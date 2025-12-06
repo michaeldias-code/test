@@ -36,6 +36,11 @@ export class View {
         this.addClickHandlers();
     }
 
+    setupRestartButton(callback) {
+        const btn = document.getElementById("restart-btn");
+        btn.addEventListener("click", callback);
+    }
+
     /* ---------------- Notações ---------------- */
     createFileLabels() {
         const files = "abcdefgh";
@@ -128,57 +133,57 @@ export class View {
         });
     }
 
-// View.js — v2
-onGameOver({ winner, reason }) {
-    const modal = document.createElement("div");
-    modal.className = "game-over-modal";  // Estilo de modal
+    // View.js — v2
+    onGameOver({ winner, reason }) {
+        const modal = document.createElement("div");
+        modal.className = "game-over-modal";  // Estilo de modal
 
-    const modalContent = document.createElement("div");
-    modalContent.className = "game-over-content";
+        const modalContent = document.createElement("div");
+        modalContent.className = "game-over-content";
 
-    // Personaliza a mensagem com base no vencedor
-    if (winner === "brancas") {
-        modalContent.innerHTML = `
-            <h2>Parabéns, você venceu!!!</h2>
-            <p>Quer jogar novamente?</p>
-        `;
-    } else {
-        modalContent.innerHTML = `
-            <h2>Você perdeu!</h2>
-            <p>Quer tentar novamente?</p>
-        `;
+        // Personaliza a mensagem com base no vencedor
+        if (winner === "brancas") {
+            modalContent.innerHTML = `
+                <h2>Parabéns, você venceu!!!</h2>
+                <p>Quer jogar novamente?</p>
+            `;
+        } else {
+            modalContent.innerHTML = `
+                <h2>Você perdeu!</h2>
+                <p>Quer tentar novamente?</p>
+            `;
+        }
+
+        // Botões de ação
+        const replayButton = document.createElement("button");
+        replayButton.textContent = "Sim";
+        replayButton.className = "replay-button";
+        replayButton.onclick = () => {
+            this.controller.resetGame();  // Chama o método resetGame do GameController
+            this.closeModal(modal);       // Fecha o modal
+        };
+
+        const noButton = document.createElement("button");
+        noButton.textContent = "Não";
+        noButton.className = "no-button";
+        noButton.onclick = () => this.closeModal(modal);  // Fecha o modal
+
+        // Adiciona os botões à mensagem
+        modalContent.appendChild(replayButton);
+        modalContent.appendChild(noButton);
+    
+        // Adiciona a estrutura do modal ao corpo
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        // Exibe o modal
+        modal.style.display = "flex";
     }
 
-    // Botões de ação
-    const replayButton = document.createElement("button");
-    replayButton.textContent = "Sim";
-    replayButton.className = "replay-button";
-    replayButton.onclick = () => {
-        this.controller.resetGame();  // Chama o método resetGame do GameController
-        this.closeModal(modal);       // Fecha o modal
-    };
-
-    const noButton = document.createElement("button");
-    noButton.textContent = "Não";
-    noButton.className = "no-button";
-    noButton.onclick = () => this.closeModal(modal);  // Fecha o modal
-
-    // Adiciona os botões à mensagem
-    modalContent.appendChild(replayButton);
-    modalContent.appendChild(noButton);
-    
-    // Adiciona a estrutura do modal ao corpo
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
-
-    // Exibe o modal
-    modal.style.display = "flex";
-}
-
-/* ---------------- Fechar o Modal ---------------- */
-closeModal(modal) {
-    modal.style.display = "none"; // Fecha o modal
-}
+    /* ---------------- Fechar o Modal ---------------- */
+    closeModal(modal) {
+        modal.style.display = "none"; // Fecha o modal
+    }
 
     /* ---------------- Resetar o Jogo ---------------- */
     resetGame() {
@@ -200,4 +205,5 @@ closeModal(modal) {
         }
     }
 }
+
 
