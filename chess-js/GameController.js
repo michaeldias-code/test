@@ -21,9 +21,10 @@ export class GameController {
         this.aiTimerId = null;
 
         /* 🔥 Registrar callback da promoção */
-        this.view.onPromotionSelect = (pos, tipoSelecionado) => {
-            this.promotePawn(pos, tipoSelecionado);
+        this.view.onPromotionSelect = (tipo) => {
+            this.promotePawn(this.pendingPromotionPos, tipo);
         };
+
 
         this.view.setupRestartButton(() => {
             this.resetGame();
@@ -50,17 +51,14 @@ export class GameController {
         /* ------------------------------------------------------------------
            🔥 DETECÇÃO DE PROMOÇÃO DE PEÃO (SEM ALTERAR SUA LÓGICA EXISTENTE)
         ------------------------------------------------------------------ */
-        if (piece.tipo === "♙" && to < 8) {
-            // Peão branco promove
-            this.view.showPromotionModal(to, "brancas");
-            return true; // aguarda escolha
+        if (piece.tipo === "♙" || piece.tipo === "♟") {
+            if ((piece.cor === "brancas" && to < 8) || (piece.cor === "pretas" && to >= 56)) {            
+                // É AQUI QUE VOCÊ COLOCA AS 3 LINHAS
+                this.pendingPromotionPos = to;
+                this.view.showPromotionModal(piece.cor);
+                return true;
+            }
         }
-        if (piece.tipo === "♟" && to >= 56) {
-            // Peão preto promove
-            this.view.showPromotionModal(to, "pretas");
-            return true; // aguarda escolha
-        }
-
         // Troca turno
         this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
 
@@ -173,3 +171,4 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
