@@ -273,6 +273,11 @@ export class View {
         document.body.appendChild(modal);
     }
 
+    hidePromotionModal() {
+        const modal = document.getElementById("promotion-modal");
+        modal.style.display = "none";
+    }
+
     /* ---------------- Resetar o Jogo (View apenas delega para o Controller) ---------------- */
     resetGame() {
         // apenas delega para o controller — o controller é o dono do estado
@@ -289,4 +294,5 @@ export class View {
         }
     }
 }
+
 
