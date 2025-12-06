@@ -1,4 +1,4 @@
-// AI.js
+// AI.js - v1
 import { MoveValidator } from "./MoveValidator.js";
 
 export class AI {
@@ -15,7 +15,7 @@ export class AI {
             const p = this.board.board[i];
             if (p && p.cor === color) {
                 const possible = this.validator.getPossibleMoves(i);
-                possible.forEach(dest => moves.push({ from: i, to: dest }));
+                for (let dest of possible) moves.push({ from: i, to: dest });
             }
         }
 
@@ -26,6 +26,8 @@ export class AI {
 
     makeMove(color) {
         const m = this.getRandomMove(color);
-        if (m) this.board.movePiece(m.from, m.to);
+        if (!m) return;
+
+        this.board.movePiece(m.from, m.to);
     }
 }
