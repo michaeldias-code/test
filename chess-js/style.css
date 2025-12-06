@@ -23,8 +23,8 @@ h1 {
 /* Wrapper do tabuleiro */
 #chessboard-wrapper {
     position: relative;
-    width: 80vmin;
-    height: 80vmin;
+    width: 70vmin;
+    height: 70vmin;
 }
 
 /* Tabuleiro */
@@ -133,5 +133,6 @@ h1 {
     .file-label { bottom: -5%; }
     .rank-label { left: -3%; }
 }
+
 
 
