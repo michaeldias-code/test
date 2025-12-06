@@ -29,6 +29,8 @@ export class View {
         this.boardDiv.id = "chessboard";
         this.container.appendChild(this.boardDiv);
 
+        this.onPromotionSelect = null; // será configurado pelo GameController
+
         /* <<<<<<<<<<<<<< IMPORTANTE >>>>>>>>>>>>>> */
         this.createRankLabels();
         this.createFileLabels();
@@ -255,8 +257,14 @@ export class View {
             btn.style.border = "2px solid rgba(0,0,0,0.12)";
             btn.onclick = () => {
                 this.closeModal(modal);
-                callback(tipo);
+
+                if (this.onPromotionSelect) {
+                    this.onPromotionSelect(tipo);
+                } else {
+                    console.error("onPromotionSelect não definido no View!");
+                }
             };
+
             options.appendChild(btn);
         });
 
@@ -281,3 +289,4 @@ export class View {
         }
     }
 }
+
