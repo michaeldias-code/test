@@ -95,15 +95,22 @@ h1 {
 }
 
 .piece.brancas {
-    color: #ffffff;
-    text-shadow: 1px 1px 3px black;
+    color: #f8f8f8; /* levemente escuro = muito mais visível */
+    text-shadow:
+        -1px -1px 1px #333,
+         1px -1px 1px #333,
+        -1px  1px 1px #333,
+         1px  1px 1px #333;  /* contorno completo */
 }
 
 .piece.pretas {
-    color: #000000;
-    text-shadow: 1px 1px 2px white;
+    color: #111; /* preto real sem sumir */
+    text-shadow:
+        -1px -1px 1px white,
+         1px -1px 1px white,
+        -1px  1px 1px white,
+         1px  1px 1px white;
 }
-
 /* Mensagem de fim de jogo */
 .game-over-message {
     position: absolute;
@@ -189,6 +196,7 @@ h1 {
         overflow: hidden;        /* impede sombra de "empurrar" */
     }
 }
+
 
 
 
