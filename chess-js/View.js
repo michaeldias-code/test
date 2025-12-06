@@ -1,3 +1,5 @@
+import { Board } from './Board.js?v=999';  // Adiciona a importação do Board
+
 export class View {
     constructor(board, controller) {
         this.board = board;
