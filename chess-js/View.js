@@ -7,11 +7,11 @@ export class View {
         this.selected = null;
         this.lastMove = null;
 
-        //this.container = document.createElement("div");
-        //this.container.id = "chess-container";
-        //document.body.appendChild(this.container);
-
         this.container = document.getElementById("chess-container");
+
+        // Conecta o botão existente no HTML
+        document.getElementById("restart-btn")
+        .addEventListener("click", () => this.controller.resetGame());
 
         /* áreas */
         this.rankArea = document.createElement("div");
@@ -27,22 +27,9 @@ export class View {
         this.boardDiv.id = "chessboard";
         this.container.appendChild(this.boardDiv);
 
-
-        /* Botão de Reiniciar */
-        this.restartButton = document.createElement("button");
-        this.restartButton.id = "restart-btn";
-        this.restartButton.textContent = "Reiniciar Jogo";
-        this.restartButton.addEventListener("click", () => this.controller.resetGame());
-        this.container.appendChild(this.restartButton);
-
-        /* <<<<<<<<<<<<<< IMPORTANTE >>>>>>>>>>>>>> */
         this.createRankLabels();
         this.createFileLabels();
-
-        // Renderizar inicial
         this.render();
-
-        // Adicionar eventos de clique
         this.addClickHandlers();
     }
 
@@ -215,6 +202,7 @@ export class View {
         }
     }
 }
+
 
 
 
