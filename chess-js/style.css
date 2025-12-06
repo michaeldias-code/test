@@ -1,35 +1,79 @@
-/* style.css — v2 */
-
-/* Corpo da página */
+/* ============================
+   GLOBAL / BODY
+============================ */
 body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #fff;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    background: #fff;
-    font-family: Arial, sans-serif;
+    justify-content: center;
 }
 
-/* Título centralizado acima do tabuleiro */
+/* ============================
+   TÍTULO
+============================ */
 h1 {
-    margin: 15px 0;
-    font-size: clamp(1.5em, 4vw, 2.5em);
-    color: #333;
-    /*color: #333;*/
+    width: 100%;
     text-align: center;
+    margin: 15px 0;
+    font-size: clamp(1.5em, 5vw, 2.5em);
+    color: #333;
 }
 
-/* Wrapper do tabuleiro */
-#chessboard-wrapper {
+/* ============================
+   CONTAINER PRINCIPAL
+============================ */
+#chess-container {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 1fr auto;
+    gap: 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 600px; /* Tamanho máximo no desktop */
+    max-height: 600px;
+    height: 100%;
+    box-sizing: border-box;
     position: relative;
-    width: 90vmin;     /* tamanho ajustado em vmin */
-    height: 90vmin;    /* altura ajustada em vmin */
 }
 
-/* Tabuleiro */
+/* ============================
+   RANKS (números à esquerda)
+============================ */
+#rank-area {
+    grid-row: 1;
+    grid-column: 1;
+    display: grid;
+    grid-template-rows: repeat(8, 1fr);
+    align-items: center;
+    justify-items: center;
+    font-size: clamp(10px, 2.8vw, 20px);
+    font-weight: bold;
+    padding-right: 4px;
+}
+
+/* ============================
+   FILES (letras embaixo)
+============================ */
+#file-area {
+    grid-row: 2;
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    justify-items: center;
+    align-items: center;
+    font-size: clamp(12px, 3vw, 22px);
+    font-weight: bold;
+}
+
+/* ============================
+   TABULEIRO
+============================ */
 #chessboard {
+    grid-row: 1;
+    grid-column: 2;
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
@@ -37,74 +81,55 @@ h1 {
     height: 100%;
     border: 3px solid #000;
     box-shadow: 0 0 10px #000;
+    box-sizing: border-box;
 }
 
-/* Células */
+/* ============================
+   CELULAS DO TABULEIRO
+============================ */
 .cell {
     display: flex;
     justify-content: center;
     align-items: center;
-    aspect-ratio: 1 / 1;   /* força quadrado perfeito */
-    width: 100%;            /* garante ocupar a célula da grid */
-    height: 100%;           /* garante ocupar a célula da grid */
-    font-size: 4.5vmin;     /* usa vmin fixo */
-    user-select: none;
+    font-size: clamp(22px, 5vw, 46px);
 }
 
+/* cores */
 .white { background: #f0d9b5; }
 .black { background: #b58863; }
 
-/* Seleção da peça */
-.selected {
-    outline: 3px solid yellow;
-    outline-offset: -2px;
-}
-
-/* Destaque do último movimento */
-.ai-move {
-    background-color: rgba(255, 255, 0, 0.5); /* amarelo semi-transparente */
-    transition: background-color 0.3s ease;
-}
-
-/* Notações externas */
-.file-label,
-.rank-label {
-    position: absolute;
-    font-weight: bold;
-    pointer-events: none;
-    font-size: calc(80vmin * 0.04);
-    color: #000;
-}
-
-/* Letras (a–h) embaixo */
-.file-label {
-    bottom: -8%;
-    transform: translateX(-50%);
-}
-
-/* Números (1–8) à esquerda */
-.rank-label {
-    left: -4%;
-    transform: translateY(50%);
-}
-
-/* Peças */
+/* ============================
+   PEÇAS
+============================ */
 .piece {
     pointer-events: none;
-    font-size: calc(80vmin / 10);
+    font-size: clamp(22px, 5vw, 46px);
 }
 
 .piece.brancas {
-    color: #ffffff;
-    text-shadow: 1px 1px 3px black;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
 }
 
 .piece.pretas {
-    color: #000000;
-    text-shadow: 1px 1px 2px white;
+    color: #000;
+    text-shadow: 1px 1px 2px #fff;
 }
 
-/* Mensagem de fim de jogo */
+/* ============================
+   SELEÇÃO E ÚLTIMO LANCE
+============================ */
+.selected {
+    outline: 3px solid yellow;
+}
+
+.ai-move {
+    background-color: rgba(255, 255, 0, 0.45);
+}
+
+/* ============================
+   MENSAGEM DE FIM DE JOGO
+============================ */
 .game-over-message {
     position: fixed;
     bottom: 20px;
@@ -120,22 +145,35 @@ h1 {
     z-index: 1000;
 }
 
-/* Ajustes finos para celular */
+/* ============================
+   AJUSTES PARA CELULAR
+============================ */
 @media (max-width: 600px) {
-    #chessboard-wrapper {
-        width: 90vmin;
-        height: 90vmin;
+    #chess-container {
+        width: 85vw !important;
+        height: 85vw !important;
     }
 
+    #chessboard {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Aumenta o tamanho das células e das peças */
     .cell {
-        font-size: calc(90vmin / 10);  /* Tamanho das células no celular */
+        font-size: clamp(28px, 8vw, 50px) !important;
     }
 
-    .file-label {
-        bottom: -5%;   /* Ajuste na posição das letras */
+    .piece {
+        font-size: clamp(28px, 8vw, 50px) !important;
     }
 
-    .rank-label {
-        left: -3%;     /* Ajuste na posição dos números */
+    /* Ajusta o espaçamento */
+    #rank-area {
+        padding-right: 10px !important;
+    }
+
+    #file-area {
+        padding-top: 10px !important;
     }
 }
