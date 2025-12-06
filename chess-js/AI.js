@@ -36,11 +36,10 @@ export class AI {
         return null;
     }
 
-    // Método para resetar a IA e garantir que não há estado residual
+    // Método para resetar a IA
     reset() {
         console.log("Resetando IA...");
-        // Qualquer estado que precisar ser limpo na IA pode ser feito aqui, 
-        // caso você tenha variáveis internas de cache ou algo que precise ser reinicializado.
-        // Como neste código, não temos variáveis persistentes, apenas uma chamada ao reset é suficiente.
+        // Garantimos que qualquer coisa residual seja limpa, como variáveis internas.
+        // Neste código, a IA não tem variáveis persistentes, então só garantir que não há cache é o suficiente.
     }
 }
