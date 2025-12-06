@@ -178,9 +178,26 @@ h1 {
     transition: background-color 0.3s;
 }
 
-.replay-button:hover, .show-board-button:hover {
-    background-color: #45a049;
+/* Estilo para os botões */
+.replay-button, .no-button {
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
 }
+
+.replay-button {
+    background-color: #4CAF50; /* Verde para 'Sim' */
+    color: white;
+}
+
+.no-button {
+    background-color: #f44336; /* Vermelho para 'Não' */
+    color: white;
+}
+
 
 
 .close-btn {
@@ -232,5 +249,6 @@ h1 {
         padding-top: 8px !important;
     }
 }
+
 
 
