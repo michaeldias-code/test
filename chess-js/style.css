@@ -19,8 +19,8 @@ h1 {
     text-align: center;
     margin: 15px 0;
     font-size: clamp(1.5em, 5vw, 2.5em);
-    /*color: red;*/
-    color: #333;
+    color: red;
+    /*color: #333;*/
 }
 
 /* ============================
@@ -158,8 +158,8 @@ h1 {
 /* Ajustes para celular */
 @media (max-width: 600px) {
     #chess-container {
-        width: min(95vmin, 700px); /* Aumenta o tamanho do tabuleiro no celular */
-        height: min(95vmin, 700px); /* Garante que o tabuleiro ocupe mais espaço no celular */
+        width: min(95vmin, 80vw); /* Usa 80% da largura da tela no celular */
+        height: min(95vmin, 80vw); /* Ajusta a altura do tabuleiro no celular também */
     }
 
     #chessboard {
@@ -169,21 +169,18 @@ h1 {
 
     /* Ajustes adicionais para as notações */
     #rank-area {
-        padding-right: 8px; /* Dá um respiro maior entre números e tabuleiro */
+        padding-right: 10px; /* Ajuste o espaçamento entre o número e o tabuleiro */
     }
 
     #file-area {
-        padding-top: 8px; /* Ajusta o espaçamento de cima */
+        padding-top: 10px; /* Aumenta um pouco o espaçamento entre as letras e o tabuleiro */
     }
 
     .cell {
-        font-size: clamp(28px, 6vw, 48px); /* Aumenta o tamanho das células e peças */
+        font-size: clamp(28px, 8vw, 50px); /* Aumenta ainda mais o tamanho das peças */
     }
 
     .piece {
-        font-size: clamp(28px, 6vw, 48px); /* Aumenta as peças também */
+        font-size: clamp(28px, 8vw, 50px); /* Aumenta o tamanho das peças */
     }
 }
-
-
-
