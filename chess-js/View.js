@@ -1,4 +1,4 @@
-// View.js — v4
+// View.js — v1
 export class View {
     constructor(board, controller) {
         this.board = board;
@@ -8,7 +8,7 @@ export class View {
 
         // Criar wrapper do tabuleiro
         this.container = document.createElement("div");
-        this.container.id = "chessboard-wrapper";
+        this.container.id = "chess-container";
         document.body.appendChild(this.container);
 
         // Criar div do tabuleiro
@@ -30,21 +30,21 @@ export class View {
     /* ---------------- Notações ---------------- */
     createFileLabels() {
         const files = "abcdefgh";
-        for (let col = 0; col < 8; col++) {
+        for (let c = 0; c < 8; c++) {
             const lbl = document.createElement("div");
             lbl.className = "file-label";
-            lbl.textContent = files[col];
-            lbl.style.left = `${(col + 0.5) * 12.5}%`;
+            lbl.textContent = files[c];
+            lbl.style.gridColumn = (c + 2); // colunas 2–9
             this.container.appendChild(lbl);
         }
     }
 
     createRankLabels() {
-        for (let row = 0; row < 8; row++) {
+        for (let r = 0; r < 8; r++) {
             const lbl = document.createElement("div");
             lbl.className = "rank-label";
-            lbl.textContent = 8 - row;
-            lbl.style.top = `${(row + 0.5) * 12.5}%`;
+            lbl.textContent = 8 - r;
+            lbl.style.gridRow = (r + 2); // linhas 2–9
             this.container.appendChild(lbl);
         }
     }
@@ -128,8 +128,6 @@ export class View {
         const div = document.createElement("div");
         div.className = "game-over-message";
         div.textContent = `${winner} venceu por ${reason}!`;
-        /*document.body.appendChild(div);*/
-        this.container.appendChild(div);
+        document.body.appendChild(div);
     }
 }
-
