@@ -100,5 +100,3 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
-
-console.log("GameController carregado!");
