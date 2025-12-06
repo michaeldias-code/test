@@ -20,12 +20,6 @@ export class GameController {
 
         this.aiTimerId = null;
 
-        /* 🔥 Registrar callback da promoção */
-        this.view.onPromotionSelect = (tipo) => {
-            this.promotePawn(this.pendingPromotionPos, tipo);
-        };
-
-
         this.view.setupRestartButton(() => {
             this.resetGame();
         });
@@ -54,9 +48,11 @@ export class GameController {
         if (piece.tipo === "♙" || piece.tipo === "♟") {
             if ((piece.cor === "brancas" && to < 8) || (piece.cor === "pretas" && to >= 56)) {            
                 // É AQUI QUE VOCÊ COLOCA AS 3 LINHAS
-                this.pendingPromotionPos = to;
-                this.view.showPromotionModal(piece.cor);
-                return true;
+				this.pendingPromotionPos = to;
+				this.view.showPromotionModal(piece.cor, (symbol) => {
+					this.promotePawn(this.pendingPromotionPos, symbol);
+				});
+				return true;
             }
         }
         // Troca turno
@@ -161,5 +157,4 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
-
 
