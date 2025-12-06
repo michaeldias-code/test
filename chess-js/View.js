@@ -1,4 +1,4 @@
-// View.js — v1
+// View.js — v2
 export class View {
     constructor(board, controller) {
         this.board = board;
@@ -6,19 +6,27 @@ export class View {
         this.selected = null;
         this.lastMove = null;
 
-        // Criar wrapper do tabuleiro
         this.container = document.createElement("div");
         this.container.id = "chess-container";
         document.body.appendChild(this.container);
 
-        // Criar div do tabuleiro
+        /* áreas */
+        this.rankArea = document.createElement("div");
+        this.rankArea.id = "rank-area";
+        this.container.appendChild(this.rankArea);
+
+        this.fileArea = document.createElement("div");
+        this.fileArea.id = "file-area";
+        this.container.appendChild(this.fileArea);
+
+        /* tabuleiro */
         this.boardDiv = document.createElement("div");
         this.boardDiv.id = "chessboard";
         this.container.appendChild(this.boardDiv);
 
-        // Adicionar notações externas
-        this.createFileLabels();
+        /* <<<<<<<<<<<<<< IMPORTANTE >>>>>>>>>>>>>> */
         this.createRankLabels();
+        this.createFileLabels();
 
         // Renderizar inicial
         this.render();
@@ -32,22 +40,19 @@ export class View {
         const files = "abcdefgh";
         for (let c = 0; c < 8; c++) {
             const lbl = document.createElement("div");
-            lbl.className = "file-label";
             lbl.textContent = files[c];
-            lbl.style.gridColumn = (c + 2); // colunas 2–9
-            this.container.appendChild(lbl);
+            this.fileArea.appendChild(lbl);
         }
     }
 
     createRankLabels() {
         for (let r = 0; r < 8; r++) {
             const lbl = document.createElement("div");
-            lbl.className = "rank-label";
             lbl.textContent = 8 - r;
-            lbl.style.gridRow = (r + 2); // linhas 2–9
-            this.container.appendChild(lbl);
+            this.rankArea.appendChild(lbl);
         }
     }
+
 
     /* ---------------- Renderização ---------------- */
     render() {
@@ -131,3 +136,4 @@ export class View {
         document.body.appendChild(div);
     }
 }
+
