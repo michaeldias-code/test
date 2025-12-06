@@ -29,8 +29,6 @@ export class View {
         this.boardDiv.id = "chessboard";
         this.container.appendChild(this.boardDiv);
 
-        this.onPromotionSelect = null; // será configurado pelo GameController
-
         /* <<<<<<<<<<<<<< IMPORTANTE >>>>>>>>>>>>>> */
         this.createRankLabels();
         this.createFileLabels();
@@ -204,74 +202,71 @@ export class View {
        showPromotionModal(cor, callback) - ex: cor = "brancas" ou "pretas"
        callback(tipoEscolhido) => retorna o símbolo escolhido (♕, ♖, ♗, ♘ ou versões pretas)
     ------------------------------------------------------------------------------ */
-    showPromotionModal(cor, callback) {
-        // Cria overlay
-        const modal = document.createElement("div");
-        modal.className = "promotion-overlay";
-        modal.style.position = "fixed";
-        modal.style.top = "0";
-        modal.style.left = "0";
-        modal.style.right = "0";
-        modal.style.bottom = "0";
-        modal.style.display = "flex";
-        modal.style.alignItems = "center";
-        modal.style.justifyContent = "center";
-        modal.style.background = "rgba(0,0,0,0.6)";
-        modal.style.zIndex = "9999";
-
-        // Box
-        const box = document.createElement("div");
-        box.className = "promotion-box";
-        box.style.background = "#fff";
-        box.style.padding = "18px";
-        box.style.borderRadius = "10px";
-        box.style.textAlign = "center";
-        box.style.boxShadow = "0 6px 20px rgba(0,0,0,0.25)";
-
-        const h = document.createElement("h3");
-        h.textContent = "Promoção de Peão";
-        box.appendChild(h);
-
-        const p = document.createElement("p");
-        p.textContent = "Escolha a peça para promover:";
-        box.appendChild(p);
-
-        const options = document.createElement("div");
-        options.style.display = "flex";
-        options.style.gap = "14px";
-        options.style.justifyContent = "center";
-        options.style.marginTop = "12px";
-
-        const pieces = cor === "brancas"
-            ? ["♕", "♖", "♗", "♘"]
-            : ["♛", "♜", "♝", "♞"];
-
-        pieces.forEach(tipo => {
-            const btn = document.createElement("button");
-            btn.className = "promo-piece";
-            btn.textContent = tipo;
-            btn.style.fontSize = "32px";
-            btn.style.padding = "8px 12px";
-            btn.style.borderRadius = "8px";
-            btn.style.cursor = "pointer";
-            btn.style.border = "2px solid rgba(0,0,0,0.12)";
-            btn.onclick = () => {
-                this.closeModal(modal);
-
-                if (this.onPromotionSelect) {
-                    this.onPromotionSelect(tipo);
-                } else {
-                    console.error("onPromotionSelect não definido no View!");
-                }
-            };
-
-            options.appendChild(btn);
-        });
-
-        box.appendChild(options);
-        modal.appendChild(box);
-        document.body.appendChild(modal);
-    }
+	showPromotionModal(cor, callback) {
+	
+		// Criar overlay
+		const modal = document.createElement("div");
+		modal.className = "promotion-overlay";
+		modal.style.position = "fixed";
+		modal.style.top = "0";
+		modal.style.left = "0";
+		modal.style.right = "0";
+		modal.style.bottom = "0";
+		modal.style.display = "flex";
+		modal.style.alignItems = "center";
+		modal.style.justifyContent = "center";
+		modal.style.background = "rgba(0,0,0,0.6)";
+		modal.style.zIndex = "9999";
+	
+		// Box
+		const box = document.createElement("div");
+		box.className = "promotion-box";
+		box.style.background = "#fff";
+		box.style.padding = "18px";
+		box.style.borderRadius = "10px";
+		box.style.textAlign = "center";
+		box.style.boxShadow = "0 6px 20px rgba(0,0,0,0.25)";
+	
+		const h = document.createElement("h3");
+		h.textContent = "Promoção de Peão";
+		box.appendChild(h);
+	
+		const p = document.createElement("p");
+		p.textContent = "Escolha a peça para promover:";
+		box.appendChild(p);
+	
+		const options = document.createElement("div");
+		options.style.display = "flex";
+		options.style.gap = "14px";
+		options.style.justifyContent = "center";
+		options.style.marginTop = "12px";
+	
+		const pieces = cor === "brancas"
+			? ["♕", "♖", "♗", "♘"]
+			: ["♛", "♜", "♝", "♞"];
+	
+		pieces.forEach(symbol => {
+			const btn = document.createElement("button");
+			btn.className = "promo-piece";
+			btn.textContent = symbol;
+			btn.style.fontSize = "32px";
+			btn.style.padding = "8px 12px";
+			btn.style.borderRadius = "8px";
+			btn.style.cursor = "pointer";
+			btn.style.border = "2px solid rgba(0,0,0,0.12)";
+	
+			btn.onclick = () => {
+				this.closeModal(modal);
+				callback(symbol);   // <<<<<<🔥🔥 CHAMA O CALLBACK CERTO!!!
+			};
+	
+			options.appendChild(btn);
+		});
+	
+		box.appendChild(options);
+		modal.appendChild(box);
+		document.body.appendChild(modal);
+	}
 
     hidePromotionModal() {
         const modal = document.querySelector(".promotion-overlay");
@@ -295,6 +290,5 @@ export class View {
         }
     }
 }
-
 
 
