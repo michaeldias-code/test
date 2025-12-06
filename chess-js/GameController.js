@@ -117,18 +117,26 @@ export class GameController {
     /* ------------------------------------------------------
        🔥 MÉTODO NOVO — executa a promoção após escolha do modal
     ------------------------------------------------------ */
-    promotePawn(pos, newSymbol) {
-        const piece = this.board.board[pos];
-        if (!piece) return;
-
-        piece.tipo = newSymbol; // <<<<< símbolo diretamente: ♕, ♖, ♗, ♘
-
-        this.view.hidePromotionModal();
-        this.view.render();
-
-        const cor = piece.cor;
-        this.currentTurn = cor === "brancas" ? "pretas" : "brancas";
-    }
+	promotePawn(pos, escolha) {
+		const piece = this.board.board[pos];
+		if (!piece) return;
+	
+		const cor = piece.cor;
+	
+		const mapa = {
+			rainha: cor === "brancas" ? "♕" : "♛",
+			torre:  cor === "brancas" ? "♖" : "♜",
+			bispo:  cor === "brancas" ? "♗" : "♝",
+			cavalo: cor === "brancas" ? "♘" : "♞"
+		};
+	
+		piece.tipo = mapa[escolha];
+	
+		this.view.hidePromotionModal();
+		this.view.render();
+	
+		this.currentTurn = cor === "brancas" ? "pretas" : "brancas";
+	}
     
     /* ---------------- Reset do jogo (inalterado exceto correções seguras) ---------------- */
     resetGame() {
@@ -157,4 +165,3 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
-
