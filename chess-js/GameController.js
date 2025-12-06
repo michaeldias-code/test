@@ -1,4 +1,4 @@
-// GameController.js — v1
+// GameController.js — v2
 import { Board } from './Board.js';
 import { MoveValidator } from './MoveValidator.js';
 import { AI } from './AI.js';
@@ -56,6 +56,11 @@ export class GameController {
         if (!this.gameOver && this.currentTurn === "pretas") {
             setTimeout(() => {
                 this.ai.makeMove("pretas");
+                
+                // marca último movimento das pretas
+                this.lastAIMove = m;
+                this.view.renderLastAIMove(m.to); // <--- destaque visual
+                
                 this.view.render();
 
                 this.currentTurn = "brancas";
@@ -78,3 +83,4 @@ export class GameController {
 }
 
 console.log("GameController carregado!");
+
