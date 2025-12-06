@@ -150,10 +150,38 @@ h1 {
     text-align: center;
 }
 
+/* Estilos para os botões de fim de jogo */
 .game-over-message {
-    font-size: 1.5em;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    font-weight: bold;
     color: red;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 1000;
 }
+
+.replay-button, .show-board-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px 5px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.replay-button:hover, .show-board-button:hover {
+    background-color: #45a049;
+}
+
 
 .close-btn {
     margin-top: 20px;
@@ -204,4 +232,5 @@ h1 {
         padding-top: 8px !important;
     }
 }
+
 
