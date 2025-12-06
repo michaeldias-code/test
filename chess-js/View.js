@@ -25,6 +25,14 @@ export class View {
         this.boardDiv.id = "chessboard";
         this.container.appendChild(this.boardDiv);
 
+
+        /* Botão de Reiniciar */
+        this.restartButton = document.createElement("button");
+        this.restartButton.id = "restart-btn";
+        this.restartButton.textContent = "Reiniciar Jogo";
+        this.restartButton.addEventListener("click", () => this.controller.resetGame());
+        this.container.appendChild(this.restartButton);
+
         /* <<<<<<<<<<<<<< IMPORTANTE >>>>>>>>>>>>>> */
         this.createRankLabels();
         this.createFileLabels();
@@ -205,5 +213,6 @@ export class View {
         }
     }
 }
+
 
 
