@@ -1,4 +1,3 @@
-// View.js — v2
 export class View {
     constructor(board, controller) {
         this.board = board;
@@ -33,9 +32,6 @@ export class View {
 
         // Adicionar eventos de clique
         this.addClickHandlers();
-
-        // Adicionar evento de fechamento do modal
-        document.getElementById('close-modal').addEventListener('click', this.closeModal);
     }
 
     /* ---------------- Notações ---------------- */
@@ -55,7 +51,6 @@ export class View {
             this.rankArea.appendChild(lbl);
         }
     }
-
 
     /* ---------------- Renderização ---------------- */
     render() {
@@ -131,23 +126,47 @@ export class View {
         });
     }
 
-    /* ---------------- Mensagem de Game Over ---------------- */
+    /* ---------------- Mensagem de fim de jogo ---------------- */
     onGameOver({ winner, reason }) {
-        const messageBox = document.getElementById("game-over-modal");
-        const messageText = document.getElementById("game-over-message");
+        const div = document.createElement("div");
+        div.className = "game-over-message";
+        div.textContent = `${winner} venceu por ${reason}!`;
 
-        // Atualiza a mensagem
-        messageText.textContent = `${winner} venceu por ${reason}!`;
+        // Botões de ação
+        const replayButton = document.createElement("button");
+        replayButton.textContent = "Jogar novamente";
+        replayButton.className = "replay-button";
+        replayButton.onclick = () => this.resetGame();  // Chama a função para reiniciar o jogo
 
-        // Exibe o modal
-        messageBox.style.display = 'flex';
+        const showBoardButton = document.createElement("button");
+        showBoardButton.textContent = "Ver tabuleiro";
+        showBoardButton.className = "show-board-button";
+        showBoardButton.onclick = () => this.closeMessage(); // Fecha a mensagem
+
+        // Adiciona os botões à mensagem
+        div.appendChild(replayButton);
+        div.appendChild(showBoardButton);
+        
+        document.body.appendChild(div);
     }
 
-    /* ---------------- Fechar o Modal ---------------- */
-    closeModal() {
-        const messageBox = document.getElementById("game-over-modal");
-        messageBox.style.display = 'none';
+    /* ---------------- Resetar o Jogo ---------------- */
+    resetGame() {
+        // Reinicia o tabuleiro e outras variáveis
+        this.controller.gameOver = false;
+        this.controller.currentTurn = "brancas"; // Você pode alterar a cor inicial conforme necessário
+        this.controller.board = new Board(); // Reinicia o tabuleiro
+        this.controller.view.render(); // Re-renderiza o tabuleiro
+
+        // Remove a mensagem de fim de jogo
+        this.closeMessage();
+    }
+
+    /* ---------------- Fechar a mensagem de fim de jogo ---------------- */
+    closeMessage() {
+        const gameOverMessage = document.querySelector(".game-over-message");
+        if (gameOverMessage) {
+            gameOverMessage.remove(); // Remove a mensagem de fim de jogo
+        }
     }
 }
-
-
