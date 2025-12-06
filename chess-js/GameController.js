@@ -1,8 +1,8 @@
-// GameController.js — v1
-import { Board } from './Board.js';
-import { MoveValidator } from './MoveValidator.js';
-import { AI } from './AI.js';
-import { View } from './View.js';
+// GameController.js — v2
+import { View } from './View.js?v=999';
+import { AI } from './AI.js?v=999';
+import { Board } from './Board.js?v=999';
+import { MoveValidator } from './MoveValidator.js?v=999';
 
 export class GameController {
     constructor() {
@@ -80,3 +80,4 @@ export class GameController {
 }
 
 console.log("GameController carregado!");
+
