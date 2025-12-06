@@ -121,10 +121,14 @@ h1 {
 
 /* Ajustes finos para celular */
 @media (max-width: 600px) {
+    body {
+        justify-content: center;     /* centraliza verticalmente */
+        padding-top: 10px;           /* só um respiro */
+        padding-bottom: 20px;
+    }
     #chessboard-wrapper {
         width: 90vmin;
         height: 90vmin;
-        justify-content: center;
     }
 
     .cell {
@@ -134,6 +138,7 @@ h1 {
     .file-label { bottom: -5%; }
     .rank-label { left: -3%; }
 }
+
 
 
 
