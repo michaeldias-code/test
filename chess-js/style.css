@@ -1,4 +1,4 @@
-/* style.css — v4.1 */
+/* style.css — v4.2 */
 
 /* Corpo da página */
 body {
@@ -106,29 +106,27 @@ h1 {
 /* Mensagem de fim de jogo */
 .game-over-message {
     position: absolute;
-    top: 100%;                /* logo abaixo do tabuleiro */
+    top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    margin-top: 10px;
+    margin-top: 18px;    /* novo espaçamento seguro */
 
-    font-size: 1.4rem;
-    font-weight: bold;
+    font-size: 1.45rem;
+    font-weight: 700;
 
-    color: #8b0000;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 12px 22px;
-    border-radius: 10px;
+    color: #7a0000;
+    background: rgba(255, 255, 255, 0.97);
+    padding: 14px 26px;
+    border-radius: 12px;
 
-    border: 2px solid #8b0000;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+    border: 2px solid #7a0000;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.25);
 
     z-index: 1000;
-    text-align: center;
-    width: fit-content;
-    max-width: 90vw;
-
     animation: fadeInUp 0.4s ease-out;
+    pointer-events: none;
 }
+
 
 @keyframes fadeInUp {
     from {
@@ -178,3 +176,4 @@ h1 {
         font-size: calc(82vmin / 10);
     }
 }
+
