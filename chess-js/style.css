@@ -19,8 +19,8 @@ h1 {
     text-align: center;
     margin: 15px 0;
     font-size: clamp(1.5em, 5vw, 2.5em);
-    /*color: red;*/
-    color: #333;
+    color: red;
+    /*color: #333;*/
 }
 
 /* ============================
@@ -155,15 +155,10 @@ h1 {
 /* ============================
    AJUSTES PARA CELULAR
 ============================ */
-/* Ajustes para celular */
-/* ============================
-   AJUSTES PARA CELULAR
-============================ */
-/* Ajustes para celular */
 @media (max-width: 600px) {
     #chess-container {
-        width: 90vmin;  /* Aumenta o tamanho do container para 90% da tela */
-        height: 90vmin; /* Ajusta a altura também para 90% */
+        width: 90vmin;  /* Tamanho mais fixo no celular */
+        height: 90vmin; /* Garante que o tabuleiro ocupe mais espaço no celular */
     }
 
     #chessboard {
@@ -171,22 +166,21 @@ h1 {
         height: 100%;
     }
 
-    /* As notações e a linha delineadora continuam ajustadas */
+    /* Ajuste das notações e linha delineadora */
     #rank-area {
-        padding-right: 6px;  /* Aumenta o espaçamento entre números e tabuleiro */
+        padding-right: 8px;  /* Mais espaço */
     }
 
     #file-area {
-        padding-top: 6px;  /* Ajusta o espaçamento de cima */
+        padding-top: 8px;  /* Mais espaço */
     }
 
-    /* Aumenta mais o tamanho das células e peças */
     .cell {
-        font-size: clamp(28px, 6vw, 50px); /* Aumenta o tamanho das células e peças */
+        font-size: 40px; /* Aumenta o tamanho das células e peças */
     }
 
     .piece {
-        font-size: clamp(28px, 6vw, 50px); /* Aumenta as peças também */
+        font-size: 40px; /* Aumenta as peças também */
     }
 }
 
