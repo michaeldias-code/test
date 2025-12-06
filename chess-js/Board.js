@@ -1,3 +1,5 @@
+import { Piece } from './Piece.js';
+
 export class Board {
     constructor() {
         console.log("Board construído!");
@@ -9,33 +11,53 @@ export class Board {
     setupPieces() {
         console.log("Board: posicionando peças...");
 
-        // Peões pretos
+        // ---------------------------
+        // Peões pretos (linha 2)
+        // ---------------------------
         for (let i = 8; i < 16; i++)
-            this.board[i] = { tipo: "♟", cor: "pretas" };
+            this.board[i] = new Piece("♟", "pretas");
 
-        // Peões brancos
+        // ---------------------------
+        // Peões brancos (linha 7)
+        // ---------------------------
         for (let i = 48; i < 56; i++)
-            this.board[i] = { tipo: "♙", cor: "brancas" };
+            this.board[i] = new Piece("♙", "brancas");
 
+        // ---------------------------
         // Torres
-        this.board[0] = this.board[7] = { tipo: "♜", cor: "pretas" };
-        this.board[56] = this.board[63] = { tipo: "♖", cor: "brancas" };
+        // ---------------------------
+        this.board[0]  = new Piece("♜", "pretas");
+        this.board[7]  = new Piece("♜", "pretas");
+        this.board[56] = new Piece("♖", "brancas");
+        this.board[63] = new Piece("♖", "brancas");
 
+        // ---------------------------
         // Cavalos
-        this.board[1] = this.board[6] = { tipo: "♞", cor: "pretas" };
-        this.board[57] = this.board[62] = { tipo: "♘", cor: "brancas" };
+        // ---------------------------
+        this.board[1]  = new Piece("♞", "pretas");
+        this.board[6]  = new Piece("♞", "pretas");
+        this.board[57] = new Piece("♘", "brancas");
+        this.board[62] = new Piece("♘", "brancas");
 
+        // ---------------------------
         // Bispos
-        this.board[2] = this.board[5] = { tipo: "♝", cor: "pretas" };
-        this.board[58] = this.board[61] = { tipo: "♗", cor: "brancas" };
+        // ---------------------------
+        this.board[2]  = new Piece("♝", "pretas");
+        this.board[5]  = new Piece("♝", "pretas");
+        this.board[58] = new Piece("♗", "brancas");
+        this.board[61] = new Piece("♗", "brancas");
 
+        // ---------------------------
         // Rainhas
-        this.board[3] = { tipo: "♛", cor: "pretas" };
-        this.board[59] = { tipo: "♕", cor: "brancas" };
+        // ---------------------------
+        this.board[3]  = new Piece("♛", "pretas");
+        this.board[59] = new Piece("♕", "brancas");
 
+        // ---------------------------
         // Reis
-        this.board[4] = { tipo: "♚", cor: "pretas" };
-        this.board[60] = { tipo: "♔", cor: "brancas" };
+        // ---------------------------
+        this.board[4]  = new Piece("♚", "pretas");
+        this.board[60] = new Piece("♔", "brancas");
 
         console.log("Board pronto!");
     }
@@ -43,8 +65,8 @@ export class Board {
     // Reseta o tabuleiro para a posição inicial
     resetBoard() {
         console.log("Resetando tabuleiro...");
-        this.board = Array(64).fill(null); // limpa o tabuleiro
-        this.setupPieces(); // reposiciona as peças
+        this.board = Array(64).fill(null);
+        this.setupPieces();
     }
 
     movePiece(from, to) {
