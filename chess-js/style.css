@@ -1,4 +1,4 @@
-/* style.css — v4.2 */
+/* style.css — v4.4 */
 
 /* Corpo da página */
 body {
@@ -36,6 +36,7 @@ h1 {
     height: 100%;
     border: 3px solid #000;
     box-shadow: 0 0 10px #000;
+    box-sizing: border-box;
 }
 
 /* Células */
@@ -142,38 +143,52 @@ h1 {
 
 /* Ajustes finos para celular */
 @media (max-width: 600px) {
+    /* Centralização agora funciona porque o bloco cabe na tela */
     body {
-        justify-content: center;     /* centraliza verticalmente */
-        padding-top: 10px;           /* só um respiro */
-        padding-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
     }
+    /* Wrapper nunca ultrapassa a tela */
     #chessboard-wrapper {
-        width: 90vmin;
-        height: 90vmin;
-    }
+        width: min(90vmin, 95vw);
+        height: min(90vmin, 95vw);
 
+        /* RESOLUÇÃO DO PROBLEMA */
+        max-height: calc(100vh - 120px);  /* garante caber com labels */
+        max-width: calc(100vw - 20px);
+
+        position: relative;
+        box-sizing: border-box;
+    }
+    /* Tabuleiro interno sempre perfeito */
+    #chessboard {
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+    }
     .cell {
         font-size: calc(90vmin / 10);
     }
-
-    .file-label { bottom: -5%; }
-    .rank-label { left: -3%; }
-}
-
-@media (min-width: 900px) {
-    #chessboard-wrapper {
-        width: 82vmin;
-        height: 82vmin;
-    }
-
-    /* Ajustar labels para manter proporção */
+    /* Labels acompanham perfeitamente o novo tamanho */
     .file-label,
     .rank-label {
-        font-size: calc(82vmin * 0.04);
-    }
-
-    .piece {
-        font-size: calc(82vmin / 10);
+        font-size: calc( (min(90vmin, 95vw)) * 0.04 );
     }
 }
+
+/* Ajuste fino para PC */
+@media (min-width: 900px) {
+    #chessboard-wrapper {
+        width: 84vmin;
+        height: 84vmin;
+        box-sizing: border-box;  /* evita ultrapassagem */
+        overflow: hidden;        /* impede sombra de "empurrar" */
+    }
+}
+
+
 
