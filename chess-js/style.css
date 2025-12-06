@@ -124,6 +124,7 @@ h1 {
     #chessboard-wrapper {
         width: 90vmin;
         height: 90vmin;
+        justify-content: center;
     }
 
     .cell {
@@ -133,6 +134,7 @@ h1 {
     .file-label { bottom: -5%; }
     .rank-label { left: -3%; }
 }
+
 
 
 
