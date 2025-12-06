@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Xadrez Responsivo</title>
+<style>
+    body {
+        margin: 0;
+        background: #222;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    /* O tabuleiro ocupa 90% da menor dimensão da tela */
+    #board {
+        width: min(95vw, 95vh);
+        height: min(95vw, 95vh);
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: repeat(8, 1fr);
+        border: 3px solid #000;
+        box-shadow: 0 0 15px #000;
+        background: #000;
+    }
+
+    .cell {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: calc(min(95vw, 95vh) / 10);
+        user-select: none;
+        cursor: pointer;
+    }
+
+    .white {
+        background: #f0d9b5;
+    }
+    .black {
+        background: #b58863;
+    }
+
+    .selected {
+        outline: 4px solid yellow;
+    }
+</style>
+</head>
+<body>
+
+<div id="board"></div>
+
+<script>
+    const boardEl = document.getElementById("board");
+
+    // Tabuleiro representado como array de 64 casas
+    const board = Array(64).fill(null);
+
+    // Peças iniciais
+    const initial = {
+        white: ["♖","♘","♗","♕","♔","♗","♘","♖"],
+        black: ["♜","♞","♝","♛","♚","♝","♞","♜"]
+    };
+
+    // Montagem inicial
+    for (let i = 0; i < 8; i++) {
+        board[i] = initial.black[i];
+        board[i + 8] = "♟";
+        board[i + 48] = "♙";
+        board[i + 56] = initial.white[i];
+    }
+
+    function render() {
+        boardEl.innerHTML = "";
+        for (let i = 0; i < 64; i++) {
+            const cell = document.createElement("div");
+            cell.className = "cell " + (((Math.floor(i/8) + i % 8) % 2 === 0) ? "white" : "black");
+            cell.dataset.index = i;
+
+            if (board[i]) cell.textContent = board[i];
+
+            if (i === selected) cell.classList.add("selected");
+
+            boardEl.appendChild(cell);
+        }
+    }
+
+    let selected = null;
+
+    boardEl.addEventListener("click", e => {
+        const cell = e.target.closest(".cell");
+        if (!cell) return;
+
+        const i = parseInt(cell.dataset.index);
+
+        // Seleciona
+        if (selected === null) {
+            if (board[i]) selected = i;
+        }
+        // Move
+        else {
+            if (i !== selected) {
+                board[i] = board[selected];
+                board[selected] = null;
+            }
+            selected = null;
+        }
+
+        render();
+    });
+
+    render();
+</script>
+
+</body>
+</html>
