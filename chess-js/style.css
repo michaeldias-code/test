@@ -42,16 +42,18 @@ h1 {
    RANKS (números à esquerda)
 ============================ */
 #rank-area {
-    grid-row: 1;
+    grid-row: 1; 
     grid-column: 1;
 
     display: grid;
     grid-template-rows: repeat(8, 1fr);
-    justify-items: center;
     align-items: center;
+    justify-items: center;
 
-    font-size: clamp(12px, 3vw, 22px);
+    font-size: clamp(10px, 2.8vw, 20px);
     font-weight: bold;
+
+    padding-right: 4px; /* adiciona espaço entre números e tabuleiro */
 }
 
 /* ============================
@@ -165,3 +167,4 @@ h1 {
         font-size: clamp(14px, 5vw, 20px);
     }
 }
+
