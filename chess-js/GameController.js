@@ -1,4 +1,4 @@
-// GameController.js — v2.1
+// GameController.js — v2.2
 import { Board } from './Board.js';
 import { MoveValidator } from './MoveValidator.js';
 import { AI } from './AI.js';
@@ -53,35 +53,36 @@ export class GameController {
             }
         }
 
-        if (!this.gameOver && this.currentTurn === "pretas") {
+        if (this.currentTurn === 'pretas') {
             setTimeout(() => {
-                this.ai.makeMove("pretas");
-                
-                // marca último movimento das pretas
-                this.lastAIMove = m;
-                this.view.renderLastAIMove(m.to); // <--- destaque visual
-                
-                this.view.render();
+                const m = this.ai.makeMove('pretas'); // agora retorna o movimento
+                this.view.render(); 
+                this.currentTurn = 'brancas';
 
-                this.currentTurn = "brancas";
-
-                if (this.validator.isKingInCheck("brancas")) {
-                    if (this.validator.isCheckmate("brancas")) {
-                        this.gameOver = true;
-                        this.view.onGameOver({
-                            winner: "pretas",
-                            reason: "checkmate"
-                        });
-                    }
+                // Aqui você pode usar `m.from` e `m.to` se quiser destacar a casa
+                if (m) {
+                    console.log(`IA moveu de ${m.from} para ${m.to}`);
                 }
 
+                // Verifica xeque
+                if (this.validator.isKingInCheck(this.currentTurn)) {
+                    console.log(`Xeque para ${this.currentTurn}!`);
+                    if (this.validator.isCheckmate(this.currentTurn)) {
+                        console.log(`Xeque-mate! Pretas venceram!`);
+                        this.gameOver = true; 
+                        this.view.onGameOver({
+                            winner: this.currentTurn,
+                            reason: 'checkmate'
+                        });                      
+                    }
+                }
             }, 300);
         }
-
         return true;
     }
 }
 
 console.log("GameController carregado!");
+
 
 
