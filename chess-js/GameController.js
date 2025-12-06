@@ -121,29 +121,19 @@ export class GameController {
     /* ------------------------------------------------------
        🔥 MÉTODO NOVO — executa a promoção após escolha do modal
     ------------------------------------------------------ */
-    promotePawn(pos, newType) {
+    promotePawn(pos, newSymbol) {
         const piece = this.board.board[pos];
         if (!piece) return;
 
-        const cor = piece.cor;
+        piece.tipo = newSymbol; // <<<<< símbolo diretamente: ♕, ♖, ♗, ♘
 
-        const pecas = {
-            rainha: cor === "brancas" ? "♕" : "♛",
-            torre:  cor === "brancas" ? "♖" : "♜",
-            bispo:  cor === "brancas" ? "♗" : "♝",
-            cavalo: cor === "brancas" ? "♘" : "♞",
-        };
-
-        piece.tipo = pecas[newType];
-
-        // Fecha modal e atualiza visual
         this.view.hidePromotionModal();
         this.view.render();
 
-        // Continua o jogo após promoção
+        const cor = piece.cor;
         this.currentTurn = cor === "brancas" ? "pretas" : "brancas";
     }
-
+    
     /* ---------------- Reset do jogo (inalterado exceto correções seguras) ---------------- */
     resetGame() {
         console.log("Reiniciando o jogo...");
@@ -171,4 +161,5 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
 
