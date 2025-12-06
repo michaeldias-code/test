@@ -1,14 +1,15 @@
-// AI.js - v2
+// AI.js - v2.1
 import { MoveValidator } from "./MoveValidator.js";
 
 export class AI {
     constructor(board, validator) {
         this.board = board;
         this.validator = validator;
-        console.log("AI carregado!");
+        console.log("AI carregado! Validator recebido:", this.validator);
     }
 
     getRandomMove(color) {
+        console.log("Validator dentro da IA:", this.validator);
         const moves = [];
 
         for (let i = 0; i < 64; i++) {
@@ -32,4 +33,5 @@ export class AI {
         return m; // <-- necessário para destacar
     }
 }
+
 
