@@ -69,8 +69,8 @@ export class GameController {
                     if (this.validator.isCheckmate("brancas")) {
                         console.log("Xeque-mate! Pretas venceram!");
                         this.gameOver = true;
-                            // Chama a View para mostrar a mensagem de fim de jogo
-                            this.view.onGameOver({ winner: piece.cor, reason: "checkmate" });
+                        // Chama a View para mostrar a mensagem de fim de jogo
+                        this.view.onGameOver({ winner: piece.cor, reason: "checkmate" });
                     }
                 }
             }, 300); // atraso de 300ms para animação
@@ -78,8 +78,21 @@ export class GameController {
 
         return true;
     }
+
+    /* ---------------- Novo método para resetar o jogo ---------------- */
+    resetGame() {
+        console.log("Reiniciando o jogo...");
+
+        // Resetando o tabuleiro e outras variáveis
+        this.board.resetBoard(); // Resetando o tabuleiro com a função do Board
+        this.gameOver = false; // Resetando o status de fim de jogo
+        this.currentTurn = "brancas"; // Inicia com as brancas
+
+        // Re-renderizando o tabuleiro
+        this.view.render();
+
+        console.log("Jogo reiniciado!");
+    }
 }
 
 console.log("GameController carregado!");
-
-
