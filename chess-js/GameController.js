@@ -1,4 +1,4 @@
-// GameController.js — v3
+// GameController.js — v1
 import { Board } from './Board.js';
 import { MoveValidator } from './MoveValidator.js';
 import { AI } from './AI.js';
