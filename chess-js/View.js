@@ -33,6 +33,9 @@ export class View {
 
         // Adicionar eventos de clique
         this.addClickHandlers();
+
+        // Adicionar evento de fechamento do modal
+        document.getElementById('close-modal').addEventListener('click', this.closeModal);
     }
 
     /* ---------------- Notações ---------------- */
@@ -128,12 +131,23 @@ export class View {
         });
     }
 
-    /* ---------------- Mensagem de fim de jogo ---------------- */
+    /* ---------------- Mensagem de Game Over ---------------- */
     onGameOver({ winner, reason }) {
-        const div = document.createElement("div");
-        div.className = "game-over-message";
-        div.textContent = `${winner} venceu por ${reason}!`;
-        document.body.appendChild(div);
+        const messageBox = document.getElementById("game-over-modal");
+        const messageText = document.getElementById("game-over-message");
+
+        // Atualiza a mensagem
+        messageText.textContent = `${winner} venceu por ${reason}!`;
+
+        // Exibe o modal
+        messageBox.style.display = 'flex';
+    }
+
+    /* ---------------- Fechar o Modal ---------------- */
+    closeModal() {
+        const messageBox = document.getElementById("game-over-modal");
+        messageBox.style.display = 'none';
     }
 }
+
 
