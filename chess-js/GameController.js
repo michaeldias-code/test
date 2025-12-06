@@ -69,7 +69,8 @@ export class GameController {
                     if (this.validator.isCheckmate("brancas")) {
                         console.log("Xeque-mate! Pretas venceram!");
                         this.gameOver = true;
-                        this.view.onGameOver({ winner: "pretas", reason: "checkmate" });
+                            // Chama a View para mostrar a mensagem de fim de jogo
+                            this.view.onGameOver({ winner: piece.cor, reason: "checkmate" });
                     }
                 }
             }, 300); // atraso de 300ms para animação
@@ -80,4 +81,5 @@ export class GameController {
 }
 
 console.log("GameController carregado!");
+
 
