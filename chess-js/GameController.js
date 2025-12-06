@@ -1,4 +1,3 @@
-// GameController.js — v2
 import { View } from './View.js?v=999';
 import { AI } from './AI.js?v=999';
 import { Board } from './Board.js?v=999';
@@ -16,6 +15,7 @@ export class GameController {
 
         this.currentTurn = "brancas";
         this.gameOver = false;
+        this.lastMove = null; // A variável lastMove também precisa ser resetada
 
         console.log("GameController carregado!");
     }
@@ -83,10 +83,13 @@ export class GameController {
     resetGame() {
         console.log("Reiniciando o jogo...");
 
-        // Resetando o tabuleiro e outras variáveis
-        this.board.resetBoard(); // Resetando o tabuleiro com a função do Board
-        this.gameOver = false; // Resetando o status de fim de jogo
-        this.currentTurn = "brancas"; // Inicia com as brancas
+        // Resetando o tabuleiro
+        this.board.resetBoard();
+
+        // Resetando as variáveis de estado do jogo
+        this.gameOver = false;
+        this.currentTurn = "brancas";  // Pode ser "brancas" ou "pretas", dependendo de como você quer iniciar
+        this.lastMove = null;          // Limpa o último movimento
 
         // Re-renderizando o tabuleiro
         this.view.render();
