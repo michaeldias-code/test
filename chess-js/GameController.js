@@ -21,6 +21,10 @@ export class GameController {
         // Guardar ID do timer da IA para podermos limpar no reset
         this.aiTimerId = null;
 
+        this.view.setupRestartButton(() => {
+            this.resetGame();
+        });
+
         console.log("GameController carregado!");
     }
 
@@ -127,3 +131,4 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
