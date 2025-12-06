@@ -19,8 +19,8 @@ h1 {
     text-align: center;
     margin: 15px 0;
     font-size: clamp(1.5em, 5vw, 2.5em);
-    /*color: red;*/
-    color: #333;
+    color: red;
+    /*color: #333;*/
 }
 
 /* ============================
@@ -149,8 +149,8 @@ h1 {
 /* Ajustes para celular */
 @media (max-width: 600px) {
     #chess-container {
-        width: 90vw;    /* Aumenta mais ainda no celular */
-        height: 90vw;   /* Garantir que o tabuleiro ocupe mais espaço (90% da largura da tela) */
+        width: 99vw;    /* Aumenta mais ainda no celular */
+        height: 99vw;   /* Garantir que o tabuleiro ocupe mais espaço (90% da largura da tela) */
     }
 
     /* Tabuleiro */
@@ -176,3 +176,4 @@ h1 {
         padding-top: 8px;    /* Ajusta o espaçamento de cima */
     }
 }
+
