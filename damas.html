@@ -6,11 +6,18 @@
 <style>
     body {
         margin: 0;
-        background: #222;
+        background: #fff;
         display: flex;
-        justify-content: center;
+        flex-direction: column;
+        justify-content: flex-start;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
+        font-family: sans-serif;
+    }
+
+    h1 {
+        margin: 20px 0;
+        color: #222;
     }
 
     #wrapper {
@@ -21,168 +28,147 @@
 
     /* Tabuleiro */
     #board {
-        width: 90%;
-        height: 90%;
+        width: 100%;
+        height: 100%;
         display: grid;
         grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: repeat(8, 1fr);
         border: 3px solid #000;
-        box-shadow: 0 0 15px #000;
+        box-shadow: 0 0 10px #000;
         background: #000;
-        justify-content: center;
     }
 
-    /* Cada célula é um quadrado */
     .cell {
         aspect-ratio: 1/1;
         display: flex;
         justify-content: center;
         align-items: center;
-
-        font-size: calc(min(95vw, 95vh) / 10);
-        line-height: 1;
-
+        font-size: calc(min(90vw, 90vh) / 10);
         user-select: none;
         cursor: pointer;
+        transition: background 0.2s;
     }
 
     .white { background: #f0d9b5; }
     .black { background: #b58863; }
-
-    .selected {
-        outline: 4px solid yellow;
-    }
+    .selected { outline: 4px solid yellow; }
 
     /* Notação */
     .file-label, .rank-label {
         position: absolute;
-        color: #fff;
-        opacity: 0.8;
+        color: #000;
         font-weight: bold;
-        font-size: calc(min(90vw, 90vh) * 0.04);
+        font-size: calc(min(90vw, 90vh) * 0.05);
         pointer-events: none;
+        user-select: none;
     }
 
-    /* Letras (a–h) */
     .file-label {
-        bottom: -6%;
+        bottom: -5%;
         transform: translateX(-50%);
     }
 
-    /* Números (1–8) */
     .rank-label {
-        left: -6%;
-        transform: translateY(50%);
+        left: -5%;
+        transform: translateY(-50%);
     }
 </style>
 </head>
 <body>
 
+<h1>Xadrez</h1>
 <div id="wrapper">
     <div id="board"></div>
 </div>
 
 <script>
-    const wrapper = document.getElementById("wrapper");
-    const boardEl = document.getElementById("board");
+const wrapper = document.getElementById("wrapper");
+const boardEl = document.getElementById("board");
 
-    /* --------------------------
-       Adiciona notações externas
-    ---------------------------*/
+/* --------------------------
+   Adiciona notações externas
+---------------------------*/
+function addNotation() {
+    const files = "abcdefgh";
 
-    function addNotation() {
-        const files = "abcdefgh";
-
-        // Letras
-        for (let col = 0; col < 8; col++) {
-            const div = document.createElement("div");
-            div.className = "file-label";
-            div.textContent = files[col];
-
-            div.style.left = `${(col + 0.5) * (100 / 8)}%`;
-            wrapper.appendChild(div);
-        }
-
-        // Números
-        for (let row = 0; row < 8; row++) {
-            const div = document.createElement("div");
-            div.className = "rank-label";
-            div.textContent = 8 - row;
-
-            div.style.top = `${(row + 0.1) * (100 / 8)}%`;
-            wrapper.appendChild(div);
-        }
+    // Letras
+    for (let col = 0; col < 8; col++) {
+        const div = document.createElement("div");
+        div.className = "file-label";
+        div.textContent = files[col];
+        div.style.left = `${(col + 0.5) * 12.5}%`;
+        wrapper.appendChild(div);
     }
 
-    addNotation();
-
-    /* --------------------------
-       Tabuleiro lógico
-    ---------------------------*/
-
-    const board = Array(64).fill(null);
-
-    // Peças iniciais
-    const initial = {
-        white: ["♖","♘","♗","♕","♔","♗","♘","♖"],
-        black: ["♜","♞","♝","♛","♚","♝","♞","♜"]
-    };
-
-    for (let i = 0; i < 8; i++) {
-        board[i] = initial.black[i];
-        board[i + 8] = "♟";
-        board[i + 48] = "♙";
-        board[i + 56] = initial.white[i];
+    // Números
+    for (let row = 0; row < 8; row++) {
+        const div = document.createElement("div");
+        div.className = "rank-label";
+        div.textContent = 8 - row;
+        div.style.top = `${(row + 0.5) * 12.5}%`;
+        wrapper.appendChild(div);
     }
+}
 
-    /* --------------------------
-       Renderização
-    ---------------------------*/
-    function render() {
-        boardEl.innerHTML = "";
+addNotation();
 
-        for (let i = 0; i < 64; i++) {
-            const cell = document.createElement("div");
-            cell.className =
-                "cell " + (((Math.floor(i/8) + (i % 8)) % 2 === 0) ? "white" : "black");
+/* --------------------------
+   Tabuleiro lógico
+---------------------------*/
+const board = Array(64).fill(null);
 
-            cell.dataset.index = i;
+// Peças iniciais
+const initial = {
+    white: ["♖","♘","♗","♕","♔","♗","♘","♖"],
+    black: ["♜","♞","♝","♛","♚","♝","♞","♜"]
+};
 
-            if (board[i]) cell.textContent = board[i];
+for (let i = 0; i < 8; i++) {
+    board[i] = initial.black[i];
+    board[i + 8] = "♟";
+    board[i + 48] = "♙";
+    board[i + 56] = initial.white[i];
+}
 
-            if (i === selected) cell.classList.add("selected");
-
-            boardEl.appendChild(cell);
-        }
+/* --------------------------
+   Renderização
+---------------------------*/
+function render() {
+    boardEl.innerHTML = "";
+    for (let i = 0; i < 64; i++) {
+        const cell = document.createElement("div");
+        cell.className = "cell " + (((Math.floor(i/8) + (i % 8)) % 2 === 0) ? "white" : "black");
+        cell.dataset.index = i;
+        if (board[i]) cell.textContent = board[i];
+        if (i === selected) cell.classList.add("selected");
+        boardEl.appendChild(cell);
     }
+}
 
-    /* --------------------------
-       Seleção e movimento simples
-    ---------------------------*/
-    let selected = null;
+/* --------------------------
+   Seleção e movimento simples
+---------------------------*/
+let selected = null;
 
-    boardEl.addEventListener("click", e => {
-        const cell = e.target.closest(".cell");
-        if (!cell) return;
+boardEl.addEventListener("click", e => {
+    const cell = e.target.closest(".cell");
+    if (!cell) return;
+    const i = parseInt(cell.dataset.index);
 
-        const i = parseInt(cell.dataset.index);
-
-        if (selected === null) {
-            if (board[i]) selected = i;
-        } else {
-            if (i !== selected) {
-                board[i] = board[selected];
-                board[selected] = null;
-            }
-            selected = null;
+    if (selected === null) {
+        if (board[i]) selected = i;
+    } else {
+        if (i !== selected) {
+            board[i] = board[selected];
+            board[selected] = null;
         }
-
-        render();
-    });
-
+        selected = null;
+    }
     render();
+});
+
+render();
 </script>
 
 </body>
 </html>
-
-
