@@ -91,6 +91,9 @@ export class GameController {
         this.currentTurn = "brancas";  // Pode ser "brancas" ou "pretas", dependendo de como você quer iniciar
         this.lastMove = null;          // Limpa o último movimento
 
+        // Resetando a IA
+        this.ai.reset();  // Resetando a IA para não fazer o movimento da partida anterior
+
         // Re-renderizando o tabuleiro
         this.view.render();
 
