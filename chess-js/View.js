@@ -1,4 +1,4 @@
-// View.js — v2
+// View.js — v2.1
 export class View {
     constructor(board, controller) {
         this.board = board;
@@ -19,6 +19,21 @@ export class View {
         this.addClickHandlers();
     }
 
+    highlightCell(index) {
+        // Remove qualquer destaque anterior
+        const prev = this.boardDiv.querySelector('.ai-move');
+        if (prev) prev.classList.remove('ai-move');
+
+        // Adiciona destaque na célula alvo
+        const cell = this.boardDiv.querySelector(`.cell[data-index='${index}']`);
+        if (cell) cell.classList.add('ai-move');
+
+        // Remove o destaque depois de 500ms
+        setTimeout(() => {
+            if (cell) cell.classList.remove('ai-move');
+        }, 500);
+    }
+    
     createFileLabels() {
         const files = "abcdefgh";
         for (let col = 0; col < 8; col++) {
@@ -109,4 +124,5 @@ export class View {
         document.body.appendChild(div);
     }
 }
+
 
