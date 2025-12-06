@@ -218,23 +218,20 @@ h1 {
 /* Botão de Reiniciar */
 #restart-btn {
     display: block;
-    margin: 25px auto 0 auto;   /* <-- move ele para baixo e centraliza */
-    padding: 12px 28px;
-    font-size: 20px;
-    cursor: pointer;
-    background: linear-gradient(135deg, #1a8444, #2ecc71);
+    margin: 25px auto;
+    padding: 12px 24px;
+    background: #222;
     color: white;
+    font-size: 16px;
     border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-    transition: 0.25s;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
 #restart-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.35);
-    background: linear-gradient(135deg, #27ae60, #58d68d);
+    background: #444;
+    transform: scale(1.05);
 }
 
 #restart-btn:active {
@@ -276,6 +273,7 @@ h1 {
         padding-top: 8px !important;
     }
 }
+
 
 
 
