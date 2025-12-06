@@ -19,7 +19,8 @@ h1 {
     text-align: center;
     margin: 15px 0;
     font-size: clamp(1.5em, 5vw, 2.5em);
-    color: #333;
+    color: red;
+    /*color: #333;*/
 }
 
 /* ============================
@@ -183,3 +184,4 @@ h1 {
         font-size: clamp(28px, 6vw, 48px); /* Aumenta as peças também */
     }
 }
+
