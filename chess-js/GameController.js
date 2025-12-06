@@ -1,4 +1,4 @@
-// GameController.js — v2.2
+// GameController.js — v2.3
 import { Board } from './Board.js';
 import { MoveValidator } from './MoveValidator.js';
 import { AI } from './AI.js';
@@ -62,6 +62,7 @@ export class GameController {
                 // Aqui você pode usar `m.from` e `m.to` se quiser destacar a casa
                 if (m) {
                     console.log(`IA moveu de ${m.from} para ${m.to}`);
+                    this.view.highlightCell(m.to);
                 }
 
                 // Verifica xeque
@@ -83,6 +84,7 @@ export class GameController {
 }
 
 console.log("GameController carregado!");
+
 
 
 
