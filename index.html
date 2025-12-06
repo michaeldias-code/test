@@ -1,85 +1,162 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Escolha seu Jogo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xadrez Responsivo</title>
 <style>
 body {
     margin: 0;
-    background: #f0f0f0;
+    background: #fff;
     font-family: Arial, sans-serif;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    text-align: center;
+    min-height: 100vh;
 }
 
 h1 {
-    margin-bottom: 50px;
-    font-size: 2em;
-}
-
-button {
-    width: 250px;
-    max-width: 80%;
-    padding: 20px 0;
-    font-size: 1.5em;
     margin: 15px 0;
-    cursor: pointer;
-    border: none;
-    border-radius: 12px;
-    background-color: #4CAF50;
-    color: white;
-    transition: background-color 0.3s, transform 0.2s;
+    color: #333;
+    font-size: clamp(1.5em, 4vw, 2.5em);
 }
 
-button:hover {
-    background-color: #45a049;
-    transform: scale(1.05);
+#wrapper {
+    position: relative;
+    width: 85vmin;  /* usa a menor dimensão da tela */
+    height: 85vmin;
 }
+
+#board {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    border: 3px solid #000;
+    box-shadow: 0 0 10px #000;
+    background: #000;
+}
+
+.cell {
+    aspect-ratio: 1/1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: calc(85vmin / 10);
+    line-height: 1;
+    user-select: none;
+    cursor: pointer;
+}
+
+.white { background: #f0d9b5; }
+.black { background: #b58863; }
+
+.selected { outline: 4px solid yellow; }
+.ai-move { background-color: rgba(255,0,0,0.5); }
+
+.file-label, .rank-label {
+    position: absolute;
+    color: #000;
+    font-weight: bold;
+    pointer-events: none;
+    font-size: calc(85vmin * 0.04);
+}
+
+.file-label { bottom: -6%; transform: translateX(-50%); }
+.rank-label { left: -6%; transform: translateY(50%); }
 
 @media (max-width: 600px) {
-    button {
-        width: 80%;
-        font-size: 1.2em;
-        padding: 15px 0;
+    #wrapper {
+        width: 90vmin;
+        height: 90vmin;
     }
+    .cell { font-size: calc(90vmin / 10); }
+    .file-label, .rank-label { font-size: calc(90vmin * 0.04); }
 }
 </style>
 </head>
 <body>
 
-<h1>Escolha seu Jogo</h1>
+<h1>Xadrez</h1>
+<div id="wrapper">
+    <div id="board"></div>
+</div>
 
-<!--<button onclick="window.location.href='xadrez.html'">Xadrez-1</button>-->
-<!--<button onclick="window.location.href='chess/view.html'">Xadrez</button>-->
+<script>
+const wrapper = document.getElementById("wrapper");
+const boardEl = document.getElementById("board");
+const board = Array(64).fill(null);
 
-<button onclick="window.location.href='sudoku.html'">Sudoku</button>
-<button onclick="window.location.href='damas.html'">Damas</button>
-<button onclick="window.location.href='jogodavelha.html'">Jogo da Velha</button>
-<button onclick="window.location.href='shogi.html'">Shogi</button>
-<button onclick="window.location.href='chess-js/index.html'">Xadrez</button>    
+/* -------------------------- Notação -------------------------- */
+function addNotation() {
+    const files = "abcdefgh";
+    for (let c=0;c<8;c++){
+        const f=document.createElement("div");
+        f.className="file-label";
+        f.textContent=files[c];
+        f.style.left=`${(c+0.5)*12.5}%`;
+        wrapper.appendChild(f);
+    }
+    for (let r=0;r<8;r++){
+        const n=document.createElement("div");
+        n.className="rank-label";
+        n.textContent=8-r;
+        n.style.top=`${(r+0.5)*12.5}%`;
+        wrapper.appendChild(n);
+    }
+}
+addNotation();
 
-    
+/* -------------------------- Peças iniciais -------------------------- */
+const initial = {
+    white: ["♖","♘","♗","♕","♔","♗","♘","♖"],
+    black: ["♜","♞","♝","♛","♚","♝","♞","♜"]
+};
+for(let i=0;i<8;i++){
+    board[i]=initial.black[i];
+    board[i+8]="♟";
+    board[i+48]="♙";
+    board[i+56]=initial.white[i];
+}
+
+/* -------------------------- Renderização -------------------------- */
+let selected=null;
+let lastMove=null;
+
+function render(){
+    boardEl.innerHTML="";
+    for(let i=0;i<64;i++){
+        const cell=document.createElement("div");
+        cell.className="cell "+(((Math.floor(i/8)+(i%8))%2===0)?"white":"black");
+        cell.dataset.index=i;
+        if(board[i]) cell.textContent=board[i];
+        if(i===selected) cell.classList.add("selected");
+        if(lastMove && (i===lastMove.from || i===lastMove.to)) cell.classList.add("ai-move");
+        boardEl.appendChild(cell);
+    }
+}
+
+/* -------------------------- Movimento simples -------------------------- */
+boardEl.addEventListener("click", e=>{
+    const cell=e.target.closest(".cell");
+    if(!cell) return;
+    const i=parseInt(cell.dataset.index);
+    if(selected===null){
+        if(board[i]) selected=i;
+    } else {
+        if(i!==selected){
+            board[i]=board[selected];
+            board[selected]=null;
+            lastMove={from:selected,to:i}; // marca movimento
+        }
+        selected=null;
+    }
+    render();
+});
+
+render();
+</script>
+
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
