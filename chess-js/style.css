@@ -1,4 +1,5 @@
-/* ============================
+/* style.css - v6
+============================
    GLOBAL / BODY
 ============================ */
 body {
@@ -153,18 +154,32 @@ h1 {
 /* ============================
    AJUSTES PARA CELULAR
 ============================ */
+/* Ajustes para celular */
 @media (max-width: 600px) {
     #chess-container {
-        width: 90vmin;      /* aumenta para ocupar quase toda a tela */
-        aspect-ratio: 1 / 1;
+        width: min(95vmin, 650px);  /* Aumenta o tamanho no celular */
+        height: min(95vmin, 650px); /* Garante que o tabuleiro ocupe mais espaço no celular */
     }
 
-    .cell, .piece {
-        font-size: clamp(20px, 8vw, 40px); /* maior para celular */
+    #chessboard {
+        width: 100%;
+        height: 100%;
     }
 
-    #rank-area, #file-area {
-        font-size: clamp(14px, 5vw, 20px);
+    /* As notações e a linha delineadora continuam ajustadas */
+    #rank-area {
+        padding-right: 6px;  /* Aumenta um pouco mais o espaçamento */
+    }
+
+    #file-area {
+        padding-top: 6px;  /* Ajusta o espaçamento de cima */
+    }
+
+    .cell {
+        font-size: clamp(28px, 6vw, 48px); /* Aumenta o tamanho das células e peças */
+    }
+
+    .piece {
+        font-size: clamp(28px, 6vw, 48px); /* Aumenta as peças também */
     }
 }
-
