@@ -1,4 +1,3 @@
-// AI.js - v2.2
 import { MoveValidator } from "./MoveValidator.js";
 
 export class AI {
@@ -12,6 +11,7 @@ export class AI {
         console.log("Validator dentro da IA:", this.validator);
         const moves = [];
 
+        // Gera todos os movimentos possíveis
         for (let i = 0; i < 64; i++) {
             const p = this.board.board[i];
             if (p && p.cor === color) {
@@ -20,8 +20,10 @@ export class AI {
             }
         }
 
+        // Se não houver movimentos possíveis, retorna null
         if (moves.length === 0) return null;
 
+        // Retorna um movimento aleatório
         return moves[Math.floor(Math.random() * moves.length)];
     }
 
@@ -33,7 +35,12 @@ export class AI {
         }
         return null;
     }
+
+    // Método para resetar a IA e garantir que não há estado residual
+    reset() {
+        console.log("Resetando IA...");
+        // Qualquer estado que precisar ser limpo na IA pode ser feito aqui, 
+        // caso você tenha variáveis internas de cache ou algo que precise ser reinicializado.
+        // Como neste código, não temos variáveis persistentes, apenas uma chamada ao reset é suficiente.
+    }
 }
-
-
-
