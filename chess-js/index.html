@@ -7,11 +7,6 @@
 </head>
 <body>
     <h1>Jogo de Xadrez</h1>
-
-    <!-- Aqui o tabuleiro será desenhado pelo View -->
-    <div id="chess-area"></div>
-
-    <!-- Agora o botão fica realmente abaixo do tabuleiro -->
     <button id="restart-btn">🔄 Reiniciar Jogo</button>
 
     <!-- Modal de Game Over -->
@@ -25,9 +20,7 @@
     <script type="module">
         import { GameController } from './GameController.js?v=1';
         console.log('[HTML] Inicializando jogo de xadrez');
-
-        // Passe o container para o GameController
-        const game = new GameController(document.getElementById("chess-area"));
+        const game = new GameController();
     </script>
 </body>
 </html>
