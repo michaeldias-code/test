@@ -1,4 +1,4 @@
-// AI.js - v1
+// AI.js - v2
 import { MoveValidator } from "./MoveValidator.js";
 
 export class AI {
@@ -26,8 +26,10 @@ export class AI {
 
     makeMove(color) {
         const m = this.getRandomMove(color);
-        if (!m) return;
+        if (!m) return null;
 
         this.board.movePiece(m.from, m.to);
+        return m; // <-- necessário para destacar
     }
 }
+
