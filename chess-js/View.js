@@ -132,23 +132,29 @@ export class View {
     onGameOver({ winner, reason }) {
         const div = document.createElement("div");
         div.className = "game-over-message";
-        div.textContent = `${winner} venceu por ${reason}!`;
+
+        // Personaliza a mensagem com base no vencedor
+        if (winner === "brancas") {
+            div.textContent = `Parabéns, você venceu!!! Quer jogar novamente?`;
+        } else {
+            div.textContent = `Você perdeu! Quer tentar novamente?`;
+        }
 
         // Botões de ação
         const replayButton = document.createElement("button");
-        replayButton.textContent = "Jogar novamente";
+        replayButton.textContent = "Sim";
         replayButton.className = "replay-button";
         replayButton.onclick = () => this.resetGame();  // Chama a função para reiniciar o jogo
 
-        const showBoardButton = document.createElement("button");
-        showBoardButton.textContent = "Ver tabuleiro";
-        showBoardButton.className = "show-board-button";
-        showBoardButton.onclick = () => this.closeMessage(); // Fecha a mensagem
+        const noButton = document.createElement("button");
+        noButton.textContent = "Não";
+        noButton.className = "no-button";
+        noButton.onclick = () => this.closeMessage();  // Fecha a mensagem de fim de jogo
 
         // Adiciona os botões à mensagem
         div.appendChild(replayButton);
-        div.appendChild(showBoardButton);
-        
+        div.appendChild(noButton);
+    
         document.body.appendChild(div);
     }
 
@@ -172,3 +178,4 @@ export class View {
         }
     }
 }
+
