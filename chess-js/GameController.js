@@ -18,8 +18,12 @@ export class GameController {
         this.gameOver = false;
         this.lastMove = null;
 
-        // Guardar ID do timer da IA para podermos limpar no reset
         this.aiTimerId = null;
+
+        /* 🔥 Registrar callback da promoção */
+        this.view.onPromotionSelect = (pos, tipoSelecionado) => {
+            this.promotePawn(pos, tipoSelecionado);
+        };
 
         this.view.setupRestartButton(() => {
             this.resetGame();
@@ -38,15 +42,29 @@ export class GameController {
         const validMoves = this.validator.getPossibleMoves(from);
         if (!validMoves.includes(to)) return false;
 
-        // Executa o movimento
+        // Executa movimento
         this.board.movePiece(from, to);
         this.view.lastMove = { from, to };
         this.view.render();
 
-        // Troca de turno
+        /* ------------------------------------------------------------------
+           🔥 DETECÇÃO DE PROMOÇÃO DE PEÃO (SEM ALTERAR SUA LÓGICA EXISTENTE)
+        ------------------------------------------------------------------ */
+        if (piece.tipo === "♙" && to < 8) {
+            // Peão branco promove
+            this.view.showPromotionModal(to, "brancas");
+            return true; // aguarda escolha
+        }
+        if (piece.tipo === "♟" && to >= 56) {
+            // Peão preto promove
+            this.view.showPromotionModal(to, "pretas");
+            return true; // aguarda escolha
+        }
+
+        // Troca turno
         this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
 
-        // Verifica xeque / xeque-mate
+        // Xeque / xeque-mate
         if (this.validator.isKingInCheck(this.currentTurn)) {
             console.log(`Xeque em ${this.currentTurn}!`);
             if (this.validator.isCheckmate(this.currentTurn)) {
@@ -59,29 +77,35 @@ export class GameController {
 
         // Turno da IA
         if (this.currentTurn === "pretas") {
-            // limpar timer anterior por segurança
             if (this.aiTimerId) {
                 clearTimeout(this.aiTimerId);
                 this.aiTimerId = null;
             }
 
             this.aiTimerId = setTimeout(() => {
-                // se jogo for reiniciado durante o timeout, respeitamos gameOver
                 if (this.gameOver) return;
 
-                const m = this.ai.makeMove("pretas"); // retorna {from, to}
+                const m = this.ai.makeMove("pretas");
                 if (m) {
                     this.view.lastMove = { from: m.from, to: m.to };
                     this.view.render();
                     this.view.highlightCell(m.to);
                     console.log(`IA moveu de ${m.from} para ${m.to}`);
+
+                    /* 🔥 PROMOÇÃO DE PEÃO PELA IA */
+                    const moved = this.board.board[m.to];
+                    if (moved.tipo === "♙" && m.to < 8) {
+                        this.promotePawn(m.to, "rainha"); // IA promove automaticamente
+                    }
+                    if (moved.tipo === "♟" && m.to >= 56) {
+                        this.promotePawn(m.to, "rainha");
+                    }
                 }
 
-                // Marca fim do timeout
                 this.aiTimerId = null;
 
-                // Verifica xeque após movimento da IA
                 this.currentTurn = "brancas";
+
                 if (this.validator.isKingInCheck("brancas")) {
                     console.log("Xeque para brancas!");
                     if (this.validator.isCheckmate("brancas")) {
@@ -96,37 +120,55 @@ export class GameController {
         return true;
     }
 
-    /* ---------------- Novo método para resetar o jogo (melhorado) ---------------- */
+    /* ------------------------------------------------------
+       🔥 MÉTODO NOVO — executa a promoção após escolha do modal
+    ------------------------------------------------------ */
+    promotePawn(pos, newType) {
+        const piece = this.board.board[pos];
+        if (!piece) return;
+
+        const cor = piece.cor;
+
+        const pecas = {
+            rainha: cor === "brancas" ? "♕" : "♛",
+            torre:  cor === "brancas" ? "♖" : "♜",
+            bispo:  cor === "brancas" ? "♗" : "♝",
+            cavalo: cor === "brancas" ? "♘" : "♞",
+        };
+
+        piece.tipo = pecas[newType];
+
+        // Fecha modal e atualiza visual
+        this.view.hidePromotionModal();
+        this.view.render();
+
+        // Continua o jogo após promoção
+        this.currentTurn = cor === "brancas" ? "pretas" : "brancas";
+    }
+
+    /* ---------------- Reset do jogo (inalterado exceto correções seguras) ---------------- */
     resetGame() {
         console.log("Reiniciando o jogo...");
 
-        // Limpa timers pendentes da IA
         if (this.aiTimerId) {
             clearTimeout(this.aiTimerId);
             this.aiTimerId = null;
         }
 
-        // Recria o tabuleiro (novo objeto com novo array interno)
         this.board = new Board();
-
-        // Recria o validator apontando para o novo array do tabuleiro
         this.validator = new MoveValidator(this.board.board);
-
-        // Recria a IA com as referências atualizadas
         this.ai = new AI(this.board, this.validator);
 
-        // Reset variáveis de controle
         this.gameOver = false;
         this.currentTurn = "brancas";
         this.lastMove = null;
 
-        // Atualiza a View para apontar pro novo board e limpa seleção/último-movimento
         this.view.board = this.board;
         this.view.selected = null;
         this.view.lastMove = null;
 
-        // Re-renderiza
         this.view.render();
+        this.view.hidePromotionModal();
 
         console.log("Jogo reiniciado!");
     }
