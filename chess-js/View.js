@@ -1,4 +1,4 @@
-// View.js — v3
+// View.js — v4
 export class View {
     constructor(board, controller) {
         this.board = board;
@@ -128,6 +128,8 @@ export class View {
         const div = document.createElement("div");
         div.className = "game-over-message";
         div.textContent = `${winner} venceu por ${reason}!`;
-        document.body.appendChild(div);
+        /*document.body.appendChild(div);*/
+        this.container.appendChild(div);
     }
 }
+
