@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Escolha seu Jogo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+    margin: 0;
+    background: #f0f0f0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+}
+
+h1 {
+    margin-bottom: 50px;
+    font-size: 2em;
+}
+
+button {
+    width: 250px;
+    max-width: 80%;
+    padding: 20px 0;
+    font-size: 1.5em;
+    margin: 15px 0;
+    cursor: pointer;
+    border: none;
+    border-radius: 12px;
+    background-color: #4CAF50;
+    color: white;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+@media (max-width: 600px) {
+    button {
+        width: 80%;
+        font-size: 1.2em;
+        padding: 15px 0;
+    }
+}
+</style>
+</head>
+<body>
+
+<h1>Escolha seu Jogo</h1>
+
+<!--<button onclick="window.location.href='xadrez.html'">Xadrez-1</button>-->
+<!--<button onclick="window.location.href='chess/view.html'">Xadrez</button>-->
+
+<button onclick="window.location.href='sudoku.html'">Sudoku</button>
+<button onclick="window.location.href='damas.html'">Damas</button>
+<button onclick="window.location.href='jogodavelha.html'">Jogo da Velha</button>
+<button onclick="window.location.href='shogi.html'">Shogi</button>
+<button onclick="window.location.href='chess-js/index.html'">Xadrez</button>    
+
+    
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
