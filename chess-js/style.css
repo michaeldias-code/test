@@ -1,202 +1,87 @@
-/* style.css — v4.4 */
-
-/* Corpo da página */
-body {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    background: #fff;
-    font-family: Arial, sans-serif;
-}
-
-/* Título centralizado acima do tabuleiro */
-h1 {
-    margin: 15px 0;
-    font-size: clamp(1.5em, 4vw, 2.5em);
-    color: #333;
-    text-align: center;
-}
-
-/* Wrapper do tabuleiro */
-#chessboard-wrapper {
+/* === CONTAINER PRINCIPAL (TABULEIRO + NOTAÇÃO) === */
+#chess-container {
+    display: grid;
+    grid-template-columns: 1fr repeat(8, minmax(0, 1fr)) 1fr;
+    grid-template-rows: 1fr repeat(8, minmax(0, 1fr)) 1fr;
+    width: min(90vmin, 600px);
+    aspect-ratio: 1 / 1;
     position: relative;
-    width: 90vmin;
-    height: 90vmin;
+    user-select: none;
 }
 
-/* Tabuleiro */
+/* === TABULEIRO === */
 #chessboard {
+    grid-column: 2 / span 8;
+    grid-row: 2 / span 8;
+
     display: grid;
     grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
-    width: 100%;
-    height: 100%;
+
     border: 3px solid #000;
     box-shadow: 0 0 10px #000;
-    box-sizing: border-box;
 }
 
-/* Células */
+/* === CÉLULAS === */
 .cell {
     display: flex;
     justify-content: center;
     align-items: center;
-    aspect-ratio: 1 / 1;   /* força quadrado perfeito */
-    width: 100%;            /* garante ocupar a célula da grid */
-    height: 100%;           /* garante ocupar a célula da grid */
-    font-size: 4.5vmin;     /* ou calc da célula, mas fixo */
-    user-select: none;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: 100%;
+    font-size: calc(7vmin);
 }
 
 .white { background: #f0d9b5; }
 .black { background: #b58863; }
 
-/* Seleção da peça */
-.selected {
-    outline: 3px solid yellow;
-    outline-offset: -2px;
-}
-
-/* Destaque do último movimento */
-.ai-move {
-    background-color: rgba(255, 255, 0, 0.5); /* amarelo semi-transparente */
-    transition: background-color 0.3s ease;
-}
-
-/* Notações externas */
-.file-label,
-.rank-label {
-    position: absolute;
-    font-weight: bold;
-    pointer-events: none;
-    font-size: calc(80vmin * 0.04);
-    color: #000;
-}
-
-/* Letras (a–h) embaixo */
+/* === NOTAÇÃO === */
 .file-label {
-    bottom: -8%;
-    transform: translateX(-50%);
+    grid-row: 10;
+    text-align: center;
+    font-size: calc(3vmin);
+    font-weight: bold;
 }
 
-/* Números (1–8) à esquerda */
 .rank-label {
-    left: -4%;
-    transform: translateY(50%);
+    grid-column: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: calc(3vmin);
+    font-weight: bold;
 }
 
-/* Peças */
+/* espaço nos cantos */
+.corner {
+    grid-row: 1;
+    grid-column: 1;
+}
+
+/* === PEÇAS === */
 .piece {
     pointer-events: none;
-    font-size: calc(80vmin / 10);
+    font-size: calc(6vmin);
 }
 
 .piece.brancas {
-    color: #f8f8f8; /* levemente escuro = muito mais visível */
-    text-shadow:
-        -1px -1px 1px #333,
-         1px -1px 1px #333,
-        -1px  1px 1px #333,
-         1px  1px 1px #333;  /* contorno completo */
+    color: #fff;
+    text-shadow: 1px 1px 3px black;
 }
 
 .piece.pretas {
-    color: #111; /* preto real sem sumir */
-    text-shadow:
-        -1px -1px 1px white,
-         1px -1px 1px white,
-        -1px  1px 1px white,
-         1px  1px 1px white;
-}
-/* Mensagem de fim de jogo */
-.game-over-message {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 18px;    /* novo espaçamento seguro */
-
-    font-size: 1.45rem;
-    font-weight: 700;
-
-    color: #7a0000;
-    background: rgba(255, 255, 255, 0.97);
-    padding: 14px 26px;
-    border-radius: 12px;
-
-    border: 2px solid #7a0000;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.25);
-
-    z-index: 1000;
-    animation: fadeInUp 0.4s ease-out;
-    pointer-events: none;
+    color: #000;
+    text-shadow: 1px 1px 2px white;
 }
 
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translate(-50%, 10px);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, 0);
-    }
+/* Seleção */
+.selected {
+    outline: 4px solid yellow;
 }
 
-
-/* Ajustes finos para celular */
-@media (max-width: 600px) {
-    /* Centralização agora funciona porque o bloco cabe na tela */
-    body {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-    }
-    /* Wrapper nunca ultrapassa a tela */
-    #chessboard-wrapper {
-        width: min(90vmin, 95vw);
-        height: min(90vmin, 95vw);
-
-        /* RESOLUÇÃO DO PROBLEMA */
-        max-height: calc(100vh - 120px);  /* garante caber com labels */
-        max-width: calc(100vw - 20px);
-
-        position: relative;
-        box-sizing: border-box;
-    }
-    /* Tabuleiro interno sempre perfeito */
-    #chessboard {
-        width: 100%;
-        height: 100%;
-        box-sizing: border-box;
-    }
-    .cell {
-        font-size: calc(90vmin / 10);
-    }
-    /* Labels acompanham perfeitamente o novo tamanho */
-    .file-label,
-    .rank-label {
-        font-size: calc( (min(90vmin, 95vw)) * 0.04 );
-    }
+/* Último movimento */
+.ai-move {
+    background-color: rgba(255, 255, 0, 0.5);
+    transition: background-color 0.3s ease;
 }
-
-/* Ajuste fino para PC */
-@media (min-width: 900px) {
-    #chessboard-wrapper {
-        width: 84vmin;
-        height: 84vmin;
-        box-sizing: border-box;  /* evita ultrapassagem */
-        overflow: hidden;        /* impede sombra de "empurrar" */
-    }
-}
-
-
-
-
