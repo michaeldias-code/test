@@ -1,4 +1,4 @@
-// GameController.js — v2.3
+// GameController.js — v3
 import { Board } from './Board.js';
 import { MoveValidator } from './MoveValidator.js';
 import { AI } from './AI.js';
@@ -31,60 +31,52 @@ export class GameController {
         const validMoves = this.validator.getPossibleMoves(from);
         if (!validMoves.includes(to)) return false;
 
+        // Executa o movimento
         this.board.movePiece(from, to);
+        this.view.lastMove = { from, to }; // registra o movimento para destaque
         this.view.render();
 
-        const enemy = this.currentTurn === "brancas" ? "pretas" : "brancas";
-        this.currentTurn = enemy;
+        // Troca de turno
+        this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
 
+        // Verifica xeque
+        const enemy = this.currentTurn;
         if (this.validator.isKingInCheck(enemy)) {
             console.log(`Xeque em ${enemy}!`);
-
             if (this.validator.isCheckmate(enemy)) {
                 console.log(`Checkmate! ${piece.cor} venceu!`);
                 this.gameOver = true;
-
-                this.view.onGameOver({
-                    winner: piece.cor,
-                    reason: "checkmate"
-                });
-
+                this.view.onGameOver({ winner: piece.cor, reason: "checkmate" });
                 return true;
             }
         }
 
-        if (this.currentTurn === 'pretas') {
+        // Turno da IA
+        if (this.currentTurn === "pretas") {
             setTimeout(() => {
-                const m = this.ai.makeMove('pretas'); // agora retorna o movimento
-                this.view.render(); 
-                this.currentTurn = 'brancas';
-
-                // Aqui você pode usar `m.from` e `m.to` se quiser destacar a casa
+                const m = this.ai.makeMove("pretas"); // retorna {from, to}
                 if (m) {
+                    this.view.lastMove = { from: m.from, to: m.to };
+                    this.view.render();
+                    this.view.highlightCell(m.to); // destaque amarelo temporário
                     console.log(`IA moveu de ${m.from} para ${m.to}`);
-                    this.view.highlightCell(m.to);
                 }
 
-                // Verifica xeque
-                if (this.validator.isKingInCheck(this.currentTurn)) {
-                    console.log(`Xeque para ${this.currentTurn}!`);
-                    if (this.validator.isCheckmate(this.currentTurn)) {
-                        console.log(`Xeque-mate! Pretas venceram!`);
-                        this.gameOver = true; 
-                        this.view.onGameOver({
-                            winner: this.currentTurn,
-                            reason: 'checkmate'
-                        });                      
+                // Verifica xeque após movimento da IA
+                this.currentTurn = "brancas";
+                if (this.validator.isKingInCheck("brancas")) {
+                    console.log("Xeque para brancas!");
+                    if (this.validator.isCheckmate("brancas")) {
+                        console.log("Xeque-mate! Pretas venceram!");
+                        this.gameOver = true;
+                        this.view.onGameOver({ winner: "pretas", reason: "checkmate" });
                     }
                 }
-            }, 300);
+            }, 300); // atraso de 300ms para animação
         }
+
         return true;
     }
 }
 
 console.log("GameController carregado!");
-
-
-
-
