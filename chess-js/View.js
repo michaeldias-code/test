@@ -274,9 +274,10 @@ export class View {
     }
 
     hidePromotionModal() {
-        const modal = document.getElementById("promotion-modal");
-        modal.style.display = "none";
+        const modal = document.querySelector(".promotion-overlay");
+        if (modal) modal.remove();
     }
+
 
     /* ---------------- Resetar o Jogo (View apenas delega para o Controller) ---------------- */
     resetGame() {
@@ -294,5 +295,6 @@ export class View {
         }
     }
 }
+
 
 
