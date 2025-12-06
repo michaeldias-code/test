@@ -130,14 +130,23 @@ export class View {
 
     /* ---------------- Mensagem de fim de jogo ---------------- */
     onGameOver({ winner, reason }) {
-        const div = document.createElement("div");
-        div.className = "game-over-message";
+        const modal = document.createElement("div");
+        modal.className = "game-over-modal";  // Estilo de modal
+
+        const modalContent = document.createElement("div");
+        modalContent.className = "game-over-content";
 
         // Personaliza a mensagem com base no vencedor
         if (winner === "brancas") {
-            div.textContent = `Parabéns, você venceu!!! Quer jogar novamente?`;
+            modalContent.innerHTML = `
+                <h2>Parabéns, você venceu!!!</h2>
+                <p>Quer jogar novamente?</p>
+            `;
         } else {
-            div.textContent = `Você perdeu! Quer tentar novamente?`;
+            modalContent.innerHTML = `
+                <h2>Você perdeu!</h2>
+                <p>Quer tentar novamente?</p>
+            `;
         }
 
         // Botões de ação
@@ -149,13 +158,23 @@ export class View {
         const noButton = document.createElement("button");
         noButton.textContent = "Não";
         noButton.className = "no-button";
-        noButton.onclick = () => this.closeMessage();  // Fecha a mensagem de fim de jogo
+        noButton.onclick = () => this.closeModal(modal);  // Fecha o modal
 
         // Adiciona os botões à mensagem
-        div.appendChild(replayButton);
-        div.appendChild(noButton);
-    
-        document.body.appendChild(div);
+        modalContent.appendChild(replayButton);
+        modalContent.appendChild(noButton);
+        
+        // Adiciona a estrutura do modal ao corpo
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        // Exibe o modal
+        modal.style.display = "flex";
+    }
+
+    /* ---------------- Fechar o Modal ---------------- */
+    closeModal(modal) {
+        modal.style.display = "none"; // Fecha o modal
     }
 
     /* ---------------- Resetar o Jogo ---------------- */
@@ -178,4 +197,3 @@ export class View {
         }
     }
 }
-
