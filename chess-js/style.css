@@ -110,7 +110,13 @@ h1 {
     outline-offset: -2px;       /* opcional: ajusta posição do contorno */
 }
 
-.ai-highlight {
+/*.ai-highlight {
     background-color: rgba(255, 0, 0, 0.6) !important;
     transition: background-color 0.5s ease;
+}*/
+
+.ai-move {
+    background-color: rgba(255,0,0,0.5); /* vermelho sem cobrir totalmente a peça */
 }
+
+
