@@ -1,4 +1,4 @@
-/* style.css — v4 */
+/* style.css — v4.1 */
 
 /* Corpo da página */
 body {
@@ -162,9 +162,19 @@ h1 {
     .rank-label { left: -3%; }
 }
 
+@media (min-width: 900px) {
+    #chessboard-wrapper {
+        width: 82vmin;
+        height: 82vmin;
+    }
 
+    /* Ajustar labels para manter proporção */
+    .file-label,
+    .rank-label {
+        font-size: calc(82vmin * 0.04);
+    }
 
-
-
-
-
+    .piece {
+        font-size: calc(82vmin / 10);
+    }
+}
