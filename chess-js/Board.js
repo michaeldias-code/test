@@ -1,10 +1,10 @@
-// Board.js - v1
+// Board.js - v2
 export class Board {
     constructor() {
         console.log("Board construído!");
 
         this.board = Array(64).fill(null);
-        this.setupPieces();
+        this.setupPieces();  // Configura as peças ao iniciar
     }
 
     setupPieces() {
@@ -44,5 +44,11 @@ export class Board {
     movePiece(from, to) {
         this.board[to] = this.board[from];
         this.board[from] = null;
+    }
+
+    /* ---------------- Resetar o tabuleiro ---------------- */
+    resetBoard() {
+        this.board = Array(64).fill(null);  // Limpa o tabuleiro
+        this.setupPieces();  // Reposiciona as peças nas posições iniciais
     }
 }
