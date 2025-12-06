@@ -13,9 +13,9 @@ export class GameController {
 
         this.view = new View(this.board, this);
 
-        this.currentTurn = "brancas";
+        this.currentTurn = "brancas"; // O jogo começa com as brancas
         this.gameOver = false;
-        this.lastMove = null; // A variável lastMove também precisa ser resetada
+        this.lastMove = null;
 
         console.log("GameController carregado!");
     }
@@ -70,7 +70,7 @@ export class GameController {
                         console.log("Xeque-mate! Pretas venceram!");
                         this.gameOver = true;
                         // Chama a View para mostrar a mensagem de fim de jogo
-                        this.view.onGameOver({ winner: piece.cor, reason: "checkmate" });
+                        this.view.onGameOver({ winner: "pretas", reason: "checkmate" });
                     }
                 }
             }, 300); // atraso de 300ms para animação
@@ -86,7 +86,7 @@ export class GameController {
         // Resetando o tabuleiro
         this.board.resetBoard();
 
-        // Resetando as variáveis de estado do jogo
+        // Resetando as variáveis de controle
         this.gameOver = false;
         this.currentTurn = "brancas";  // Pode ser "brancas" ou "pretas", dependendo de como você quer iniciar
         this.lastMove = null;          // Limpa o último movimento
