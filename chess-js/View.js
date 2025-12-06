@@ -7,9 +7,11 @@ export class View {
         this.selected = null;
         this.lastMove = null;
 
-        this.container = document.createElement("div");
-        this.container.id = "chess-container";
-        document.body.appendChild(this.container);
+        //this.container = document.createElement("div");
+        //this.container.id = "chess-container";
+        //document.body.appendChild(this.container);
+
+        this.container = document.getElementById("chess-container");
 
         /* áreas */
         this.rankArea = document.createElement("div");
@@ -213,6 +215,7 @@ export class View {
         }
     }
 }
+
 
 
 
