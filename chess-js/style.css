@@ -1,4 +1,4 @@
-/* style.css — v3 */
+/* style.css — v3.1 */
 
 /* Corpo da página */
 body {
@@ -77,7 +77,7 @@ h1 {
 
 /* Letras (a–h) embaixo */
 .file-label {
-    bottom: -4%;
+    bottom: -8%;
     transform: translateX(-50%);
 }
 
@@ -133,4 +133,5 @@ h1 {
     .file-label { bottom: -5%; }
     .rank-label { left: -3%; }
 }
+
 
