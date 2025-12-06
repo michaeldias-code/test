@@ -7,6 +7,9 @@
 </head>
 <body>
     <h1>Jogo de Xadrez</h1>
+
+    <div id="chess-container"></div>
+
     <button id="restart-btn">🔄 Reiniciar Jogo</button>
 
     <!-- Modal de Game Over -->
@@ -19,8 +22,7 @@
 
     <script type="module">
         import { GameController } from './GameController.js?v=1';
-        console.log('[HTML] Inicializando jogo de xadrez');
-        const game = new GameController();
+        new GameController();
     </script>
 </body>
 </html>
