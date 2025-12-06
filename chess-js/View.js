@@ -1,4 +1,4 @@
-// View.js — v1
+// View.js — v2
 export class View {
     constructor(board, controller) {
         this.board = board;
@@ -66,6 +66,17 @@ export class View {
         }
     }
 
+    renderLastAIMove(index) {
+        const cell = this.boardDiv.querySelector(`[data-index="${index}"]`);
+        if (!cell) return;
+
+        cell.classList.add("ai-highlight");
+
+        setTimeout(() => {
+            cell.classList.remove("ai-highlight");
+        }, 1000); // 1 segundo
+    }
+
     addClickHandlers() {
         this.boardDiv.addEventListener("click", e => {
             const cell = e.target.closest(".cell");
@@ -98,3 +109,4 @@ export class View {
         document.body.appendChild(div);
     }
 }
+
