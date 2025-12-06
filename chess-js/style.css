@@ -43,9 +43,11 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: calc(80vmin / 10);
+    aspect-ratio: 1 / 1;   /* força quadrado perfeito */
+    width: 100%;            /* garante ocupar a célula da grid */
+    height: 100%;           /* garante ocupar a célula da grid */
+    font-size: 4.5vmin;     /* ou calc da célula, mas fixo */
     user-select: none;
-    cursor: pointer;
 }
 
 .white { background: #f0d9b5; }
@@ -131,3 +133,4 @@ h1 {
     .file-label { bottom: -5%; }
     .rank-label { left: -3%; }
 }
+
