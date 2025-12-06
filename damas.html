@@ -6,26 +6,26 @@
 <style>
     body {
         margin: 0;
-        background: #fff; /* fundo branco */
+        background: #fff;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
         font-family: sans-serif;
     }
 
     h1 {
         margin: 10px 0;
         color: #333;
+        text-align: center;
     }
 
+    /* Wrapper do tabuleiro */
     #wrapper {
         position: relative;
-        width: 85vw; /* 5% menor que antes */
-        max-width: 85vh; /* garante proporção quadrada */
-        height: 85vw;
-        max-height: 85vh;
+        width: clamp(280px, 85vw, 500px);   /* mínimo 280px, máximo 500px */
+        height: clamp(280px, 85vw, 500px);
     }
 
     #board {
@@ -33,7 +33,7 @@
         height: 100%;
         display: grid;
         grid-template-columns: repeat(8, 1fr);
-        border: 3px solid #000;
+        border: 2px solid #000;
         box-shadow: 0 0 10px #000;
         background: #000;
     }
@@ -43,7 +43,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: calc(85vw / 10);
+        font-size: calc(clamp(280px, 85vw, 500px) / 10);
         line-height: 1;
         user-select: none;
         cursor: pointer;
@@ -52,15 +52,16 @@
     .white { background: #f0d9b5; }
     .black { background: #b58863; }
 
-    .selected { outline: 4px solid yellow; }
-    .ai-move { background-color: rgba(255,0,0,0.5); } /* vermelho semi-transparente */
+    .selected { outline: 3px solid yellow; }
+    .ai-move { background-color: rgba(255,0,0,0.5); }
 
+    /* Notação */
     .file-label, .rank-label {
         position: absolute;
         color: #000;
         font-weight: bold;
         pointer-events: none;
-        font-size: calc(85vw * 0.04);
+        font-size: calc(clamp(280px, 85vw, 500px) * 0.04);
     }
 
     .file-label { bottom: -6%; transform: translateX(-50%); }
@@ -138,7 +139,7 @@ boardEl.addEventListener("click", e=>{
         if(i!==selected){
             board[i]=board[selected];
             board[selected]=null;
-            aiMove=i; // marca movimento do usuário como vermelho
+            aiMove=i;
         }
         selected=null;
     }
