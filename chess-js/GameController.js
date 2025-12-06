@@ -1,4 +1,4 @@
-// GameController.js — v2
+// GameController.js — v2.1
 import { Board } from './Board.js';
 import { MoveValidator } from './MoveValidator.js';
 import { AI } from './AI.js';
@@ -10,7 +10,7 @@ export class GameController {
 
         this.board = new Board();
         this.validator = new MoveValidator(this.board.board);
-        this.ai = new AI(this.board, this);
+        this.ai = new AI(this.board, this.validator);
 
         this.view = new View(this.board, this);
 
@@ -83,4 +83,5 @@ export class GameController {
 }
 
 console.log("GameController carregado!");
+
 
