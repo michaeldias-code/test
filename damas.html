@@ -13,23 +13,28 @@
         height: 100vh;
     }
 
-    /* O tabuleiro ocupa 90% da menor dimensão da tela */
+    /* Tabuleiro ocupa até 95% da tela */
     #board {
         width: min(95vw, 95vh);
         height: min(95vw, 95vh);
         display: grid;
         grid-template-columns: repeat(8, 1fr);
-        grid-template-rows: repeat(8, 1fr);
         border: 3px solid #000;
         box-shadow: 0 0 15px #000;
         background: #000;
     }
 
+    /* Cada célula é um quadrado perfeito */
     .cell {
+        aspect-ratio: 1/1;
         display: flex;
         justify-content: center;
         align-items: center;
+
+        /* Impede variação de altura da peça */
         font-size: calc(min(95vw, 95vh) / 10);
+        line-height: 1;
+
         user-select: none;
         cursor: pointer;
     }
