@@ -88,12 +88,13 @@ export class GameController {
 
                     /* 🔥 PROMOÇÃO DE PEÃO PELA IA */
                     const moved = this.board.board[m.to];
-                    if (moved.tipo === "♙" && m.to < 8) {
-                        this.promotePawn(m.to, "rainha"); // IA promove automaticamente
-                    }
-                    if (moved.tipo === "♟" && m.to >= 56) {
-                        this.promotePawn(m.to, "rainha");
-                    }
+					// IA promove automaticamente para rainha
+					if (moved.tipo === "♙" && m.to < 8) {
+						this.promotePawn(m.to, "rainha");
+					}
+					if (moved.tipo === "♟" && m.to >= 56) {
+						this.promotePawn(m.to, "rainha");
+					}
                 }
 
                 this.aiTimerId = null;
@@ -130,6 +131,11 @@ export class GameController {
 			cavalo: cor === "brancas" ? "♘" : "♞"
 		};
 	
+		// 👉 Proteção contra escolha inválida
+		if (!mapa[escolha]) {
+			console.error("Promoção inválida:", escolha);
+			return;
+		}
 		piece.tipo = mapa[escolha];
 	
 		this.view.hidePromotionModal();
