@@ -136,6 +136,41 @@ export class GameController {
         return true;
     }
 
+		handleEnPassant(from, to, piece) {
+		const move = { from, to, piece };
+	
+		console.log(`GameController: Verificando en passant de ${this.indexToNotation(from)} para ${this.indexToNotation(to)}`);
+	
+		// Checa se a jogada é válida para en passant
+		if (this.validator.checkEnPassant(move)) {
+			// Determina a posição do peão capturado
+			const captureRank = piece.cor === "brancas" ? "5" : "4"; // linha onde o peão inimigo está
+			const captureFile = this.indexToNotation(to)[0];       // mesma coluna do peão que moveu
+			const capturePos = this.notationToIndex(`${captureFile}${captureRank}`);
+	
+			console.log(`En passant executado! Peão capturado em ${this.indexToNotation(capturePos)}`);
+	
+			// Remove o peão capturado
+			this.board.board[capturePos] = null;
+	
+			// Atualiza a lista de peões aptos para en passant
+			this.validator.enPassantList = this.validator.enPassantList.filter(pos => pos !== to);
+	
+			this.view.render();
+			return true;
+		}
+	
+		return false;
+	}
+	
+	// Função auxiliar para converter notação para índice
+	notationToIndex(notation) {
+		const files = "abcdefgh";
+		const file = files.indexOf(notation[0]);
+		const rank = 8 - parseInt(notation[1]);
+		return rank * 8 + file;
+	}
+
 	indexToNotation(i) {
     	const files = "abcdefgh";
     	const file = files[i % 8];
@@ -237,3 +272,4 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
