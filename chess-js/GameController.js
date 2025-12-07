@@ -41,11 +41,10 @@ export class GameController {
 		// Captura en passant
 		// ----------------------------
 		if ((piece.tipo === "♙" || piece.tipo === "♟") && from % 8 !== to % 8 && !this.board.board[to]) {
-			const ep = this.validator.enPassantTarget;
-			if (ep) {
-				const capturePos = ep.y * 8 + ep.x;
-				this.board.board[capturePos] = null;
-				console.log(`♙ Captura en passant em ${this.indexToNotation(capturePos)}`);
+			const epIndex = this.validator.enPassantTarget;
+			if (epIndex !== null) {
+				this.board.board[epIndex] = null;
+				console.log(`♙ Captura en passant em ${this.indexToNotation(epIndex)}`);
 			}
 		}
 	
@@ -59,12 +58,9 @@ export class GameController {
 		// Atualiza enPassantTarget
 		// ----------------------------
 		this.validator.enPassantTarget = null;
-		if (piece.tipo === "♙" && from - to === 16) {
-			this.validator.enPassantTarget = { x: from % 8, y: 4 };
-		}
-		if (piece.tipo === "♟" && to - from === 16) {
-			this.validator.enPassantTarget = { x: from % 8, y: 3 };
-		}
+		if (piece.tipo === "♙" && from - to === 16) this.validator.enPassantTarget = from - 8;
+		if (piece.tipo === "♟" && to - from === 16) this.validator.enPassantTarget = from + 8;
+	
 	
 		// ----------------------------
 		// Detecta roque
@@ -250,4 +246,5 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
 
