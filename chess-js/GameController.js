@@ -44,12 +44,12 @@ export class GameController {
 
 	movePiece(from, to) {
 		console.log(`Tentando mover peça de ${this.indexToNotation(from)} para ${this.indexToNotation(to)}...`);
-	
+		
 		if (this.gameOver) {
 			console.log("O jogo acabou! Não é possível mover.");
 			return false;
 		}
-	
+		
 		const piece = this.board.board[from];
 		if (!piece || piece.cor !== this.currentTurn) {
 			console.log(`Movimento inválido! A peça não pertence ao jogador ${this.currentTurn}.`);
@@ -63,13 +63,13 @@ export class GameController {
 			console.log(`Movimento inválido de ${this.indexToNotation(from)} para ${this.indexToNotation(to)}.`);
 			return false;
 		}
-	
+		
 		// Captura en passant (não usa mais índices)
 		if ((piece.tipo === "♙" || piece.tipo === "♟") && !this.board.board[to]) {
 			const epNotation = this.indexToNotation(this.validator.enPassantTarget);
 			const fromNotation = this.indexToNotation(from);
 			const toNotation = this.indexToNotation(to);
-	
+		
 			// Verificando se a casa de destino está ao lado do peão adversário
 			if (Math.abs(toNotation.charCodeAt(0) - fromNotation.charCodeAt(0)) === 1 && this.validator.enPassantTarget !== null) {
 				if (epNotation === toNotation) {
@@ -78,7 +78,7 @@ export class GameController {
 				}
 			}
 		}
-	
+		
 		// Movimentando a peça
 		this.board.movePiece(from, to);
 		console.log(`👤 Jogador: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`);
@@ -86,17 +86,22 @@ export class GameController {
 		// Atualizando enPassantTarget
 		this.validator.enPassantTarget = null;
 		console.log(`Antes do if: enPassantTarget = ${this.validator.enPassantTarget}, from = ${from}, to = ${to}, diferença = ${Math.abs(from - to)}`);
+		
+		// Atualizando enPassantTarget após mover um peão
 		if (piece.tipo === "♙" && Math.abs(from - to) === 16) {
 			// Define a casa que será possível para en passant
-			const toNotation = this.indexToNotation(to);
-			if (toNotation[1] === '4') this.validator.enPassantTarget = to;
-		}
-		console.log(`Depois do if: enPassantTarget = ${this.validator.enPassantTarget}`);
-		if (piece.tipo === "♟" && Math.abs(from - to) === 16) {
-			const toNotation = this.indexToNotation(to);
-			if (toNotation[1] === '5') this.validator.enPassantTarget = to;
+			if (to === 32) this.validator.enPassantTarget = to - 8; // Peão branco de e2 para e4
+			else if (to === 40) this.validator.enPassantTarget = to + 8; // Peão preto de d7 para d5
 		}
 	
+		if (piece.tipo === "♟" && Math.abs(from - to) === 16) {
+			// Define a casa que será possível para en passant
+			if (to === 48) this.validator.enPassantTarget = to + 8; // Peão preto de e7 para e5
+			else if (to === 24) this.validator.enPassantTarget = to - 8; // Peão branco de d2 para d4
+		}
+		
+		console.log(`Depois do if: enPassantTarget = ${this.validator.enPassantTarget}`);
+		
 		// Detectando roque
 		if (piece.tipo === "♔" || piece.tipo === "♚") {
 			const row = piece.cor === "brancas" ? 7 : 0;
@@ -267,4 +272,3 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
-
