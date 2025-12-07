@@ -28,7 +28,7 @@ export class GameController {
         console.log("GameController carregado!");
     }
 
-	movePiece(from, to) {
+movePiece(from, to) {
 		if (this.gameOver) return false;
 	
 		const piece = this.board.board[from];
@@ -47,23 +47,27 @@ export class GameController {
 	
 		// reset da en passant
 		this.validator.enPassantTarget = null;
-	
+		
 		// Se o peão avançou 2 casas, marca para en passant corretamente
-		if (piece.tipo === "♙" && from - to === 16) {
-			this.validator.enPassantTarget = from - 8; // casa intermediária
+		if (piece.tipo === "♙" && from - to === 16) { 
+			// peão branco avançou duas casas
+			this.validator.enPassantTarget = to + 8; // a casa "atrás" do peão
 		}
-		if (piece.tipo === "♟" && to - from === 16) {
-			this.validator.enPassantTarget = from + 8; // casa intermediária
+		if (piece.tipo === "♟" && to - from === 16) { 
+			// peão preto avançou duas casas
+			this.validator.enPassantTarget = to - 8; // a casa "atrás" do peão
 		}
-	
+		
 		// Capturando en passant
 		if (piece.tipo === "♙" && from % 8 !== to % 8 && !this.board.board[to]) {
-			console.log(`♙ En passant! Capturando peão em ${this.indexToNotation(to + 8)}`);
-			this.board.board[to + 8] = null;
+			const captureIndex = to + 8; // peão branco captura abaixo
+			console.log(`♙ En passant! Capturando peão em ${this.indexToNotation(captureIndex)}`);
+			this.board.board[captureIndex] = null;
 		}
 		if (piece.tipo === "♟" && from % 8 !== to % 8 && !this.board.board[to]) {
-			console.log(`♟ En passant! Capturando peão em ${this.indexToNotation(to - 8)}`);
-			this.board.board[to - 8] = null;
+			const captureIndex = to - 8; // peão preto captura acima
+			console.log(`♟ En passant! Capturando peão em ${this.indexToNotation(captureIndex)}`);
+			this.board.board[captureIndex] = null;
 		}
 	
 		// Detecta roque
@@ -248,3 +252,4 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
