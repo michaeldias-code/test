@@ -72,6 +72,13 @@ export class MoveValidator {
         return moves;
     }
 
+	indexToNotation(pos) {
+    	const files = "abcdefgh";
+    	const file = files[pos % 8];
+    	const rank = 8 - Math.floor(pos / 8);
+    	return `${file}${rank}`;
+	}
+
     // ---------------------------------------
     // MOVIMENTOS DE UMA PEÇA (SEM FILTRO DE XEQUE)
     // ---------------------------------------
@@ -308,3 +315,4 @@ export class MoveValidator {
         return false;
     }
 }
+
