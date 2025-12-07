@@ -1,5 +1,6 @@
 // MoveValidator.js v3
 export class MoveValidator {
+
     constructor(boardArray) {
         this.board = boardArray;
         this.enPassantTargets = []; // Agora armazenamos múltiplos alvos de en passant
@@ -31,12 +32,15 @@ export class MoveValidator {
         switch (offset) {
             case -1: return nr === sr && nc === sc - 1;
             case 1: return nr === sr && nc === sc + 1;
+
             case -8: return nc === sc && nr === sr - 1;
             case 8: return nc === sc && nr === sr + 1;
+
             case -9: return (nr === sr - 1) && (nc === sc - 1);
             case -7: return (nr === sr - 1) && (nc === sc + 1);
             case 7: return (nr === sr + 1) && (nc === sc - 1);
             case 9: return (nr === sr + 1) && (nc === sc + 1);
+
             default: return false;
         }
     }
@@ -116,7 +120,6 @@ export class MoveValidator {
                     for (let epTarget of this.enPassantTargets) {
                         const epNotation = this.indexToNotation(epTarget.target);
                         if (Math.abs(this.indexToNotation(pos).charCodeAt(0) - epNotation.charCodeAt(0)) === 1) {
-                            // Verifica as casas para en passant
                             if (epNotation === this.indexToNotation(pos - 9)) moves.push(pos - 9);
                             if (epNotation === this.indexToNotation(pos - 7)) moves.push(pos - 7);
                         }
@@ -142,24 +145,24 @@ export class MoveValidator {
                     for (let epTarget of this.enPassantTargets) {
                         const epNotation = this.indexToNotation(epTarget.target);
                         if (Math.abs(this.indexToNotation(pos).charCodeAt(0) - epNotation.charCodeAt(0)) === 1) {
-                            // Verifica as casas para en passant
                             if (epNotation === this.indexToNotation(pos + 7)) moves.push(pos + 7);
                             if (epNotation === this.indexToNotation(pos + 9)) moves.push(pos + 9);
                         }
                     }
                 }
                 break;
-
-            // Outras peças
             case "♖": case "♜":
                 moves.push(...this.getSlidingMoves(pos, [-1, 1, -8, 8]));
                 break;
+
             case "♗": case "♝":
                 moves.push(...this.getSlidingMoves(pos, [-9, -7, 7, 9]));
                 break;
+
             case "♕": case "♛":
                 moves.push(...this.getSlidingMoves(pos, [-1, 1, -8, 8, -9, -7, 7, 9]));
                 break;
+
             case "♘": case "♞":
                 const k = [-17, -15, -10, -6, 6, 10, 15, 17];
                 for (let off of k) {
@@ -190,22 +193,7 @@ export class MoveValidator {
     }
 
     // ---------------------------------------
-    // Atualiza os alvos de en passant
-    // ---------------------------------------
-    updateEnPassantTargets(piece, from, to) {
-        if (piece.tipo === '♙' && Math.abs(from - to) === 16) {
-            // Se o peão branco avançou 2 casas, cria um alvo de en passant
-            this.enPassantTargets.push({ target: to, piece: piece });
-            console.log(`Alvo de en passant criado em ${this.indexToNotation(to)}`);
-        } else if (piece.tipo === '♟' && Math.abs(from - to) === 16) {
-            // Para peões pretos, a lógica é a mesma
-            this.enPassantTargets.push({ target: to, piece: piece });
-            console.log(`Alvo de en passant criado em ${this.indexToNotation(to)}`);
-        }
-    }
-
-    // ---------------------------------------
-    // Filtro de cheque
+    // FILTRO DE CHEQUE
     // ---------------------------------------
     getPossibleMoves(pos) {
         const piece = this.board[pos];
@@ -214,7 +202,41 @@ export class MoveValidator {
         let moves = this.rawMoves(pos);
         const res = [];
 
-        // Filtra movimentos inválidos por causa de cheque
+        // Roque para o rei
+        if (piece.tipo === "♔" || piece.tipo === "♚") {
+            const color = piece.cor;
+            const row = color === "brancas" ? 7 : 0;
+
+            // Roque curto
+            if (!piece.hasMoved) {
+                const shortRook = this.board[row * 8 + 7];
+                if (shortRook && !shortRook.hasMoved) {
+                    if (
+                        !this.board[row * 8 + 5] &&
+                        !this.board[row * 8 + 6] &&
+                        !this.isCellAttacked(row * 8 + 4, color) &&
+                        !this.isCellAttacked(row * 8 + 5, color) &&
+                        !this.isCellAttacked(row * 8 + 6, color)
+                    ) moves.push(row * 8 + 6);
+                }
+            }
+
+            // Roque longo
+            if (!piece.hasMoved) {
+                const longRook = this.board[row * 8 + 0];
+                if (longRook && !longRook.hasMoved) {
+                    if (
+                        !this.board[row * 8 + 1] &&
+                        !this.board[row * 8 + 2] &&
+                        !this.board[row * 8 + 3] &&
+                        !this.isCellAttacked(row * 8 + 4, color) &&
+                        !this.isCellAttacked(row * 8 + 3, color) &&
+                        !this.isCellAttacked(row * 8 + 2, color)
+                    ) moves.push(row * 8 + 2);
+                }
+            }
+        }
+
         for (let to of moves) {
             if (this.wouldNotLeaveKingInCheck(pos, to)) {
                 res.push(to);
@@ -244,7 +266,7 @@ export class MoveValidator {
     }
 
     // ---------------------------------------
-    // Verifica se o rei está em cheque
+    // CHEQUE
     // ---------------------------------------
     isKingInCheck(color) {
         const kingPos = this.board.findIndex(p =>
@@ -261,6 +283,40 @@ export class MoveValidator {
 
             const moves = this.rawMoves(i);
             if (moves.includes(kingPos)) return true;
+        }
+
+        return false;
+    }
+
+    // ---------------------------------------
+    // CHEQUE-MATE
+    // ---------------------------------------
+    isCheckmate(color) {
+        if (!this.isKingInCheck(color)) return false;
+
+        for (let i = 0; i < 64; i++) {
+            const p = this.board[i];
+            if (p && p.cor === color) {
+                const moves = this.getPossibleMoves(i);
+                if (moves.length > 0) return false;
+            }
+        }
+
+        return true;
+    }
+
+    // ---------------------------------------
+    // CASA ATACADA
+    // ---------------------------------------
+    isCellAttacked(pos, color) {
+        const enemyColor = color === "brancas" ? "pretas" : "brancas";
+
+        for (let i = 0; i < 64; i++) {
+            const p = this.board[i];
+            if (!p || p.cor !== enemyColor) continue;
+
+            const moves = this.rawMoves(i);
+            if (moves.includes(pos)) return true;
         }
 
         return false;
