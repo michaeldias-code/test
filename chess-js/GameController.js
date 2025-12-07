@@ -71,20 +71,18 @@ export class GameController {
         /* ------------------------------------------------------------------
            ?? DETECÇÃO DE PROMOÇÃO DE PEÃO (SEM ALTERAR SUA LÓGICA EXISTENTE)
         ------------------------------------------------------------------ */
-        if (piece.tipo === "?" || piece.tipo === "?") {
-            if ((piece.cor === "brancas" && to < 8) || (piece.cor === "pretas" && to >= 56)) {            
-                // É AQUI QUE VOCÊ COLOCA AS 3 LINHAS
-				console.log(
-					`? Promoção detectada! Peão chegou em ${this.indexToNotation(to)}`
-				);
+       
+		if (piece.tipo === "♙" || piece.tipo === "♟") {
+			if ((piece.cor === "brancas" && to < 8) || (piece.cor === "pretas" && to >= 56)) {
+				console.log(`♕ Promoção detectada! Peão chegou em ${this.indexToNotation(to)}`);
 				this.pendingPromotionPos = to;
 				this.view.showPromotionModal(piece.cor, (simbolo) => {
 					this.promotePawn(this.pendingPromotionPos, simbolo);
 				});
-
+		
 				return true;
-            }
-        }
+			}
+		}
         // Troca turno
         this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
 
@@ -241,4 +239,3 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
-
