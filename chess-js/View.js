@@ -138,6 +138,7 @@ export class View {
                 } else {
                     const ok = this.controller.movePiece(this.selected, index);
                     if (ok) this.lastMove = { from: this.selected, to: index };
+					console.log(`Movimento registrado: de ${this.selected} para ${index}`);
                     this.selected = null;
                 }
             }
@@ -290,5 +291,6 @@ export class View {
         }
     }
 }
+
 
 
