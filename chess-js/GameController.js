@@ -8,9 +8,11 @@ export class GameController {
     constructor() {
         console.log("GameController inicializando...");
 
+		const testMode = true; // ou false para jogo normal
+		
         this.board = new Board();
         this.validator = new MoveValidator(this.board.board);
-        this.ai = new AI(this.board, this.validator);
+        this.ai = new AI(this.board, this.validator, testMode);
 
         this.view = new View(this.board, this);
 
@@ -257,4 +259,5 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
 
