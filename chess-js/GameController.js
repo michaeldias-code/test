@@ -39,6 +39,11 @@ export class GameController {
 
         // Executa movimento
         this.board.movePiece(from, to);
+		
+		console.log(
+			`👤 Jogador: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`
+		);
+
         this.view.lastMove = { from, to };
         this.view.render();
 
@@ -48,10 +53,17 @@ export class GameController {
         if (piece.tipo === "♙" || piece.tipo === "♟") {
             if ((piece.cor === "brancas" && to < 8) || (piece.cor === "pretas" && to >= 56)) {            
                 // É AQUI QUE VOCÊ COLOCA AS 3 LINHAS
+				console.log(
+					`✨ Promoção detectada! Peão chegou em ${this.indexToNotation(to)}`
+				);
 				this.pendingPromotionPos = to;
 				this.view.showPromotionModal(piece.cor, (symbol) => {
 					this.promotePawn(this.pendingPromotionPos, symbol);
 				});
+				console.log(
+					`🚀 Promoção concluída em ${this.indexToNotation(this.pendingPromotionPos)} para: ${simbolo}`
+				);
+
 				return true;
             }
         }
@@ -84,7 +96,9 @@ export class GameController {
                     this.view.lastMove = { from: m.from, to: m.to };
                     this.view.render();
                     this.view.highlightCell(m.to);
-                    console.log(`IA moveu de ${m.from} para ${m.to}`);
+					console.log(
+						`♟️ IA: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`
+					);
 
                     /* 🔥 PROMOÇÃO DE PEÃO PELA IA */
                     const moved = this.board.board[m.to];
@@ -114,6 +128,13 @@ export class GameController {
 
         return true;
     }
+
+	indexToNotation(i) {
+    	const files = "abcdefgh";
+    	const file = files[i % 8];
+    	const rank = 8 - Math.floor(i / 8);
+    	return `${file}${rank}`;
+	}
 
     /* ------------------------------------------------------
        🔥 MÉTODO NOVO — executa a promoção após escolha do modal
@@ -187,3 +208,4 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
