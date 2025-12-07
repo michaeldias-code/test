@@ -1,4 +1,4 @@
-// MoveValidator.js v10
+// MoveValidator.js v3
 export class MoveValidator {
 
     constructor(boardArray) {
@@ -95,9 +95,9 @@ export class MoveValidator {
 			const tgt = this.board[to];
 			if (!tgt || tgt.cor !== piece.cor) {
 				moves.push(to);
-				console.log(`✔ Movimento válido de ${piece.tipo} em ${this.indexToNotation(pos)} → ${this.indexToNotation(to)} (${reason})`);
+				console.log(`✔ Movimento válido de ${piece.tipo} em ${this.indexToNotation(pos)} → ${this.indexToNotation(to)} `);
 			} else {
-				console.log(`✖ Movimento bloqueado em ${this.indexToNotation(to)} (${reason})`);
+				console.log(`✖ Movimento bloqueado em ${this.indexToNotation(to)} `);
 			}
 		};
 	
@@ -315,4 +315,3 @@ export class MoveValidator {
         return false;
     }
 }
-
