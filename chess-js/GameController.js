@@ -60,9 +60,6 @@ export class GameController {
 				this.view.showPromotionModal(piece.cor, (simbolo) => {
 					this.promotePawn(this.pendingPromotionPos, simbolo);
 				});
-				console.log(
-					`🚀 Promoção concluída em ${this.indexToNotation(this.pendingPromotionPos)} para: ${simbolo}`
-				);
 
 				return true;
             }
