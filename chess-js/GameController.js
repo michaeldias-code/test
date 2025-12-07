@@ -44,21 +44,25 @@ export class GameController {
 			`?? Jogador: ${this.indexToNotation(from)} ? ${this.indexToNotation(to)}`
 		);
 
-		
-		
 		// Detecta roque
-		if (piece.tipo === "?" || piece.tipo === "?") {
-			const row = piece.cor === "brancas" ? 7 : 0;
-			// Roque curto
-			if (to === row * 8 + 6) {
-				console.log("? Roque curto!");
-				this.board.movePiece(row * 8 + 7, row * 8 + 5); // torre pula
-			}
-			// Roque longo
-			if (to === row * 8 + 2) {
-				console.log("? Roque longo!");
-				this.board.movePiece(row * 8 + 0, row * 8 + 3); // torre pula
-			}
+		if (piece.tipo === "♔" || piece.tipo === "♚") {
+    		const row = piece.cor === "brancas" ? 7 : 0;
+    		// Roque curto
+    		if (to === row * 8 + 6) {
+        		console.log("♔ Roque curto!");
+        		// mover torre e marcar hasMoved
+        		this.board.movePiece(row * 8 + 7, row * 8 + 5); // torre pula para f-file
+        		// opcional: marcar hasMoved nas peças (importante se seu MoveValidator usa hasMoved)
+        		if (this.board.board[row*8 + 5]) this.board.board[row*8 + 5].hasMoved = true;
+        		if (this.board.board[to]) this.board.board[to].hasMoved = true;
+    		}
+    		// Roque longo
+    		if (to === row * 8 + 2) {
+        		console.log("♔ Roque longo!");
+        		this.board.movePiece(row * 8 + 0, row * 8 + 3); // torre pula para d-file
+        		if (this.board.board[row*8 + 3]) this.board.board[row*8 + 3].hasMoved = true;
+        		if (this.board.board[to]) this.board.board[to].hasMoved = true;
+    		}
 		}
 		
         this.view.lastMove = { from, to };
@@ -237,3 +241,4 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
