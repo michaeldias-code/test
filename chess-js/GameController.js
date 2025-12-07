@@ -44,7 +44,27 @@ export class GameController {
 			`👤 Jogador: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`
 		);
 
+		// reset da en passant
+		this.validator.enPassantTarget = null;
 		
+		// Se o peão avançou 2 casas, marca para en passant
+		if (piece.tipo === "♙" && from - to === 16) {
+    		this.validator.enPassantTarget = to + 8; // posição por onde ele passou
+		}
+		if (piece.tipo === "♟" && to - from === 16) {
+    		this.validator.enPassantTarget = to - 8;
+		}
+
+		// capturando en passant
+		if (piece.tipo === "♙" && from % 8 !== to % 8 && !this.board.board[to]) {
+    		console.log(`♙ En passant! Capturando peão em ${this.indexToNotation(to + 8)}`);
+    		this.board.board[to + 8] = null;
+		}
+		if (piece.tipo === "♟" && from % 8 !== to % 8 && !this.board.board[to]) {
+    		console.log(`♟ En passant! Capturando peão em ${this.indexToNotation(to - 8)}`);
+    		this.board.board[to - 8] = null;
+		}
+
 		
 		// Detecta roque
 		if (piece.tipo === "♔" || piece.tipo === "♚") {
@@ -104,7 +124,7 @@ export class GameController {
                     this.view.render();
                     this.view.highlightCell(m.to);
 					console.log(
-						`♟️ IA: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`
+						`♟️ IA: ${this.indexToNotation(m.from)} → ${this.indexToNotation(m.to)}`
 					);
 
                     /* 🔥 PROMOÇÃO DE PEÃO PELA IA */
@@ -237,3 +257,4 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
