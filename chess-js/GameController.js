@@ -42,121 +42,135 @@ export class GameController {
         console.log("GameController carregado!");
     }
 
-    movePiece(from, to) {
-        console.log(`Tentando mover peça de ${this.indexToNotation(from)} para ${this.indexToNotation(to)}...`);
-
-        if (this.gameOver) {
-            console.log("O jogo acabou! Não é possível mover.");
-            return false;
-        }
-
-        const piece = this.board.board[from];
-        if (!piece || piece.cor !== this.currentTurn) {
-            console.log(`Movimento inválido! A peça não pertence ao jogador ${this.currentTurn}.`);
-            return false;
-        }
-
-        // Verificando movimentos válidos
-        const validMoves = this.validator.getPossibleMoves(from);
-        console.log(`Movimentos válidos para ${this.indexToNotation(from)}: ${validMoves}`);
-        if (!validMoves.includes(to)) {
-            console.log(`Movimento inválido de ${this.indexToNotation(from)} para ${this.indexToNotation(to)}.`);
-            return false;
-        }
-
-        // Captura en passant
-        if ((piece.tipo === "♙" || piece.tipo === "♟") && from % 8 !== to % 8 && !this.board.board[to]) {
-            const epIndex = this.validator.enPassantTarget;
-            if (epIndex !== null) {
-                this.board.board[epIndex] = null;
-                console.log(`♙ Captura en passant em ${this.indexToNotation(epIndex)}`);
-            }
-        }
-
-        // Movimentando a peça
-        this.board.movePiece(from, to);
-        console.log(`👤 Jogador: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`);
-
-        // Atualizando enPassantTarget
-        this.validator.enPassantTarget = null;
-        if (piece.tipo === "♙" && from - to === 16) this.validator.enPassantTarget = from - 8;
-        if (piece.tipo === "♟" && to - from === 16) this.validator.enPassantTarget = from + 8;
-
-        // Detectando roque
-        if (piece.tipo === "♔" || piece.tipo === "♚") {
-            const row = piece.cor === "brancas" ? 7 : 0;
-            if (to === row * 8 + 6) {
-                console.log("♔ Roque curto!");
-                this.board.movePiece(row * 8 + 7, row * 8 + 5);
-            }
-            if (to === row * 8 + 2) {
-                console.log("♔ Roque longo!");
-                this.board.movePiece(row * 8 + 0, row * 8 + 3);
-            }
-        }
-
-        // Atualizando a View
-        this.view.lastMove = { from, to };
-        this.view.render();
-        
-        // Verificando promoção de peão
-        if ((piece.tipo === "♙" && to < 8) || (piece.tipo === "♟" && to >= 56)) {
-            console.log(`✨ Promoção detectada! Peão chegou em ${this.indexToNotation(to)}`);
-            this.pendingPromotionPos = to;
-            this.view.showPromotionModal(piece.cor, (simbolo) => {
-                this.promotePawn(this.pendingPromotionPos, simbolo);
-            });
-            return true;
-        }
-
-        // Troca de turno
-        this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
-        console.log(`Turno trocado! Agora é a vez das ${this.currentTurn}.`);
-
-        // Checando se o rei está em check/checkmate
-        this.logCheckState(this.currentTurn);
-        if (this.gameOver) return true;
-
-        // Turno da IA
-        if (this.currentTurn === "pretas") {
-            if (this.aiTimerId) {
-                clearTimeout(this.aiTimerId);
-                this.aiTimerId = null;
-            }
-
-            this.aiTimerId = setTimeout(() => {
-                if (this.gameOver) return;
-
-                console.log("Turno da IA: processando movimento...");
-                const m = this.ai.makeMove("pretas");
-                if (m) {
-                    this.view.lastMove = { from: m.from, to: m.to };
-                    this.view.render();
-                    this.view.highlightCell(m.to);
-                    console.log(`♟️ IA: ${this.indexToNotation(m.from)} → ${this.indexToNotation(m.to)}`);
-
-                    // Promoção automática da IA
-                    const moved = this.board.board[m.to];
-                    if (moved.tipo === "♙" && m.to < 8) this.promotePawn(m.to, "rainha");
-                    if (moved.tipo === "♟" && m.to >= 56) this.promotePawn(m.to, "rainha");
-                }
-
-                this.aiTimerId = null;
-                this.currentTurn = "brancas";
-
-                if (this.validator.isKingInCheck("brancas")) {
-                    console.log("Xeque para brancas!");
-                    if (this.validator.isCheckmate("brancas")) {
-                        console.log("Xeque-mate! Pretas venceram!");
-                        this.gameOver = true;
-                        this.view.onGameOver({ winner: "pretas", reason: "checkmate" });
-                    }
-                }
-            }, 300);
-        }
-
-        return true;
-    }
+	movePiece(from, to) {
+		console.log(`Tentando mover peça de ${this.indexToNotation(from)} para ${this.indexToNotation(to)}...`);
+	
+		if (this.gameOver) {
+			console.log("O jogo acabou! Não é possível mover.");
+			return false;
+		}
+	
+		const piece = this.board.board[from];
+		if (!piece || piece.cor !== this.currentTurn) {
+			console.log(`Movimento inválido! A peça não pertence ao jogador ${this.currentTurn}.`);
+			return false;
+		}
+	
+		// Verificando movimentos válidos
+		const validMoves = this.validator.getPossibleMoves(from);
+		console.log(`Movimentos válidos para ${this.indexToNotation(from)}: ${validMoves}`);
+		if (!validMoves.includes(to)) {
+			console.log(`Movimento inválido de ${this.indexToNotation(from)} para ${this.indexToNotation(to)}.`);
+			return false;
+		}
+	
+		// Captura en passant (não usa mais índices)
+		if ((piece.tipo === "♙" || piece.tipo === "♟") && !this.board.board[to]) {
+			const epNotation = this.indexToNotation(this.validator.enPassantTarget);
+			const fromNotation = this.indexToNotation(from);
+			const toNotation = this.indexToNotation(to);
+	
+			// Verificando se a casa de destino está ao lado do peão adversário
+			if (Math.abs(toNotation.charCodeAt(0) - fromNotation.charCodeAt(0)) === 1 && this.validator.enPassantTarget !== null) {
+				if (epNotation === toNotation) {
+					this.board.board[this.validator.enPassantTarget] = null;  // Remove a peça capturada por en passant
+					console.log(`♙ Captura en passant em ${epNotation}`);
+				}
+			}
+		}
+	
+		// Movimentando a peça
+		this.board.movePiece(from, to);
+		console.log(`👤 Jogador: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`);
+	
+		// Atualizando enPassantTarget
+		this.validator.enPassantTarget = null;
+		if (piece.tipo === "♙" && Math.abs(from - to) === 16) {
+			// Define a casa que será possível para en passant
+			const toNotation = this.indexToNotation(to);
+			if (toNotation[1] === '4') this.validator.enPassantTarget = to;
+		}
+	
+		if (piece.tipo === "♟" && Math.abs(from - to) === 16) {
+			const toNotation = this.indexToNotation(to);
+			if (toNotation[1] === '5') this.validator.enPassantTarget = to;
+		}
+	
+		// Detectando roque
+		if (piece.tipo === "♔" || piece.tipo === "♚") {
+			const row = piece.cor === "brancas" ? 7 : 0;
+			if (to === row * 8 + 6) {
+				console.log("♔ Roque curto!");
+				this.board.movePiece(row * 8 + 7, row * 8 + 5);
+			}
+			if (to === row * 8 + 2) {
+				console.log("♔ Roque longo!");
+				this.board.movePiece(row * 8 + 0, row * 8 + 3);
+			}
+		}
+	
+		// Atualizando a View
+		this.view.lastMove = { from, to };
+		this.view.render();
+		
+		// Verificando promoção de peão
+		if ((piece.tipo === "♙" && to < 8) || (piece.tipo === "♟" && to >= 56)) {
+			console.log(`✨ Promoção detectada! Peão chegou em ${this.indexToNotation(to)}`);
+			this.pendingPromotionPos = to;
+			this.view.showPromotionModal(piece.cor, (simbolo) => {
+				this.promotePawn(this.pendingPromotionPos, simbolo);
+			});
+			return true;
+		}
+	
+		// Troca de turno
+		this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
+		console.log(`Turno trocado! Agora é a vez das ${this.currentTurn}.`);
+	
+		// Checando se o rei está em check/checkmate
+		this.logCheckState(this.currentTurn);
+		if (this.gameOver) return true;
+	
+		// Turno da IA
+		if (this.currentTurn === "pretas") {
+			if (this.aiTimerId) {
+				clearTimeout(this.aiTimerId);
+				this.aiTimerId = null;
+			}
+	
+			this.aiTimerId = setTimeout(() => {
+				if (this.gameOver) return;
+	
+				console.log("Turno da IA: processando movimento...");
+				const m = this.ai.makeMove("pretas");
+				if (m) {
+					this.view.lastMove = { from: m.from, to: m.to };
+					this.view.render();
+					this.view.highlightCell(m.to);
+					console.log(`♟️ IA: ${this.indexToNotation(m.from)} → ${this.indexToNotation(m.to)}`);
+	
+					// Promoção automática da IA
+					const moved = this.board.board[m.to];
+					if (moved.tipo === "♙" && m.to < 8) this.promotePawn(m.to, "rainha");
+					if (moved.tipo === "♟" && m.to >= 56) this.promotePawn(m.to, "rainha");
+				}
+	
+				this.aiTimerId = null;
+				this.currentTurn = "brancas";
+	
+				if (this.validator.isKingInCheck("brancas")) {
+					console.log("Xeque para brancas!");
+					if (this.validator.isCheckmate("brancas")) {
+						console.log("Xeque-mate! Pretas venceram!");
+						this.gameOver = true;
+						this.view.onGameOver({ winner: "pretas", reason: "checkmate" });
+					}
+				}
+			}, 300);
+		}
+	
+		return true;
+	}
 
     indexToNotation(i) {
         const files = "abcdefgh";
