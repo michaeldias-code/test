@@ -245,6 +245,9 @@ export class MoveValidator {
     // Movimento temporário seguro
     // ---------------------------------------
     wouldNotLeaveKingInCheck(from, to) {
+
+		if (!this.isValidPosition(from) || !this.isValidPosition(to)) return false;
+		
         const piece = this.board[from];
         const backupFrom = piece;
         const backupTo = this.board[to];
@@ -317,3 +320,4 @@ export class MoveValidator {
         return false;
     }
 }
+
