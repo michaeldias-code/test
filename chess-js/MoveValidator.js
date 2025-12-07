@@ -84,7 +84,7 @@ export class MoveValidator {
     // ---------------------------------------
 	rawMoves(pos) {
 		const piece = this.board[pos];
-		if (!piece) return [];	
+		if (!piece) return [];
 		const moves = [];
 		const r = this.row(pos);
 		const c = this.col(pos);
@@ -94,28 +94,27 @@ export class MoveValidator {
 			const tgt = this.board[to];
 			if (!tgt || tgt.cor !== piece.cor) {
 				moves.push(to);
-				console.log(`✔ Movimento válido de ${piece.tipo} em ${this.indexToNotation(pos)} → ${this.indexToNotation(to)} `);
+				console.log(`✔ Movimento válido de ${piece.tipo} em ${this.indexToNotation(pos)} → ${this.indexToNotation(to)}`);
 			} else {
-				console.log(`✖ Movimento bloqueado em ${this.indexToNotation(to)} `);
+				console.log(`✖ Movimento bloqueado em ${this.indexToNotation(to)}`);
 			}
 		};
 	
 		switch (piece.tipo) {
 			case "♙": // peão branco
 				console.log(`♙ Avaliando peão branco em ${this.indexToNotation(pos)}`);
-			
+	
 				// Avança 1 casa
 				if (r > 0 && !this.board[pos - 8]) add(pos - 8);
-			
+	
 				// Avança 2 casas do início
 				if (r === 6 && !this.board[pos - 8] && !this.board[pos - 16]) add(pos - 16);
-			
+	
 				// Captura normal
 				if (c > 0 && this.board[pos - 9] && this.board[pos - 9].cor === "pretas") add(pos - 9);
 				if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7);
-			
+	
 				// En passant
-				
 				console.log(`♙ Testando passant ${r} ${this.enPassantTarget !== null ? this.enPassantTarget : 'Nenhum alvo'} ${this.indexToNotation(pos)}`);
 				if (r === 3 && this.enPassantTarget !== null) {
 					const epNotation = this.indexToNotation(this.enPassantTarget);
@@ -128,20 +127,20 @@ export class MoveValidator {
 					}
 				}
 				break;
-			
+	
 			case "♟": // peão preto
 				console.log(`♟ Avaliando peão preto em ${this.indexToNotation(pos)}`);
-			
+	
 				// Avança 1 casa
 				if (r < 7 && !this.board[pos + 8]) add(pos + 8);
-			
+	
 				// Avança 2 casas do início
 				if (r === 1 && !this.board[pos + 8] && !this.board[pos + 16]) add(pos + 16);
-			
+	
 				// Captura normal
 				if (c < 7 && this.board[pos + 9] && this.board[pos + 9].cor === "brancas") add(pos + 9);
 				if (c > 0 && this.board[pos + 7] && this.board[pos + 7].cor === "brancas") add(pos + 7);
-			
+	
 				// En passant
 				if (r === 4 && this.enPassantTarget !== null) {
 					const epNotation = this.indexToNotation(this.enPassantTarget);
@@ -153,8 +152,7 @@ export class MoveValidator {
 						if (epNotation === this.indexToNotation(pos + 9)) moves.push(pos + 9);
 					}
 				}
-				break;
-				
+				break;				
 			case "♖": case "♜":
 				moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8]));
 				break;
@@ -326,4 +324,3 @@ export class MoveValidator {
         return false;
     }
 }
-
