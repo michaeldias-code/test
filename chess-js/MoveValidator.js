@@ -109,14 +109,42 @@ export class MoveValidator {
                 if (r === 6 && !this.board[pos - 8] && !this.board[pos - 16]) add(pos - 16);
                 if (c > 0 && this.board[pos - 9] && this.board[pos - 9].cor === "pretas") add(pos - 9);
                 if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7);
-                break;
+                
+				// En Passant: se o módulo estiver plugado, peça os alvos possíveis para este peão
+				try {
+					if (this.enPassant && typeof this.enPassant.getEnPassantTargetsForPawn === 'function') {
+						const epTargets = this.enPassant.getEnPassantTargetsForPawn(pos);
+						for (let t of epTargets) {
+							// segurança: apenas adicionar se a casa de destino estiver vazia (condição de en passant)
+							if (this.isValidPosition(t) && !this.board[t]) moves.push(t);
+						}
+					}
+				} catch (e) {
+					// não atrapalha o fluxo do jogo
+				}								
+				
+				break;
 
             case "♟": // peão preto
                 if (r < 7 && !this.board[pos + 8]) add(pos + 8);
                 if (r === 1 && !this.board[pos + 8] && !this.board[pos + 16]) add(pos + 16);
                 if (c < 7 && this.board[pos + 9] && this.board[pos + 9].cor === "brancas") add(pos + 9);
                 if (c > 0 && this.board[pos + 7] && this.board[pos + 7].cor === "brancas") add(pos + 7);
-                break;
+                
+				// En Passant: se o módulo estiver plugado, peça os alvos possíveis para este peão
+				try {
+					if (this.enPassant && typeof this.enPassant.getEnPassantTargetsForPawn === 'function') {
+						const epTargets = this.enPassant.getEnPassantTargetsForPawn(pos);
+						for (let t of epTargets) {
+							// segurança: apenas adicionar se a casa de destino estiver vazia (condição de en passant)
+							if (this.isValidPosition(t) && !this.board[t]) moves.push(t);
+						}
+					}
+				} catch (e) {
+					// não atrapalha o fluxo do jogo
+				}
+				
+				break;
 
             case "♖": case "♜":
                 moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8]));
@@ -289,4 +317,3 @@ export class MoveValidator {
         return false;
     }
 }
-
