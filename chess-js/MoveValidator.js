@@ -153,13 +153,44 @@ export class MoveValidator {
         const moves = this.rawMoves(pos);
         const res = [];
 
-        // Dentro do getPossibleMoves(pos)
-        if (piece.tipo === "♔" || piece.tipo === "♚") {
-            // roque curto
-            if (canCastleShort(piece.cor)) moves.push(shortCastlePos);
-            // roque longo
-            if (canCastleLong(piece.cor)) moves.push(longCastlePos);
-        }
+		// Supondo que `piece` seja o rei
+		if (piece.tipo === "♔" || piece.tipo === "♚") {
+			const color = piece.cor;
+			const row = color === "brancas" ? 7 : 0;
+
+			// Roque curto (lado do rei)
+			if (!piece.hasMoved) { // rei ainda não se moveu
+				const shortRook = this.board[row * 8 + 7]; // torre do lado do rei
+				if (shortRook && !shortRook.hasMoved) {
+					if (
+						!this.board[row * 8 + 5] &&
+						!this.board[row * 8 + 6] &&
+						!this.isCellAttacked(row * 8 + 4, color) &&
+						!this.isCellAttacked(row * 8 + 5, color) &&
+						!this.isCellAttacked(row * 8 + 6, color)
+					) {
+						moves.push(row * 8 + 6); // destino do rei no roque curto
+					}
+				}
+			}
+		
+			// Roque longo (lado da dama)
+			if (!piece.hasMoved) {
+				const longRook = this.board[row * 8 + 0]; // torre do lado da dama
+				if (longRook && !longRook.hasMoved) {
+					if (
+						!this.board[row * 8 + 1] &&
+						!this.board[row * 8 + 2] &&
+						!this.board[row * 8 + 3] &&
+						!this.isCellAttacked(row * 8 + 4, color) &&
+						!this.isCellAttacked(row * 8 + 3, color) &&
+						!this.isCellAttacked(row * 8 + 2, color)
+					) {
+						moves.push(row * 8 + 2); // destino do rei no roque longo
+					}
+				}
+			}
+		}
 
         for (let to of moves) {
             if (this.wouldNotLeaveKingInCheck(pos, to)) {
@@ -230,4 +261,3 @@ export class MoveValidator {
         return true;
     }
 }
-
