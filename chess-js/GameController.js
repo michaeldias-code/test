@@ -57,8 +57,8 @@ export class GameController {
 					`✨ Promoção detectada! Peão chegou em ${this.indexToNotation(to)}`
 				);
 				this.pendingPromotionPos = to;
-				this.view.showPromotionModal(piece.cor, (symbol) => {
-					this.promotePawn(this.pendingPromotionPos, symbol);
+				this.view.showPromotionModal(piece.cor, (simbolo) => {
+					this.promotePawn(this.pendingPromotionPos, simbolo);
 				});
 				console.log(
 					`🚀 Promoção concluída em ${this.indexToNotation(this.pendingPromotionPos)} para: ${simbolo}`
@@ -208,4 +208,3 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
-
