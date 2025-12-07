@@ -146,7 +146,7 @@ export class View {
                     const ok = this.controller.movePiece(this.selected, index);
                     if (ok) this.lastMove = { from: this.selected, to: index };
 
-					console.log(`Movimento registrado: de indexToNotation(${this.selected}) para indexToNotation(${index})`);
+					console.log(`Movimento registrado: de ${this.indexToNotation(this.selected)} para ${this.indexToNotation(index)}`);
                     this.selected = null;
                 }
             }
@@ -299,6 +299,7 @@ export class View {
         }
     }
 }
+
 
 
 
