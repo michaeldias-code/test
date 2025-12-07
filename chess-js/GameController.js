@@ -109,13 +109,13 @@ export class GameController {
 						`?? IA: ${this.indexToNotation(from)} ? ${this.indexToNotation(to)}`
 					);
 
-                    /* ?? PROMOÇÃO DE PEÃO PELA IA */
-                    const moved = this.board.board[m.to];
-					// IA promove automaticamente para rainha
-					if (moved.tipo === "?" && m.to < 8) {
+					/* 🔥 PROMOÇÃO DE PEÃO PELA IA (corrigido) */
+					const moved = this.board.board[m.to];
+					// IA promove automaticamente para rainha — usa símbolos reais
+					if (moved && moved.tipo === "♙" && m.to < 8) {
 						this.promotePawn(m.to, "rainha");
 					}
-					if (moved.tipo === "?" && m.to >= 56) {
+					if (moved && moved.tipo === "♟" && m.to >= 56) {
 						this.promotePawn(m.to, "rainha");
 					}
                 }
@@ -155,24 +155,26 @@ export class GameController {
 		const cor = piece.cor;
 	
 		const simboloParaNome = {
-			"?": "rainha", "?": "rainha",
-			"?": "torre",  "?": "torre",
-			"?": "bispo",  "?": "bispo",
-			"?": "cavalo", "?": "cavalo"
+			"♕": "rainha", "♛": "rainha",
+			"♖": "torre",  "♜": "torre",
+			"♗": "bispo",  "♝": "bispo",
+			"♘": "cavalo", "♞": "cavalo"
 		};
-	
+		
 		if (simboloParaNome[escolha]) {
 			escolha = simboloParaNome[escolha];
 		}
-	
+		
+		// Mapa final que coloca o símbolo correto no tabuleiro de acordo com a cor
 		const mapa = {
-			rainha: cor === "brancas" ? "?" : "?",
-			torre:  cor === "brancas" ? "?" : "?",
-			bispo:  cor === "brancas" ? "?" : "?",
-			cavalo: cor === "brancas" ? "?" : "?"
+			rainha: cor === "brancas" ? "♕" : "♛",
+			torre:  cor === "brancas" ? "♖" : "♜",
+			bispo:  cor === "brancas" ? "♗" : "♝",
+			cavalo: cor === "brancas" ? "♘" : "♞"
 		};
-	
+		
 		piece.tipo = mapa[escolha];
+
 	
 		console.log(
 			`?? Promoção concluída em ${this.indexToNotation(pos)} para: ${escolha}`
