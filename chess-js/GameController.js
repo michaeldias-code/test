@@ -85,12 +85,13 @@ export class GameController {
 	
 		// Atualizando enPassantTarget
 		this.validator.enPassantTarget = null;
+		console.log(`Antes do if: enPassantTarget = ${this.validator.enPassantTarget}, from = ${from}, to = ${to}, diferença = ${Math.abs(from - to)}`);
 		if (piece.tipo === "♙" && Math.abs(from - to) === 16) {
 			// Define a casa que será possível para en passant
 			const toNotation = this.indexToNotation(to);
 			if (toNotation[1] === '4') this.validator.enPassantTarget = to;
 		}
-	
+		console.log(`Depois do if: enPassantTarget = ${this.validator.enPassantTarget}`);
 		if (piece.tipo === "♟" && Math.abs(from - to) === 16) {
 			const toNotation = this.indexToNotation(to);
 			if (toNotation[1] === '5') this.validator.enPassantTarget = to;
@@ -266,3 +267,4 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
