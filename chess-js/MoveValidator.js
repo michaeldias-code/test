@@ -186,54 +186,57 @@ export class MoveValidator {
     // ---------------------------------------
     // FILTRO DE CHEQUE
     // ---------------------------------------
+    getPossibleMoves(pos) {
+        const piece = this.board[pos];
+        if (!piece) return [];
 
-	getPossibleMoves(pos) {
-		const piece = this.board[pos];
-		if (!piece) return [];
-	
-		let moves = this.rawMoves(pos);
-		const res = [];
-	
-		// Roque para o rei
-		if (piece.tipo === "♔" || piece.tipo === "♚") {
-			const color = piece.cor;
-			const row = color === "brancas" ? 7 : 0;
-	
-			// Roque curto
-			if (!piece.hasMoved) {
-				const shortRook = this.board[row*8 + 7];
-				if (shortRook && !shortRook.hasMoved) {
-					if (!this.board[row*8 + 5] && !this.board[row*8 + 6] &&
-						!this.isCellAttacked(row*8 + 4, color) &&
-						!this.isCellAttacked(row*8 + 5, color) &&
-						!this.isCellAttacked(row*8 + 6, color)) moves.push(row*8 + 6);
-				}
-			}
-	
-			// Roque longo
-			if (!piece.hasMoved) {
-				const longRook = this.board[row*8 + 0];
-				if (longRook && !longRook.hasMoved) {
-					if (!this.board[row*8 + 1] && !this.board[row*8 + 2] && !this.board[row*8 + 3] &&
-						!this.isCellAttacked(row*8 + 4, color) &&
-						!this.isCellAttacked(row*8 + 3, color) &&
-						!this.isCellAttacked(row*8 + 2, color)) moves.push(row*8 + 2);
-				}
-			}
-		}
-	
-		for (let to of moves) {
-			if (this.wouldNotLeaveKingInCheck(pos, to)) res.push(to);
-		}
-	
-		return res;
-	}
+        let moves = this.rawMoves(pos);
+        const res = [];
 
-	
-	
-	
-	
-	
+        // Roque para o rei
+        if (piece.tipo === "♔" || piece.tipo === "♚") {
+            const color = piece.cor;
+            const row = color === "brancas" ? 7 : 0;
+
+            // Roque curto
+            if (!piece.hasMoved) {
+                const shortRook = this.board[row*8 + 7];
+                if (shortRook && !shortRook.hasMoved) {
+                    if (
+                        !this.board[row*8 + 5] &&
+                        !this.board[row*8 + 6] &&
+                        !this.isCellAttacked(row*8 + 4, color) &&
+                        !this.isCellAttacked(row*8 + 5, color) &&
+                        !this.isCellAttacked(row*8 + 6, color)
+                    ) moves.push(row*8 + 6);
+                }
+            }
+
+            // Roque longo
+            if (!piece.hasMoved) {
+                const longRook = this.board[row*8 + 0];
+                if (longRook && !longRook.hasMoved) {
+                    if (
+                        !this.board[row*8 + 1] &&
+                        !this.board[row*8 + 2] &&
+                        !this.board[row*8 + 3] &&
+                        !this.isCellAttacked(row*8 + 4, color) &&
+                        !this.isCellAttacked(row*8 + 3, color) &&
+                        !this.isCellAttacked(row*8 + 2, color)
+                    ) moves.push(row*8 + 2);
+                }
+            }
+        }
+
+        for (let to of moves) {
+            if (this.wouldNotLeaveKingInCheck(pos, to)) {
+                res.push(to);
+            }
+        }
+
+        return res;
+    }
+
     // ---------------------------------------
     // Movimento temporário seguro
     // ---------------------------------------
