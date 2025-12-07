@@ -83,7 +83,7 @@ export class MoveValidator {
 		const r = this.row(pos);
 		const c = this.col(pos);
 	
-		const add = (to, reason) => {
+		const add = (to) => {
 			if (!this.isValidPosition(to)) return;
 			const tgt = this.board[to];
 			if (!tgt || tgt.cor !== piece.cor) {
@@ -96,14 +96,14 @@ export class MoveValidator {
 	
 		switch (piece.tipo) {
 			case "♙": // peão branco
-				console.log(`♙ Avaliando peão branco em ${this.indexToNotation(pos)}`);
-				// avanço normal
-				if (r > 0 && !this.board[pos - 8]) add(pos - 8, 'avançar 1');
-				// avanço duplo
-				if (r === 6 && !this.board[pos - 8] && !this.board[pos - 16]) add(pos - 16, 'avançar 2');
-				// capturas normais
-				if (c > 0 && this.board[pos - 9] && this.board[pos - 9].cor === "pretas") add(pos - 9, 'captura esquerda');
-				if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7, 'captura direita');
+				console.log(`♙ Avaliando peão branco em ${this.indexToNotation(pos)}`);			
+				// avança 1 casa
+				if (r > 0 && !this.board[pos - 8]) add(pos - 8);
+				// avança 2 casas do início
+				if (r === 6 && !this.board[pos - 8] && !this.board[pos - 16]) add(pos - 16);
+				// captura normal
+				if (c > 0 && this.board[pos - 9] && this.board[pos - 9].cor === "pretas") add(pos - 9);
+				if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7);
 				// en passant
 				if (r === 3) {
 					console.log(`♙ Checando en passant em ${this.indexToNotation(pos)}`);
@@ -120,10 +120,10 @@ export class MoveValidator {
 	
 			case "♟": // peão preto
 				console.log(`♟ Avaliando peão preto em ${this.indexToNotation(pos)}`);
-				if (r < 7 && !this.board[pos + 8]) add(pos + 8, 'avançar 1');
-				if (r === 1 && !this.board[pos + 8] && !this.board[pos + 16]) add(pos + 16, 'avançar 2');
-				if (c < 7 && this.board[pos + 9] && this.board[pos + 9].cor === "brancas") add(pos + 9, 'captura direita');
-				if (c > 0 && this.board[pos + 7] && this.board[pos + 7].cor === "brancas") add(pos + 7, 'captura esquerda');
+				if (r < 7 && !this.board[pos + 8]) add(pos + 8);
+				if (r === 1 && !this.board[pos + 8] && !this.board[pos + 16]) add(pos + 16);
+				if (c < 7 && this.board[pos + 9] && this.board[pos + 9].cor === "brancas") add(pos + 9);
+				if (c > 0 && this.board[pos + 7] && this.board[pos + 7].cor === "brancas") add(pos + 7);
 				if (r === 4) {
 					console.log(`♟ Checando en passant em ${this.indexToNotation(pos)}`);
 					if (c > 0 && this.enPassantTarget === pos - 1) {
@@ -137,7 +137,42 @@ export class MoveValidator {
 				}
 				break;
 	
-			// ... aqui entram as outras peças como antes (torre, bispo, etc.)
+			case "♖": case "♜":
+				moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8]));
+				break;
+	
+			case "♗": case "♝":
+				moves.push(...this.getSlidingMoves(pos, [-9,-7,7,9]));
+				break;
+	
+			case "♕": case "♛":
+				moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8,-9,-7,7,9]));
+				break;
+	
+			case "♘": case "♞":
+				const k = [-17,-15,-10,-6,6,10,15,17];
+				for (let off of k) {
+					let to = pos + off;
+					if (!this.isValidPosition(to)) continue;
+					if (Math.abs(this.row(to) - r) + Math.abs(this.col(to) - c) === 3) {
+						const tgt = this.board[to];
+						if (!tgt || tgt.cor !== piece.cor) moves.push(to);
+					}
+				}
+				break;
+	
+			case "♔": case "♚":
+				const ko = [-9,-8,-7,-1,1,7,8,9];
+				for (let off of ko) {
+					let to = pos + off;
+					if (!this.isValidPosition(to)) continue;
+					if (Math.abs(this.row(to) - r) <= 1 &&
+						Math.abs(this.col(to) - c) <= 1) {
+						const tgt = this.board[to];
+						if (!tgt || tgt.cor !== piece.cor) moves.push(to);
+					}
+				}
+				break;
 		}
 	
 		return moves;
