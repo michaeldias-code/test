@@ -252,29 +252,32 @@ export class GameController {
         }
     }
 
-    resetGame() {
-        console.log("Reiniciando o jogo...");
-
-        if (this.aiTimerId) {
-            clearTimeout(this.aiTimerId);
-            this.aiTimerId = null;
-        }
-
-        this.board = new Board();
-        this.validator = new MoveValidator(this.board.board);
-        this.ai = new AI(this.board, this.validator);
-
-        this.gameOver = false;
-        this.currentTurn = "brancas";
-        this.lastMove = null;
-
-        this.view.board = this.board;
-        this.view.selected = null;
-        this.view.lastMove = null;
-
-        this.view.render();
-        this.view.hidePromotionModal();
-
-        console.log("Jogo reiniciado!");
-    }
+	resetGame() {
+		console.log("Reiniciando o jogo...");
+		
+		if (this.aiTimerId) {
+			clearTimeout(this.aiTimerId);
+			this.aiTimerId = null;
+		}
+	
+		this.board = new Board();
+		this.validator = new MoveValidator(this.board.board);
+		this.ai = new AI(this.board, this.validator);
+	
+		// Resetando a lista de alvos de en passant
+		this.validator.enPassantTargets = []; 
+	
+		this.gameOver = false;
+		this.currentTurn = "brancas";
+		this.lastMove = null;
+	
+		this.view.board = this.board;
+		this.view.selected = null;
+		this.view.lastMove = null;
+	
+		this.view.render();
+		this.view.hidePromotionModal();
+	
+		console.log("Jogo reiniciado!");
+	}
 }
