@@ -115,6 +115,8 @@ export class MoveValidator {
 				if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7);
 			
 				// En passant
+				
+				console.log(`♙ Testando passant ${r} ${this.enPassantTarget !== null ? this.enPassantTarget : 'Nenhum alvo'} ${this.indexToNotation(pos)}`);
 				if (r === 3 && this.enPassantTarget !== null) {
 					const epNotation = this.indexToNotation(this.enPassantTarget);
 					const posNotation = this.indexToNotation(pos);
@@ -324,3 +326,4 @@ export class MoveValidator {
         return false;
     }
 }
+
