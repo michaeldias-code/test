@@ -67,16 +67,9 @@ export class GameController {
         // Troca turno
         this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
 
-        // Xeque / xeque-mate
-        if (this.validator.isKingInCheck(this.currentTurn)) {
-            console.log(`Xeque em ${this.currentTurn}!`);
-            if (this.validator.isCheckmate(this.currentTurn)) {
-                console.log(`Checkmate! ${piece.cor} venceu!`);
-                this.gameOver = true;
-                this.view.onGameOver({ winner: piece.cor, reason: "checkmate" });
-                return true;
-            }
-        }
+		// Loga estado de check/checkmate para o próximo jogador
+		this.logCheckState(this.currentTurn);
+		if (this.gameOver) return true;
 
         // Turno da IA
         if (this.currentTurn === "pretas") {
@@ -184,7 +177,22 @@ export class GameController {
 			}, 300);
 		}
 	}
-    
+	logCheckState(cor) {
+		if (this.validator.isKingInCheck(cor)) {
+			console.log(`⚠️ Check em ${cor}!`);
+	
+			if (this.validator.isCheckmate(cor)) {
+				console.log(`💀 Checkmate! ${cor === "brancas" ? "pretas" : "brancas"} venceu!`);
+				this.gameOver = true;
+				this.view.onGameOver({ 
+					winner: cor === "brancas" ? "pretas" : "brancas",
+					reason: "checkmate"
+				});
+			}
+		}
+	}
+
+	
     /* ---------------- Reset do jogo (inalterado exceto correções seguras) ---------------- */
     resetGame() {
         console.log("Reiniciando o jogo...");
