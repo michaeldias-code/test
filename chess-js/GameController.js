@@ -50,7 +50,33 @@ export class GameController {
         const validMoves = this.validator.getPossibleMoves(from);
         if (!validMoves.includes(to)) return false;
 
-        // Executa movimento
+        // Executa movimento DEPOIS DO ENPASSANT
+		
+		// Tentar aplicar en passant (se possível) — Regra de OURO: apenas faz se TODAS as condições estiverem corretas.
+		// Se applyEnPassantIfPossible retornar true, o movimento já foi aplicado pelo módulo.
+		// Caso contrário, prosseguimos com a movimentação normal.
+		let epApplied = false;
+		try {
+			if (this.enPassant && typeof this.enPassant.applyEnPassantIfPossible === 'function') {
+				epApplied = this.enPassant.applyEnPassantIfPossible(from, to, piece, this.board);
+			}
+		} catch (e) {
+			epApplied = false;
+		}
+		
+		if (!epApplied) {
+			// movimento normal (apenas se en passant não foi aplicado)
+			this.board.movePiece(from, to);
+		}
+		// registrar possível passo duplo para o módulo
+		try {
+			if (this.enPassant && typeof this.enPassant.registerDoubleStep === 'function') {
+				this.enPassant.registerDoubleStep(from, to, piece);
+			}
+		} catch (e) {
+			// ignore
+		}
+		
         this.board.movePiece(from, to);
 		
 		console.log(
@@ -254,4 +280,3 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
-
