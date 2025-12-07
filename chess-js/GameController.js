@@ -44,12 +44,12 @@ export class GameController {
 
 	movePiece(from, to) {
 		console.log(`Tentando mover peça de ${this.indexToNotation(from)} para ${this.indexToNotation(to)}...`);
-		
+	
 		if (this.gameOver) {
 			console.log("O jogo acabou! Não é possível mover.");
 			return false;
 		}
-		
+	
 		const piece = this.board.board[from];
 		if (!piece || piece.cor !== this.currentTurn) {
 			console.log(`Movimento inválido! A peça não pertence ao jogador ${this.currentTurn}.`);
@@ -63,44 +63,50 @@ export class GameController {
 			console.log(`Movimento inválido de ${this.indexToNotation(from)} para ${this.indexToNotation(to)}.`);
 			return false;
 		}
-		
-		// Captura en passant (não usa mais índices)
+	
+		// Captura en passant
 		if ((piece.tipo === "♙" || piece.tipo === "♟") && !this.board.board[to]) {
-			const epNotation = this.indexToNotation(this.validator.enPassantTarget);
 			const fromNotation = this.indexToNotation(from);
 			const toNotation = this.indexToNotation(to);
-		
-			// Verificando se a casa de destino está ao lado do peão adversário
-			if (Math.abs(toNotation.charCodeAt(0) - fromNotation.charCodeAt(0)) === 1 && this.validator.enPassantTarget !== null) {
-				if (epNotation === toNotation) {
-					this.board.board[this.validator.enPassantTarget] = null;  // Remove a peça capturada por en passant
-					console.log(`♙ Captura en passant em ${epNotation}`);
+			// Verificando se a casa de destino está ao lado do peão adversário e se é um alvo de en passant
+			for (let epTarget of this.validator.enPassantTargets) {
+				const epNotation = this.indexToNotation(epTarget.target);
+				if (Math.abs(toNotation.charCodeAt(0) - fromNotation.charCodeAt(0)) === 1 && epTarget.target === to) {
+					if (epTarget.color === piece.cor) {
+						this.board.board[epTarget.target] = null; // Remove a peça adversária
+						console.log(`♙ Captura en passant em ${epNotation}`);
+						break;
+					}
 				}
 			}
 		}
-		
+	
 		// Movimentando a peça
 		this.board.movePiece(from, to);
 		console.log(`👤 Jogador: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`);
 	
-		// Atualizando enPassantTarget
-		this.validator.enPassantTarget = null;
-		console.log(`Antes do if: enPassantTarget = ${this.validator.enPassantTarget}, from = ${from}, to = ${to}, diferença = ${Math.abs(from - to)}`);
-		
-		// Atualizando enPassantTarget após mover um peão
+		// Atualizando enPassantTargets após mover um peão
 		if (piece.tipo === "♙" && Math.abs(from - to) === 16) {
-			// Define a casa que será possível para en passant
-			if (to === 32) this.validator.enPassantTarget = to - 8; // Peão branco de e2 para e4
-			else if (to === 40) this.validator.enPassantTarget = to + 8; // Peão preto de d7 para d5
+			// Adiciona o alvo de en passant para o peão branco
+			if (to === 32) this.validator.enPassantTargets.push({ target: to - 8, color: 'pretas' });  // Peão branco de e2 para e4
+			else if (to === 40) this.validator.enPassantTargets.push({ target: to + 8, color: 'brancas' }); // Peão preto de d7 para d5
 		}
 	
 		if (piece.tipo === "♟" && Math.abs(from - to) === 16) {
-			// Define a casa que será possível para en passant
-			if (to === 48) this.validator.enPassantTarget = to + 8; // Peão preto de e7 para e5
-			else if (to === 24) this.validator.enPassantTarget = to - 8; // Peão branco de d2 para d4
+			// Adiciona o alvo de en passant para o peão preto
+			if (to === 48) this.validator.enPassantTargets.push({ target: to + 8, color: 'brancas' }); // Peão preto de e7 para e5
+			else if (to === 24) this.validator.enPassantTargets.push({ target: to - 8, color: 'pretas' }); // Peão branco de d2 para d4
 		}
-		
-		console.log(`Depois do if: enPassantTarget = ${this.validator.enPassantTarget}`);
+	
+		// Atualizando enPassantTarget para null após o movimento
+		this.validator.enPassantTargets = this.validator.enPassantTargets.filter(target => target.target !== to);
+	
+		// Troca de turno
+		this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
+		console.log(`Turno trocado! Agora é a vez das ${this.currentTurn}.`);
+	
+		return true;
+	}
 		
 		// Detectando roque
 		if (piece.tipo === "♔" || piece.tipo === "♚") {
