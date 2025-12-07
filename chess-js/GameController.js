@@ -1,3 +1,4 @@
+
 // GameController.js
 import { View } from './View.js?v=999';
 import { AI } from './AI.js?v=999';
@@ -39,7 +40,7 @@ export class GameController {
 	
 		// Executa movimento
 		this.board.movePiece(from, to);
-		
+	
 		console.log(
 			`👤 Jogador: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`
 		);
@@ -47,15 +48,15 @@ export class GameController {
 		// reset da en passant
 		this.validator.enPassantTarget = null;
 	
-		// Se o peão avançou 2 casas, marca a célula para en passant
+		// Se o peão avançou 2 casas, marca para en passant corretamente
 		if (piece.tipo === "♙" && from - to === 16) {
-			this.validator.enPassantTarget = to + 8; // posição por onde ele passou
+			this.validator.enPassantTarget = from - 8; // casa intermediária
 		}
 		if (piece.tipo === "♟" && to - from === 16) {
-			this.validator.enPassantTarget = to - 8;
+			this.validator.enPassantTarget = from + 8; // casa intermediária
 		}
 	
-		// Captura en passant
+		// Capturando en passant
 		if (piece.tipo === "♙" && from % 8 !== to % 8 && !this.board.board[to]) {
 			console.log(`♙ En passant! Capturando peão em ${this.indexToNotation(to + 8)}`);
 			this.board.board[to + 8] = null;
@@ -71,12 +72,12 @@ export class GameController {
 			// Roque curto
 			if (to === row * 8 + 6) {
 				console.log("♔ Roque curto!");
-				this.board.movePiece(row * 8 + 7, row * 8 + 5);
+				this.board.movePiece(row * 8 + 7, row * 8 + 5); // torre pula
 			}
 			// Roque longo
 			if (to === row * 8 + 2) {
 				console.log("♔ Roque longo!");
-				this.board.movePiece(row * 8 + 0, row * 8 + 3);
+				this.board.movePiece(row * 8 + 0, row * 8 + 3); // torre pula
 			}
 		}
 	
@@ -86,7 +87,9 @@ export class GameController {
 		// Promoção de peão
 		if (piece.tipo === "♙" || piece.tipo === "♟") {
 			if ((piece.cor === "brancas" && to < 8) || (piece.cor === "pretas" && to >= 56)) {
-				console.log(`✨ Promoção detectada! Peão chegou em ${this.indexToNotation(to)}`);
+				console.log(
+					`✨ Promoção detectada! Peão chegou em ${this.indexToNotation(to)}`
+				);
 				this.pendingPromotionPos = to;
 				this.view.showPromotionModal(piece.cor, (simbolo) => {
 					this.promotePawn(this.pendingPromotionPos, simbolo);
@@ -117,9 +120,11 @@ export class GameController {
 					this.view.lastMove = { from: m.from, to: m.to };
 					this.view.render();
 					this.view.highlightCell(m.to);
-					console.log(`♟️ IA: ${this.indexToNotation(m.from)} → ${this.indexToNotation(m.to)}`);
+					console.log(
+						`♟️ IA: ${this.indexToNotation(m.from)} → ${this.indexToNotation(m.to)}`
+					);
 	
-					// Promoção automática para rainha
+					// Promoção automática da IA
 					const moved = this.board.board[m.to];
 					if (moved.tipo === "♙" && m.to < 8) this.promotePawn(m.to, "rainha");
 					if (moved.tipo === "♟" && m.to >= 56) this.promotePawn(m.to, "rainha");
@@ -243,5 +248,3 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
-
-
