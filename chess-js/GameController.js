@@ -1,4 +1,4 @@
-// GameController.js
+// GameController.js - v1
 import { View } from './View.js?v=999';
 import { AI } from './AI.js?v=999';
 import { Board } from './Board.js?v=999';
@@ -208,3 +208,4 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
