@@ -3,7 +3,7 @@ export class MoveValidator {
 
     constructor(boardArray) {
         this.board = boardArray;
-        this.enPassantTarget = null; // posição do peão vulnerável ao en passant
+        this.enPassantTarget = = []; // posição do peão vulnerável ao en passant
         console.log("MoveValidator carregado!");
     }
 
@@ -322,3 +322,4 @@ export class MoveValidator {
         return false;
     }
 }
+
