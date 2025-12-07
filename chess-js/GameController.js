@@ -44,6 +44,23 @@ export class GameController {
 			`👤 Jogador: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`
 		);
 
+		
+		
+		// Detecta roque
+		if (piece.tipo === "♔" || piece.tipo === "♚") {
+			const row = piece.cor === "brancas" ? 7 : 0;
+			// Roque curto
+			if (to === row * 8 + 6) {
+				console.log("♔ Roque curto!");
+				this.board.movePiece(row * 8 + 7, row * 8 + 5); // torre pula
+			}
+			// Roque longo
+			if (to === row * 8 + 2) {
+				console.log("♔ Roque longo!");
+				this.board.movePiece(row * 8 + 0, row * 8 + 3); // torre pula
+			}
+		}
+		
         this.view.lastMove = { from, to };
         this.view.render();
 
