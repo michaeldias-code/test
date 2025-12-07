@@ -1,4 +1,4 @@
-// View.js — Versão atualizada e completa
+// View.js — Versão atualizada e completa - difficulty
 export class View {
     constructor(board, controller) {
         this.board = board;
@@ -301,6 +301,7 @@ export class View {
         }
     }
 }
+
 
 
 
