@@ -14,10 +14,17 @@ export class View {
             this.container.id = "chess-container";
             document.body.appendChild(this.container);
         }
-        this.difficultySelect.addEventListener("change", (e) => {
-            const difficulty = e.target.value;
-            this.controller.setDifficulty(difficulty);  // Atualiza a dificuldade no controlador
-        });
+		 // Seleção de dificuldade
+        this.difficultySelect = document.getElementById("difficulty");
+
+ 		if (this.difficultySelect) {
+            this.difficultySelect.addEventListener("change", (e) => {
+                const difficulty = e.target.value;
+                this.controller.setDifficulty(difficulty);  // Atualiza a dificuldade no controlador
+            });
+        } else {
+            console.error('Elemento de seleção de dificuldade não encontrado!');
+        }
 
         /* áreas */
         this.rankArea = document.createElement("div");
@@ -294,5 +301,6 @@ export class View {
         }
     }
 }
+
 
 
