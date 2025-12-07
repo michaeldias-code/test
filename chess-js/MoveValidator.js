@@ -116,20 +116,9 @@ export class MoveValidator {
 				if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7);
 			
 				// En passant
-				if (r === 3 && this.enPassantTarget) {
-					const ep = this.enPassantTarget;
-			
-					// Esquerda
-					if (c > 0 && ep.x === c - 1 && ep.y === r) {
-						moves.push(pos - 9);
-						console.log(`♙ En passant disponível à esquerda: ${this.indexToNotation(pos - 9)}`);
-					}
-			
-					// Direita
-					if (c < 7 && ep.x === c + 1 && ep.y === r) {
-						moves.push(pos - 7);
-						console.log(`♙ En passant disponível à direita: ${this.indexToNotation(pos - 7)}`);
-					}
+				if (r === 3 && this.enPassantTarget !== null) {
+					if (c > 0 && this.enPassantTarget === pos - 9) moves.push(pos - 9);
+					if (c < 7 && this.enPassantTarget === pos - 7) moves.push(pos - 7);
 				}
 				break;
 			
@@ -147,20 +136,9 @@ export class MoveValidator {
 				if (c > 0 && this.board[pos + 7] && this.board[pos + 7].cor === "brancas") add(pos + 7);
 			
 				// En passant
-				if (r === 4 && this.enPassantTarget) {
-					const ep = this.enPassantTarget;
-			
-					// Esquerda
-					if (c > 0 && ep.x === c - 1 && ep.y === r) {
-						moves.push(pos + 7);
-						console.log(`♟ En passant disponível à esquerda: ${this.indexToNotation(pos + 7)}`);
-					}
-			
-					// Direita
-					if (c < 7 && ep.x === c + 1 && ep.y === r) {
-						moves.push(pos + 9);
-						console.log(`♟ En passant disponível à direita: ${this.indexToNotation(pos + 9)}`);
-					}
+				if (r === 4 && this.enPassantTarget !== null) {
+					if (c > 0 && this.enPassantTarget === pos + 7) moves.push(pos + 7);
+					if (c < 7 && this.enPassantTarget === pos + 9) moves.push(pos + 9);
 				}
 				break;
 				
