@@ -502,8 +502,7 @@ export class MoveValidator {
             }
             lines.push(cols.join(' '));
         }
-        return lines.join('
-');
+        return lines.join(' ');
     }
 
     // ---------------------------------------
@@ -527,3 +526,4 @@ export class MoveValidator {
     }
 
 }
+
