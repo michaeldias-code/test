@@ -28,7 +28,7 @@ export class GameController {
         console.log("GameController carregado!");
     }
 
-	movePiece(from, to) {
+movePiece(from, to) {
 		if (this.gameOver) return false;
 	
 		const piece = this.board.board[from];
@@ -44,13 +44,18 @@ export class GameController {
 		console.log(`👤 Jogador: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`);
 	
 		// Captura en passant
-		if (piece.tipo === "♙" && from % 8 !== to % 8 && !this.board.board[to]) {
-			console.log(`♙ En passant! Capturando peão em ${this.indexToNotation(to + 8)}`);
-			this.board.board[to + 8] = null;
-		}
-		if (piece.tipo === "♟" && from % 8 !== to % 8 && !this.board.board[to]) {
-			console.log(`♟ En passant! Capturando peão em ${this.indexToNotation(to - 8)}`);
-			this.board.board[to - 8] = null;
+		if (piece.tipo === "♙") {
+			// Peão branco: se mover na diagonal e a casa de destino estiver vazia
+			if (from % 8 !== to % 8 && !this.board.board[to]) {
+				// Remove o peão preto que está "atrás" do destino
+				this.board.board[to + 8] = null;
+			}
+		} else if (piece.tipo === "♟") {
+			// Peão preto: se mover na diagonal e a casa de destino estiver vazia
+			if (from % 8 !== to % 8 && !this.board.board[to]) {
+				// Remove o peão branco que está "acima" do destino
+				this.board.board[to - 8] = null;
+			}
 		}
 	
 		// Reset e atualização de en passant
@@ -142,7 +147,8 @@ export class GameController {
 	
 		return true;
 	}
-	
+
+		
 	indexToNotation(i) {
     	const files = "abcdefgh";
     	const file = files[i % 8];
