@@ -105,6 +105,13 @@ export class View {
         }
     }
 
+	indexToNotation(pos) {
+    	const files = "abcdefgh";
+    	const file = files[pos % 8];
+    	const rank = 8 - Math.floor(pos / 8);
+    	return `${file}${rank}`;
+	}
+	
     /* ---------------- Destaque de movimento AI/último movimento ---------------- */
     highlightCell(index) {
         const prev = this.boardDiv.querySelector(".ai-move");
@@ -138,7 +145,8 @@ export class View {
                 } else {
                     const ok = this.controller.movePiece(this.selected, index);
                     if (ok) this.lastMove = { from: this.selected, to: index };
-					console.log(`Movimento registrado: de ${this.selected} para ${index}`);
+
+					console.log(`Movimento registrado: de indexToNotation(${this.selected}) para indexToNotation(${index})`);
                     this.selected = null;
                 }
             }
@@ -291,6 +299,7 @@ export class View {
         }
     }
 }
+
 
 
 
