@@ -9,6 +9,19 @@ export class GameController {
         console.log("GameController inicializando...");
 
         this.board = new Board();
+
+		// Tentar instanciar EnPassant sem quebrar se o módulo não estiver presente
+		try {
+    	// eslint-disable-next-line no-undef
+    		if (typeof EnPassant !== 'undefined') {
+        		this.enPassant = new EnPassant(this.board.board);
+    		} else {
+        		this.enPassant = null;
+    		}
+		} catch (e) {
+    		this.enPassant = null;
+		}
+		
         this.validator = new MoveValidator(this.board.board);
         this.ai = new AI(this.board, this.validator);
 
@@ -241,3 +254,4 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
