@@ -124,6 +124,19 @@ export class GameController {
 	
 		const cor = piece.cor;
 	
+		// Conversão de símbolo → nome
+		const simboloParaNome = {
+			"♕": "rainha", "♛": "rainha",
+			"♖": "torre",  "♜": "torre",
+			"♗": "bispo",  "♝": "bispo",
+			"♘": "cavalo", "♞": "cavalo"
+		};
+	
+		// se veio símbolo, converte para nome
+		if (simboloParaNome[escolha]) {
+			escolha = simboloParaNome[escolha];
+		}
+	
 		const mapa = {
 			rainha: cor === "brancas" ? "♕" : "♛",
 			torre:  cor === "brancas" ? "♖" : "♜",
@@ -131,17 +144,20 @@ export class GameController {
 			cavalo: cor === "brancas" ? "♘" : "♞"
 		};
 	
-		// 👉 Proteção contra escolha inválida
+		// proteção contra qualquer erro
 		if (!mapa[escolha]) {
 			console.error("Promoção inválida:", escolha);
 			return;
 		}
+	
 		piece.tipo = mapa[escolha];
 	
 		this.view.hidePromotionModal();
 		this.view.render();
 	
-		this.currentTurn = cor === "brancas" ? "pretas" : "brancas";
+		this.currentTurn = cor === "brancas"
+			? "pretas"
+			: "brancas";
 	}
     
     /* ---------------- Reset do jogo (inalterado exceto correções seguras) ---------------- */
