@@ -14,11 +14,6 @@ export class GameController {
 
         this.view = new View(this.board, this);
 
-		//seleção de dificuldade do jogo
-		this.difficulty = "normal";  // Dificuldade padrão
-        this.board = new Board();
-        this.view = new View(this.board, this);
-
         this.currentTurn = "brancas";
         this.gameOver = false;
         this.lastMove = null;
@@ -31,32 +26,6 @@ export class GameController {
 
         console.log("GameController carregado!");
     }
-
-	    // Configura a dificuldade
-    setDifficulty(difficulty) {
-        this.difficulty = difficulty;
-        console.log(`Dificuldade definida para: ${difficulty}`);
-        // Aqui você pode modificar o comportamento da IA de acordo com a dificuldade
-        this.adjustAI();
-    }
-
-    // Função que ajustaria a IA de acordo com a dificuldade
-    adjustAI() {
-        switch (this.difficulty) {
-            case "easy":
-                console.log("IA em modo fácil.");
-                break;
-            case "normal":
-                console.log("IA em modo normal.");
-                break;
-            case "hard":
-                console.log("IA em modo difícil.");
-                break;
-            default:
-                console.log("Dificuldade não reconhecida.");
-        }
-    }
-
 
     movePiece(from, to) {
         if (this.gameOver) return false;
@@ -268,4 +237,3 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
-
