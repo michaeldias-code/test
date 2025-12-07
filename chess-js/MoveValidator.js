@@ -150,16 +150,43 @@ export class MoveValidator {
 	* 
 	* @param {Object} move - O movimento que foi realizado.
 	*/
-	updateEnPassantList(move) {
-		const { from, to, piece } = move;
-
-		// Se for um peão e moveu duas casas, marca ele como apto para en passant
-		if (piece.tipo === "peao" && Math.abs(from - to) === 16) {
-			console.log(`Peão de ${piece.cor} de ${from} para ${to} pode ser capturado em en passant.`);
-			this.enPassantList.push(to);  // Adiciona à lista de peões aptos para captura en passant
+	updateEnPassant(from, to, piece) {
+		// Limpa movimentos antigos
+		this.enPassantList = [];
+	
+		// Apenas peões podem gerar en passant
+		if (piece.getType() !== '?' && piece.getType() !== '?') return;
+	
+		const fromRank = parseInt(from[1], 10);
+		const toRank = parseInt(to[1], 10);
+	
+		// Peão branco avançou duas casas
+		if (piece.isWhite() && fromRank === 2 && toRank === 4) {
+			const file = from[0];
+			this.enPassantList.push(file + '3'); // casa onde captura pode ocorrer
+		}
+		// Peão preto avançou duas casas
+		else if (piece.isBlack() && fromRank === 7 && toRank === 5) {
+			const file = from[0];
+			this.enPassantList.push(file + '6');
 		}
 	}
-    
+	// Verifica se o movimento é captura en passant
+	isEnPassant(from, to, piece) {
+		if (!piece) return false;
+		if (piece.getType() !== '?' && piece.getType() !== '?') return false;
+	
+		// Movimento diagonal de 1 casa
+		const fileDiff = Math.abs(from.charCodeAt(0) - to.charCodeAt(0));
+		const rankDiff = Math.abs(parseInt(from[1], 10) - parseInt(to[1], 10));
+	
+		if (fileDiff === 1 && rankDiff === 1) {
+			return this.enPassantList.includes(to); // verifica se a casa está na lista
+		}
+	
+		return false;
+	}
+
     // ---------------------------------------
     // MOVIMENTOS DE UMA PEÇA (SEM FILTRO DE XEQUE)
     // ---------------------------------------
@@ -178,42 +205,42 @@ export class MoveValidator {
         };
 
         switch (piece.tipo) {
-            case "♙": // peão branco
+            case "?": // peão branco
                 if (r > 0 && !this.board[pos - 8]) add(pos - 8);
                 if (r === 6 && !this.board[pos - 8] && !this.board[pos - 16]) add(pos - 16);
                 if (c > 0 && this.board[pos - 9] && this.board[pos - 9].cor === "pretas") add(pos - 9);
                 if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7);
                 
-				// ✅ LINHA NOVA: en passant
+				// ? LINHA NOVA: en passant
 			    if (this.enPassantList.includes(pos - 9)) moves.push(pos - 9);
     			if (this.enPassantList.includes(pos - 7)) moves.push(pos - 7);
 				break;
 				
-            case "♟": // peão preto
+            case "?": // peão preto
                 if (r < 7 && !this.board[pos + 8]) add(pos + 8);
                 if (r === 1 && !this.board[pos + 8] && !this.board[pos + 16]) add(pos + 16);
                 if (c < 7 && this.board[pos + 9] && this.board[pos + 9].cor === "brancas") add(pos + 9);
                 if (c > 0 && this.board[pos + 7] && this.board[pos + 7].cor === "brancas") add(pos + 7);
                 
-				// ✅ LINHA NOVA: en passant
+				// ? LINHA NOVA: en passant
     			if (this.enPassantList.includes(pos + 9)) moves.push(pos + 9);
     			if (this.enPassantList.includes(pos + 7)) moves.push(pos + 7);
 				
 				break;
 
-            case "♖": case "♜":
+            case "?": case "?":
                 moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8]));
                 break;
 
-            case "♗": case "♝":
+            case "?": case "?":
                 moves.push(...this.getSlidingMoves(pos, [-9,-7,7,9]));
                 break;
 
-            case "♕": case "♛":
+            case "?": case "?":
                 moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8,-9,-7,7,9]));
                 break;
 
-            case "♘": case "♞":
+            case "?": case "?":
                 const k = [-17,-15,-10,-6,6,10,15,17];
                 for (let off of k) {
                     let to = pos + off;
@@ -225,7 +252,7 @@ export class MoveValidator {
                 }
                 break;
 
-            case "♔": case "♚":
+            case "?": case "?":
                 const ko = [-9,-8,-7,-1,1,7,8,9];
                 for (let off of ko) {
                     let to = pos + off;
@@ -253,7 +280,7 @@ export class MoveValidator {
         const res = [];
 
         // Roque para o rei
-        if (piece.tipo === "♔" || piece.tipo === "♚") {
+        if (piece.tipo === "?" || piece.tipo === "?") {
             const color = piece.cor;
             const row = color === "brancas" ? 7 : 0;
 
@@ -321,8 +348,8 @@ export class MoveValidator {
     isKingInCheck(color) {
         const kingPos = this.board.findIndex(p =>
             p && (
-                (p.tipo === "♔" && p.cor === color) ||
-                (p.tipo === "♚" && p.cor === color)
+                (p.tipo === "?" && p.cor === color) ||
+                (p.tipo === "?" && p.cor === color)
             )
         );
         if (kingPos === -1) return false;
@@ -372,5 +399,4 @@ export class MoveValidator {
         return false;
     }
 }
-
 
