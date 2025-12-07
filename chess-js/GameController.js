@@ -106,7 +106,7 @@ export class GameController {
 		console.log(`Turno trocado! Agora é a vez das ${this.currentTurn}.`);
 	
 		return true;
-	}
+	
 		
 		// Detectando roque
 		if (piece.tipo === "♔" || piece.tipo === "♚") {
@@ -281,3 +281,4 @@ export class GameController {
 		console.log("Jogo reiniciado!");
 	}
 }
+
