@@ -183,14 +183,23 @@ export class MoveValidator {
                 if (r === 6 && !this.board[pos - 8] && !this.board[pos - 16]) add(pos - 16);
                 if (c > 0 && this.board[pos - 9] && this.board[pos - 9].cor === "pretas") add(pos - 9);
                 if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7);
-                break;
-
+                
+				// ✅ LINHA NOVA: en passant
+			    if (this.enPassantList.includes(pos - 9)) moves.push(pos - 9);
+    			if (this.enPassantList.includes(pos - 7)) moves.push(pos - 7);
+				break;
+				
             case "♟": // peão preto
                 if (r < 7 && !this.board[pos + 8]) add(pos + 8);
                 if (r === 1 && !this.board[pos + 8] && !this.board[pos + 16]) add(pos + 16);
                 if (c < 7 && this.board[pos + 9] && this.board[pos + 9].cor === "brancas") add(pos + 9);
                 if (c > 0 && this.board[pos + 7] && this.board[pos + 7].cor === "brancas") add(pos + 7);
-                break;
+                
+				// ✅ LINHA NOVA: en passant
+    			if (this.enPassantList.includes(pos + 9)) moves.push(pos + 9);
+    			if (this.enPassantList.includes(pos + 7)) moves.push(pos + 7);
+				
+				break;
 
             case "♖": case "♜":
                 moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8]));
@@ -363,4 +372,5 @@ export class MoveValidator {
         return false;
     }
 }
+
 
