@@ -153,6 +153,14 @@ export class MoveValidator {
         const moves = this.rawMoves(pos);
         const res = [];
 
+        // Dentro do getPossibleMoves(pos)
+        if (piece.tipo === "♔" || piece.tipo === "♚") {
+            // roque curto
+            if (canCastleShort(piece.cor)) moves.push(shortCastlePos);
+            // roque longo
+            if (canCastleLong(piece.cor)) moves.push(longCastlePos);
+        }
+
         for (let to of moves) {
             if (this.wouldNotLeaveKingInCheck(pos, to)) {
                 res.push(to);
@@ -222,3 +230,4 @@ export class MoveValidator {
         return true;
     }
 }
+
