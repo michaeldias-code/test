@@ -14,18 +14,18 @@ export class View {
             this.container.id = "chess-container";
             document.body.appendChild(this.container);
         }
-		 // Seleção de dificuldade
+		// Seleção de dificuldade (sem a necessidade de realmente alterar a IA por agora)
         this.difficultySelect = document.getElementById("difficulty");
 
- 		if (this.difficultySelect) {
+        if (this.difficultySelect) {
             this.difficultySelect.addEventListener("change", (e) => {
                 const difficulty = e.target.value;
-                this.controller.setDifficulty(difficulty);  // Atualiza a dificuldade no controlador
+                console.log(`Dificuldade selecionada: ${difficulty}`);
+                // Não estamos mais chamando a função `setDifficulty`, apenas exibindo no console
             });
         } else {
             console.error('Elemento de seleção de dificuldade não encontrado!');
         }
-
         /* áreas */
         this.rankArea = document.createElement("div");
         this.rankArea.id = "rank-area";
@@ -301,6 +301,7 @@ export class View {
         }
     }
 }
+
 
 
 
