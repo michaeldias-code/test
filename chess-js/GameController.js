@@ -23,8 +23,8 @@ export class GameController {
     		this.enPassant = null;
 		}
 		
-        this.validator = new MoveValidator(this.board.board);
-        this.ai = new AI(this.board, this.validator);
+        this.validator = new MoveValidator(this.board.board, this.enPassant);
+        this.ai = new AI(this.board, this.validator, this.enPassant);
 
         this.view = new View(this.board, this);
 
@@ -284,6 +284,7 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
+
 
 
 
