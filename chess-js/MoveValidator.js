@@ -1,4 +1,4 @@
-// MoveValidator.js
+// MoveValidator.js v10
 export class MoveValidator {
 
     constructor(boardArray) {
@@ -91,32 +91,32 @@ export class MoveValidator {
 	
 		switch (piece.tipo) {
 			case "♙": // peão branco
-				// andar 1 casa
+				// avança 1 casa
 				if (r > 0 && !this.board[pos - 8]) add(pos - 8);
-				// andar 2 casas
+				// avança 2 casas do início
 				if (r === 6 && !this.board[pos - 8] && !this.board[pos - 16]) add(pos - 16);
 				// captura normal
 				if (c > 0 && this.board[pos - 9] && this.board[pos - 9].cor === "pretas") add(pos - 9);
 				if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7);
 				// en passant
-				if (r === 3) { // linha 5
-					if (c > 0 && this.board[pos - 1] === this.enPassantTarget) moves.push(pos - 9);
-					if (c < 7 && this.board[pos + 1] === this.enPassantTarget) moves.push(pos - 7);
+				if (r === 3) { // linha 5 (0-indexed)
+					if (c > 0 && this.enPassantTarget === pos - 9) moves.push(pos - 9);
+					if (c < 7 && this.enPassantTarget === pos - 7) moves.push(pos - 7);
 				}
 				break;
 	
 			case "♟": // peão preto
-				// andar 1 casa
+				// avança 1 casa
 				if (r < 7 && !this.board[pos + 8]) add(pos + 8);
-				// andar 2 casas
+				// avança 2 casas do início
 				if (r === 1 && !this.board[pos + 8] && !this.board[pos + 16]) add(pos + 16);
 				// captura normal
 				if (c < 7 && this.board[pos + 9] && this.board[pos + 9].cor === "brancas") add(pos + 9);
 				if (c > 0 && this.board[pos + 7] && this.board[pos + 7].cor === "brancas") add(pos + 7);
 				// en passant
-				if (r === 4) { // linha 4
-					if (c > 0 && this.board[pos - 1] === this.enPassantTarget) moves.push(pos + 7);
-					if (c < 7 && this.board[pos + 1] === this.enPassantTarget) moves.push(pos + 9);
+				if (r === 4) { // linha 4 (0-indexed)
+					if (c > 0 && this.enPassantTarget === pos + 7) moves.push(pos + 7);
+					if (c < 7 && this.enPassantTarget === pos + 9) moves.push(pos + 9);
 				}
 				break;
 	
