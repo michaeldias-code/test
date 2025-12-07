@@ -103,47 +103,67 @@ export class MoveValidator {
 	
 		switch (piece.tipo) {
 			case "♙": // peão branco
-				console.log(`♙ Avaliando peão branco em ${this.indexToNotation(pos)}`);			
-				// avança 1 casa
+				console.log(`♙ Avaliando peão branco em ${this.indexToNotation(pos)}`);
+			
+				// Avança 1 casa
 				if (r > 0 && !this.board[pos - 8]) add(pos - 8);
-				// avança 2 casas do início
+			
+				// Avança 2 casas do início
 				if (r === 6 && !this.board[pos - 8] && !this.board[pos - 16]) add(pos - 16);
-				// captura normal
+			
+				// Captura normal
 				if (c > 0 && this.board[pos - 9] && this.board[pos - 9].cor === "pretas") add(pos - 9);
 				if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7);
-				// en passant
-				if (r === 3) {
-					console.log(`♙ Checando en passant em ${this.indexToNotation(pos)}`);
-					if (c > 0 && this.enPassantTarget === pos - 1) {
+			
+				// En passant
+				if (r === 3 && this.enPassantTarget) {
+					const ep = this.enPassantTarget;
+			
+					// Esquerda
+					if (c > 0 && ep.x === c - 1 && ep.y === r) {
 						moves.push(pos - 9);
 						console.log(`♙ En passant disponível à esquerda: ${this.indexToNotation(pos - 9)}`);
 					}
-					if (c < 7 && this.enPassantTarget === pos + 1) {
+			
+					// Direita
+					if (c < 7 && ep.x === c + 1 && ep.y === r) {
 						moves.push(pos - 7);
 						console.log(`♙ En passant disponível à direita: ${this.indexToNotation(pos - 7)}`);
 					}
 				}
 				break;
-	
+			
 			case "♟": // peão preto
 				console.log(`♟ Avaliando peão preto em ${this.indexToNotation(pos)}`);
+			
+				// Avança 1 casa
 				if (r < 7 && !this.board[pos + 8]) add(pos + 8);
+			
+				// Avança 2 casas do início
 				if (r === 1 && !this.board[pos + 8] && !this.board[pos + 16]) add(pos + 16);
+			
+				// Captura normal
 				if (c < 7 && this.board[pos + 9] && this.board[pos + 9].cor === "brancas") add(pos + 9);
 				if (c > 0 && this.board[pos + 7] && this.board[pos + 7].cor === "brancas") add(pos + 7);
-				if (r === 4) {
-					console.log(`♟ Checando en passant em ${this.indexToNotation(pos)}`);
-					if (c > 0 && this.enPassantTarget === pos - 1) {
+			
+				// En passant
+				if (r === 4 && this.enPassantTarget) {
+					const ep = this.enPassantTarget;
+			
+					// Esquerda
+					if (c > 0 && ep.x === c - 1 && ep.y === r) {
 						moves.push(pos + 7);
 						console.log(`♟ En passant disponível à esquerda: ${this.indexToNotation(pos + 7)}`);
 					}
-					if (c < 7 && this.enPassantTarget === pos + 1) {
+			
+					// Direita
+					if (c < 7 && ep.x === c + 1 && ep.y === r) {
 						moves.push(pos + 9);
 						console.log(`♟ En passant disponível à direita: ${this.indexToNotation(pos + 9)}`);
 					}
 				}
 				break;
-	
+				
 			case "♖": case "♜":
 				moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8]));
 				break;
