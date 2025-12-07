@@ -4,6 +4,7 @@ export class MoveValidator {
     constructor(boardArray) {
         this.board = boardArray;
         console.log("MoveValidator carregado!");
+        this.enPassantList = [];  // Lista de peões que podem fazer en passant
     }
 
     // ---------------------------------------
@@ -71,6 +72,94 @@ export class MoveValidator {
         return moves;
     }
 
+	/**
+	* Verifica se a jogada é válida para en passant e se a captura pode ser feita.
+	* 
+	* @param {Object} move - O movimento da peça, contendo as posições de origem e destino.
+	* @returns {Boolean} - Retorna verdadeiro se a jogada de en passant for válida.
+	*/
+	checkEnPassant(move) {
+		const { from, to, piece } = move;  // de onde a peça está indo e a peça em si
+		const direction = piece.cor === "brancas" ? 1 : -1;  // Direção do movimento: +1 para brancas, -1 para pretas
+		const oppositeDirection = piece.cor === "brancas" ? -1 : 1;  // Direção oposta (oponente)
+
+		// Log para entender o movimento
+		console.log(`Recebido movimento: ${piece.cor} ${piece.tipo} de ${from} para ${to}`);
+
+		// 1. Verifica se o movimento é válido para um peão
+		if (piece.tipo !== "peao") {
+			console.log("Movimento não é de peão, en passant não é possível.");
+			return false;  // Não é um peão, não há como realizar en passant
+		}
+
+		// 2. Verifica se o movimento foi para a captura em en passant
+		if (this.isEnPassantCapture(move)) {
+			console.log("Captura en passant detectada!");
+
+			// 3. Verifica se o peão está apto para a captura en passant
+			if (this.enPassantList.includes(to)) {
+				console.log(`Movimento de en passant válido: de ${from} para ${to}`);
+				return true;
+			} else {
+				console.log(`Captura en passant não permitida: peão não apto para captura.`);
+				return false;
+			}
+		}
+
+		// 4. Se não é captura en passant, retorna false
+		console.log("Movimento não é uma captura en passant.");
+		return false;
+	}
+
+	/**
+	* Verifica se o movimento é uma captura en passant.
+	* 
+	* @param {Object} move - O movimento que está sendo validado.
+	* @returns {Boolean} - Retorna verdadeiro se for uma captura en passant.
+	*/
+	isEnPassantCapture(move) {
+		const { from, to, piece } = move;
+		const direction = piece.cor === "brancas" ? 1 : -1;  // +1 para brancas, -1 para pretas
+		const oppositeDirection = piece.cor === "brancas" ? -1 : 1;  // Direção oposta (oponente)
+
+		// Log para acompanhar a verificação
+		console.log(`Verificando se ${piece.cor} pode capturar en passant de ${from} para ${to}`);
+
+		// 1. Verifica se a célula de destino está ocupada pelo peão inimigo
+		const targetPiece = this.board[to];
+		if (targetPiece && targetPiece.tipo === "peao" && targetPiece.cor !== piece.cor) {
+			// 2. Verifica se o movimento foi feito por um peão inimigo nas condições certas
+			const lastMove = this.board[this.lastMoveIndex];  // Pega o último movimento (para verificar a jogada de 2 casas)
+			if (lastMove && lastMove.piece.tipo === "peao" && lastMove.piece.cor !== piece.cor) {
+				const isTwoSquaresMove = Math.abs(lastMove.from - lastMove.to) === 16;  // Movimento de 2 casas
+				if (isTwoSquaresMove && Math.abs(from - to) === 1 && to === lastMove.to) {
+					// A célula do inimigo foi movida duas casas para a frente
+					console.log(`Captura en passant possível: ${piece.cor} peão de ${from} para ${to}`);
+					return true;
+				}
+			}
+		}
+
+		// Se não for uma captura en passant, retorna false
+		return false;
+	}
+
+	/**
+	* Atualiza a lista de peões aptos para en passant após um movimento.
+	* Esta função é chamada após cada movimento para adicionar ou remover peões da lista de en passant.
+	* 
+	* @param {Object} move - O movimento que foi realizado.
+	*/
+	updateEnPassantList(move) {
+		const { from, to, piece } = move;
+
+		// Se for um peão e moveu duas casas, marca ele como apto para en passant
+		if (piece.tipo === "peao" && Math.abs(from - to) === 16) {
+			console.log(`Peão de ${piece.cor} de ${from} para ${to} pode ser capturado em en passant.`);
+			this.enPassantList.push(to);  // Adiciona à lista de peões aptos para captura en passant
+		}
+	}
+    
     // ---------------------------------------
     // MOVIMENTOS DE UMA PEÇA (SEM FILTRO DE XEQUE)
     // ---------------------------------------
@@ -274,3 +363,4 @@ export class MoveValidator {
         return false;
     }
 }
+
