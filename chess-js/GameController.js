@@ -170,6 +170,19 @@ export class GameController {
 		this.view.render();
 	
 		this.currentTurn = cor === "brancas" ? "pretas" : "brancas";
+		// 🔥 Após a promoção, inicia turno da IA (se for vez das pretas)
+		if (this.currentTurn === "pretas" && !this.gameOver) {
+			setTimeout(() => {
+				const m = this.ai.makeMove("pretas");
+				if (m) {
+					this.view.lastMove = { from: m.from, to: m.to };
+					this.view.render();
+					this.view.highlightCell(m.to);
+					console.log(`♟️ IA: ${this.indexToNotation(m.from)} → ${this.indexToNotation(m.to)}`);
+				}
+				this.currentTurn = "brancas";
+			}, 300);
+		}
 	}
     
     /* ---------------- Reset do jogo (inalterado exceto correções seguras) ---------------- */
