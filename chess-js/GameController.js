@@ -44,10 +44,12 @@ export class GameController {
 			`?? Jogador: ${this.indexToNotation(from)} ? ${this.indexToNotation(to)}`
 		);
 
-		if (piece.tipo === "♙" || piece.tipo === "♟") {
+		if (piece.tipo === "?" || piece.tipo === "?") {
     		this.handleEnPassant(from, to, piece);       // captura en passant, se aplicável
     		this.validator.updateEnPassantList({ from, to, piece }); // atualiza lista de peões aptos
 		}		
+		
+		this.moveValidator.updateEnPassant(from, to, piece);
 		
 		// Detecta roque
 		if (piece.tipo === "?" || piece.tipo === "?") {
@@ -275,5 +277,4 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
-
 
