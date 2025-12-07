@@ -84,8 +84,7 @@ export class MoveValidator {
     // ---------------------------------------
 	rawMoves(pos) {
 		const piece = this.board[pos];
-		if (!piece) return [];
-	
+		if (!piece) return [];	
 		const moves = [];
 		const r = this.row(pos);
 		const c = this.col(pos);
@@ -117,8 +116,14 @@ export class MoveValidator {
 			
 				// En passant
 				if (r === 3 && this.enPassantTarget !== null) {
-					if (c > 0 && this.enPassantTarget === pos - 9) moves.push(pos - 9);
-					if (c < 7 && this.enPassantTarget === pos - 7) moves.push(pos - 7);
+					const epNotation = this.indexToNotation(this.enPassantTarget);
+					const posNotation = this.indexToNotation(pos);
+	
+					// Verificando se a casa de destino está ao lado do peão adversário
+					if (Math.abs(posNotation.charCodeAt(0) - epNotation.charCodeAt(0)) === 1) {
+						if (epNotation === this.indexToNotation(pos - 9)) moves.push(pos - 9);
+						if (epNotation === this.indexToNotation(pos - 7)) moves.push(pos - 7);
+					}
 				}
 				break;
 			
@@ -137,8 +142,14 @@ export class MoveValidator {
 			
 				// En passant
 				if (r === 4 && this.enPassantTarget !== null) {
-					if (c > 0 && this.enPassantTarget === pos + 7) moves.push(pos + 7);
-					if (c < 7 && this.enPassantTarget === pos + 9) moves.push(pos + 9);
+					const epNotation = this.indexToNotation(this.enPassantTarget);
+					const posNotation = this.indexToNotation(pos);
+	
+					// Verificando se a casa de destino está ao lado do peão adversário
+					if (Math.abs(posNotation.charCodeAt(0) - epNotation.charCodeAt(0)) === 1) {
+						if (epNotation === this.indexToNotation(pos + 7)) moves.push(pos + 7);
+						if (epNotation === this.indexToNotation(pos + 9)) moves.push(pos + 9);
+					}
 				}
 				break;
 				
