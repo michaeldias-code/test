@@ -94,9 +94,9 @@ export class MoveValidator {
 			const tgt = this.board[to];
 			if (!tgt || tgt.cor !== piece.cor) {
 				moves.push(to);
-				console.log(`✔ Movimento válido de ${piece.tipo} em ${this.indexToNotation(pos)} → ${this.indexToNotation(to)}`);
+				console.log(`✔ Movimento válido de ${piece.tipo} em ${this.indexToNotation(pos)} → ${this.indexToNotation(to)} `);
 			} else {
-				console.log(`✖ Movimento bloqueado em ${this.indexToNotation(to)}`);
+				console.log(`✖ Movimento bloqueado em ${this.indexToNotation(to)} `);
 			}
 		};
 	
@@ -115,15 +115,14 @@ export class MoveValidator {
 				if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7);
 	
 				// En passant
-				console.log(`♙ Testando passant ${r} ${this.enPassantTarget !== null ? this.enPassantTarget : 'Nenhum alvo'} ${this.indexToNotation(pos)}`);
-				if (r === 3 && this.enPassantTarget !== null) {
-					const epNotation = this.indexToNotation(this.enPassantTarget);
-					const posNotation = this.indexToNotation(pos);
-	
-					// Verificando se a casa de destino está ao lado do peão adversário
-					if (Math.abs(posNotation.charCodeAt(0) - epNotation.charCodeAt(0)) === 1) {
-						if (epNotation === this.indexToNotation(pos - 9)) moves.push(pos - 9);
-						if (epNotation === this.indexToNotation(pos - 7)) moves.push(pos - 7);
+				console.log(`♙ Testando passant ${r} ${this.enPassantTargets.length ? this.enPassantTargets : 'Nenhum alvo'}`);
+				if (r === 3) {
+					for (let epTarget of this.enPassantTargets) {
+						const epNotation = this.indexToNotation(epTarget.target);
+						if (Math.abs(this.indexToNotation(pos).charCodeAt(0) - epNotation.charCodeAt(0)) === 1) {
+							if (epNotation === this.indexToNotation(pos - 9)) moves.push(pos - 9);
+							if (epNotation === this.indexToNotation(pos - 7)) moves.push(pos - 7);
+						}
 					}
 				}
 				break;
@@ -142,17 +141,16 @@ export class MoveValidator {
 				if (c > 0 && this.board[pos + 7] && this.board[pos + 7].cor === "brancas") add(pos + 7);
 	
 				// En passant
-				if (r === 4 && this.enPassantTarget !== null) {
-					const epNotation = this.indexToNotation(this.enPassantTarget);
-					const posNotation = this.indexToNotation(pos);
-	
-					// Verificando se a casa de destino está ao lado do peão adversário
-					if (Math.abs(posNotation.charCodeAt(0) - epNotation.charCodeAt(0)) === 1) {
-						if (epNotation === this.indexToNotation(pos + 7)) moves.push(pos + 7);
-						if (epNotation === this.indexToNotation(pos + 9)) moves.push(pos + 9);
+				if (r === 4) {
+					for (let epTarget of this.enPassantTargets) {
+						const epNotation = this.indexToNotation(epTarget.target);
+						if (Math.abs(this.indexToNotation(pos).charCodeAt(0) - epNotation.charCodeAt(0)) === 1) {
+							if (epNotation === this.indexToNotation(pos + 7)) moves.push(pos + 7);
+							if (epNotation === this.indexToNotation(pos + 9)) moves.push(pos + 9);
+						}
 					}
 				}
-				break;				
+				break;
 			case "♖": case "♜":
 				moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8]));
 				break;
