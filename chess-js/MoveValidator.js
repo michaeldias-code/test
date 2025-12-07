@@ -1,256 +1,276 @@
-// GameController.js
-import { View } from './View.js?v=999';
-import { AI } from './AI.js?v=999';
-import { Board } from './Board.js?v=999';
-import { MoveValidator } from './MoveValidator.js?v=999';
+// MoveValidator.js
+export class MoveValidator {
 
-export class GameController {
-    constructor() {
-        console.log("GameController inicializando...");
-
-        this.board = new Board();
-        this.validator = new MoveValidator(this.board.board);
-        this.ai = new AI(this.board, this.validator);
-
-        this.view = new View(this.board, this);
-
-        this.currentTurn = "brancas";
-        this.gameOver = false;
-        this.lastMove = null;
-
-        this.aiTimerId = null;
-
-        this.view.setupRestartButton(() => {
-            this.resetGame();
-        });
-
-        console.log("GameController carregado!");
+    constructor(boardArray) {
+        this.board = boardArray;
+        console.log("MoveValidator carregado!");
     }
 
-    movePiece(from, to) {
-        if (this.gameOver) return false;
+    // ---------------------------------------
+    // Regras básicas
+    // ---------------------------------------
+    isValidPosition(pos) {
+        return pos >= 0 && pos < 64;
+    }
 
-        const piece = this.board.board[from];
-        if (!piece) return false;
-        if (piece.cor !== this.currentTurn) return false;
+    row(pos) { return Math.floor(pos / 8); }
+    col(pos) { return pos % 8; }
 
-        const validMoves = this.validator.getPossibleMoves(from);
-        if (!validMoves.includes(to)) return false;
+    sameRow(a, b) { return this.row(a) === this.row(b); }
+    sameCol(a, b) { return this.col(a) === this.col(b); }
 
-        // Executa movimento
-        this.board.movePiece(from, to);
-		
-		console.log(
-			`👤 Jogador: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`
-		);
+    // ---------------------------------------
+    // CHECA SE MOVIMENTO DESLIZANTE QUEBRA BORDAS
+    // ---------------------------------------
+    slidingStepOk(start, next, offset) {
+        const sr = this.row(start);
+        const sc = this.col(start);
+        const nr = this.row(next);
+        const nc = this.col(next);
 
-		
-		
-		// Detecta roque
-		if (piece.tipo === "♔" || piece.tipo === "♚") {
-			const row = piece.cor === "brancas" ? 7 : 0;
-			// Roque curto
-			if (to === row * 8 + 6) {
-				console.log("♔ Roque curto!");
-				this.board.movePiece(row * 8 + 7, row * 8 + 5); // torre pula
-			}
-			// Roque longo
-			if (to === row * 8 + 2) {
-				console.log("♔ Roque longo!");
-				this.board.movePiece(row * 8 + 0, row * 8 + 3); // torre pula
-			}
-		}
-		
-        this.view.lastMove = { from, to };
-        this.view.render();
+        switch (offset) {
+            case -1: return nr === sr && nc === sc - 1;
+            case 1: return nr === sr && nc === sc + 1;
 
-        /* ------------------------------------------------------------------
-           🔥 DETECÇÃO DE PROMOÇÃO DE PEÃO (SEM ALTERAR SUA LÓGICA EXISTENTE)
-        ------------------------------------------------------------------ */
-        if (piece.tipo === "♙" || piece.tipo === "♟") {
-            if ((piece.cor === "brancas" && to < 8) || (piece.cor === "pretas" && to >= 56)) {            
-                // É AQUI QUE VOCÊ COLOCA AS 3 LINHAS
-				console.log(
-					`✨ Promoção detectada! Peão chegou em ${this.indexToNotation(to)}`
-				);
-				this.pendingPromotionPos = to;
-				this.view.showPromotionModal(piece.cor, (simbolo) => {
-					this.promotePawn(this.pendingPromotionPos, simbolo);
-				});
+            case -8: return nc === sc && nr === sr - 1;
+            case 8: return nc === sc && nr === sr + 1;
 
-				return true;
+            case -9: return (nr === sr - 1) && (nc === sc - 1);
+            case -7: return (nr === sr - 1) && (nc === sc + 1);
+            case 7: return (nr === sr + 1) && (nc === sc - 1);
+            case 9: return (nr === sr + 1) && (nc === sc + 1);
+
+            default: return false;
+        }
+    }
+
+    // ---------------------------------------
+    // MOVIMENTOS DESLIZANTES
+    // ---------------------------------------
+    getSlidingMoves(pos, directions) {
+        const moves = [];
+        const piece = this.board[pos];
+
+        for (let d of directions) {
+            let p = pos + d;
+
+            while (this.isValidPosition(p) && this.slidingStepOk(p - d, p, d)) {
+                const target = this.board[p];
+
+                if (!target) {
+                    moves.push(p);
+                } else {
+                    if (target.cor !== piece.cor) moves.push(p);
+                    break;
+                }
+
+                p += d;
             }
         }
-        // Troca turno
-        this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
 
-		// Loga estado de check/checkmate para o próximo jogador
-		this.logCheckState(this.currentTurn);
-		if (this.gameOver) return true;
+        return moves;
+    }
 
-        // Turno da IA
-        if (this.currentTurn === "pretas") {
-            if (this.aiTimerId) {
-                clearTimeout(this.aiTimerId);
-                this.aiTimerId = null;
-            }
+    // ---------------------------------------
+    // MOVIMENTOS DE UMA PEÇA (SEM FILTRO DE XEQUE)
+    // ---------------------------------------
+    rawMoves(pos) {
+        const piece = this.board[pos];
+        if (!piece) return [];
 
-            this.aiTimerId = setTimeout(() => {
-                if (this.gameOver) return;
+        const moves = [];
+        const r = this.row(pos);
+        const c = this.col(pos);
 
-                const m = this.ai.makeMove("pretas");
-                if (m) {
-                    this.view.lastMove = { from: m.from, to: m.to };
-                    this.view.render();
-                    this.view.highlightCell(m.to);
-					console.log(
-						`♟️ IA: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`
-					);
+        const add = (to) => {
+            if (!this.isValidPosition(to)) return;
+            const tgt = this.board[to];
+            if (!tgt || tgt.cor !== piece.cor) moves.push(to);
+        };
 
-                    /* 🔥 PROMOÇÃO DE PEÃO PELA IA */
-                    const moved = this.board.board[m.to];
-					// IA promove automaticamente para rainha
-					if (moved.tipo === "♙" && m.to < 8) {
-						this.promotePawn(m.to, "rainha");
-					}
-					if (moved.tipo === "♟" && m.to >= 56) {
-						this.promotePawn(m.to, "rainha");
-					}
-                }
+        switch (piece.tipo) {
+            case "♙": // peão branco
+                if (r > 0 && !this.board[pos - 8]) add(pos - 8);
+                if (r === 6 && !this.board[pos - 8] && !this.board[pos - 16]) add(pos - 16);
+                if (c > 0 && this.board[pos - 9] && this.board[pos - 9].cor === "pretas") add(pos - 9);
+                if (c < 7 && this.board[pos - 7] && this.board[pos - 7].cor === "pretas") add(pos - 7);
+                break;
 
-                this.aiTimerId = null;
+            case "♟": // peão preto
+                if (r < 7 && !this.board[pos + 8]) add(pos + 8);
+                if (r === 1 && !this.board[pos + 8] && !this.board[pos + 16]) add(pos + 16);
+                if (c < 7 && this.board[pos + 9] && this.board[pos + 9].cor === "brancas") add(pos + 9);
+                if (c > 0 && this.board[pos + 7] && this.board[pos + 7].cor === "brancas") add(pos + 7);
+                break;
 
-                this.currentTurn = "brancas";
+            case "♖": case "♜":
+                moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8]));
+                break;
 
-                if (this.validator.isKingInCheck("brancas")) {
-                    console.log("Xeque para brancas!");
-                    if (this.validator.isCheckmate("brancas")) {
-                        console.log("Xeque-mate! Pretas venceram!");
-                        this.gameOver = true;
-                        this.view.onGameOver({ winner: "pretas", reason: "checkmate" });
+            case "♗": case "♝":
+                moves.push(...this.getSlidingMoves(pos, [-9,-7,7,9]));
+                break;
+
+            case "♕": case "♛":
+                moves.push(...this.getSlidingMoves(pos, [-1,1,-8,8,-9,-7,7,9]));
+                break;
+
+            case "♘": case "♞":
+                const k = [-17,-15,-10,-6,6,10,15,17];
+                for (let off of k) {
+                    let to = pos + off;
+                    if (!this.isValidPosition(to)) continue;
+                    if (Math.abs(this.row(to) - r) + Math.abs(this.col(to) - c) === 3) {
+                        const tgt = this.board[to];
+                        if (!tgt || tgt.cor !== piece.cor) moves.push(to);
                     }
                 }
-            }, 300);
+                break;
+
+            case "♔": case "♚":
+                const ko = [-9,-8,-7,-1,1,7,8,9];
+                for (let off of ko) {
+                    let to = pos + off;
+                    if (!this.isValidPosition(to)) continue;
+                    if (Math.abs(this.row(to) - r) <= 1 &&
+                        Math.abs(this.col(to) - c) <= 1) {
+                        const tgt = this.board[to];
+                        if (!tgt || tgt.cor !== piece.cor) moves.push(to);
+                    }
+                }
+                break;
+        }
+
+        return moves;
+    }
+
+    // ---------------------------------------
+    // FILTRO DE CHEQUE
+    // ---------------------------------------
+    getPossibleMoves(pos) {
+        const piece = this.board[pos];
+        if (!piece) return [];
+
+        let moves = this.rawMoves(pos);
+        const res = [];
+
+        // Roque para o rei
+        if (piece.tipo === "♔" || piece.tipo === "♚") {
+            const color = piece.cor;
+            const row = color === "brancas" ? 7 : 0;
+
+            // Roque curto
+            if (!piece.hasMoved) {
+                const shortRook = this.board[row*8 + 7];
+                if (shortRook && !shortRook.hasMoved) {
+                    if (
+                        !this.board[row*8 + 5] &&
+                        !this.board[row*8 + 6] &&
+                        !this.isCellAttacked(row*8 + 4, color) &&
+                        !this.isCellAttacked(row*8 + 5, color) &&
+                        !this.isCellAttacked(row*8 + 6, color)
+                    ) moves.push(row*8 + 6);
+                }
+            }
+
+            // Roque longo
+            if (!piece.hasMoved) {
+                const longRook = this.board[row*8 + 0];
+                if (longRook && !longRook.hasMoved) {
+                    if (
+                        !this.board[row*8 + 1] &&
+                        !this.board[row*8 + 2] &&
+                        !this.board[row*8 + 3] &&
+                        !this.isCellAttacked(row*8 + 4, color) &&
+                        !this.isCellAttacked(row*8 + 3, color) &&
+                        !this.isCellAttacked(row*8 + 2, color)
+                    ) moves.push(row*8 + 2);
+                }
+            }
+        }
+
+        for (let to of moves) {
+            if (this.wouldNotLeaveKingInCheck(pos, to)) {
+                res.push(to);
+            }
+        }
+
+        return res;
+    }
+
+    // ---------------------------------------
+    // Movimento temporário seguro
+    // ---------------------------------------
+    wouldNotLeaveKingInCheck(from, to) {
+        const piece = this.board[from];
+        const backupFrom = piece;
+        const backupTo = this.board[to];
+
+        this.board[to] = piece;
+        this.board[from] = null;
+
+        const safe = !this.isKingInCheck(piece.cor);
+
+        this.board[from] = backupFrom;
+        this.board[to] = backupTo;
+
+        return safe;
+    }
+
+    // ---------------------------------------
+    // CHEQUE
+    // ---------------------------------------
+    isKingInCheck(color) {
+        const kingPos = this.board.findIndex(p =>
+            p && (
+                (p.tipo === "♔" && p.cor === color) ||
+                (p.tipo === "♚" && p.cor === color)
+            )
+        );
+        if (kingPos === -1) return false;
+
+        for (let i = 0; i < 64; i++) {
+            const p = this.board[i];
+            if (!p || p.cor === color) continue;
+
+            const moves = this.rawMoves(i);
+            if (moves.includes(kingPos)) return true;
+        }
+
+        return false;
+    }
+
+    // ---------------------------------------
+    // CHEQUE-MATE
+    // ---------------------------------------
+    isCheckmate(color) {
+        if (!this.isKingInCheck(color)) return false;
+
+        for (let i = 0; i < 64; i++) {
+            const p = this.board[i];
+            if (p && p.cor === color) {
+                const moves = this.getPossibleMoves(i);
+                if (moves.length > 0) return false;
+            }
         }
 
         return true;
     }
 
-	// ---------------------------------------
-	// CHECA SE UMA CASA É ATACADA PELO ADVERSÁRIO
-	// ---------------------------------------
-	isCellAttacked(pos, color) {
-		const enemyColor = color === "brancas" ? "pretas" : "brancas";
-	
-		for (let i = 0; i < 64; i++) {
-			const p = this.board[i];
-			if (!p || p.cor !== enemyColor) continue;
-	
-			const moves = this.rawMoves(i);
-			if (moves.includes(pos)) return true;
-		}
-	
-		return false;
-	}
+    // ---------------------------------------
+    // CASA ATACADA
+    // ---------------------------------------
+    isCellAttacked(pos, color) {
+        const enemyColor = color === "brancas" ? "pretas" : "brancas";
 
-	indexToNotation(i) {
-    	const files = "abcdefgh";
-    	const file = files[i % 8];
-    	const rank = 8 - Math.floor(i / 8);
-    	return `${file}${rank}`;
-	}
+        for (let i = 0; i < 64; i++) {
+            const p = this.board[i];
+            if (!p || p.cor !== enemyColor) continue;
 
-    /* ------------------------------------------------------
-       🔥 MÉTODO NOVO — executa a promoção após escolha do modal
-    ------------------------------------------------------ */
-	promotePawn(pos, escolha) {
-		const piece = this.board.board[pos];
-		if (!piece) return;
-	
-		const cor = piece.cor;
-	
-		const simboloParaNome = {
-			"♕": "rainha", "♛": "rainha",
-			"♖": "torre",  "♜": "torre",
-			"♗": "bispo",  "♝": "bispo",
-			"♘": "cavalo", "♞": "cavalo"
-		};
-	
-		if (simboloParaNome[escolha]) {
-			escolha = simboloParaNome[escolha];
-		}
-	
-		const mapa = {
-			rainha: cor === "brancas" ? "♕" : "♛",
-			torre:  cor === "brancas" ? "♖" : "♜",
-			bispo:  cor === "brancas" ? "♗" : "♝",
-			cavalo: cor === "brancas" ? "♘" : "♞"
-		};
-	
-		piece.tipo = mapa[escolha];
-	
-		console.log(
-			`🚀 Promoção concluída em ${this.indexToNotation(pos)} para: ${escolha}`
-		);
-	
-		this.view.hidePromotionModal();
-		this.view.render();
-	
-		this.currentTurn = cor === "brancas" ? "pretas" : "brancas";
-		// 🔥 Após a promoção, inicia turno da IA (se for vez das pretas)
-		if (this.currentTurn === "pretas" && !this.gameOver) {
-			setTimeout(() => {
-				const m = this.ai.makeMove("pretas");
-				if (m) {
-					this.view.lastMove = { from: m.from, to: m.to };
-					this.view.render();
-					this.view.highlightCell(m.to);
-					console.log(`♟️ IA: ${this.indexToNotation(m.from)} → ${this.indexToNotation(m.to)}`);
-				}
-				this.currentTurn = "brancas";
-			}, 300);
-		}
-	}
-	logCheckState(cor) {
-		if (this.validator.isKingInCheck(cor)) {
-			console.log(`⚠️ Check em ${cor}!`);
-	
-			if (this.validator.isCheckmate(cor)) {
-				console.log(`💀 Checkmate! ${cor === "brancas" ? "pretas" : "brancas"} venceu!`);
-				this.gameOver = true;
-				this.view.onGameOver({ 
-					winner: cor === "brancas" ? "pretas" : "brancas",
-					reason: "checkmate"
-				});
-			}
-		}
-	}
-
-	
-    /* ---------------- Reset do jogo (inalterado exceto correções seguras) ---------------- */
-    resetGame() {
-        console.log("Reiniciando o jogo...");
-
-        if (this.aiTimerId) {
-            clearTimeout(this.aiTimerId);
-            this.aiTimerId = null;
+            const moves = this.rawMoves(i);
+            if (moves.includes(pos)) return true;
         }
 
-        this.board = new Board();
-        this.validator = new MoveValidator(this.board.board);
-        this.ai = new AI(this.board, this.validator);
-
-        this.gameOver = false;
-        this.currentTurn = "brancas";
-        this.lastMove = null;
-
-        this.view.board = this.board;
-        this.view.selected = null;
-        this.view.lastMove = null;
-
-        this.view.render();
-        this.view.hidePromotionModal();
-
-        console.log("Jogo reiniciado!");
+        return false;
     }
 }
