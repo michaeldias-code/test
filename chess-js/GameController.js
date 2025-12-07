@@ -28,12 +28,12 @@ export class GameController {
         console.log("GameController carregado!");
     }
 
-movePiece(from, to) {
+	movePiece(from, to) {
 		if (this.gameOver) return false;
 	
 		const piece = this.board.board[from];
-		if (!piece) return false;
-		if (piece.cor !== this.currentTurn) return false;
+		// if (!piece) return false; //precisa?
+ 		if (piece.cor !== this.currentTurn) return false;
 	
 		const validMoves = this.validator.getPossibleMoves(from);
 		if (!validMoves.includes(to)) return false;
@@ -41,35 +41,27 @@ movePiece(from, to) {
 		// Executa movimento
 		this.board.movePiece(from, to);
 	
-		console.log(
-			`👤 Jogador: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`
-		);
+		console.log(`👤 Jogador: ${this.indexToNotation(from)} → ${this.indexToNotation(to)}`);
 	
-		// reset da en passant
-		this.validator.enPassantTarget = null;
-		
-		// Se o peão avançou 2 casas, marca para en passant corretamente
-		if (piece.tipo === "♙" && from - to === 16) { 
-			// peão branco avançou duas casas
-			this.validator.enPassantTarget = to + 8; // a casa "atrás" do peão
-		}
-		if (piece.tipo === "♟" && to - from === 16) { 
-			// peão preto avançou duas casas
-			this.validator.enPassantTarget = to - 8; // a casa "atrás" do peão
-		}
-		
-		// Capturando en passant
+		// Captura en passant
 		if (piece.tipo === "♙" && from % 8 !== to % 8 && !this.board.board[to]) {
-			const captureIndex = to + 8; // peão branco captura abaixo
-			console.log(`♙ En passant! Capturando peão em ${this.indexToNotation(captureIndex)}`);
-			this.board.board[captureIndex] = null;
+			console.log(`♙ En passant! Capturando peão em ${this.indexToNotation(to + 8)}`);
+			this.board.board[to + 8] = null;
 		}
 		if (piece.tipo === "♟" && from % 8 !== to % 8 && !this.board.board[to]) {
-			const captureIndex = to - 8; // peão preto captura acima
-			console.log(`♟ En passant! Capturando peão em ${this.indexToNotation(captureIndex)}`);
-			this.board.board[captureIndex] = null;
+			console.log(`♟ En passant! Capturando peão em ${this.indexToNotation(to - 8)}`);
+			this.board.board[to - 8] = null;
 		}
 	
+		// Reset e atualização de en passant
+		this.validator.enPassantTarget = null;
+		if (piece.tipo === "♙" && from - to === 16) {
+			this.validator.enPassantTarget = to + 8; // casa intermediária
+		}
+		if (piece.tipo === "♟" && to - from === 16) {
+			this.validator.enPassantTarget = to - 8; // casa intermediária
+		}
+		
 		// Detecta roque
 		if (piece.tipo === "♔" || piece.tipo === "♚") {
 			const row = piece.cor === "brancas" ? 7 : 0;
@@ -150,7 +142,7 @@ movePiece(from, to) {
 	
 		return true;
 	}
-
+	
 	indexToNotation(i) {
     	const files = "abcdefgh";
     	const file = files[i % 8];
@@ -252,4 +244,3 @@ movePiece(from, to) {
         console.log("Jogo reiniciado!");
     }
 }
-
