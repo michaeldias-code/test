@@ -77,7 +77,10 @@ export class GameController {
 			// ignore
 		}
 		
-        this.board.movePiece(from, to);
+		// REMOVIDO: segunda chamada duplicada de movePiece()
+		// (a movimentação já foi feita acima via epApplied branch ou via board.movePiece)
+		// Não fazer nada aqui para evitar sobrescrever destino com undefined.
+		//this.board.movePiece(from, to);
 		
 		console.log(
 			`?? Jogador: ${this.indexToNotation(from)} ? ${this.indexToNotation(to)}`
