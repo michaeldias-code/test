@@ -1,4 +1,4 @@
-// GameController.js - v1
+// GameController.js
 import { View } from './View.js?v=999';
 import { AI } from './AI.js?v=999';
 import { Board } from './Board.js?v=999';
@@ -145,7 +145,6 @@ export class GameController {
 	
 		const cor = piece.cor;
 	
-		// Conversão de símbolo → nome
 		const simboloParaNome = {
 			"♕": "rainha", "♛": "rainha",
 			"♖": "torre",  "♜": "torre",
@@ -153,7 +152,6 @@ export class GameController {
 			"♘": "cavalo", "♞": "cavalo"
 		};
 	
-		// se veio símbolo, converte para nome
 		if (simboloParaNome[escolha]) {
 			escolha = simboloParaNome[escolha];
 		}
@@ -165,20 +163,16 @@ export class GameController {
 			cavalo: cor === "brancas" ? "♘" : "♞"
 		};
 	
-		// proteção contra qualquer erro
-		if (!mapa[escolha]) {
-			console.error("Promoção inválida:", escolha);
-			return;
-		}
-	
 		piece.tipo = mapa[escolha];
+	
+		console.log(
+			`🚀 Promoção concluída em ${this.indexToNotation(pos)} para: ${escolha}`
+		);
 	
 		this.view.hidePromotionModal();
 		this.view.render();
 	
-		this.currentTurn = cor === "brancas"
-			? "pretas"
-			: "brancas";
+		this.currentTurn = cor === "brancas" ? "pretas" : "brancas";
 	}
     
     /* ---------------- Reset do jogo (inalterado exceto correções seguras) ---------------- */
@@ -208,4 +202,3 @@ export class GameController {
         console.log("Jogo reiniciado!");
     }
 }
-
