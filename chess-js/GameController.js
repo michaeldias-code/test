@@ -35,7 +35,9 @@ export class GameController {
 		const isConsoleMode = window.location.href.includes("consolemode");
 		// Adiciona classe ao body
 		//INICIA ***CONSOLE MODE***
-				if (isConsoleMode) {
+		if (isConsoleMode) {
+			//oculta tabuleiro
+			document.body.classList.add("consolemode");
 			// cria console web
 			const consoleDiv = document.createElement('div');
 			consoleDiv.style.cssText = `
@@ -362,6 +364,7 @@ export class GameController {
 		console.log("Jogo reiniciado!");
 	}
 }
+
 
 
 
