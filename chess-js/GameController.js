@@ -35,68 +35,64 @@ export class GameController {
 		const isConsoleMode = window.location.href.includes("consolemode");
 		// Adiciona classe ao body
 		//INICIA ***CONSOLE MODE***
-		if (isConsoleMode) {
-			document.body.classList.add("consolemode");
-		
-			// Container do console
-			const consoleContainer = document.createElement("div");
-			consoleContainer.id = "web-console-container";
-			consoleContainer.style.cssText = `
-				position: fixed; bottom: 0; left: 0; width: 100%; height: 200px;
-				background: #fff; color: #000; font-family: monospace;
-				padding: 4px; box-sizing: border-box; z-index: 9999; display: flex;
-				flex-direction: column; border-top: 2px solid #888;
-			`;
-			document.body.appendChild(consoleContainer);
-		
-			// Área de log
-			const consoleDiv = document.createElement("div");
-			consoleDiv.id = "web-console";
+				if (isConsoleMode) {
+			// cria console web
+			const consoleDiv = document.createElement('div');
 			consoleDiv.style.cssText = `
-				flex: 1; overflow-y: auto; padding: 2px;
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				height: 200px;
+				background: #fff;
+				border-top: 2px solid #000;
+				font-family: monospace;
+				padding: 8px;
+				overflow-y: auto;
+				display: flex;
+				flex-direction: column;
+				z-index: 9999;
 			`;
-			consoleContainer.appendChild(consoleDiv);
+			const outputDiv = document.createElement('div');
+			outputDiv.style.flex = '1';
+			outputDiv.style.overflowY = 'auto';
+			const inputDiv = document.createElement('div');
+			inputDiv.style.display = 'flex';
+			const promptSpan = document.createElement('span');
+			promptSpan.textContent = '>';
+			const input = document.createElement('input');
+			input.style.cssText = 'flex:1; border:none; outline:none; font-family:monospace';
+			inputDiv.appendChild(promptSpan);
+			inputDiv.appendChild(input);
+			consoleDiv.appendChild(outputDiv);
+			consoleDiv.appendChild(inputDiv);
+			document.body.appendChild(consoleDiv);
 		
-			// Input
-			const consoleInput = document.createElement("input");
-			consoleInput.id = "web-console-input";
-			consoleInput.style.cssText = `
-				width: 100%; height: 28px; background:#fff; color:#000; border:1px solid #888;
-				font-family: monospace; padding:4px; box-sizing:border-box;
-			`;
-			consoleInput.placeholder = "> Comando";
-			consoleContainer.appendChild(consoleInput);
+			function wlog(...args) {
+				args.forEach(a => {
+					const div = document.createElement('div');
+					div.textContent = typeof a === 'object' ? JSON.stringify(a, null, 2) : a;
+					outputDiv.appendChild(div);
+				});
+				outputDiv.scrollTop = outputDiv.scrollHeight;
+			}
 		
-			// Função para logar
-			window.wlog = (msg) => {
-				const line = document.createElement("div");
-				line.textContent = `> ${msg}`;
-				consoleDiv.appendChild(line);
-				consoleDiv.scrollTop = consoleDiv.scrollHeight;
-			};
-		
-			// Input listener
-			consoleInput.addEventListener("keydown", (e) => {
-				if (e.key === "Enter") {
-					const cmd = consoleInput.value;
-					consoleInput.value = "";
+			input.addEventListener('keydown', e => {
+				if (e.key === 'Enter') {
+					const cmd = input.value;
+					wlog('> ' + cmd);
 					try {
 						const result = eval(cmd);
-						wlog(cmd);
-						wlog(result);
-					} catch (err) {
-						wlog(`Erro: ${err}`);
+						if (result !== undefined) wlog(result);
+					} catch(err) {
+						wlog('Error: ' + err);
 					}
+					input.value = '';
 				}
 			});
 		
-			// Foco inicial
-			consoleInput.focus();
-		
-			// Expor objetos
-			window.board = this.board;
-			window.game = this;
-			window.ai = this.ai;
+			window.wlog = wlog;
+			window.board = this.board; // já estava, mas garante acesso
 		}
 
 		//FIM ***CONSOLE MODE***
@@ -366,6 +362,7 @@ export class GameController {
 		console.log("Jogo reiniciado!");
 	}
 }
+
 
 
 
