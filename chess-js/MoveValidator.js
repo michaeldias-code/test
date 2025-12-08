@@ -1,25 +1,16 @@
 // MoveValidator.js
 export class MoveValidator {
 
-    constructor(boardArray) {
-        this.board = boardArray;
+	constructor(boardArray, enPassant = null) {
+		this.board = boardArray;
+	
+		// Se o controlador/quem instanciou passou uma instância de EnPassant, usa-a.
+		// Caso contrário, mantém null — nunca tentamos instanciar EnPassant aqui (evita mismatch export/default).
+		this.enPassant = enPassant || null;
+	
+		console.log("MoveValidator carregado!");
+	}
 
-        // Tentativa de plugar EnPassant, sem quebrar nada.
-        // Se EnPassant estiver disponível como import default no escopo do bundler, instanciamos.
-        // Caso contrário, deixamos this.enPassant = null e o MoveValidator continua funcionando normalmente.
-        try {
-            // eslint-disable-next-line no-undef
-            if (typeof EnPassant !== 'undefined') {
-                // se EnPassant foi incluído via import em bundler, instanciamos com a referência do board (array)
-                this.enPassant = new EnPassant(this.board);
-            } else {
-                this.enPassant = null;
-            }
-        } catch (e) {
-            this.enPassant = null;
-        }        
-        console.log("MoveValidator carregado!");
-    }
 
     // ---------------------------------------
     // Regras básicas
@@ -320,4 +311,3 @@ export class MoveValidator {
         return false;
     }
 }
-
