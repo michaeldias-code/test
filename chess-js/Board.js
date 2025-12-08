@@ -74,12 +74,22 @@ export class Board {
         this.board[from] = null;
     }
 
+    notationToIndex(pos) {
+        const files = "abcdefgh";
+        const file = files.indexOf(pos[0].toLowerCase()); // coluna: a-h
+        const rank = 8 - parseInt(pos[1]);               // linha: 1-8
+        if (file < 0 || rank < 0 || rank > 7) return null; // checa validade
+        return rank * 8 + file;
+    }
+
+    
     // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     // |||||||||||||||---------------- Testes simulados ----------------|||||||||||||||
     // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     
-    getPiece(pos) {
-        return this.board[pos];
+    getPiece(posNotation) {
+        posIndex = notationToIndex(posNotation);
+        return this.board[posIndex];
     }
 
     setPiece(pos, piece) {
@@ -123,5 +133,6 @@ export class Board {
         }
     }
 }
+
 
 
