@@ -255,37 +255,37 @@ export class GameController {
 			}
 		}
 	}
-
 	
-    /* ---------------- Reset do jogo (inalterado exceto correções seguras) ---------------- */
-    resetGame() {
-        console.log("Reiniciando o jogo...");
-
-        if (this.aiTimerId) {
-            clearTimeout(this.aiTimerId);
-            this.aiTimerId = null;
-        }
-
-        this.board = new Board();
-        this.validator = new MoveValidator(this.board.board);
-        this.ai = new AI(this.board, this.validator);
-
-        this.gameOver = false;
-        this.currentTurn = "brancas";
-        this.lastMove = null;
-
-        this.view.board = this.board;
-        this.view.selected = null;
-        this.view.lastMove = null;
-
-        this.view.render();
-        this.view.hidePromotionModal();
-
-        console.log("Jogo reiniciado!");
-    }
+	/* ---------------- Reset do jogo (inalterado exceto correções seguras) ---------------- */
+	resetGame() {
+		console.log("Reiniciando o jogo...");
+	
+		if (this.aiTimerId) {
+			clearTimeout(this.aiTimerId);
+			this.aiTimerId = null;
+		}
+	
+		this.board = new Board();
+	
+		// recriar EnPassant com o novo board
+		this.enPassant = new EnPassant(this.board.board);
+	
+		// injetar EnPassant no MoveValidator
+		this.validator = new MoveValidator(this.board.board, this.enPassant);
+	
+		this.ai = new AI(this.board, this.validator);
+	
+		this.gameOver = false;
+		this.currentTurn = "brancas";
+		this.lastMove = null;
+	
+		this.view.board = this.board;
+		this.view.selected = null;
+		this.view.lastMove = null;
+	
+		this.view.render();
+		this.view.hidePromotionModal();
+	
+		console.log("Jogo reiniciado!");
+	}
 }
-
-
-
-
-
