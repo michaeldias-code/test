@@ -99,8 +99,22 @@ export class Board {
     }
 
     setPiece(posNotation, piece) {
+	    const map = {
+    	    "peao branco": new Piece("♙", "brancas"),
+	        "peao preto":  new Piece("♟", "pretas"),
+    	    "torre branca": new Piece("♖", "brancas"),
+        	"torre preta":  new Piece("♜", "pretas"),
+        	"cavalo branco": new Piece("♘", "brancas"),
+        	"cavalo preto":  new Piece("♞", "pretas"),
+        	"bispo branco": new Piece("♗", "brancas"),
+        	"bispo preto":  new Piece("♝", "pretas"),
+        	"rainha branca": new Piece("♕", "brancas"),
+        	"rainha preta":  new Piece("♛", "pretas"),
+        	"rei branco": new Piece("♔", "brancas"),
+        	"rei preto":  new Piece("♚", "pretas")
+    	};	
         let posIndex = this.notationToIndex(posNotation);
-        this.board[posIndex] = piece;
+        this.board[posIndex] = map[piece] || null; // null se não achar
     }
 
     printBoard() {
@@ -140,4 +154,5 @@ export class Board {
         }
     }
 }
+
 
