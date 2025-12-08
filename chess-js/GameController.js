@@ -11,6 +11,11 @@ export class GameController {
 
         this.board = new Board();
 
+		//versão para test - Expor para o console
+    	window.board = this.board;   // instância
+    	window.Board = Board;        // classe
+
+		
 		// Tentar instanciar EnPassant sem quebrar se o módulo não estiver presente
 		try {
     	// eslint-disable-next-line no-undef
@@ -291,3 +296,4 @@ export class GameController {
 		console.log("Jogo reiniciado!");
 	}
 }
+
