@@ -98,25 +98,25 @@ export class Board {
         return this.board[posIndex];
     }
 
-    setPiece(posNotation, piece) {
-	    const map = {
-    	    "peao branco": new Piece("♙", "brancas"),
-	        "peao preto":  new Piece("♟", "pretas"),
-    	    "torre branca": new Piece("♖", "brancas"),
-        	"torre preta":  new Piece("♜", "pretas"),
-        	"cavalo branco": new Piece("♘", "brancas"),
-        	"cavalo preto":  new Piece("♞", "pretas"),
-        	"bispo branco": new Piece("♗", "brancas"),
-        	"bispo preto":  new Piece("♝", "pretas"),
-        	"rainha branca": new Piece("♕", "brancas"),
-        	"rainha preta":  new Piece("♛", "pretas"),
-        	"rei branco": new Piece("♔", "brancas"),
-        	"rei preto":  new Piece("♚", "pretas")
-    	};	
-        let posIndex = this.notationToIndex(posNotation);
-        this.board[posIndex] = map[piece] || null; // null se não achar
-    }
+  	moveOrSetPiece(fromNotation, toNotation) {
+    	const fromIndex = this.notationToIndex(fromNotation);
+    	const toIndex = this.notationToIndex(toNotation);
 
+    	const piece = this.board[fromIndex];
+    	if (!piece) {
+        	console.log(`Nenhuma peça em ${fromNotation}`);
+        	return;
+    	}
+
+    	// Captura (simplesmente substitui a peça no destino)
+    	this.board[toIndex] = piece;
+
+    	// Remove a peça da origem
+    	this.board[fromIndex] = null;
+
+    	console.log(`Movido ${piece.tipo} de ${fromNotation} para ${toNotation}`);
+	}
+	
     printBoard() {
         //const display = this.board.map(p => p ? p.tipo : ".").reduce((acc, val, idx) => {
         //    acc += val + " ";
@@ -154,5 +154,6 @@ export class Board {
         }
     }
 }
+
 
 
