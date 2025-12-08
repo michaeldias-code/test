@@ -34,9 +34,61 @@ export class GameController {
 		//consoleMode
 		const isConsoleMode = window.location.href.includes("consolemode");
 		// Adiciona classe ao body
+		//INICIA ***CONSOLE MODE***
 		if (isConsoleMode) {
     		document.body.classList.add("consolemode");
+			//
+			//
+			//
+						// Cria div do console
+			const consoleDiv = document.createElement("div");
+			consoleDiv.id = "web-console";
+			consoleDiv.style.cssText = `
+				position:fixed; bottom:0; left:0; width:100%; height:200px;
+				background:#111; color:#0f0; font-family:monospace; overflow:auto; padding:8px; z-index:9999;
+			`;
+			document.body.appendChild(consoleDiv);
+		
+			// Cria input do console
+			const consoleInput = document.createElement("input");
+			consoleInput.id = "web-console-input";
+			consoleInput.style.cssText = `
+				position:fixed; bottom:0; left:0; width:100%; height:30px;
+				background:#222; color:#0f0; font-family:monospace; border:none; padding:4px;
+			`;
+			consoleInput.placeholder = "Digite comando e pressione Enter";
+			document.body.appendChild(consoleInput);
+		
+			// Função para escrever no console
+			window.wlog = (msg) => {
+				const line = document.createElement("div");
+				line.textContent = msg;
+				consoleDiv.appendChild(line);
+				consoleDiv.scrollTop = consoleDiv.scrollHeight;
+			};
+		
+			// Listener para input
+			consoleInput.addEventListener("keydown", (e) => {
+				if (e.key === "Enter") {
+					const cmd = consoleInput.value;
+					consoleInput.value = "";
+					try {
+						const result = eval(cmd);  // ⚠️ usar com cuidado
+						wlog(`> ${cmd}`);
+						wlog(result);
+					} catch (err) {
+						wlog(`Erro: ${err}`);
+					}
+				}
+			});
+		
+			// Expor objetos para o console
+			window.board = this.board;
+			window.game = this;
+			window.ai = this.ai;
+		
 		}
+		//FIM ***CONSOLE MODE***
 		
         this.view = new View(this.board, this);
 			
@@ -303,6 +355,7 @@ export class GameController {
 		console.log("Jogo reiniciado!");
 	}
 }
+
 
 
 
