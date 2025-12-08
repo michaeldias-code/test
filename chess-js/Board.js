@@ -81,6 +81,12 @@ export class Board {
         if (file < 0 || rank < 0 || rank > 7) return null; // checa validade
         return rank * 8 + file;
     }
+    indexToNotation(i) {
+    	const files = "abcdefgh";
+    	const file = files[i % 8];
+    	const rank = 8 - Math.floor(i / 8);
+    	return `${file}${rank}`;
+	}
 
     
     // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -92,8 +98,9 @@ export class Board {
         return this.board[posIndex];
     }
 
-    setPiece(pos, piece) {
-        this.board[pos] = piece;
+    setPiece(posNotation, piece) {
+        let posIndex = this.notationToIndex(posNotation);
+        this.board[posIndex] = piece;
     }
 
     printBoard() {
@@ -133,3 +140,4 @@ export class Board {
         }
     }
 }
+
