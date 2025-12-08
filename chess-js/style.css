@@ -286,7 +286,6 @@ h1 {
     }
 }
 
-
-
-
-
+body.consolemode #chess-container {
+    display: none; /* Esconde o tabuleiro */
+}
