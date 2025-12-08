@@ -31,7 +31,7 @@ export class GameController {
         this.validator = new MoveValidator(this.board.board, this.enPassant);
         this.ai = new AI(this.board, this.validator, this.enPassant);
 
-		if (!window.location.href.includes("test")) {
+		if (!window.location.href.includes("consolemode")) {
         	this.view = new View(this.board, this);
 		}
 			
@@ -298,5 +298,6 @@ export class GameController {
 		console.log("Jogo reiniciado!");
 	}
 }
+
 
 
