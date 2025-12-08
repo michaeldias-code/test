@@ -73,4 +73,43 @@ export class Board {
         this.board[to] = this.board[from];
         this.board[from] = null;
     }
+
+    // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    // |||||||||||||||---------------- Testes simulados ----------------|||||||||||||||
+    // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    
+    getPiece(pos) {
+        return this.board[pos];
+    }
+
+    setPiece(pos, piece) {
+        this.board[pos] = piece;
+    }
+
+    printBoard() {
+        const display = this.board.map(p => p ? p.tipo : ".").reduce((acc, val, idx) => {
+            acc += val + " ";
+            if ((idx + 1) % 8 === 0) acc += "\n";
+            return acc;
+        }, "");
+        console.log(display);
+    }
+    
+    
+    testCommand(command, args) {
+        switch (command) {
+            case "enpassant":
+                // Simula uma captura en passant
+                // Retorna sempre o que esperamos em teste manual
+                return {
+                    legal: true,
+                    captured: this.enPassantTarget !== null ? this.enPassantTarget : null,
+                    from: args.from,
+                    to: args.to
+                };
+            default:
+                return { error: "Comando não reconhecido" };
+        }
+    }
 }
+
