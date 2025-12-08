@@ -31,6 +31,13 @@ export class GameController {
         this.validator = new MoveValidator(this.board.board, this.enPassant);
         this.ai = new AI(this.board, this.validator, this.enPassant);
 
+		//consoleMode
+		const isConsoleMode = window.location.href.includes("consolemode");
+		// Adiciona classe ao body
+		if (isConsoleMode) {
+    		document.body.classList.add("consolemode");
+		}
+		
         this.view = new View(this.board, this);
 			
         this.currentTurn = "brancas";
@@ -296,6 +303,7 @@ export class GameController {
 		console.log("Jogo reiniciado!");
 	}
 }
+
 
 
 
