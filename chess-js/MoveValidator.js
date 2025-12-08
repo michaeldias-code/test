@@ -233,26 +233,67 @@ export class MoveValidator {
     }
 
     // ---------------------------------------
-    // Movimento temporário seguro
+    // Movimento ALTERADO ENPASSANT
     // ---------------------------------------
-    wouldNotLeaveKingInCheck(from, to) {
-
+	wouldNotLeaveKingInCheck(from, to) {
+		// Segurança básica
 		if (!this.isValidPosition(from) || !this.isValidPosition(to)) return false;
-		
-        const piece = this.board[from];
-        const backupFrom = piece;
-        const backupTo = this.board[to];
-
-        this.board[to] = piece;
-        this.board[from] = null;
-
-        const safe = !this.isKingInCheck(piece.cor);
-
-        this.board[from] = backupFrom;
-        this.board[to] = backupTo;
-
-        return safe;
-    }
+	
+		const piece = this.board[from];
+		if (!piece) return false;
+	
+		// Backups (simples) para restaurar o estado
+		const backupFrom = this.board[from];
+		const backupTo = this.board[to];
+	
+		// Se houver módulo EnPassant plugado, verifique se esse movimento é um en passant
+		let epCapturedIdx = null;
+		try {
+			if (this.enPassant && typeof this.enPassant.isEnPassantMove === 'function') {
+				if (this.enPassant.isEnPassantMove(from, to, piece)) {
+					// índice do peão que seria capturado em en passant
+					if (piece.tipo === '♙') epCapturedIdx = to + 8;
+					else if (piece.tipo === '♟') epCapturedIdx = to - 8;
+	
+					// valida segurança do índice
+					if (!this.isValidPosition(epCapturedIdx)) epCapturedIdx = null;
+				}
+			}
+		} catch (e) {
+			// Regra de OURO: não atrapalhar o fluxo do jogo
+			epCapturedIdx = null;
+		}
+	
+		// Aplicar o movimento na simulação:
+		// mover peça de origem -> destino
+		this.board[to] = this.board[from];
+		this.board[from] = null;
+	
+		// se for en passant, remover também o peão capturado na simulação
+		let backupCaptured = null;
+		if (epCapturedIdx !== null) {
+			backupCaptured = this.board[epCapturedIdx];
+			this.board[epCapturedIdx] = null;
+		}
+	
+		// Checar se o rei do lado da peça ficou em cheque
+		let safe = true;
+		try {
+			safe = !this.isKingInCheck(piece.cor);
+		} catch (e) {
+			// se algo estranho acontecer, não permitir movimento inseguro
+			safe = false;
+		}
+	
+		// Restaurar estado original (sempre)
+		this.board[from] = backupFrom;
+		this.board[to] = backupTo;
+		if (epCapturedIdx !== null) {
+			this.board[epCapturedIdx] = backupCaptured;
+		}
+	
+		return safe;
+	}
 
     // ---------------------------------------
     // CHEQUE
