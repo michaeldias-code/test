@@ -36,45 +36,53 @@ export class GameController {
 		// Adiciona classe ao body
 		//INICIA ***CONSOLE MODE***
 		if (isConsoleMode) {
-    		document.body.classList.add("consolemode");
-			//
-			//
-			//
-						// Cria div do console
+			document.body.classList.add("consolemode");
+		
+			// Container do console
+			const consoleContainer = document.createElement("div");
+			consoleContainer.id = "web-console-container";
+			consoleContainer.style.cssText = `
+				position: fixed; bottom: 0; left: 0; width: 100%; height: 200px;
+				background: #fff; color: #000; font-family: monospace;
+				padding: 4px; box-sizing: border-box; z-index: 9999; display: flex;
+				flex-direction: column; border-top: 2px solid #888;
+			`;
+			document.body.appendChild(consoleContainer);
+		
+			// Área de log
 			const consoleDiv = document.createElement("div");
 			consoleDiv.id = "web-console";
 			consoleDiv.style.cssText = `
-				position:fixed; bottom:0; left:0; width:100%; height:200px;
-				background:#111; color:#0f0; font-family:monospace; overflow:auto; padding:8px; z-index:9999;
+				flex: 1; overflow-y: auto; padding: 2px;
 			`;
-			document.body.appendChild(consoleDiv);
+			consoleContainer.appendChild(consoleDiv);
 		
-			// Cria input do console
+			// Input
 			const consoleInput = document.createElement("input");
 			consoleInput.id = "web-console-input";
 			consoleInput.style.cssText = `
-				position:fixed; bottom:0; left:0; width:100%; height:30px;
-				background:#222; color:#0f0; font-family:monospace; border:none; padding:4px;
+				width: 100%; height: 28px; background:#fff; color:#000; border:1px solid #888;
+				font-family: monospace; padding:4px; box-sizing:border-box;
 			`;
-			consoleInput.placeholder = "Digite comando e pressione Enter";
-			document.body.appendChild(consoleInput);
+			consoleInput.placeholder = "> Comando";
+			consoleContainer.appendChild(consoleInput);
 		
-			// Função para escrever no console
+			// Função para logar
 			window.wlog = (msg) => {
 				const line = document.createElement("div");
-				line.textContent = msg;
+				line.textContent = `> ${msg}`;
 				consoleDiv.appendChild(line);
 				consoleDiv.scrollTop = consoleDiv.scrollHeight;
 			};
 		
-			// Listener para input
+			// Input listener
 			consoleInput.addEventListener("keydown", (e) => {
 				if (e.key === "Enter") {
 					const cmd = consoleInput.value;
 					consoleInput.value = "";
 					try {
-						const result = eval(cmd);  // ⚠️ usar com cuidado
-						wlog(`> ${cmd}`);
+						const result = eval(cmd);
+						wlog(cmd);
 						wlog(result);
 					} catch (err) {
 						wlog(`Erro: ${err}`);
@@ -82,12 +90,15 @@ export class GameController {
 				}
 			});
 		
-			// Expor objetos para o console
+			// Foco inicial
+			consoleInput.focus();
+		
+			// Expor objetos
 			window.board = this.board;
 			window.game = this;
 			window.ai = this.ai;
-		
 		}
+
 		//FIM ***CONSOLE MODE***
 		
         this.view = new View(this.board, this);
@@ -355,6 +366,7 @@ export class GameController {
 		console.log("Jogo reiniciado!");
 	}
 }
+
 
 
 
