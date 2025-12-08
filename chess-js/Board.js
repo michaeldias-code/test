@@ -88,7 +88,7 @@ export class Board {
     // ||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
     
     getPiece(posNotation) {
-        posIndex = this.notationToIndex(posNotation);
+        let posIndex = this.notationToIndex(posNotation);
         return this.board[posIndex];
     }
 
@@ -133,6 +133,7 @@ export class Board {
         }
     }
 }
+
 
 
 
