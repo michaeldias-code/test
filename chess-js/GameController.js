@@ -33,6 +33,7 @@ export class GameController {
 
 		if (!window.location.href.includes("consolemode")) {
         	this.view = new View(this.board, this);
+			this.view.setupRestartButton(() => this.resetGame());
 		}
 			
         this.currentTurn = "brancas";
@@ -298,6 +299,7 @@ export class GameController {
 		console.log("Jogo reiniciado!");
 	}
 }
+
 
 
 
