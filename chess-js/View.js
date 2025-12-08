@@ -75,9 +75,7 @@ export class View {
         // Rerenderizar o tabuleiro completo
         this.boardDiv.innerHTML = "";
 
-		//En Passant, alteração do índice. Rollback se necessário
-        //for (let r = 0; r < 8; r++) {
-		for (let r = 7; r >= 0; r--) {
+        for (let r = 0; r < 8; r++) {		
             for (let c = 0; c < 8; c++) {
                 const i = r * 8 + c;
                 const cell = document.createElement("div");
@@ -297,4 +295,5 @@ export class View {
         }
     }
 }
+
 
