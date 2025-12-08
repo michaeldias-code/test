@@ -36,9 +36,10 @@ export class GameController {
 		// Adiciona classe ao body
 		//INICIA ***CONSOLE MODE***
 		if (isConsoleMode) {
-			//oculta tabuleiro
+			// Oculta o tabuleiro
 			document.body.classList.add("consolemode");
-			// cria console web
+		
+			// Cria a caixinha de console web
 			const consoleDiv = document.createElement('div');
 			consoleDiv.style.cssText = `
 				position: fixed;
@@ -55,21 +56,27 @@ export class GameController {
 				flex-direction: column;
 				z-index: 9999;
 			`;
+		
 			const outputDiv = document.createElement('div');
 			outputDiv.style.flex = '1';
 			outputDiv.style.overflowY = 'auto';
+		
 			const inputDiv = document.createElement('div');
 			inputDiv.style.display = 'flex';
+		
 			const promptSpan = document.createElement('span');
 			promptSpan.textContent = '>';
+		
 			const input = document.createElement('input');
 			input.style.cssText = 'flex:1; border:none; outline:none; font-family:monospace';
+		
 			inputDiv.appendChild(promptSpan);
 			inputDiv.appendChild(input);
 			consoleDiv.appendChild(outputDiv);
 			consoleDiv.appendChild(inputDiv);
 			document.body.appendChild(consoleDiv);
 		
+			// Função para escrever no console da página
 			function wlog(...args) {
 				args.forEach(a => {
 					const div = document.createElement('div');
@@ -79,6 +86,14 @@ export class GameController {
 				outputDiv.scrollTop = outputDiv.scrollHeight;
 			}
 		
+			// Redireciona todo console.log para wlog
+			const originalLog = console.log;
+			console.log = (...args) => {
+				wlog(...args);       // escreve na caixinha web
+				originalLog(...args); // opcional: mantém no DevTools
+			};
+		
+			// Permite digitar comandos e ver resultados
 			input.addEventListener('keydown', e => {
 				if (e.key === 'Enter') {
 					const cmd = input.value;
@@ -93,8 +108,9 @@ export class GameController {
 				}
 			});
 		
+			// Expor board e wlog para a página
+			window.board = this.board;
 			window.wlog = wlog;
-			window.board = this.board; // já estava, mas garante acesso
 		}
 
 		//FIM ***CONSOLE MODE***
@@ -364,13 +380,3 @@ export class GameController {
 		console.log("Jogo reiniciado!");
 	}
 }
-
-
-
-
-
-
-
-
-
-
