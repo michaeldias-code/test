@@ -149,71 +149,118 @@ export default class EnPassant {
     // boardObj (opcional) pode ser o objeto Board (que tem movePiece) ou null; se fornecido,
     // o método tenta usar boardObj.movePiece para manter consistência; caso contrário, manipula array diretamente.
     // Retorna true se capturou (aplicou en passant), false caso contrário (não altera nada).
-    applyEnPassantIfPossible(fromIdx, toIdx, piece, boardObj = null) {
-        try {
-            if (!this.isEnPassantMove(fromIdx, toIdx, piece)) return false;
-
-            // índice do peão que vai ser removido (fica em mesma file do alvo, uma rank diferente)
-            let capturedPawnIdx;
-            if (piece.tipo === '♙') capturedPawnIdx = toIdx + 8;
-            else capturedPawnIdx = toIdx - 8;
-
-            // trava de segurança: verifique que existe um peão inimigo naquela posição
-            const captured = this.board[capturedPawnIdx];
-            if (!captured) return false;
-            if (captured.tipo !== '♟' && captured.tipo !== '♙') return false;
-            if (captured.cor === piece.cor) return false;
-
-            // Faz a captura ATÓMICA: se boardObj.movePiece falhar (ex: undefined), manipulamos o array
-            if (boardObj && typeof boardObj.movePiece === 'function') {
-                // mover peão capturador para toIdx
-                // Depois remover o peão capturado na posição capturedPawnIdx
-                // Usamos try/catch para garantir restauração em caso de erro
-                try {
-                    // backup simples
-                    const backupFrom = this.board[fromIdx];
-                    const backupTo = this.board[toIdx];
-                    const backupCaptured = this.board[capturedPawnIdx];
-
-                    // move
-                    boardObj.movePiece(fromIdx, toIdx);
-                    // remove capturado
-                    this.board[capturedPawnIdx] = null;
-
-                    // marca hasMoved se existir
-                    if (this.board[toIdx]) this.board[toIdx].hasMoved = true;
-
-                    // limpa estado do en passant
-                    this.enPassantTargetIndex = null;
-                    this.capturablePawnIndex = null;
-                    return true;
-                } catch (e) {
-                    console.error('EnPassant.applyEnPassantIfPossible erro ao usar boardObj (ignorado):', e);
-                    return false;
-                }
-            } else {
-                // manipulação direta no array
-                const backupFrom = this.board[fromIdx];
-                const backupTo = this.board[toIdx];
-                const backupCaptured = this.board[capturedPawnIdx];
-
-                // aplicar
-                this.board[toIdx] = this.board[fromIdx];
-                this.board[fromIdx] = null;
-                this.board[capturedPawnIdx] = null;
-
-                if (this.board[toIdx]) this.board[toIdx].hasMoved = true;
-
-                // limpa estado
-                this.enPassantTargetIndex = null;
-                this.capturablePawnIndex = null;
-                return true;
-            }
-        } catch (e) {
-            console.error('EnPassant.applyEnPassantIfPossible erro (ignorado):', e);
-            return false;
-        }
-    }
+	// Módulo: EnPassant.js
+	// Método: applyEnPassantIfPossible(fromIdx,toIdx,piece, boardObj = null)
+	// Substituir a implementação atual por esta (apenas neste arquivo).
+	
+	applyEnPassantIfPossible(fromIdx, toIdx, piece, boardObj = null) {
+		try {
+			// DEBUG: log inicial (ajuda a ver a tentativa)
+			console.debug('[EnPassant] applyEnPassantIfPossible chamado',
+						{ fromIdx, toIdx, pieceTipo: piece && piece.tipo, pieceCor: piece && piece.cor,
+							enPassantTargetIndex: this.enPassantTargetIndex,
+							capturablePawnIndex: this.capturablePawnIndex });
+	
+			// Verifica se esse movimento é reconhecido como en passant
+			if (!this.isEnPassantMove(fromIdx, toIdx, piece)) {
+				console.debug('[EnPassant] não é en passant válido (isEnPassantMove=false)');
+				return false;
+			}
+	
+			// calcula índice do peão que será removido
+			let capturedPawnIdx = (piece.tipo === '♙') ? (toIdx + 8) : (toIdx - 8);
+	
+			// segurança: índice válido
+			if (!Number.isInteger(capturedPawnIdx) || capturedPawnIdx < 0 || capturedPawnIdx > 63) {
+				console.warn('[EnPassant] capturedPawnIdx inválido', capturedPawnIdx);
+				return false;
+			}
+	
+			// verifica existência do peão capturável
+			const captured = this.board[capturedPawnIdx];
+			if (!captured) {
+				console.debug('[EnPassant] não encontrou peça capturável em', capturedPawnIdx, this.indexToAlgebraic(capturedPawnIdx));
+				return false;
+			}
+			if (captured.cor === piece.cor) {
+				console.debug('[EnPassant] peça capturável tem mesma cor (não é captura)', captured);
+				return false;
+			}
+			if (captured.tipo !== '♟' && captured.tipo !== '♙') {
+				console.debug('[EnPassant] peça capturável não é peão', captured.tipo);
+				return false;
+			}
+	
+			// Executa a captura de forma atômica com backup — tenta usar boardObj.movePiece se disponível
+			if (boardObj && typeof boardObj.movePiece === 'function') {
+				// backup
+				const bFrom = this.board[fromIdx];
+				const bTo = this.board[toIdx];
+				const bCaptured = this.board[capturedPawnIdx];
+	
+				try {
+					// move o capturador para destino
+					boardObj.movePiece(fromIdx, toIdx);
+					// remove o peão capturado
+					this.board[capturedPawnIdx] = null;
+	
+					// marcam hasMoved se existir
+					if (this.board[toIdx]) this.board[toIdx].hasMoved = true;
+	
+					// limpa estado do módulo
+					this.enPassantTargetIndex = null;
+					this.capturablePawnIndex = null;
+	
+					console.info('[EnPassant] captura en passant aplicada via boardObj', {
+						movedTo: toIdx, movedToAlg: this.indexToAlgebraic(toIdx),
+						removedIdx: capturedPawnIdx, removedAlg: this.indexToAlgebraic(capturedPawnIdx)
+					});
+	
+					return true;
+				} catch (err) {
+					// restaura em caso de problema
+					this.board[fromIdx] = bFrom;
+					this.board[toIdx] = bTo;
+					this.board[capturedPawnIdx] = bCaptured;
+					console.error('[EnPassant] erro aplicando via boardObj — restaurado (ignorado)', err);
+					return false;
+				}
+			} else {
+				// manipulação direta no array — também atômica via backup
+				const bFrom = this.board[fromIdx];
+				const bTo = this.board[toIdx];
+				const bCaptured = this.board[capturedPawnIdx];
+	
+				try {
+					this.board[toIdx] = this.board[fromIdx];
+					this.board[fromIdx] = null;
+					this.board[capturedPawnIdx] = null;
+	
+					if (this.board[toIdx]) this.board[toIdx].hasMoved = true;
+	
+					this.enPassantTargetIndex = null;
+					this.capturablePawnIndex = null;
+	
+					console.info('[EnPassant] captura en passant aplicada manipulando array', {
+						movedTo: toIdx, movedToAlg: this.indexToAlgebraic(toIdx),
+						removedIdx: capturedPawnIdx, removedAlg: this.indexToAlgebraic(capturedPawnIdx)
+					});
+	
+					return true;
+				} catch (err) {
+					// restaura no erro
+					this.board[fromIdx] = bFrom;
+					this.board[toIdx] = bTo;
+					this.board[capturedPawnIdx] = bCaptured;
+					console.error('[EnPassant] erro aplicando diretamente — restaurado (ignorado)', err);
+					return false;
+				}
+			}
+		} catch (e) {
+			console.error('EnPassant.applyEnPassantIfPossible erro (ignorado):', e);
+			return false;
+		}
+	}
 
     // Limpa o estado (chamar no fim do turno se desejar)
     clear() {
