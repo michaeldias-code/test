@@ -51,6 +51,8 @@ export class GameController {
         const validMoves = this.validator.getPossibleMoves(from);
         if (!validMoves.includes(to)) return false;
 
+		console.log(`DEBUG validator.getPossibleMoves para ${this.indexToNotation(from)} (${from}) =>`, validMoves);
+		
         // Executa movimento DEPOIS DO ENPASSANT
 		
 		// Tentar aplicar en passant (se possível) — Regra de OURO: apenas faz se TODAS as condições estiverem corretas.
