@@ -125,6 +125,9 @@ export class View {
             if (!cell) return;
 
             const index = Number(cell.dataset.index);
+			
+			console.log(`DEBUG click em célula, alvo DOM:`, cell, 'dataset.index=', cell && cell.dataset && cell.dataset.index);
+			
             const piece = this.board.board[index];
 
             if (this.selected === null) {
@@ -136,6 +139,8 @@ export class View {
                 if (this.selected === index) {
                     this.selected = null;
                 } else {
+					console.log(`DEBUG tentativa de movimento: from=${this.selected} (${this.board.board[this.selected]?.tipo}), to=${index} (${this.board.board[index] ? this.board.board[index].tipo : 'vazio'})`);
+
                     const ok = this.controller.movePiece(this.selected, index);
                     if (ok) this.lastMove = { from: this.selected, to: index };
                     this.selected = null;
@@ -290,4 +295,3 @@ export class View {
         }
     }
 }
-
