@@ -29,7 +29,9 @@ export class GameController {
 		
 		// Passamos a instância EP para os módulos que precisam.
 		this.validator = new MoveValidator(this.board.board, this.enPassant);
-		this.ai = new AI(this.board, this.validator, this.enPassant);
+		//this.ai = new AI(this.board, this.validator, this.enPassant);
+		this.ai = new AI(this.board, this.validator, this.enPassant, "easy");
+
 
 		//consoleMode
 		const isConsoleMode = window.location.href.includes("consolemode");
@@ -399,3 +401,4 @@ this.logCheckState(this.currentTurn);
 		console.log("Jogo reiniciado!");
 	}
 }
+
