@@ -34,7 +34,7 @@ h1 {
 }
 
 /* ============================
-   CONTAINER PRINCIPAL (GRID)
+   CONTAINER PRINCIPAL (GRID) - AJUSTE FINAL DE OVERFLOW NO DESKTOP
 ============================ */
 #chess-container {
     display: grid;
@@ -42,13 +42,20 @@ h1 {
     grid-template-rows: 1fr auto;
     gap: 0;
     
-    /* CHAVE 5: Reduz a margem vertical para aproximar do título/dificuldade */
     margin: 5px auto; 
     
-    width: 90vmin;
-    height: 90vmin;
+    /* CHAVE 1: Limitamos a largura MÁXIMA para 600px */
     max-width: 600px;
-    max-height: 600px; 
+    
+    /* CHAVE 2: Limitamos a altura MÁXIMA usando a altura do viewport (80vh) */
+    /* Isso garante que ele nunca ocupe mais de 80% da altura da tela. */
+    max-height: 80vh; 
+    
+    /* Usamos 'auto' para que a largura/altura sejam definidas pelo max-width/max-height */
+    width: auto; 
+    height: auto; 
+
+    /* A proporção 1:1 é garantida pelo grid interno (células) */
     
     box-sizing: border-box;
     position: relative;
