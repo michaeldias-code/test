@@ -1,4 +1,4 @@
-// AI.js
+// AI.js -vGem
 import { MoveValidator } from "./MoveValidator.js";
 
 export class AI {
@@ -70,3 +70,4 @@ export class AI {
         // Se a IA fosse mais complexa (árvores de busca, cache), ela seria limpa aqui.
     }
 }
+
