@@ -281,6 +281,9 @@ h1 {
         height: 95vw;
         max-width: none;
         max-height: none;
+        
+        /* CHAVE: MARGEM EXTRA INFERIOR para empurrar o botão de resetar */
+        margin-bottom: 40px; 
     }
     
     /* Aumenta a fonte das peças/células para melhor toque */
