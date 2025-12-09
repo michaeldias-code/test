@@ -46,6 +46,16 @@ export class AI_Medium {
                 return bestCapture;
             }
         }
+		// 🔥 REGRA PRINCIPAL: se existe captura, a IA deve capturar SEMPRE,
+		// mesmo que a heurística chooseBestCapture não escolha uma.
+		if (captureMoves.length > 0) {
+			// fallback obrigatório: escolhe qualquer captura disponível
+			const forcedCapture = captureMoves[Math.floor(Math.random() * captureMoves.length)];
+			this.applyMoveWithEPAndRegister(forcedCapture);
+			this.lastMove = { from: forcedCapture.from, to: forcedCapture.to };
+			return forcedCapture;
+		}
+
 
         // 4) buscar movimentos totalmente seguros (não atacados após execução)
         const safeMoves = myMoves.filter(m => !this.wouldBeAttackedAfterMove(m, enemyColor));
@@ -325,5 +335,4 @@ export class AI_Medium {
         return removed;
     }
 }
-
 
