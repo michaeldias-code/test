@@ -1,24 +1,50 @@
-class AI_Easy {
+// AI_Easy.js
+
+export class AI_Easy {
+
     constructor(board, validator, enPassant) {
         this.board = board;
         this.validator = validator;
         this.enPassant = enPassant;
+
+        console.log("🤖 AI_Easy carregada (modo fácil).");
     }
 
-    findMove(playerColor) {
+    /**
+     * Retorna um movimento legal aleatório.
+     */
+    findMove(color) {
+        const allMoves = this.getAllLegalMoves(color);
+
+        if (allMoves.length === 0) {
+            return null;
+        }
+
+        const randomIndex = Math.floor(Math.random() * allMoves.length);
+        return allMoves[randomIndex];
+    }
+
+    /**
+     * Gera uma lista de todos os movimentos possíveis para a cor fornecida.
+     */
+    getAllLegalMoves(color) {
         const moves = [];
 
         for (let i = 0; i < 64; i++) {
-            const p = this.board.board[i];
-            if (p && p.cor === playerColor) {
-                const possible = this.validator.getPossibleMoves(i);
-                for (let to of possible) moves.push({ from: i, to });
+            const piece = this.board.board[i];
+
+            if (!piece || piece.cor !== color) continue;
+
+            const possibleMoves = this.validator.getPossibleMoves(i);
+
+            for (const dest of possibleMoves) {
+                moves.push({
+                    from: i,
+                    to: dest
+                });
             }
         }
 
-        if (moves.length === 0) return null;
-        return moves[Math.floor(Math.random() * moves.length)];
+        return moves;
     }
 }
-
-export { AI_Easy };
