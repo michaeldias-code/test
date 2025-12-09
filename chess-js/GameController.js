@@ -215,19 +215,21 @@ export class GameController {
 			}
 		}
 
-		// 6. Troca turno
-		this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
+// 6. Troca turno
+this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
 
-		// 7. Configura o alvo EP para o próximo turno (se o peão moveu 2 casas)
-		if (this.enPassant) {
-			this.enPassant.setTarget(this.board.enPassantTargetPos);
-		}
+// ** NOVO FLUXO: Sincronizar EP para o PRÓXIMO jogador **
+if (this.enPassant) {
+    // 1. O alvo recém-criado no board (pelo pulo duplo) é copiado para o EnPassant.js
+    this.enPassant.setTarget(this.board.enPassantTargetPos);
+    
+    // 2. O alvo é resetado no Board, para que um novo alvo não seja criado sem necessidade.
+    this.board.enPassantTargetPos = null;
+}
+// FIM NOVO FLUXO
 
-		// 8. Zera o alvo EP do Board para que não seja carregado para o próximo turno do GameController
-		this.board.enPassantTargetPos = null; // Limpa o estado no board
-
-		// Loga estado de check/checkmate para o próximo jogador
-		this.logCheckState(this.currentTurn);
+// Loga estado de check/checkmate para o próximo jogador
+this.logCheckState(this.currentTurn);
 		if (this.gameOver) return true;
 
 		// Turno da IA
@@ -278,10 +280,10 @@ export class GameController {
 				this.currentTurn = "brancas";
 
 				// 11. Configura alvo EP para o próximo turno da Branca
-				if (this.enPassant) {
-					this.enPassant.setTarget(this.board.enPassantTargetPos);
-				}
-				this.board.enPassantTargetPos = null; // Limpa o estado no board
+				//if (this.enPassant) {
+				//	this.enPassant.setTarget(this.board.enPassantTargetPos);
+				//}
+				//this.board.enPassantTargetPos = null; // Limpa o estado no board
 
 				this.logCheckState(this.currentTurn);
 
@@ -398,4 +400,3 @@ export class GameController {
 		console.log("Jogo reiniciado!");
 	}
 }
-
