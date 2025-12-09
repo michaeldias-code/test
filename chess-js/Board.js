@@ -123,7 +123,7 @@ export class Board {
 		     let row = "";
 		     for (let c = 0; c < 8; c++) {
 		         const p = this.board[r * 8 + c];
-		         row += p ? p.tipo : "  ";
+		         row += p ? p.tipo : ".";
 		         row += " ";
 		     }
 			 console.log(row);
@@ -148,3 +148,4 @@ export class Board {
         }
     }
 }
+
