@@ -21,11 +21,11 @@ export class EnPassant {
         const targetCol = this.targetPos % 8;
 
         // LOG DE DEPURAÇÃO
-        console.log(`[EP Check] Peão em ${pawnPos} (R${pawnRow}, C${pawnCol}) tentando alvo ${this.targetPos} (R${targetRow}, C${targetCol})`);
+        //console.log(`[EP Check] Peão em ${pawnPos} (R${pawnRow}, C${pawnCol}) tentando alvo ${this.targetPos} (R${targetRow}, C${targetCol})`);
 
         // 1. Checagem de Coluna (Devem ser adjacentes)
         if (Math.abs(pawnCol - targetCol) !== 1) {
-            console.log(`[EP Falhou] Colunas não são adjacentes. Distância: ${Math.abs(pawnCol - targetCol)}`);
+            //console.log(`[EP Falhou] Colunas não são adjacentes. Distância: ${Math.abs(pawnCol - targetCol)}`);
             return [];
         }
 
@@ -36,19 +36,19 @@ export class EnPassant {
         // Se for Peão Branco (sobe o tabuleiro)
         if (targetRow < pawnRow) {
             if (pawnRow !== 3) {
-                console.log(`[EP Falhou] Peão branco na linha ${pawnRow}. Precisa estar na linha 3 (5ª fileira)`);
+                //console.log(`[EP Falhou] Peão branco na linha ${pawnRow}. Precisa estar na linha 3 (5ª fileira)`);
                 return [];
             }
         } 
         // Se for Peão Preto (desce o tabuleiro)
         else {
             if (pawnRow !== 4) {
-                console.log(`[EP Falhou] Peão preto na linha ${pawnRow}. Precisa estar na linha 4 (4ª fileira)`);
+                //console.log(`[EP Falhou] Peão preto na linha ${pawnRow}. Precisa estar na linha 4 (4ª fileira)`);
                 return [];
             }
         }
 
-        console.log(`[EP Sucesso] Alvo legal detectado em ${this.targetPos}`);
+        //console.log(`[EP Sucesso] Alvo legal detectado em ${this.targetPos}`);
         return [this.targetPos];
     }
 
@@ -60,4 +60,5 @@ export class EnPassant {
         return piece.tipo === '♙' ? to + 8 : to - 8;
     }
 }
+
 
