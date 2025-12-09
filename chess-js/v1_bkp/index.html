@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Jogo de Xadrez</title>
+    <link rel="stylesheet" href="style.css?v=13">
+</head>
+<body>
+    <h1>Jogo de Xadrez</h1>
+
+    <!-- Menu de Seleção de Dificuldade -->
+    <div id="difficulty-container">
+        <label for="difficulty">Selecione a Dificuldade: </label>
+        <select id="difficulty">
+            <option value="easy">Fácil</option>
+            <option value="normal">Normal</option>
+            <option value="hard">Difícil</option>
+        </select>
+    </div>
+    
+    <div id="chess-container"></div>
+
+    <button id="restart-btn">🔄 Reiniciar Jogo</button>
+
+    <!-- Modal de Game Over -->
+    <div id="game-over-modal" class="game-over-modal" style="display: none;">
+        <div class="game-over-content">
+            <span id="game-over-message" class="game-over-message"></span>
+            <button id="close-modal" class="close-btn">Fechar</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { GameController } from './GameController.js?v=1';
+        new GameController();
+    </script>
+</body>
+</html>

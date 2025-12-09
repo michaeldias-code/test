@@ -1,0 +1,291 @@
+/* ============================
+   GLOBAL / BODY
+============================ */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ============================
+   TÍTULO
+============================ */
+h1 {
+    width: 100%;
+    text-align: center;
+    margin: 15px 0;
+    font-size: clamp(1.5em, 5vw, 2.5em);
+    color: #333;
+}
+
+/* ============================
+   CONTAINER PRINCIPAL
+============================ */
+#chess-container {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 1fr auto;
+    gap: 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 600px; /* Tamanho máximo no desktop */
+    max-height: 600px;
+    height: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+/* ============================
+   RANKS (números à esquerda)
+============================ */
+#rank-area {
+    grid-row: 1;
+    grid-column: 1;
+    display: grid;
+    grid-template-rows: repeat(8, 1fr);
+    align-items: center;
+    justify-items: center;
+    font-size: clamp(10px, 2.8vw, 20px);
+    font-weight: bold;
+    padding-right: 4px;
+}
+
+/* ============================
+   FILES (letras embaixo)
+============================ */
+#file-area {
+    grid-row: 2;
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    justify-items: center;
+    align-items: center;
+    font-size: clamp(12px, 3vw, 22px);
+    font-weight: bold;
+}
+
+/* ============================
+   TABULEIRO
+============================ */
+#chessboard {
+    grid-row: 1;
+    grid-column: 2;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+    width: 100%;
+    height: 100%;
+    border: 3px solid #000;
+    box-shadow: 0 0 10px #000;
+    box-sizing: border-box;
+}
+
+/* ============================
+   CELULAS DO TABULEIRO
+============================ */
+.cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(22px, 5vw, 46px);
+}
+
+/* cores */
+.white { background: #f0d9b5; }
+.black { background: #b58863; }
+
+/* ============================
+   PEÇAS
+============================ */
+.piece {
+    pointer-events: none;
+    font-size: clamp(22px, 5vw, 46px);
+}
+
+.piece.brancas {
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+}
+
+.piece.pretas {
+    color: #000;
+    text-shadow: 1px 1px 2px #fff;
+}
+
+/* ============================
+   SELEÇÃO E ÚLTIMO LANCE
+============================ */
+.selected {
+    outline: 3px solid yellow;
+}
+
+.ai-move {
+    background-color: rgba(255, 255, 0, 0.45);
+}
+
+/* ============================
+   Estilo para o Modal de Game Over
+============================ */
+.game-over-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none; /* Inicialmente escondido */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Fica acima de tudo */
+}
+
+.game-over-content {
+    background-color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* Estilos para os botões de fim de jogo */
+.game-over-message {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    font-weight: bold;
+    color: red;
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-align: center;
+    z-index: 1000;
+}
+
+.replay-button, .show-board-button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px 5px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+/* Estilo para os botões */
+.replay-button, .no-button {
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+}
+
+.replay-button {
+    background-color: #4CAF50; /* Verde para 'Sim' */
+    color: white;
+}
+
+.no-button {
+    background-color: #f44336; /* Vermelho para 'Não' */
+    color: white;
+}
+
+
+
+.close-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: #ff6347;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+
+.close-btn:hover {
+    background-color: #ff4500;
+}
+
+/* Botão de Reiniciar */
+#restart-btn {
+    display: block;
+    margin: 25px auto;
+    padding: 12px 24px;
+    background: #222;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#restart-btn:hover {
+    background: #444;
+    transform: scale(1.05);
+}
+
+#restart-btn:active {
+    transform: translateY(0px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+}
+
+#difficulty-container {
+    margin: 20px 0;
+    font-size: 1.2em;
+}
+
+#difficulty {
+    padding: 8px;
+    font-size: 1em;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+/* ============================
+   AJUSTES PARA CELULAR
+============================ */
+@media (max-width: 600px) {
+    /* Aumenta o tamanho do container para 30% maior */
+    #chess-container {
+        width: 110vw !important; /* Aumenta o tamanho do container no celular (30% maior) */
+        height: 110vw !important; /* Aumenta também a altura */
+    }
+
+    /* Ajusta o tabuleiro para ocupar todo o tamanho */
+    #chessboard {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Aumenta o tamanho das células e das peças no celular em 30% */
+    .cell {
+        font-size: clamp(29px, 7vw, 60px) !important; /* Tamanho das células 30% maior */
+    }
+
+    .piece {
+        font-size: clamp(29px, 7vw, 60px) !important; /* Tamanho das peças 30% maior */
+    }
+
+    /* Ajusta o espaçamento das notações para não invadir o tabuleiro */
+    #rank-area {
+        padding-right: 8px !important;
+    }
+
+    #file-area {
+        padding-top: 8px !important;
+    }
+}
+
+body.consolemode #chess-container {
+    display: none; /* Esconde o tabuleiro */
+}
