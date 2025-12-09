@@ -1,10 +1,11 @@
-// View.js — Versão atualizada e completa
+// View.js — Versão atualizada e completa com destaque de movimentos válidos
 export class View {
     constructor(board, controller) {
         this.board = board;
         this.controller = controller;
         this.selected = null;
         this.lastMove = null;
+        this.validMoves = []; // <<<< NOVO: Lista de índices dos movimentos válidos
 
         // Espera que exista <div id="chess-container"></div> no HTML
         this.container = document.getElementById("chess-container");
@@ -36,14 +37,10 @@ export class View {
         this.addClickHandlers();
     }
 
-    /**
-     * O GameController chama esse método para ligar o botão de restart.
-     * Evita que o View crie elementos duplicados.
-     */
     setupRestartButton(callback) {
+        // ... código mantido ...
         const btn = document.getElementById("restart-btn");
         if (!btn) return;
-        // remove listeners anteriores por segurança (evita duplicatas)
         btn.replaceWith(btn.cloneNode(true));
         const fresh = document.getElementById("restart-btn");
         fresh.addEventListener("click", callback);
@@ -51,8 +48,8 @@ export class View {
 
     /* ---------------- Notações ---------------- */
     createFileLabels() {
+        // ... código mantido ...
         const files = "abcdefgh";
-        // limpa caso já exista (re-render seguro)
         this.fileArea.innerHTML = "";
         for (let c = 0; c < 8; c++) {
             const lbl = document.createElement("div");
@@ -62,6 +59,7 @@ export class View {
     }
 
     createRankLabels() {
+        // ... código mantido ...
         this.rankArea.innerHTML = "";
         for (let r = 0; r < 8; r++) {
             const lbl = document.createElement("div");
@@ -69,6 +67,41 @@ export class View {
             this.rankArea.appendChild(lbl);
         }
     }
+
+    /* ---------------- Destaque de Movimentos Válidos (NOVO) ---------------- */
+
+    highlightValidMoves(moves) {
+        // Limpa destaques anteriores primeiro
+        this.clearHighlights();
+        this.validMoves = moves;
+
+        // Adiciona a classe 'valid-move' às células de destino
+        moves.forEach(index => {
+            const cell = this.boardDiv.querySelector(`.cell[data-index="${index}"]`);
+            if (cell) {
+                cell.classList.add("valid-move");
+                // Adiciona um ponto visual
+                if (!this.board.board[index]) {
+                    const dot = document.createElement("div");
+                    dot.className = "valid-dot";
+                    cell.appendChild(dot);
+                }
+            }
+        });
+    }
+
+    clearHighlights() {
+        // Remove todos os destaques de movimentos válidos
+        this.boardDiv.querySelectorAll('.valid-move').forEach(cell => {
+            cell.classList.remove('valid-move');
+        });
+        // Remove todos os pontos visuais
+        this.boardDiv.querySelectorAll('.valid-dot').forEach(dot => {
+            dot.remove();
+        });
+        this.validMoves = [];
+    }
+
 
     /* ---------------- Renderização ---------------- */
     render() {
@@ -90,6 +123,9 @@ export class View {
                 if (this.lastMove && (i === this.lastMove.from || i === this.lastMove.to)) {
                     cell.classList.add("ai-move");
                 }
+                
+                // Destaque de movimento válido (mantido no render, embora seja melhor aplicar fora)
+                // Usaremos clearHighlights/highlightValidMoves para melhor desempenho, mas a lógica de seleção segue abaixo:
 
                 // Renderizar peça
                 const piece = this.board.board[i];
@@ -103,10 +139,16 @@ export class View {
                 this.boardDiv.appendChild(cell);
             }
         }
+        
+        // Re-aplica os destaques de movimentos válidos após o re-render
+        if (this.selected !== null && this.validMoves.length > 0) {
+            this.highlightValidMoves(this.validMoves);
+        }
     }
 
     /* ---------------- Destaque de movimento AI/último movimento ---------------- */
     highlightCell(index) {
+        // ... código mantido ...
         const prev = this.boardDiv.querySelector(".ai-move");
         if (prev) prev.classList.remove("ai-move");
 
@@ -118,38 +160,47 @@ export class View {
         }, 500);
     }
 
-    /* ---------------- Eventos de clique ---------------- */
+    /* ---------------- Eventos de clique (MODIFICADO) ---------------- */
     addClickHandlers() {
         this.boardDiv.addEventListener("click", e => {
             const cell = e.target.closest(".cell");
             if (!cell) return;
 
             const index = Number(cell.dataset.index);
-			
-			console.log(`DEBUG click em célula, alvo DOM:`, cell, 'dataset.index=', cell && cell.dataset && cell.dataset.index);
-			
+            
+            console.log(`DEBUG click em célula, alvo DOM:`, cell, 'dataset.index=', cell && cell.dataset && cell.dataset.index);
+            
             const piece = this.board.board[index];
 
             if (this.selected === null) {
-                // só permite selecionar peças brancas (jogador)
-                if (piece && piece.cor === "brancas") {
+                // Seleção inicial: só permite selecionar peças brancas
+                if (piece && piece.cor === "brancas" && this.controller.currentTurn === "brancas") {
                     this.selected = index;
+                    // <<<< NOVO: Obtém e destaca os movimentos válidos >>>>
+                    this.validMoves = this.controller.getValidMoves(index);
+                    this.highlightValidMoves(this.validMoves);
                 }
             } else {
                 if (this.selected === index) {
+                    // Deseleciona
                     this.selected = null;
+                    this.clearHighlights(); // <<<< NOVO: Limpa os destaques
                 } else {
-					console.log(`DEBUG tentativa de movimento: from=${this.selected} (${this.board.board[this.selected]?.tipo}), to=${index} (${this.board.board[index] ? this.board.board[index].tipo : 'vazio'})`);
+                    // Tentativa de movimento
+                    console.log(`DEBUG tentativa de movimento: from=${this.selected} (${this.board.board[this.selected]?.tipo}), to=${index} (${this.board.board[index] ? this.board.board[index].tipo : 'vazio'})`);
 
                     const ok = this.controller.movePiece(this.selected, index);
                     if (ok) this.lastMove = { from: this.selected, to: index };
+                    
                     this.selected = null;
+                    this.clearHighlights(); // <<<< NOVO: Limpa os destaques
                 }
             }
 
             this.render();
         });
     }
+
 
     // ---------------- Game Over Modal (mantive seu estilo) ----------------
     onGameOver({ winner, reason }) {
@@ -295,5 +346,3 @@ export class View {
         }
     }
 }
-
-
