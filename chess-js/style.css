@@ -1,5 +1,5 @@
 /* ============================
-   style.css — UNIFICADO (Layout V2 + Estética V1 + Responsividade V2/vmin)
+   style.css — AJUSTADO (Layout V2 + Estética V1 + Correções de Overflow)
 ============================ */
 
 /* ============================
@@ -12,8 +12,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Alinha o conteúdo ao topo */
-    min-height: 100vh;
+    /* Usar min-height: 100vh para ocupar a tela e permitir scroll se necessário */
+    min-height: 100vh; 
+    padding: 10px 0 20px 0; /* Espaço em cima e embaixo para não encostar nas bordas */
+    box-sizing: border-box;
 }
 
 /* ============================
@@ -28,7 +30,7 @@ h1 {
 }
 
 /* ============================
-   CONTAINER PRINCIPAL (GRID USADA PELO VIEW.JS)
+   CONTAINER PRINCIPAL (GRID)
 ============================ */
 #chess-container {
     display: grid;
@@ -37,19 +39,24 @@ h1 {
     /* Linha 1: Tabuleiro (1 Frac.) | Linha 2: Files (Auto) */
     grid-template-rows: 1fr auto;
     gap: 0;
-    margin: 0 auto;
-    /* Usa vmin para responsividade (como no V1, mas aplicado ao container) */
+    margin: 10px auto; /* Adicionar margem vertical para separar do título/botão */
+    
+    /* CHAVE 1: Dimensionamento Responsivo e Limitação no Desktop */
     width: 90vmin;
     height: 90vmin;
+    /* Limita o tamanho máximo em desktops grandes para evitar estouro vertical */
+    max-width: 600px;
+    max-height: 600px; 
+    
     box-sizing: border-box;
     position: relative;
-    /* Estilo da borda/sombra do tabuleiro (mantido do V1) */
+    /* Borda e Sombra do tabuleiro (mantida do visual V1) */
     border: 3px solid #000;
     box-shadow: 0 0 10px rgba(0,0,0,0.5); 
 }
 
 /* ============================
-   RANKS (números à esquerda) - GERADO PELO VIEW.JS
+   RANKS (números à esquerda) - Corrigido o alinhamento e fonte
 ============================ */
 #rank-area {
     grid-row: 1;
@@ -58,14 +65,17 @@ h1 {
     grid-template-rows: repeat(8, 1fr);
     align-items: center;
     justify-items: center;
-    /* Fonte usando vmin para responsividade (Adaptado do V1) */
-    font-size: calc(90vmin * 0.04);
+    /* CHAVE 2: Fonte mais robusta e menor para evitar invasão */
+    font-size: clamp(10px, 3vw, 20px); 
     font-weight: bold;
     padding-right: 4px;
+    
+    /* Ajuste para evitar que as notações fiquem "esticadas" */
+    height: 100%; 
 }
 
 /* ============================
-   FILES (letras embaixo) - GERADO PELO VIEW.JS
+   FILES (letras embaixo) - Corrigido o alinhamento e fonte
 ============================ */
 #file-area {
     grid-row: 2;
@@ -74,8 +84,8 @@ h1 {
     grid-template-columns: repeat(8, 1fr);
     justify-items: center;
     align-items: center;
-    /* Fonte usando vmin para responsividade (Adaptado do V1) */
-    font-size: calc(90vmin * 0.04);
+    /* CHAVE 2: Fonte mais robusta e menor para evitar invasão */
+    font-size: clamp(12px, 3vw, 22px);
     font-weight: bold;
     padding-top: 4px;
 }
@@ -91,35 +101,29 @@ h1 {
     grid-template-rows: repeat(8, 1fr);
     width: 100%;
     height: 100%;
-    /* Remove a borda e sombra do #chessboard, pois já está no #chess-container */
     border: none;
     box-shadow: none;
     box-sizing: border-box;
 }
 
 /* ============================
-   CELULAS DO TABULEIRO
+   CELULAS E PEÇAS
 ============================ */
 .cell {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Responsividade e fonte adaptadas do V1 */
-    font-size: 4.5vmin;
+    /* Usa clamp para tamanho de fonte das peças/células */
+    font-size: clamp(28px, 6vw, 56px); 
     user-select: none;
 }
 
-/* cores (V1) */
 .white { background: #f0d9b5; }
 .black { background: #b58863; }
 
-/* ============================
-   PEÇAS
-============================ */
 .piece {
     pointer-events: none;
-    /* Responsividade e fonte adaptadas do V1 */
-    font-size: calc(90vmin / 10);
+    font-size: 1em; /* Usa o tamanho da célula (herdado) */
 }
 
 .piece.brancas {
@@ -133,7 +137,7 @@ h1 {
 }
 
 /* ============================
-   SELEÇÃO E ÚLTIMO LANCE (V1)
+   SELEÇÃO E ÚLTIMO LANCE
 ============================ */
 .selected {
     outline: 3px solid yellow;
@@ -146,7 +150,7 @@ h1 {
 }
 
 /* ============================
-   CONTROLES E UI (V2)
+   CONTROLES E UI
 ============================ */
 
 #difficulty-container {
@@ -180,7 +184,7 @@ h1 {
 }
 
 /* ============================
-   MODAL DE FIM DE JOGO (V2)
+   MODAL DE FIM DE JOGO
 ============================ */
 
 .game-over-modal {
@@ -190,7 +194,7 @@ h1 {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.6);
-    display: none; /* Controlado pelo JS */
+    display: none;
     justify-content: center;
     align-items: center;
     z-index: 9999;
@@ -213,17 +217,10 @@ h1 {
     border: none;
 }
 
-.replay-button {
-    background-color: #4CAF50; /* Verde para 'Sim' */
-    color: white;
-}
+.replay-button { background-color: #4CAF50; color: white; }
+.no-button { background-color: #f44336; color: white; }
 
-.no-button {
-    background-color: #f44336; /* Vermelho para 'Não' */
-    color: white;
-}
-
-/* Opcional: Estilo básico para o modal de promoção */
+/* Modal de Promoção */
 .promotion-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -257,17 +254,19 @@ h1 {
 
 
 /* ============================
-   AJUSTES PARA CELULAR (garantido pelo VMIN, mas adicionamos um ajuste extra)
+   AJUSTES PARA CELULAR
 ============================ */
 @media (max-width: 600px) {
-    /* O VMIN já funciona bem, mas este bloco garante compatibilidade */
+    /* No celular, usamos a largura máxima da tela */
     #chess-container {
         width: 95vw;
         height: 95vw;
+        max-width: none;
+        max-height: none;
     }
     
-    /* Reajusta a fonte para telas muito pequenas, se necessário */
+    /* Aumenta a fonte das peças/células para melhor toque */
     .cell, .piece {
-        font-size: clamp(30px, 6vw, 50px);
+        font-size: clamp(35px, 8vw, 60px);
     }
 }
