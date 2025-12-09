@@ -24,6 +24,7 @@ export class AI_Medium {
 
     // interface pública chamada pelo AI pai / GameController
     makeMove(color) {
+        console.log("Dificuldade selecionada:");
         const enemyColor = color === "brancas" ? "pretas" : "brancas";
 
         // 1) coletar movimentos
@@ -324,3 +325,4 @@ export class AI_Medium {
         return removed;
     }
 }
+
