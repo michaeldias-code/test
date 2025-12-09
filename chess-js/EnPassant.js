@@ -36,33 +36,32 @@ export class EnPassant {
 	 * @param {number} pawnPos A posição atual do peão que está verificando.
 	 * @returns {number[]} Array contendo 0 ou 1 alvo EP.
 	 */
+// EnPassant.js
 	getEnPassantTargetsForPawn(pawnPos) {
 		if (this.targetPos === null) return [];
-
-		// 1. Checar se o alvo EP está na mesma linha EP que o peão.
+	
 		const pawnRow = Math.floor(pawnPos / 8);
 		const targetRow = Math.floor(this.targetPos / 8);
-		
-		// Linha EP para Brancas: 3 (índices 24-31). Peão Branco: Linha 4 (índices 32-39).
-		// Linha EP para Pretas: 6 (índices 40-47). Peão Preto: Linha 5 (índices 32-39).
-		if (pawnRow !== 3 && pawnRow !== 4) return [];
-
-		// 2. Checar se o peão está adjacente (coluna) ao alvo EP.
 		const pawnCol = pawnPos % 8;
 		const targetCol = this.targetPos % 8;
-
+	
+		// 1. Checar se estão em colunas adjacentes (coluna 3 vs coluna 4, etc.)
 		if (Math.abs(pawnCol - targetCol) !== 1) return [];
+	
+		// 2. Checar se o peão está na linha correta para capturar
+		// Para Brancas: Peão deve estar na fileira 5 (pawnRow === 3)
+		// Para Pretas: Peão deve estar na fileira 4 (pawnRow === 4)
 		
-		// 3. Checar se o alvo EP está na linha correta (ex: peão branco na linha 4 mira linha 3)
-		// Brancas (Linha 4 -> Linha 3): target deve ser pos-8.
-		if (pawnRow === 4 && targetRow === 2 && this.targetPos === pawnPos - 8) {
+		// Alvo EP das Brancas (captura para trás): targetRow deve ser 2
+		if (pawnRow === 3 && targetRow === 2 && this.targetPos === pawnPos - 8 + (targetCol - pawnCol)) {
 			return [this.targetPos];
 		}
-		// Pretas (Linha 3 -> Linha 4): target deve ser pos+8.
-		if (pawnRow === 3 && targetRow === 5 && this.targetPos === pawnPos + 8) {
+	
+		// Alvo EP das Pretas (captura para frente): targetRow deve ser 5
+		if (pawnRow === 4 && targetRow === 5 && this.targetPos === pawnPos + 8 + (targetCol - pawnCol)) {
 			return [this.targetPos];
 		}
-
+	
 		return [];
 	}
 
@@ -97,4 +96,3 @@ export class EnPassant {
 }
 
 // export default EnPassant; // (Como o GameController importa com 'EnPassant from', usaremos export default)
-
