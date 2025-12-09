@@ -3,7 +3,7 @@
 ============================ */
 
 /* ============================
-   GLOBAL / BODY (Menos padding)
+   GLOBAL / BODY (CORREÇÃO DE OVERFLOW)
 ============================ */
 body {
     margin: 0;
@@ -13,28 +13,35 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    /* CHAVE 1: Remove min-height: 100vh para permitir rolagem nativa quando necessário, ou use 100%*/
-    min-height: 100%; 
     
-    /* CHAVE 2: Reduz o padding vertical */
+    /* CHAVE 1: Faz o body rolar quando o conteúdo total exceder a altura da tela */
+    min-height: 100vh;
+    overflow-y: auto; /* Permite rolagem vertical quando necessário */
+    
     padding: 5px 0 15px 0; 
     box-sizing: border-box;
 }
 
+
 /* ============================
-   TÍTULO (Margem Reduzida)
+   TÍTULO E CONTROLES (Margens Otimizadas)
 ============================ */
 h1 {
     width: 100%;
     text-align: center;
-    /* CHAVE 3: Reduz a margem superior do título */
     margin: 10px 0;
     font-size: clamp(1.5em, 5vw, 2.5em);
     color: #333;
 }
 
+#difficulty-container {
+    margin: 10px 0; 
+    font-size: 1.2em;
+}
+
 /* ============================
-   CONTAINER PRINCIPAL (GRID) - AJUSTE FINAL DE OVERFLOW NO DESKTOP
+   CONTAINER PRINCIPAL (GRID)
+   >> VMIN RESTAURADO + MAX-WIDTH NO DESKTOP.
 ============================ */
 #chess-container {
     display: grid;
@@ -44,28 +51,22 @@ h1 {
     
     margin: 5px auto; 
     
-    /* CHAVE 1: Limitamos a largura MÁXIMA para 600px */
-    max-width: 600px;
+    /* CHAVE 2: Retorna o 90vmin para garantir o quadrado e responsividade geral */
+    width: 90vmin;
+    height: 90vmin;
     
-    /* CHAVE 2: Limitamos a altura MÁXIMA usando a altura do viewport (80vh) */
-    /* Isso garante que ele nunca ocupe mais de 80% da altura da tela. */
-    max-height: 80vh; 
-    
-    /* Usamos 'auto' para que a largura/altura sejam definidas pelo max-width/max-height */
-    width: auto; 
-    height: auto; 
-
-    /* A proporção 1:1 é garantida pelo grid interno (células) */
+    /* CHAVE 3: Limita o tamanho máximo no DESKTOP para não ficar GIGANTE */
+    max-width: 600px; 
+    max-height: 600px;
     
     box-sizing: border-box;
     position: relative;
-    
     border: none;
     box-shadow: none; 
 }
 
 /* ============================
-   RANKS (números à esquerda) - Ajustado para fora
+   RANKS, FILES E TABULEIRO (Permanece com Notações Externas)
 ============================ */
 #rank-area {
     grid-row: 1;
@@ -74,19 +75,13 @@ h1 {
     grid-template-rows: repeat(8, 1fr);
     align-items: center;
     justify-items: center;
-    
     font-size: clamp(10px, 3vw, 20px); 
     font-weight: bold;
-    
-    /* CHAVE: MARGEM NEGATIVA para puxar os números para fora */
-    padding-right: 8px; /* Espaço entre o número e a borda */
-    margin-right: -1px; /* Puxa para a esquerda */
-
+    padding-right: 8px;
+    margin-right: -1px;
     height: 100%; 
 }
-/* ============================
-   FILES (letras embaixo) - Ajustado para fora
-============================ */
+
 #file-area {
     grid-row: 2;
     grid-column: 2;
@@ -94,20 +89,12 @@ h1 {
     grid-template-columns: repeat(8, 1fr);
     justify-items: center;
     align-items: center;
-    
     font-size: clamp(12px, 3vw, 22px);
     font-weight: bold;
-    
-    /* CHAVE: MARGEM NEGATIVA para puxar as letras para baixo */
-    padding-top: 8px; /* Espaço entre a borda e a letra */
-    margin-top: -1px; /* Puxa para baixo */
+    padding-top: 8px;
+    margin-top: -1px;
 }
 
-
-/* ============================
-   TABULEIRO
-   >> A BORDA ESTÁ AQUI AGORA!
-============================ */
 #chessboard {
     grid-row: 1;
     grid-column: 2;
@@ -116,8 +103,6 @@ h1 {
     grid-template-rows: repeat(8, 1fr);
     width: 100%;
     height: 100%;
-    
-    /* CHAVE: BORDA E SOMBRA NO TABULEIRO FILHO */
     border: 3px solid #000;
     box-shadow: 0 0 10px rgba(0,0,0,0.5);
     box-sizing: border-box;
@@ -169,14 +154,6 @@ h1 {
 /* ============================
    CONTROLES E UI
 ============================ */
-/* ============================
-   CONTROLES (DIFICULDADE)
-============================ */
-#difficulty-container {
-    /* CHAVE 4: Reduz a margem vertical para economizar espaço */
-    margin: 10px 0; 
-    font-size: 1.2em;
-}
 
 #difficulty {
     padding: 8px;
@@ -277,23 +254,18 @@ h1 {
     border-color: #aaa;
 }
 
-
 /* ============================
-   AJUSTES PARA CELULAR
+   AJUSTES PARA CELULAR (Margin inferior resolvida na etapa anterior)
 ============================ */
 @media (max-width: 600px) {
-    /* No celular, usamos a largura máxima da tela */
     #chess-container {
         width: 95vw;
         height: 95vw;
         max-width: none;
         max-height: none;
-        
-        /* CHAVE: MARGEM EXTRA INFERIOR para empurrar o botão de resetar */
         margin-bottom: 40px; 
     }
     
-    /* Aumenta a fonte das peças/células para melhor toque */
     .cell, .piece {
         font-size: clamp(35px, 8vw, 60px);
     }
