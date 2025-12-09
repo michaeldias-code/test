@@ -14,7 +14,15 @@ export class GameController {
 	    this.difficultySelect.addEventListener("change", () => {
     	    this.difficulty = this.difficultySelect.value;
         	console.log("Dificuldade selecionada:", this.difficulty);
+	        this.resetGame(); // reinicia tudo
+
     	});
+	    this.resetGame();
+	}
+
+
+
+		
 		
 		console.log("GameController inicializando...");
 
@@ -395,7 +403,7 @@ this.logCheckState(this.currentTurn);
 	
 		// injetar EnPassant no MoveValidator e AI
 		this.validator = new MoveValidator(this.board.board, this.enPassant);
-		this.ai = new AI(this.board, this.validator, this.enPassant); // Passar EP para AI
+		this.ai = new AI(this.board, this.validator, this.enPassant, this.difficulty);
 	
 		this.gameOver = false;
 		this.currentTurn = "brancas";
@@ -411,6 +419,7 @@ this.logCheckState(this.currentTurn);
 		console.log("Jogo reiniciado!");
 	}
 }
+
 
 
 
