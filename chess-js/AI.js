@@ -1,66 +1,90 @@
-// AI.js  (AI Manager / Orquestrador)
-
-import { AI_Easy } from "./AI_Easy.js";
-import { AI_Medium } from "./AI_Medium.js";
-import { AI_Hard } from "./AI_Hard.js";
+import { AI_Easy } from "./AI_Easy.js?v=999";
 
 export class AI {
     /**
-     * @param {Board} board
-     * @param {MoveValidator} validator
-     * @param {EnPassant} enPassant
-     * @param {string} initialDifficulty - 'easy', 'medium', 'hard'
+     * @param {Board} board 
+     * @param {MoveValidator} validator 
+     * @param {EnPassant} enPassant 
+     * @param {string} difficulty 
      */
-    constructor(board, validator, enPassant, initialDifficulty = "easy") {
+    constructor(board, validator, enPassant, difficulty = "easy") {
+
         this.board = board;
         this.validator = validator;
         this.enPassant = enPassant;
 
-        this.strategies = {
-            "easy": AI_Easy,
-            "medium": AI_Medium,
-            "hard": AI_Hard,
-        };
+        this.setDifficulty(difficulty);
 
-        this.currentStrategy = null;
-
-        this.setDifficulty(initialDifficulty);
+        console.log(`🤖 IA Pai carregada. Dificuldade selecionada: ${difficulty}`);
     }
 
     /**
-     * Define qual estratégia a IA deve usar
+     * A única função para mudar a estratégia
      */
-    setDifficulty(difficulty) {
-        const key = difficulty.toLowerCase();
-        const Strategy = this.strategies[key];
-
-        if (!Strategy) {
-            console.warn(`Dificuldade desconhecida: ${difficulty}. Usando 'easy'.`);
-            this.currentStrategy = new AI_Easy(this.board, this.validator, this.enPassant);
-            return;
+    setDifficulty(level) {
+        switch (level) {
+            case "easy":
+            default:
+                this.strategy = new AI_Easy();
+                break;
         }
-
-        this.currentStrategy = new Strategy(this.board, this.validator, this.enPassant);
-        console.log(`🤖 IA configurada para dificuldade: ${key}`);
     }
 
     /**
-     * A estratégia devolve somente o movimento.
-     * O GameController executa o movimento.
+     * GameController chama APENAS ESTE MÉTODO
+     * A IA retorna um movimento COMPLETAMENTE executado
      */
-    getBestMove(playerColor) {
-        if (!this.currentStrategy) {
-            console.error("AI sem estratégia ativa!");
-            return null;
-        }
+    makeMove(color) {
 
-        return this.currentStrategy.findMove(playerColor);
+        // 1) IA coleta todos os movimentos legais usando modules do jogo
+        const validMoves = this.getValidMoves(color);
+
+        if (validMoves.length === 0) return null;
+
+        // 2) IA_Easy decide apenas QUAL movimento
+        const move = this.strategy.chooseMove(validMoves);
+
+        if (!move) return null;
+
+        // 3) IA Pai executa o movimento (continua sendo responsabilidade da AI pai)
+        this.executeMove(move);
+
+        return move;
     }
 
-    isThinking() {
-        if (this.currentStrategy && typeof this.currentStrategy.isSearching === "function") {
-            return this.currentStrategy.isSearching();
+    /**
+     * Retorna todas as jogadas legais
+     */
+    getValidMoves(color) {
+        const moves = [];
+
+        for (let from = 0; from < 64; from++) {
+            const p = this.board.board[from];
+            if (!p || p.cor !== color) continue;
+
+            const possible = this.validator.getPossibleMoves(from);
+
+            for (const to of possible) {
+                moves.push({ from, to });
+            }
         }
-        return false;
+
+        return moves;
+    }
+
+    /**
+     * Executa a jogada dentro do Board
+     * Aqui você pode incluir EP, promoção, rei em cheque etc.
+     */
+    executeMove(move) {
+        const piece = this.board.board[move.from];
+
+        // Se quiser incluir EP:
+        let epCapturedPos = null;
+        if (this.enPassant && piece.tipo === "♙" || piece.tipo === "♟") {
+            epCapturedPos = this.enPassant.isEnPassantMove(move.from, move.to, piece);
+        }
+
+        this.board.movePiece(move.from, move.to, epCapturedPos);
     }
 }
