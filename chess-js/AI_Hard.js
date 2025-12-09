@@ -1,7 +1,7 @@
 // AI_HardEvo.js
 import { AI_Medium } from './AI_Medium.js';
 
-export class AI_HardEvo extends AI_Medium {
+export class AI_Hard extends AI_Medium {
     constructor(board, validator, enPassant) {
         super(board, validator, enPassant);
 
