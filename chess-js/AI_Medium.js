@@ -38,6 +38,16 @@ export class AI_Medium {
 
         // 3) tentar capturas (priorizar melhores)
         const captureMoves = myMoves.filter(m => m.capturedPiece !== null);
+		
+		
+		// filtra capturas que não deixam a peça capturada imediatamente (evitar suicídio)
+		const safeCaptures = captureMoves.filter(m => !this.wouldBeAttackedAfterMove(m, enemyColor));
+
+		// substitui captureMoves por safeCaptures se houver pelo menos uma segura
+		if (safeCaptures.length > 0) {
+			captureMoves.splice(0, captureMoves.length, ...safeCaptures);
+		}
+		
         if (captureMoves.length > 0) {
             const bestCapture = this.chooseBestCapture(captureMoves, color, enemyMoves);
             if (bestCapture) {
@@ -335,4 +345,3 @@ export class AI_Medium {
         return removed;
     }
 }
-
