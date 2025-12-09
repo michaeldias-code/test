@@ -118,23 +118,41 @@ export class Board {
 	}
 	
     printBoard() {
-        //const display = this.board.map(p => p ? p.tipo : ".").reduce((acc, val, idx) => {
-        //    acc += val + " ";
-        //    if ((idx + 1) % 8 === 0) acc += "\n";
-        //    return acc;
-        //}, "");
-        //console.log(display);
-        console.log(""); // linha extra para separar
-        for (let r = 0; r < 8; r++) {
-            let row = "";
-            for (let c = 0; c < 8; c++) {
-                const p = this.board[r * 8 + c];
-                row += p ? p.tipo : ".";
-                row += " ";
-            }
-            console.log(row);
-        }
-        console.log(""); // linha extra para separar
+       // console.log(""); // linha extra para separar
+       // for (let r = 0; r < 8; r++) {
+       //     let row = "";
+       //     for (let c = 0; c < 8; c++) {
+       //         const p = this.board[r * 8 + c];
+       //         row += p ? p.tipo : ".";
+       //         row += " ";
+       //     }
+       //     console.log(row);
+       // }
+       // console.log(""); // linha extra para separar
+		console.clear();
+		const cellWidth = 4; // largura de cada casa no console
+	
+		let header = "   ";
+		for (let c = 0; c < 8; c++) {
+			header += String.fromCharCode(97 + c).padEnd(cellWidth, " ");
+		}
+		console.log(header);
+	
+		for (let row = 0; row < 8; row++) {
+			let linha = (8 - row) + "  ";
+	
+			for (let col = 0; col < 8; col++) {
+				const piece = this.board[row * 8 + col];
+				const symbol = piece ? piece.symbol : " ";
+	
+				// cada casa tem largura fixa
+				linha += symbol.padEnd(cellWidth, " ");
+			}
+	
+			console.log(linha + (8 - row));
+		}
+	
+		console.log(header);
     }
     
     
@@ -154,6 +172,7 @@ export class Board {
         }
     }
 }
+
 
 
 
