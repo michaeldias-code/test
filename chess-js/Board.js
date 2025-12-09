@@ -118,7 +118,7 @@ export class Board {
 	}
 	
     printBoard() {
-       // console.log(""); // linha extra para separar
+  // console.log(""); // linha extra para separar
        // for (let r = 0; r < 8; r++) {
        //     let row = "";
        //     for (let c = 0; c < 8; c++) {
@@ -130,30 +130,25 @@ export class Board {
        // }
        // console.log(""); // linha extra para separar
 		console.clear();
-		const cellWidth = 4; // largura de cada casa no console
+		const EMPTY = "　"; // espaço que tem a MESMA largura que ♙, ♟ etc
 	
-		let header = "   ";
-		for (let c = 0; c < 8; c++) {
-			header += String.fromCharCode(97 + c).padEnd(cellWidth, " ");
-		}
-		console.log(header);
+		console.log("   a  b  c  d  e  f  g  h");
 	
 		for (let row = 0; row < 8; row++) {
 			let linha = (8 - row) + "  ";
 	
 			for (let col = 0; col < 8; col++) {
 				const piece = this.board[row * 8 + col];
-				const symbol = piece ? piece.symbol : " ";
+				const symbol = piece ? piece.symbol : EMPTY;
 	
-				// cada casa tem largura fixa
-				linha += symbol.padEnd(cellWidth, " ");
+				linha += symbol + " ";
 			}
 	
 			console.log(linha + (8 - row));
 		}
 	
-		console.log(header);
-    }
+		console.log("   a  b  c  d  e  f  g  h");
+	}
     
     
     testCommand(command, args) {
@@ -172,6 +167,7 @@ export class Board {
         }
     }
 }
+
 
 
 
