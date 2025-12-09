@@ -1,3 +1,4 @@
+//AI.js v1
 import { AI_Easy } from "./AI_Easy.js?v=999";
 import { AI_Medium } from "./AI_Medium.js?v=999";
 import { AI_Hard } from "./AI_Hard.js?v=999";
@@ -32,3 +33,4 @@ export class AI {
         return this.current.makeMove(color); // delega para a IA filha
     }
 }
+
