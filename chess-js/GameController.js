@@ -1,6 +1,6 @@
 // GameController.js -vGem
 import { View } from './View.js?v=999';
-import { AI } from './AI.js?v=999';
+import AI from './AI.js?v=999';
 import { Board } from './Board.js?v=999';
 import { EnPassant } from './EnPassant.js?v=999'; // <<<< CORRIGIDO AQUI: USAR { }
 import { MoveValidator } from './MoveValidator.js?v=999';
@@ -401,4 +401,5 @@ this.logCheckState(this.currentTurn);
 		console.log("Jogo reiniciado!");
 	}
 }
+
 
