@@ -266,17 +266,17 @@ h1 {
 }
 
 /* ============================
-   AJUSTES PARA CELULAR (CORREÇÃO DE DIMENSIONAMENTO INSTÁVEL)
+   AJUSTES PARA CELULAR (CORREÇÃO DE DIMENSIONAMENTO ESTÁVEL)
 ============================ */
 @media (max-width: 600px) {
     #chess-container {
         /* Usamos VW para garantir que ele se encaixe na largura da tela */
         width: 95vw; 
         
-        /* CHAVE 1: Removemos a altura (height: 95vw) */
+        /* CHAVE 1: Removemos a altura e usamos auto */
         height: auto; 
         
-        /* CHAVE 2: Usamos aspect-ratio para FORÇAR o quadrado 1:1 */
+        /* CHAVE 2: Usamos aspect-ratio para FORÇAR o quadrado 1:1 de forma estável */
         aspect-ratio: 1 / 1; 
 
         max-width: none;
@@ -284,10 +284,9 @@ h1 {
         margin-bottom: 40px; 
     }
     
-    /* CHAVE 3: Ajuste na fonte das peças */
+    /* A fonte das peças (font-size) será herdada, mas a cláusula clamp abaixo
+       garante que a peça tenha um tamanho bom e proporcional à casa. */
     .cell, .piece {
-        /* Usamos o tamanho da célula (herdado) ou 'vw' para manter a proporção */
-        /* Clamp para garantir bom tamanho em diferentes tamanhos de celular */
         font-size: clamp(35px, 8vw, 60px); 
     }
 }
