@@ -17,12 +17,7 @@ export class GameController {
 	        this.resetGame(); // reinicia tudo
 
     	});
-	    this.resetGame();
-	}
-
-
-
-		
+	
 		
 		console.log("GameController inicializando...");
 
@@ -419,6 +414,7 @@ this.logCheckState(this.currentTurn);
 		console.log("Jogo reiniciado!");
 	}
 }
+
 
 
 
