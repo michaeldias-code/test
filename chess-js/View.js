@@ -173,18 +173,21 @@ export class View {
             const piece = this.board.board[index];
 
             if (this.selected === null) {
-                // Seleção inicial: só permite selecionar peças brancas
+                // Seleção inicial: só permite selecionar peças brancas (jogador)
                 if (piece && piece.cor === "brancas" && this.controller.currentTurn === "brancas") {
                     this.selected = index;
-                    // <<<< NOVO: Obtém e destaca os movimentos válidos >>>>
-                    this.validMoves = this.controller.getValidMoves(index);
-                    this.highlightValidMoves(this.validMoves);
+                    
+                    // <<<< NOVO CHECK: Aplica o auxílio visual APENAS no modo 'easy' >>>>
+                    if (this.controller.difficulty === "easy") {
+                        this.validMoves = this.controller.getValidMoves(index);
+                        this.highlightValidMoves(this.validMoves);
+                    }
                 }
             } else {
                 if (this.selected === index) {
                     // Deseleciona
                     this.selected = null;
-                    this.clearHighlights(); // <<<< NOVO: Limpa os destaques
+                    this.clearHighlights(); 
                 } else {
                     // Tentativa de movimento
                     console.log(`DEBUG tentativa de movimento: from=${this.selected} (${this.board.board[this.selected]?.tipo}), to=${index} (${this.board.board[index] ? this.board.board[index].tipo : 'vazio'})`);
@@ -193,7 +196,7 @@ export class View {
                     if (ok) this.lastMove = { from: this.selected, to: index };
                     
                     this.selected = null;
-                    this.clearHighlights(); // <<<< NOVO: Limpa os destaques
+                    this.clearHighlights(); 
                 }
             }
 
