@@ -31,6 +31,7 @@ h1 {
 
 /* ============================
    CONTAINER PRINCIPAL (GRID)
+   >> NENHUMA BORDA AQUI! A borda vai para o #chessboard.
 ============================ */
 #chess-container {
     display: grid;
@@ -39,24 +40,23 @@ h1 {
     /* Linha 1: Tabuleiro (1 Frac.) | Linha 2: Files (Auto) */
     grid-template-rows: 1fr auto;
     gap: 0;
-    margin: 10px auto; /* Adicionar margem vertical para separar do título/botão */
+    margin: 10px auto; 
     
-    /* CHAVE 1: Dimensionamento Responsivo e Limitação no Desktop */
     width: 90vmin;
     height: 90vmin;
-    /* Limita o tamanho máximo em desktops grandes para evitar estouro vertical */
     max-width: 600px;
     max-height: 600px; 
     
     box-sizing: border-box;
     position: relative;
-    /* Borda e Sombra do tabuleiro (mantida do visual V1) */
-    border: 3px solid #000;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5); 
+    
+    /* REMOÇÃO DA BORDA E SOMBRA DO PAI */
+    border: none;
+    box-shadow: none; 
 }
 
 /* ============================
-   RANKS (números à esquerda) - Corrigido o alinhamento e fonte
+   RANKS (números à esquerda) - Ajustado para fora
 ============================ */
 #rank-area {
     grid-row: 1;
@@ -65,17 +65,18 @@ h1 {
     grid-template-rows: repeat(8, 1fr);
     align-items: center;
     justify-items: center;
-    /* CHAVE 2: Fonte mais robusta e menor para evitar invasão */
+    
     font-size: clamp(10px, 3vw, 20px); 
     font-weight: bold;
-    padding-right: 4px;
     
-    /* Ajuste para evitar que as notações fiquem "esticadas" */
+    /* CHAVE: MARGEM NEGATIVA para puxar os números para fora */
+    padding-right: 8px; /* Espaço entre o número e a borda */
+    margin-right: -1px; /* Puxa para a esquerda */
+
     height: 100%; 
 }
-
 /* ============================
-   FILES (letras embaixo) - Corrigido o alinhamento e fonte
+   FILES (letras embaixo) - Ajustado para fora
 ============================ */
 #file-area {
     grid-row: 2;
@@ -84,14 +85,19 @@ h1 {
     grid-template-columns: repeat(8, 1fr);
     justify-items: center;
     align-items: center;
-    /* CHAVE 2: Fonte mais robusta e menor para evitar invasão */
+    
     font-size: clamp(12px, 3vw, 22px);
     font-weight: bold;
-    padding-top: 4px;
+    
+    /* CHAVE: MARGEM NEGATIVA para puxar as letras para baixo */
+    padding-top: 8px; /* Espaço entre a borda e a letra */
+    margin-top: -1px; /* Puxa para baixo */
 }
+
 
 /* ============================
    TABULEIRO
+   >> A BORDA ESTÁ AQUI AGORA!
 ============================ */
 #chessboard {
     grid-row: 1;
@@ -101,8 +107,10 @@ h1 {
     grid-template-rows: repeat(8, 1fr);
     width: 100%;
     height: 100%;
-    border: none;
-    box-shadow: none;
+    
+    /* CHAVE: BORDA E SOMBRA NO TABULEIRO FILHO */
+    border: 3px solid #000;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
     box-sizing: border-box;
 }
 
