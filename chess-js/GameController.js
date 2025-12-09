@@ -1,35 +1,36 @@
-// GameController.js
+// GameController.js -vGem
 import { View } from './View.js?v=999';
 import { AI } from './AI.js?v=999';
 import { Board } from './Board.js?v=999';
 import { MoveValidator } from './MoveValidator.js?v=999';
-import EnPassant from './EnPassant.js?v=999';
+// IMPORTANTE: Certifique-se de que EnPassant.js usa export default EnPassant;
+import EnPassant from './EnPassant.js?v=999'; 
 
 export class GameController {
-    constructor() {
-        console.log("GameController inicializando...");
+	constructor() {
+		console.log("GameController inicializando...");
 
-        this.board = new Board();
+		this.board = new Board();
 
 		//versão para test - Expor para o console
     	window.board = this.board;   // instância
     	window.Board = Board;        // classe
 
-		
-		// Tentar instanciar EnPassant sem quebrar se o módulo não estiver presente
+		// Tentar instanciar EnPassant
 		try {
-    	// eslint-disable-next-line no-undef
-    		if (typeof EnPassant !== 'undefined') {
-        		this.enPassant = new EnPassant(this.board.board);
-    		} else {
-        		this.enPassant = null;
-    		}
+			if (typeof EnPassant !== 'undefined') {
+				// Instanciamos o EnPassant sem passar o tabuleiro, pois ele precisa apenas do estado.
+				this.enPassant = new EnPassant(); 
+			} else {
+				this.enPassant = null;
+			}
 		} catch (e) {
-    		this.enPassant = null;
+			this.enPassant = null;
 		}
 		
-        this.validator = new MoveValidator(this.board.board, this.enPassant);
-        this.ai = new AI(this.board, this.validator, this.enPassant);
+		// Passamos a instância EP para os módulos que precisam.
+		this.validator = new MoveValidator(this.board.board, this.enPassant);
+		this.ai = new AI(this.board, this.validator, this.enPassant);
 
 		//consoleMode
 		const isConsoleMode = window.location.href.includes("consolemode");
@@ -115,100 +116,97 @@ export class GameController {
 
 		//FIM ***CONSOLE MODE***
 		
-        this.view = new View(this.board, this);
+
+		this.view = new View(this.board, this);
 			
-        this.currentTurn = "brancas";
-        this.gameOver = false;
-        this.lastMove = null;
+		this.currentTurn = "brancas";
+		this.gameOver = false;
+		this.lastMove = null;
 
-        this.aiTimerId = null;
+		this.aiTimerId = null;
 
-        this.view.setupRestartButton(() => {
-            this.resetGame();
-        });
+		this.view.setupRestartButton(() => {
+			this.resetGame();
+		});
 
-        console.log("GameController carregado!");
-    }
+		// Configura o estado inicial do EP (deve ser null)
+		if (this.enPassant) {
+			this.enPassant.resetTarget();
+		}
 
-    movePiece(from, to) {
-        if (this.gameOver) return false;
+		console.log("GameController carregado!");
+	}
 
-        const piece = this.board.board[from];
-        if (!piece) return false;
-        if (piece.cor !== this.currentTurn) return false;
+	movePiece(from, to) {
+		if (this.gameOver) return false;
 
-        const validMoves = this.validator.getPossibleMoves(from);
-        if (!validMoves.includes(to)) return false;
+		const piece = this.board.board[from];
+		if (!piece) return false;
+		if (piece.cor !== this.currentTurn) return false;
+
+		// 1. ZERA o alvo EP do turno anterior ANTES de checar movimentos,
+		//    pois o EP só dura 1 turno.
+		if (this.enPassant) {
+			this.enPassant.setTarget(this.board.enPassantTargetPos);
+			// ZERAR AQUI EVITARIA ERROS, mas o Board precisa que a informação EP seja transferida
+			// antes que o novo alvo seja calculado em movePiece().
+		}
+
+		const validMoves = this.validator.getPossibleMoves(from);
+		if (!validMoves.includes(to)) return false;
 
 		console.log(`DEBUG validator.getPossibleMoves para ${this.indexToNotation(from)} (${from}) =>`, validMoves);
 		
-        // Executa movimento DEPOIS DO ENPASSANT
-		
-		// Tentar aplicar en passant (se possível) — Regra de OURO: apenas faz se TODAS as condições estiverem corretas.
-		// Se applyEnPassantIfPossible retornar true, o movimento já foi aplicado pelo módulo.
-		// Caso contrário, prosseguimos com a movimentação normal.
-		let epApplied = false;
-		try {
-			if (this.enPassant && typeof this.enPassant.applyEnPassantIfPossible === 'function') {
-				epApplied = this.enPassant.applyEnPassantIfPossible(from, to, piece, this.board);
-			}
-		} catch (e) {
-			epApplied = false;
+		// 2. Tenta detectar se o movimento é um En Passant
+		let epCapturedPos = null;
+		if (this.enPassant && piece.tipo in {'♙':1, '♟':1}) {
+			epCapturedPos = this.enPassant.isEnPassantMove(from, to, piece);
 		}
+
+		// 3. Executa o movimento, passando a posição EP capturada se for um EP
+		// O método this.board.movePiece (já alterado) é capaz de tratar o movimento EP.
+		this.board.movePiece(from, to, epCapturedPos);
 		
-		if (!epApplied) {
-			// movimento normal (apenas se en passant não foi aplicado)
-			this.board.movePiece(from, to);
-		}
-		// registrar possível passo duplo para o módulo
-		try {
-			if (this.enPassant && typeof this.enPassant.registerDoubleStep === 'function') {
-				this.enPassant.registerDoubleStep(from, to, piece);
-			}
-		} catch (e) {
-			// ignore
-		}
-		
-		// REMOVIDO: segunda chamada duplicada de movePiece()
-		// (a movimentação já foi feita acima via epApplied branch ou via board.movePiece)
-		// Não fazer nada aqui para evitar sobrescrever destino com undefined.
-		//this.board.movePiece(from, to);
-		
+		// 4. Registra novo alvo EP se o peão moveu 2 casas (Board já faz isso em movePiece)
+		// O Board armazena o novo alvo em this.board.enPassantTargetPos.
+
 		console.log(
-			`?? Jogador: ${this.indexToNotation(from)} ? ${this.indexToNotation(to)}`
+			`?? Jogador: ${this.indexToNotation(from)} -> ${this.indexToNotation(to)}` +
+			(epCapturedPos !== null ? ' (En Passant aplicado)' : '')
 		);
-
-		// Detecta roque
+		
+		// Detecta roque (Reis são ♔ e ♚)
 		if (piece.tipo === "♔" || piece.tipo === "♚") {
-    		const row = piece.cor === "brancas" ? 7 : 0;
-    		// Roque curto
-    		if (to === row * 8 + 6) {
-        		console.log("♔ Roque curto!");
-        		// mover torre e marcar hasMoved
-        		this.board.movePiece(row * 8 + 7, row * 8 + 5); // torre pula para f-file
-        		// opcional: marcar hasMoved nas peças (importante se seu MoveValidator usa hasMoved)
-        		if (this.board.board[row*8 + 5]) this.board.board[row*8 + 5].hasMoved = true;
-        		if (this.board.board[to]) this.board.board[to].hasMoved = true;
-    		}
-    		// Roque longo
-    		if (to === row * 8 + 2) {
-        		console.log("♔ Roque longo!");
-        		this.board.movePiece(row * 8 + 0, row * 8 + 3); // torre pula para d-file
-        		if (this.board.board[row*8 + 3]) this.board.board[row*8 + 3].hasMoved = true;
-        		if (this.board.board[to]) this.board.board[to].hasMoved = true;
-    		}
+			const row = piece.cor === "brancas" ? 7 : 0;
+			// Roque curto
+			if (to === row * 8 + 6) {
+				console.log("? Roque curto!");
+				// mover torre e marcar hasMoved
+				this.board.movePiece(row * 8 + 7, row * 8 + 5); 
+				if (this.board.board[row*8 + 5]) this.board.board[row*8 + 5].hasMoved = true;
+				if (this.board.board[to]) this.board.board[to].hasMoved = true;
+			}
+			// Roque longo
+			if (to === row * 8 + 2) {
+				console.log("? Roque longo!");
+				this.board.movePiece(row * 8 + 0, row * 8 + 3); 
+				if (this.board.board[row*8 + 3]) this.board.board[row*8 + 3].hasMoved = true;
+				if (this.board.board[to]) this.board.board[to].hasMoved = true;
+			}
 		}
 		
-        this.view.lastMove = { from, to };
-        this.view.render();
+		// 5. Zera o estado EP no Board para o próximo turno. 
+		//    A informação EP está agora transferida para o Board (enPassantTargetPos).
+		//    O Board se auto-atualiza em movePiece, mas o GameController precisa garantir 
+		//    que o *próximo* MoveValidator use o estado correto.
+		
+		this.view.lastMove = { from, to };
+		this.view.render();
 
-        /* ------------------------------------------------------------------
-           ?? DETECÇÃO DE PROMOÇÃO DE PEÃO (SEM ALTERAR SUA LÓGICA EXISTENTE)
-        ------------------------------------------------------------------ */
-       
+		// ... (Lógica de Promoção de Peão mantida, com os símbolos corrigidos ♙/♟) ...
 		if (piece.tipo === "♙" || piece.tipo === "♟") {
-			if ((piece.cor === "brancas" && to < 8) || (piece.cor === "pretas" && to >= 56)) {
-				console.log(`♕ Promoção detectada! Peão chegou em ${this.indexToNotation(to)}`);
+			if ((piece.cor === "brancas" && this.board.row(to) === 0) || (piece.cor === "pretas" && this.board.row(to) === 7)) {
+				console.log(`? Promoção detectada! Peão chegou em ${this.indexToNotation(to)}`);
 				this.pendingPromotionPos = to;
 				this.view.showPromotionModal(piece.cor, (simbolo) => {
 					this.promotePawn(this.pendingPromotionPos, simbolo);
@@ -217,60 +215,82 @@ export class GameController {
 				return true;
 			}
 		}
-        // Troca turno
-        this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
+
+		// 6. Troca turno
+		this.currentTurn = this.currentTurn === "brancas" ? "pretas" : "brancas";
+
+		// 7. Configura o alvo EP para o próximo turno (se o peão moveu 2 casas)
+		if (this.enPassant) {
+			this.enPassant.setTarget(this.board.enPassantTargetPos);
+		}
+
+		// 8. Zera o alvo EP do Board para que não seja carregado para o próximo turno do GameController
+		this.board.enPassantTargetPos = null; // Limpa o estado no board
 
 		// Loga estado de check/checkmate para o próximo jogador
 		this.logCheckState(this.currentTurn);
 		if (this.gameOver) return true;
 
-        // Turno da IA
-        if (this.currentTurn === "pretas") {
+		// Turno da IA
+		if (this.currentTurn === "pretas") {
             if (this.aiTimerId) {
                 clearTimeout(this.aiTimerId);
                 this.aiTimerId = null;
             }
 
-            this.aiTimerId = setTimeout(() => {
-                if (this.gameOver) return;
+			this.aiTimerId = setTimeout(() => {
+				if (this.gameOver) return;
 
-                const m = this.ai.makeMove("pretas");
-                if (m) {
-                    this.view.lastMove = { from: m.from, to: m.to };
-                    this.view.render();
-                    this.view.highlightCell(m.to);
+				// A IA usará o estado EP que acabamos de definir
+				const m = this.ai.makeMove("pretas");
+				
+				if (m) {
+					// 9. Lógica de En Passant para a IA
+					const movedPiece = this.board.board[m.from];
+					let epCapturedPosAI = null;
+					if (this.enPassant && movedPiece && movedPiece.tipo in {'♙':1, '♟':1}) {
+						epCapturedPosAI = this.enPassant.isEnPassantMove(m.from, m.to, movedPiece);
+					}
+					
+					// 10. Aplica o movimento da IA
+					this.board.movePiece(m.from, m.to, epCapturedPosAI);
+
+					this.view.lastMove = { from: m.from, to: m.to };
+					this.view.render();
+					this.view.highlightCell(m.to);
 					console.log(
-						`?? IA: ${this.indexToNotation(from)} ? ${this.indexToNotation(to)}`
+						`?? IA: ${this.indexToNotation(m.from)} -> ${this.indexToNotation(m.to)}` +
+						(epCapturedPosAI !== null ? ' (En Passant aplicado pela IA)' : '')
 					);
 
-					/* 🔥 PROMOÇÃO DE PEÃO PELA IA (corrigido) */
+					/* ?? PROMOÇÃO DE PEÃO PELA IA */
 					const moved = this.board.board[m.to];
-					// IA promove automaticamente para rainha — usa símbolos reais
-					if (moved && moved.tipo === "♙" && m.to < 8) {
-						this.promotePawn(m.to, "rainha");
+					// Usar this.board.row(m.to) para checar a linha correta
+					if (moved && moved.tipo === "♟" && this.board.row(m.to) === 7) {
+						this.promotePawn(m.to, "rainha"); // Peão preto promove
 					}
-					if (moved && moved.tipo === "♟" && m.to >= 56) {
-						this.promotePawn(m.to, "rainha");
+					if (moved && moved.tipo === "♙" && this.board.row(m.to) === 0) {
+						this.promotePawn(m.to, "rainha"); // Peão branco (na promoção da IA)
 					}
-                }
+				}
 
-                this.aiTimerId = null;
+				this.aiTimerId = null;
 
-                this.currentTurn = "brancas";
+				this.currentTurn = "brancas";
 
-                if (this.validator.isKingInCheck("brancas")) {
-                    console.log("Xeque para brancas!");
-                    if (this.validator.isCheckmate("brancas")) {
-                        console.log("Xeque-mate! Pretas venceram!");
-                        this.gameOver = true;
-                        this.view.onGameOver({ winner: "pretas", reason: "checkmate" });
-                    }
-                }
-            }, 300);
-        }
+				// 11. Configura alvo EP para o próximo turno da Branca
+				if (this.enPassant) {
+					this.enPassant.setTarget(this.board.enPassantTargetPos);
+				}
+				this.board.enPassantTargetPos = null; // Limpa o estado no board
 
-        return true;
-    }
+				this.logCheckState(this.currentTurn);
+
+			}, 300);
+		}
+
+		return true;
+	}
 
 	indexToNotation(i) {
     	const files = "abcdefgh";
@@ -289,10 +309,10 @@ export class GameController {
 		const cor = piece.cor;
 	
 		const simboloParaNome = {
-			"♕": "rainha", "♛": "rainha",
-			"♖": "torre",  "♜": "torre",
-			"♗": "bispo",  "♝": "bispo",
-			"♘": "cavalo", "♞": "cavalo"
+			"?": "rainha", "?": "rainha",
+			"?": "torre",  "?": "torre",
+			"?": "bispo",  "?": "bispo",
+			"?": "cavalo", "?": "cavalo"
 		};
 		
 		if (simboloParaNome[escolha]) {
@@ -301,10 +321,10 @@ export class GameController {
 		
 		// Mapa final que coloca o símbolo correto no tabuleiro de acordo com a cor
 		const mapa = {
-			rainha: cor === "brancas" ? "♕" : "♛",
-			torre:  cor === "brancas" ? "♖" : "♜",
-			bispo:  cor === "brancas" ? "♗" : "♝",
-			cavalo: cor === "brancas" ? "♘" : "♞"
+			rainha: cor === "brancas" ? "?" : "?",
+			torre:  cor === "brancas" ? "?" : "?",
+			bispo:  cor === "brancas" ? "?" : "?",
+			cavalo: cor === "brancas" ? "?" : "?"
 		};
 		
 		piece.tipo = mapa[escolha];
@@ -346,8 +366,7 @@ export class GameController {
 			}
 		}
 	}
-	
-	/* ---------------- Reset do jogo (inalterado exceto correções seguras) ---------------- */
+	//RESET GAME
 	resetGame() {
 		console.log("Reiniciando o jogo...");
 	
@@ -358,13 +377,13 @@ export class GameController {
 	
 		this.board = new Board();
 	
-		// recriar EnPassant com o novo board
-		this.enPassant = new EnPassant(this.board.board);
+		// recriar EnPassant
+		this.enPassant = new EnPassant();
+		this.enPassant.resetTarget();
 	
-		// injetar EnPassant no MoveValidator
+		// injetar EnPassant no MoveValidator e AI
 		this.validator = new MoveValidator(this.board.board, this.enPassant);
-	
-		this.ai = new AI(this.board, this.validator);
+		this.ai = new AI(this.board, this.validator, this.enPassant); // Passar EP para AI
 	
 		this.gameOver = false;
 		this.currentTurn = "brancas";
