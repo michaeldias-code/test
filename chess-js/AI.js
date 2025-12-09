@@ -13,10 +13,11 @@ export class AI {
         this.difficulty = difficulty;
 
         this.strategies = {
-            Easy: AI_Easy,
-            Medium: AI_Medium,
-            Hard: AI_Hard
+            easy: AI_Easy,
+            medium: AI_Medium,
+            hard: AI_Hard
         };
+
 
         // ✔️ aplicar estratégia inicial
         this.setDifficulty(this.difficulty);
@@ -24,7 +25,7 @@ export class AI {
 
     setDifficulty(level) {
         this.difficulty = level; // ✔️ manter atualizado
-        const Strategy = this.strategies[level] || this.strategies["Easy"];
+        const Strategy = this.strategies[level] || this.strategies["easy"];
         this.current = new Strategy(this.board, this.validator, this.enPassant);
         console.log("🎯 AI Strategy =", level);
     }
@@ -33,5 +34,6 @@ export class AI {
         return this.current.makeMove(color); // delega para a IA filha
     }
 }
+
 
 
