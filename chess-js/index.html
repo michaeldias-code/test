@@ -2,13 +2,14 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo de Xadrez</title>
-    <link rel="stylesheet" href="style.css?v=13">
+
+    <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
     <h1>Jogo de Xadrez</h1>
 
-    <!-- Menu de Seleção de Dificuldade -->
     <div id="difficulty-container">
         <label for="difficulty">Selecione a Dificuldade: </label>
         <select id="difficulty">
@@ -22,18 +23,10 @@
 
     <button id="restart-btn">🔄 Reiniciar Jogo</button>
 
-    <!-- Modal de Game Over -->
-    <div id="game-over-modal" class="game-over-modal" style="display: none;">
-        <div class="game-over-content">
-            <span id="game-over-message" class="game-over-message"></span>
-            <button id="close-modal" class="close-btn">Fechar</button>
-        </div>
-    </div>
-
     <script type="module">
-        import { GameController } from './GameController.js?v=1';
+        // Importa e inicializa o GameController
+        import { GameController } from './GameController.js';
         new GameController();
     </script>
 </body>
 </html>
-
