@@ -39,17 +39,24 @@ export class AI_Medium {
 		// regra extra: impedir mover de volta para a posição anterior apenas por voltar
 		// (mesmo que não seja captura ou escape)
 		myMoves = myMoves.filter(m => {
+			// se não houver último movimento, tudo ok
 			if (!this.lastMove) return true;
-			// se o movimento é exatamente o inverso do último
-			if (m.from === this.lastMove.to && m.to === this.lastMove.from) {
-				// permitir apenas se for captura ou evita check
-				if (m.capturedPiece) return true;
-				if (this.willRemoveCheck(m)) return true;
-				// caso contrário, bloqueia
-				return false;
-			}
-			return true;
+		
+			// detecta movimento exatamente oposto ao último
+			const isReverse = m.from === this.lastMove.to && m.to === this.lastMove.from;
+		
+			if (!isReverse) return true;
+		
+			// permitir se capturar peça inimiga
+			if (m.capturedPiece) return true;
+		
+			// permitir se tirar do check
+			if (this.willRemoveCheck(m)) return true;
+		
+			// caso contrário, proibir o movimento de volta
+			return false;
 		});
+
 
 
         // 3) tentar capturas (priorizar melhores)
