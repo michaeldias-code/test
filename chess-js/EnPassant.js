@@ -1,4 +1,4 @@
-// EnPassant.js
+// EnPassant.js -vGem
 /**
  * Módulo responsável por gerenciar o estado e validar movimentos En Passant (EP).
  * Deve ser passado para MoveValidator e AI.
@@ -97,3 +97,4 @@ export class EnPassant {
 }
 
 // export default EnPassant; // (Como o GameController importa com 'EnPassant from', usaremos export default)
+
