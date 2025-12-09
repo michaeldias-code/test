@@ -7,6 +7,15 @@ import { MoveValidator } from './MoveValidator.js?v=999';
 
 export class GameController {
 	constructor() {
+		this.difficultySelect = document.getElementById("difficulty");
+	    // dificuldade inicial
+	    this.difficulty = this.difficultySelect.value;
+	    // quando o usuário mudar...
+	    this.difficultySelect.addEventListener("change", () => {
+    	    this.difficulty = this.difficultySelect.value;
+        	console.log("Dificuldade selecionada:", this.difficulty);
+    	});
+		
 		console.log("GameController inicializando...");
 
 		this.board = new Board();
@@ -30,7 +39,8 @@ export class GameController {
 		// Passamos a instância EP para os módulos que precisam.
 		this.validator = new MoveValidator(this.board.board, this.enPassant);
 		//this.ai = new AI(this.board, this.validator, this.enPassant);
-		this.ai = new AI(this.board, this.validator, this.enPassant, "easy");
+		//this.ai = new AI(this.board, this.validator, this.enPassant, "easy");
+		this.ai = new AI(this.board, this.validator, this.enPassant, this.difficulty);
 
 
 		//consoleMode
@@ -401,6 +411,7 @@ this.logCheckState(this.currentTurn);
 		console.log("Jogo reiniciado!");
 	}
 }
+
 
 
 
