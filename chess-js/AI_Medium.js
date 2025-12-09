@@ -36,6 +36,22 @@ export class AI_Medium {
         // 2) filtrar movimentos que repetem o último sem motivo válido
         myMoves = myMoves.filter(m => !this.isForbiddenRepeat(m));
 
+		// regra extra: impedir mover de volta para a posição anterior apenas por voltar
+		// (mesmo que não seja captura ou escape)
+		myMoves = myMoves.filter(m => {
+			if (!this.lastMove) return true;
+			// se o movimento é exatamente o inverso do último
+			if (m.from === this.lastMove.to && m.to === this.lastMove.from) {
+				// permitir apenas se for captura ou evita check
+				if (m.capturedPiece) return true;
+				if (this.willRemoveCheck(m)) return true;
+				// caso contrário, bloqueia
+				return false;
+			}
+			return true;
+		});
+
+
         // 3) tentar capturas (priorizar melhores)
         const captureMoves = myMoves.filter(m => m.capturedPiece !== null);
 		
