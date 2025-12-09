@@ -1,6 +1,7 @@
-// AI_Medium.js
-// Estratégia "Medium" com heurísticas: prefere capturas, evita casas atacadas,
+// AI_Hard.js
+// Estratégia "Hard" com heurísticas: prefere capturas, evita casas atacadas,
 // não repete o último movimento sem motivo, avalia sacrifícios por valor.
+// Aprendizado de máquina para ser implementado...
 
 export class AI_Medium {
     constructor(board, validator, enPassant) {
@@ -370,3 +371,4 @@ export class AI_Medium {
         return removed;
     }
 }
+
