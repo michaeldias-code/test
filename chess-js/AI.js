@@ -1,73 +1,63 @@
-// AI.js -vGem
-import { MoveValidator } from "./MoveValidator.js";
+// AI.js (AI Controller)
 
-export class AI {
-    /**
-     * @param {Board} board 
-     * @param {MoveValidator} validator 
-     * @param {EnPassant} enPassant Instância do módulo EnPassant
-     */
-    constructor(board, validator, enPassant) {
-        this.board = board;
-        this.validator = validator;
-        this.enPassant = enPassant; // <<<< NOVO: Armazena a instância EnPassant
-        console.log("AI carregado! Validator e EnPassant recebidos.");
-    }
+import AI_Easy from './AI_Easy.js';
+import AI_Medium from './AI_Medium.js';
+// Você adicionaria o AI_Hard aqui quando for a hora.
 
-    getRandomMove(color) {
-        console.log("Validator dentro da IA:", this.validator);
-        const moves = [];
-
-        // Gera todos os movimentos possíveis
-        for (let i = 0; i < 64; i++) {
-            const p = this.board.board[i];
-            if (p && p.cor === color) {
-                // getPossibleMoves já retorna movimentos EP se disponíveis.
-                const possible = this.validator.getPossibleMoves(i); 
-                for (let dest of possible) moves.push({ from: i, to: dest });
-            }
-        }
-
-        if (moves.length === 0) return null;
-
-        // Retorna um movimento aleatório
-        return moves[Math.floor(Math.random() * moves.length)];
+class AI {
+    constructor(difficulty = 'easy') {
+        // Mapeamento das classes de estratégia
+        this.strategies = {
+            'easy': AI_Easy,
+            'medium': AI_Medium,
+            // 'hard': AI_Hard,
+        };
+        
+        // Instância da estratégia de IA atualmente selecionada
+        this.currentStrategy = null; 
+        
+        // Define a dificuldade inicial
+        this.setDifficulty(difficulty);
     }
 
     /**
-     * Executa a jogada escolhida (random, por enquanto), aplicando a lógica EP.
-     * @param {string} color A cor da IA.
-     * @returns {{from: number, to: number}|null} O movimento realizado.
+     * Define a estratégia de IA a ser usada com base na string de dificuldade.
+     * @param {string} difficulty - 'easy', 'medium', etc.
      */
-    makeMove(color) {
-        const m = this.getRandomMove(color);
+    setDifficulty(difficulty) {
+        const StrategyClass = this.strategies[difficulty];
 
-        if (m) {
-            const piece = this.board.board[m.from];
-
-            // 1. Tenta detectar se o movimento é um En Passant
-            let epCapturedPos = null;
-            if (this.enPassant && piece.tipo in {'♙':1, '♟':1}) {
-                // Verifica se é um movimento EP. O MoveValidator garante que o movimento seja legal.
-                epCapturedPos = this.enPassant.isEnPassantMove(m.from, m.to, piece);
-            }
-            
-            // 2. Executa o movimento, passando a posição EP capturada se for um EP
-            // O Board.movePiece saberá se deve remover a peça adjacente ou não.
-            this.board.movePiece(m.from, m.to, epCapturedPos); 
-            
-            // O GameController é responsável por limpar o estado EP do Board e transferir para o EnPassant.
-
-            return m; 
+        if (StrategyClass) {
+            // Cria uma nova instância da estratégia (AI_Easy, AI_Medium, etc.)
+            this.currentStrategy = new StrategyClass();
+            console.log(`AI Dificuldade definida para: ${difficulty}`);
+        } else {
+            console.error(`Dificuldade desconhecida: ${difficulty}. Usando 'easy'.`);
+            this.currentStrategy = new AI_Easy();
         }
-        return null;
     }
 
-    // O método reset está funcional, mas deve garantir que o EnPassant também seja resetado
-    reset() {
-        console.log("Resetando IA...");
-        // O GameController já recria e injeta as novas instâncias, então este método é principalmente informativo.
-        // Se a IA fosse mais complexa (árvores de busca, cache), ela seria limpa aqui.
+    /**
+     * MÉTODO PÚBLICO PRINCIPAL: Mantém a mesma interface para os outros módulos.
+     * Delega a chamada para a estratégia de IA selecionada.
+     * * @param {object} boardState - O estado atual do tabuleiro (e.g., array, objeto FEN).
+     * @param {string} playerColor - A cor da peça que a IA está jogando ('w' ou 'b').
+     * @returns {object} O melhor movimento encontrado.
+     */
+    getBestMove(boardState, playerColor) {
+        if (!this.currentStrategy || !this.currentStrategy.findMove) {
+            console.error("Estratégia de IA não inicializada ou faltando método findMove.");
+            return null; // Retorna um valor seguro, ou talvez um movimento aleatório
+        }
+        
+        // **A ORQUESTRAÇÃO ACONTECE AQUI:** // Chama o método específico da estratégia (Easy, Medium, etc.)
+        return this.currentStrategy.findMove(boardState, playerColor);
     }
+
+    // Você pode ter outros métodos públicos aqui que também delegam ou executam lógica do controlador
+    // ...
 }
+
+export default AI;
+
 
