@@ -1,5 +1,5 @@
 // EnPassant.js -vGem
-export default class EnPassant {
+export class EnPassant {
     constructor() {
         this.targetPos = null;
     }
@@ -60,3 +60,4 @@ export default class EnPassant {
         return piece.tipo === '♙' ? to + 8 : to - 8;
     }
 }
+
