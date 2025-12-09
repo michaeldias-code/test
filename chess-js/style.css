@@ -1,9 +1,9 @@
 /* ============================
-   style.css — AJUSTADO (Layout V2 + Estética V1 + Correções de Overflow)
+   style.css — AJUSTE DE ESPAÇO VERTICAL
 ============================ */
 
 /* ============================
-   GLOBAL / BODY
+   GLOBAL / BODY (Menos padding)
 ============================ */
 body {
     margin: 0;
@@ -12,35 +12,38 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Usar min-height: 100vh para ocupar a tela e permitir scroll se necessário */
-    min-height: 100vh; 
-    padding: 10px 0 20px 0; /* Espaço em cima e embaixo para não encostar nas bordas */
+    justify-content: flex-start;
+    /* CHAVE 1: Remove min-height: 100vh para permitir rolagem nativa quando necessário, ou use 100%*/
+    min-height: 100%; 
+    
+    /* CHAVE 2: Reduz o padding vertical */
+    padding: 5px 0 15px 0; 
     box-sizing: border-box;
 }
 
 /* ============================
-   TÍTULO
+   TÍTULO (Margem Reduzida)
 ============================ */
 h1 {
     width: 100%;
     text-align: center;
-    margin: 15px 0;
+    /* CHAVE 3: Reduz a margem superior do título */
+    margin: 10px 0;
     font-size: clamp(1.5em, 5vw, 2.5em);
     color: #333;
 }
 
 /* ============================
    CONTAINER PRINCIPAL (GRID)
-   >> NENHUMA BORDA AQUI! A borda vai para o #chessboard.
 ============================ */
 #chess-container {
     display: grid;
-    /* Coluna 1: Ranks (Auto) | Coluna 2: Tabuleiro (1 Frac.) */
     grid-template-columns: auto 1fr;
-    /* Linha 1: Tabuleiro (1 Frac.) | Linha 2: Files (Auto) */
     grid-template-rows: 1fr auto;
     gap: 0;
-    margin: 10px auto; 
+    
+    /* CHAVE 5: Reduz a margem vertical para aproximar do título/dificuldade */
+    margin: 5px auto; 
     
     width: 90vmin;
     height: 90vmin;
@@ -50,7 +53,6 @@ h1 {
     box-sizing: border-box;
     position: relative;
     
-    /* REMOÇÃO DA BORDA E SOMBRA DO PAI */
     border: none;
     box-shadow: none; 
 }
@@ -160,9 +162,12 @@ h1 {
 /* ============================
    CONTROLES E UI
 ============================ */
-
+/* ============================
+   CONTROLES (DIFICULDADE)
+============================ */
 #difficulty-container {
-    margin: 20px 0;
+    /* CHAVE 4: Reduz a margem vertical para economizar espaço */
+    margin: 10px 0; 
     font-size: 1.2em;
 }
 
@@ -173,9 +178,13 @@ h1 {
     border: 1px solid #ccc;
 }
 
+/* ============================
+   BOTÃO DE REINICIAR (Aumenta margem de segurança)
+============================ */
 #restart-btn {
     display: block;
-    margin: 25px auto;
+    /* CHAVE 6: Aumenta a margem superior para garantir espaço abaixo do tabuleiro */
+    margin: 30px auto 10px auto; 
     padding: 12px 24px;
     background: #222;
     color: white;
@@ -185,6 +194,7 @@ h1 {
     cursor: pointer;
     transition: 0.2s;
 }
+
 
 #restart-btn:hover {
     background: #444;
