@@ -1,61 +1,110 @@
-// AI_Hard.js
+// AI_HardEvo.js
 import { AI_Medium } from './AI_Medium.js';
 
-export class AI_Hard extends AI_Medium {
+export class AI_HardEvo extends AI_Medium {
     constructor(board, validator, enPassant) {
         super(board, validator, enPassant);
-        // histórico de aprendizado incremental
-        // key: "from-to-piece", value: score acumulado (+ vitória, - derrota)
-        this.learningData = {};
+
+        // memória de aprendizado: { "from-to": { score, count } }
+        this.learning = this.loadLearning();
+        this.learningWeight = 1; // peso inicial do aprendizado
+        this.totalGames = 0;
     }
 
     makeMove(color) {
-        console.log("Modo Hard:");
+        const enemyColor = color === "brancas" ? "pretas" : "brancas";
 
-        // pega movimentos possíveis do Medium
-        let move = super.makeMove(color); 
+        let myMoves = this.getAllMovesForColor(color);
+        if (myMoves.length === 0) return null;
 
-        if (!move) return null;
-
-        // 🔹 AQUI: priorizar movimentos que tiveram sucesso em jogos anteriores
-        const key = `${move.from}-${move.to}-${move.piece.tipo}`;
-
-        // se houver movimentos conhecidos no aprendizado, reforça
-        const allMoves = this.getAllMovesForColor(color);
-
-        // cria ranking baseado no learningData
-        const rankedMoves = allMoves.slice().sort((a, b) => {
-            const keyA = `${a.from}-${a.to}-${a.piece.tipo}`;
-            const keyB = `${b.from}-${b.to}-${b.piece.tipo}`;
-            const scoreA = this.learningData[keyA] || 0;
-            const scoreB = this.learningData[keyB] || 0;
-            // prioriza score maior
-            return scoreB - scoreA;
+        // filtros Medium/Hard
+        myMoves = myMoves.filter(m => !this.isForbiddenRepeat(m));
+        myMoves = myMoves.filter(m => {
+            if (!this.lastMove) return true;
+            if (m.from === this.lastMove.to && m.to === this.lastMove.from) {
+                if (m.capturedPiece) return true;
+                if (this.willRemoveCheck(m)) return true;
+                return false;
+            }
+            return true;
         });
 
-        if (rankedMoves.length > 0) {
-            // escolhe o movimento top aprendido, mas ainda respeitando Medium/Hard heurísticas
-            const topMove = rankedMoves[0];
-
-            // substitui move apenas se score for positivo
-            const topKey = `${topMove.from}-${topMove.to}-${topMove.piece.tipo}`;
-            if ((this.learningData[topKey] || 0) > 0) {
-                move = topMove;
+        // calcular score combinado: heurística + aprendizado
+        const scoredMoves = myMoves.map(m => {
+            // HEURÍSTICA
+            let heuristic = 0;
+            if (m.capturedPiece) {
+                const wouldBeAttacked = this.wouldBeAttackedAfterMove(m, enemyColor);
+                heuristic = this.valueOfPiece(m.capturedPiece);
+                if (wouldBeAttacked) {
+                    heuristic -= this.estimatedAttackerValueOnSquareAfterMove(m, enemyColor);
+                }
             }
-        }
 
-        // aplicar movimento final no board
-        this.applyMoveWithEPAndRegister(move);
-        this.lastMove = { from: move.from, to: move.to };
-        return move;
+            // APRENDIZADO
+            const key = `${m.from}-${m.to}`;
+            let learned = 0;
+            if (this.learning[key]) {
+                // média ponderada do aprendizado
+                learned = this.learning[key].score / this.learning[key].count;
+            }
+
+            // peso do aprendizado cresce com o número de jogos
+            const weight = 1 + Math.log1p(this.totalGames) * this.learningWeight;
+
+            const score = heuristic + learned * weight;
+            return { move: m, score };
+        });
+
+        // ordenar por score combinado
+        scoredMoves.sort((a, b) => b.score - a.score);
+
+        const chosen = scoredMoves[0].move;
+        this.applyMoveWithEPAndRegister(chosen);
+        this.lastMove = { from: chosen.from, to: chosen.to };
+        return chosen;
     }
 
-    // método de aprendizado incremental
-    updateLearning(move, result) {
-        // move: { from, to, piece, capturedPiece }
+    // registra aprendizado no final da partida
+    updateLearning(movesSequence, result) {
         // result: +1 vitória, 0 empate, -1 derrota
-        const key = `${move.from}-${move.to}-${move.piece.tipo}`;
-        if (!this.learningData[key]) this.learningData[key] = 0;
-        this.learningData[key] += result;
+        this.totalGames += 1;
+
+        movesSequence.forEach(move => {
+            const key = `${move.from}-${move.to}`;
+            if (!this.learning[key]) this.learning[key] = { score: 0, count: 0 };
+            this.learning[key].score += result;
+            this.learning[key].count += 1;
+        });
+
+        this.saveLearning();
+    }
+
+    // salvar no localStorage
+    saveLearning() {
+        try {
+            const data = {
+                learning: this.learning,
+                totalGames: this.totalGames
+            };
+            localStorage.setItem('AI_HardEvo_Data', JSON.stringify(data));
+        } catch (e) {
+            console.warn("Falha ao salvar aprendizado:", e);
+        }
+    }
+
+    // carregar do localStorage
+    loadLearning() {
+        try {
+            const data = JSON.parse(localStorage.getItem('AI_HardEvo_Data'));
+            if (data && data.learning) {
+                this.totalGames = data.totalGames || 0;
+                return data.learning;
+            }
+            return {};
+        } catch (e) {
+            console.warn("Falha ao carregar aprendizado:", e);
+            return {};
+        }
     }
 }
