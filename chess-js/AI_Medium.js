@@ -176,8 +176,17 @@ export class AI_Medium {
             return { move: m, capturedVal, wouldBeAttacked, netGain };
         });
 
+		// filtra capturas com netGain <= 0 (evita suicídios)
+		const safeEvaluated = evaluated.filter(e => e.netGain > 0);
+		
+		// se houver capturas seguras, usar só elas
+		const usedEvaluated = safeEvaluated.length > 0 ? safeEvaluated : evaluated;
+
+
         // priorizar capturas com netGain > 0 e maiores capturedVal
-        const positive = evaluated.filter(e => e.netGain > 0);
+        //const positive = evaluated.filter(e => e.netGain > 0);
+		const positive = usedEvaluated.filter(e => e.netGain > 0);
+
         if (positive.length > 0) {
             // ordenar por capturedVal desc, netGain desc
             positive.sort((a, b) => {
