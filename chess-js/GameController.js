@@ -313,7 +313,20 @@ this.logCheckState(this.currentTurn);
     	const rank = 8 - Math.floor(i / 8);
     	return `${file}${rank}`;
 	}
+	
+	// ----------------------------------------------------------------------
+	// ?? MÉTODO NOVO — expõe os movimentos válidos para o View
+	// ----------------------------------------------------------------------
 
+	getValidMoves(posIndex) {
+		if (this.currentTurn !== "brancas") return [];
+		
+		const piece = this.board.board[posIndex];
+		if (!piece || piece.cor !== "brancas") return [];
+		
+		// Delega ao MoveValidator para obter os movimentos válidos (filtrados por xeque)
+		return this.validator.getPossibleMoves(posIndex);
+	}
     /* ------------------------------------------------------
        ?? MÉTODO NOVO — executa a promoção após escolha do modal
     ------------------------------------------------------ */
@@ -414,7 +427,6 @@ this.logCheckState(this.currentTurn);
 		console.log("Jogo reiniciado!");
 	}
 }
-
 
 
 
