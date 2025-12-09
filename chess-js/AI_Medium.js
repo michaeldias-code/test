@@ -1,6 +1,6 @@
 // AI_Medium.js
-// Estratégia "Medium" com heurísticas: prefere capturas, evita casas atacadas,
-// não repete o último movimento sem motivo, avalia sacrifícios por valor.
+// Estratégia "Medium": Heurística gulosa com noções de perigo e posicionamento.
+// Regras: Prioriza Xeque-Mate > Capturas (Melhores > Piores) > Segurança > Centro.
 
 export class AI_Medium {
     constructor(board, validator, enPassant) {
@@ -8,208 +8,162 @@ export class AI_Medium {
         this.validator = validator;
         this.enPassant = enPassant;
 
-        // guarda último movimento que esta IA executou (para evitar repetir)
+        // Guarda o último movimento para evitar repetição tola
         this.lastMove = null;
 
-        // valores das peças por símbolo (fallbacks caso não reconheça)
+        // Tabela de valores para trocas
         this.pieceValueBySymbol = {
-            "♙": 1, "♟": 1,    // peão
-            "♘": 3, "♞": 3,    // cavalo
-            "♗": 3, "♝": 3,    // bispo
-            "♖": 5, "♜": 5,    // torre
-            "♕": 9, "♛": 9,    // rainha
-            "♔": 1000, "♚": 1000 // rei (valor alto para evitar trocas que percam o rei)
+            "♙": 10, "♟": 10,   // Peão
+            "♘": 30, "♞": 30,   // Cavalo
+            "♗": 30, "♝": 30,   // Bispo
+            "♖": 50, "♜": 50,   // Torre
+            "♕": 90, "♛": 90,   // Rainha
+            "♔": 900, "♚": 900  // Rei
         };
+
+        // Bônus posicional para casas centrais (e4, d4, e5, d5 e adjacentes)
+        // Índices do array 0-63
+        this.centerSquares = [27, 28, 35, 36]; 
     }
 
-    // interface pública chamada pelo AI pai / GameController
     makeMove(color) {
-        console.log("Modo Medium:");
+        console.log("🤖 AI Medium Pensando...");
         const enemyColor = color === "brancas" ? "pretas" : "brancas";
 
-        // 1) coletar movimentos
+        // 1) Coletar todos os movimentos legais
         let myMoves = this.getAllMovesForColor(color);
         if (myMoves.length === 0) return null;
 
-        const enemyMoves = this.getAllMovesForColor(enemyColor);
+        // 2) Tentar Xeque-Mate IMEDIATO (Instinto Assassino)
+        const mateMove = myMoves.find(m => this.isCheckmateMove(m, enemyColor));
+        if (mateMove) {
+            console.log("💀 Xeque-mate encontrado!");
+            return this.executeMove(mateMove);
+        }
 
-        // 2) filtrar movimentos que repetem o último sem motivo válido
-        myMoves = myMoves.filter(m => !this.isForbiddenRepeat(m));
+        // 3) Filtrar movimentos repetitivos inúteis
+        // Remove movimentos que voltam para a casa anterior sem motivo (exceto capturas ou sair de ataque)
+        myMoves = myMoves.filter(m => !this.isBadRepeat(m, enemyColor));
+        if (myMoves.length === 0) {
+            // Se filtrou tudo, recupera os originais para não travar
+            myMoves = this.getAllMovesForColor(color);
+        }
 
-		// regra extra: impedir mover de volta para a posição anterior apenas por voltar
-		// (mesmo que não seja captura ou escape)
-		// regra extra: impedir mover de volta para a posição anterior apenas por voltar
-		myMoves = myMoves.filter(m => {
-			if (!this.lastMove) return true;
-			const isReverse = m.from === this.lastMove.to && m.to === this.lastMove.from;
-			if (!isReverse) return true;
-			if (m.capturedPiece) return true;
-			if (this.willRemoveCheck(m)) return true;
-			return false;
-		});
-
-
-
-        // 3) tentar capturas (priorizar melhores)
+        // 4) Lógica de Captura (REGRA: Se existe captura, DEVE capturar)
         const captureMoves = myMoves.filter(m => m.capturedPiece !== null);
-		
-		
-		// filtra capturas que não deixam a peça capturada imediatamente (evitar suicídio)
-		const safeCaptures = captureMoves.filter(m => !this.wouldBeAttackedAfterMove(m, enemyColor));
-
-		// substitui captureMoves por safeCaptures se houver pelo menos uma segura
-		if (safeCaptures.length > 0) {
-			captureMoves.splice(0, captureMoves.length, ...safeCaptures);
-		}
-		
+        
         if (captureMoves.length > 0) {
-            const bestCapture = this.chooseBestCapture(captureMoves, color, enemyMoves);
-            if (bestCapture) {
-                this.applyMoveWithEPAndRegister(bestCapture);
-                this.lastMove = { from: bestCapture.from, to: bestCapture.to };
-                return bestCapture;
-            }
-        }
-		// 🔥 REGRA PRINCIPAL: se existe captura, a IA deve capturar SEMPRE,
-		// mesmo que a heurística chooseBestCapture não escolha uma.
-		if (captureMoves.length > 0) {
-			// fallback obrigatório: escolhe qualquer captura disponível
-			const forcedCapture = captureMoves[Math.floor(Math.random() * captureMoves.length)];
-			this.applyMoveWithEPAndRegister(forcedCapture);
-			this.lastMove = { from: forcedCapture.from, to: forcedCapture.to };
-			return forcedCapture;
-		}
-
-
-        // 4) buscar movimentos totalmente seguros (não atacados após execução)
-        const safeMoves = myMoves.filter(m => !this.wouldBeAttackedAfterMove(m, enemyColor));
-        if (safeMoves.length > 0) {
-            // desempate: preferir movimentos que capturem peças de maior valor (mesmo sem captura aqui)
-            const chosen = this.pickPreferableMove(safeMoves);
-            this.applyMoveWithEPAndRegister(chosen);
-            this.lastMove = { from: chosen.from, to: chosen.to };
-            return chosen;
-        }
-
-        // 5) tentar movimentos que minimizam risco (menor valor do atacante possível)
-        const leastRiskMoves = this.rankMovesByRisk(myMoves, enemyColor);
-        if (leastRiskMoves.length > 0) {
-            const chosen = leastRiskMoves[0];
-            this.applyMoveWithEPAndRegister(chosen);
-            this.lastMove = { from: chosen.from, to: chosen.to };
-            return chosen;
-        }
-
-        // 6) fallback: escolher aleatório entre todos os movimentos
-        const random = myMoves[Math.floor(Math.random() * myMoves.length)];
-        this.applyMoveWithEPAndRegister(random);
-        this.lastMove = { from: random.from, to: random.to };
-        return random;
-    }
-
-    /* ---------------- Helper utilities ---------------- */
-
-    // retorna lista de movimentos { from, to, piece, capturedPiece }
-    getAllMovesForColor(color) {
-        const moves = [];
-        const boardArr = this.board.board;
-
-        for (let from = 0; from < 64; from++) {
-            const piece = boardArr[from];
-            if (!piece || piece.cor !== color) continue;
-
-            const possible = this.validator.getPossibleMoves(from) || [];
-            for (const to of possible) {
-                const captured = this.board.board[to] || null;
-                moves.push({
-                    from,
-                    to,
-                    piece,
-                    capturedPiece: captured
-                });
-            }
-        }
-
-        return moves;
-    }
-
-    // evita repetir o mesmo movimento sem motivo
-    isForbiddenRepeat(move) {
-        if (!this.lastMove) return false;
-        if (move.from === this.lastMove.from && move.to === this.lastMove.to) {
-            // permitir se for captura
-            if (move.capturedPiece) return false;
-
-            // permitir se o movimento evita perda (i.e., seria atacado antes mas não depois)
-            // vamos checar: se before it was threatened and after it's not -> allow
-            const color = move.piece.cor;
-            const enemyColor = color === "brancas" ? "pretas" : "brancas";
-            const wasAttackedBefore = this.isSquareAttacked(move.from, this.getAllMovesForColor(enemyColor));
-            const wouldBeAttackedAfter = this.wouldBeAttackedAfterMove(move, enemyColor);
-            if (wasAttackedBefore && !wouldBeAttackedAfter) return false;
-
-            // permitir se sair de check (simulação)
-            if (this.willRemoveCheck(move)) return false;
-
-            // caso contrário, proibimos repetir
-            return true;
-        }
-        return false;
-    }
-
-    // escolhe melhor captura segundo ganho material (simula riscos).
-    chooseBestCapture(captureMoves, myColor, enemyMoves) {
-        // para cada captura: calcular se é segura; se não for, avaliar ganho líquido
-        const evaluated = captureMoves.map(m => {
-            const capturedVal = this.valueOfPiece(m.capturedPiece);
-            // simula se ficará atacado depois
-            const wouldBeAttacked = this.wouldBeAttackedAfterMove(m, myColor === "brancas" ? "pretas" : "brancas");
-            let netGain = capturedVal;
-            if (wouldBeAttacked) {
-                // se atacado, estimar menor atacante que pode capturar no próximo turno
-                const attackerVal = this.estimatedAttackerValueOnSquareAfterMove(m, myColor === "brancas" ? "pretas" : "brancas");
-                // se não houver atacante, attackerVal = 0
-                netGain = capturedVal - attackerVal;
-            }
-            return { move: m, capturedVal, wouldBeAttacked, netGain };
-        });
-
-		// filtra capturas com netGain <= 0 (evita suicídios)
-		const safeEvaluated = evaluated.filter(e => e.netGain > 0);
-		
-		// se houver capturas seguras, usar só elas
-		const usedEvaluated = safeEvaluated.length > 0 ? safeEvaluated : evaluated;
-
-
-        // priorizar capturas com netGain > 0 e maiores capturedVal
-        //const positive = evaluated.filter(e => e.netGain > 0);
-		const positive = usedEvaluated.filter(e => e.netGain > 0);
-
-        if (positive.length > 0) {
-            // ordenar por capturedVal desc, netGain desc
-            positive.sort((a, b) => {
-                if (b.capturedVal !== a.capturedVal) return b.capturedVal - a.capturedVal;
-                return b.netGain - a.netGain;
+            // Ordena as capturas da "Melhor" para a "Pior"
+            // Critério: (Valor da Vítima) - (Risco de perder minha peça)
+            captureMoves.sort((a, b) => {
+                return this.evaluateCapture(b, enemyColor) - this.evaluateCapture(a, enemyColor);
             });
-            // se empate no capturedVal e netGain, escolher aleatório entre empates
-            const topVal = positive[0].capturedVal;
-            const topCandidates = positive.filter(x => x.capturedVal === topVal);
-            return topCandidates[Math.floor(Math.random() * topCandidates.length)].move;
+
+            // Pega a melhor captura disponível
+            // (Mesmo que seja ruim, a regra diz que se há captura, a IA faz)
+            const bestCapture = captureMoves[0];
+            return this.executeMove(bestCapture);
         }
 
-        // se não tem positive netGain, talvez aceitar captura neutra (netGain === 0)
-        const neutral = evaluated.filter(e => e.netGain === 0);
-        if (neutral.length > 0) {
-            const topVal = Math.max(...neutral.map(n => n.capturedVal));
-            const topCandidates = neutral.filter(x => x.capturedVal === topVal);
-            return topCandidates[Math.floor(Math.random() * topCandidates.length)].move;
+        // 5) Movimentos Seguros (Não atacados) com Bônus Posicional
+        // Filtra movimentos que não colocam a peça sob ataque imediato
+        const safeMoves = myMoves.filter(m => !this.wouldBeAttackedAfterMove(m, enemyColor));
+
+        if (safeMoves.length > 0) {
+            // Escolhe o movimento que dá maior controle de centro ou avança peões
+            // Adiciona aleatoriedade leve para não ficar robótico demais
+            safeMoves.sort((a, b) => {
+                const scoreA = this.evaluatePositionalScore(a) + Math.random() * 5;
+                const scoreB = this.evaluatePositionalScore(b) + Math.random() * 5;
+                return scoreB - scoreA;
+            });
+            return this.executeMove(safeMoves[0]);
         }
 
-        // nenhuma captura recomendada
-        return null;
+        // 6) Fallback: Se tudo é perigoso, escolhe o "Menos Pior"
+        // (Tenta salvar a peça mais valiosa ou perder a menos valiosa)
+        const sortedByRisk = myMoves.sort((a, b) => {
+            return this.valueOfPiece(a.piece) - this.valueOfPiece(b.piece);
+        });
+        
+        return this.executeMove(sortedByRisk[0]);
     }
 
-    // verifica se um quadrado será atacado depois de aplicar move (simulação)
+    /* ---------------- Heurísticas e Avaliações ---------------- */
+
+    // Avalia o ganho líquido de uma captura
+    evaluateCapture(move, enemyColor) {
+        const victimValue = this.valueOfPiece(move.capturedPiece);
+        const myPieceValue = this.valueOfPiece(move.piece);
+        
+        // Simula se minha peça será capturada de volta
+        const isSuicide = this.wouldBeAttackedAfterMove(move, enemyColor);
+
+        if (isSuicide) {
+            // Se eu capturo e morro, o lucro é (Vítima - Eu)
+            return victimValue - myPieceValue;
+        }
+        // Se eu capturo e fico seguro, o lucro é total
+        return victimValue;
+    }
+
+    // Avalia posicionamento (Centro vale mais)
+    evaluatePositionalScore(move) {
+        let score = 0;
+        // Bônus por ir para o centro
+        if (this.centerSquares.includes(move.to)) score += 5;
+        // Bônus leve por avançar peão (promover jogo)
+        if (move.piece.tipo === "♙" || move.piece.tipo === "♟") score += 2;
+        return score;
+    }
+
+    // Verifica se é uma repetição ruim
+    isBadRepeat(move, enemyColor) {
+        if (!this.lastMove) return false;
+
+        // Verifica se é o inverso do movimento anterior (A->B e agora B->A)
+        const isReverse = (move.from === this.lastMove.to && move.to === this.lastMove.from);
+        
+        if (!isReverse) return false;
+
+        // EXCEÇÕES: Permitir voltar se...
+        if (move.capturedPiece) return false; // ...for para capturar
+        if (this.willRemoveCheck(move)) return false; // ...for para salvar o Rei
+        
+        // ... ou se a casa atual (from) está sob ataque e voltar salva a peça
+        const amIAttackedHere = this.isSquareAttacked(move.from, this.getAllMovesForColor(enemyColor));
+        const willBeSafeThere = !this.wouldBeAttackedAfterMove(move, enemyColor);
+        
+        if (amIAttackedHere && willBeSafeThere) return false; // Fugir é permitido
+
+        return true; // Caso contrário, proibir o "vai e vem"
+    }
+
+    /* ---------------- Simulações e Utilitários ---------------- */
+
+    // Executa o movimento e registra para o histórico interno da IA
+    executeMove(move) {
+        this.applyMoveWithEPAndRegister(move);
+        this.lastMove = { from: move.from, to: move.to };
+        return move;
+    }
+
+    // Verifica se um movimento resulta em xeque-mate no inimigo
+    isCheckmateMove(move, enemyColor) {
+        let isMate = false;
+        this.simulateMove(move, () => {
+            // Se o inimigo não tem movimentos legais e o rei está em xeque
+            const enemyLegalMoves = this.getAllMovesForColor(enemyColor); // Recurso caro, mas ok para Medium
+            // Nota: getAllMovesForColor já verifica movimentos possíveis. 
+            // Precisamos saber se o rei DELE está em xeque agora.
+            if (this.validator.isKingInCheck(enemyColor) && enemyLegalMoves.length === 0) {
+                isMate = true;
+            }
+        });
+        return isMate;
+    }
+
+    // Simula se a peça seria atacada após o movimento
     wouldBeAttackedAfterMove(move, enemyColor) {
         let attacked = false;
         this.simulateMove(move, () => {
@@ -219,152 +173,85 @@ export class AI_Medium {
         return attacked;
     }
 
-    // estima valor do atacante que pode capturar nessa casa após move (menor valor atacante)
-    estimatedAttackerValueOnSquareAfterMove(move, enemyColor) {
-        let minVal = Infinity;
-        this.simulateMove(move, () => {
-            const enemyMoves = this.getAllMovesForColor(enemyColor);
-            // todos os ataques que capturam na mesma casa
-            const attackers = enemyMoves.filter(em => em.to === move.to && em.capturedPiece);
-            for (const a of attackers) {
-                const val = this.valueOfPiece(a.piece);
-                if (val < minVal) minVal = val;
-            }
-        });
-        if (minVal === Infinity) return 0;
-        return minVal;
-    }
-
-    // calcula valor heurístico de uma peça (aceita Piece ou null)
-    valueOfPiece(piece) {
-        if (!piece) return 0;
-        const v = this.pieceValueBySymbol[piece.tipo];
-        if (v !== undefined) return v;
-        // fallback: por cor (improvável) ou nome
-        return 1;
-    }
-
-    // filtra e ordena movimentos por risco (menor atacante preferido)
-    rankMovesByRisk(moves, enemyColor) {
-        const rated = moves.map(m => {
-            // se é captura e segura, alto valor
-            const capturedVal = this.valueOfPiece(m.capturedPiece);
-            let risk = 0;
-            this.simulateMove(m, () => {
-                const enemyMoves = this.getAllMovesForColor(enemyColor);
-                const attackers = enemyMoves.filter(em => em.to === m.to);
-                // risco medido pelo menor valor atacante (quanto pior, maior risco)
-                if (attackers.length > 0) {
-                    risk = Math.min(...attackers.map(a => this.valueOfPiece(a.piece)));
-                } else {
-                    risk = 0;
-                }
-            });
-            // score: priorizar mínimo risco, depois maior capturedVal
-            return { move: m, score: risk - capturedVal * 0.1 };
-        });
-
-        rated.sort((a, b) => a.score - b.score);
-        return rated.map(r => r.move);
-    }
-
-    // pick preferable among safe moves: choose capture of higher value, else random
-    pickPreferableMove(moves) {
-        const captures = moves.filter(m => m.capturedPiece);
-        if (captures.length > 0) {
-            // escolher captura de maior valor
-            captures.sort((a, b) => this.valueOfPiece(b.capturedPiece) - this.valueOfPiece(a.capturedPiece));
-            const topVal = this.valueOfPiece(captures[0].capturedPiece);
-            const topCandidates = captures.filter(c => this.valueOfPiece(c.capturedPiece) === topVal);
-            return topCandidates[Math.floor(Math.random() * topCandidates.length)];
-        }
-        // senão aleatório
-        return moves[Math.floor(Math.random() * moves.length)];
-    }
-
-    // verifica se o quadrado é atacado por enemyMoves (simples utilitária)
-    isSquareAttacked(squareIndex, enemyMoves) {
-        return enemyMoves.some(m => m.to === squareIndex);
-    }
-
-    // executa move no board, detectando En Passant e registrando double-step se aplicável
-    applyMoveWithEPAndRegister(move) {
-        if (!move) return;
-
-        const piece = this.board.board[move.from];
-
-        // detectar en passant (se módulo existir)
-        let epCapturedPos = null;
-        try {
-            if (this.enPassant && typeof this.enPassant.isEnPassantMove === "function") {
-                epCapturedPos = this.enPassant.isEnPassantMove(move.from, move.to, piece);
-            }
-        } catch (e) {
-            epCapturedPos = null;
-        }
-
-        // aplicar movimento (presume que board.movePiece aceita terceiro argumento opcional)
-        try {
-            if (epCapturedPos !== null && epCapturedPos !== undefined) {
-                // se board.movePiece suporta remoção EP via terceiro argumento
-                this.board.movePiece(move.from, move.to, epCapturedPos);
-            } else {
-                this.board.movePiece(move.from, move.to);
-            }
-        } catch (e) {
-            // fallback: manipular array diretamente se movePiece não aceitar terceiro argumento
-            this.board.board[move.to] = this.board.board[move.from];
-            this.board.board[move.from] = null;
-        }
-
-        // registrar passo duplo se disponível no módulo
-        try {
-            if (this.enPassant && typeof this.enPassant.registerDoubleStep === "function") {
-                this.enPassant.registerDoubleStep(move.from, move.to, piece);
-            }
-        } catch (e) {
-            // ignore
-        }
-    }
-
-    // simula move diretamente no array board.board (restaura após callback)
+    // Simula o movimento no array (sem alterar a UI ou estado permanente)
     simulateMove(move, callback) {
-        // guarda estado
-        const from = move.from;
-        const to = move.to;
-        const originalFromPiece = this.board.board[from];
-        const originalToPiece = this.board.board[to];
-
-        // aplica simulação (movimentação simples)
-        this.board.board[to] = originalFromPiece;
-        this.board.board[from] = null;
+        const originalTo = this.board.board[move.to];
+        const originalFrom = this.board.board[move.from];
+        
+        // Aplica
+        this.board.board[move.to] = originalFrom;
+        this.board.board[move.from] = null;
 
         try {
             callback();
-        } catch (e) {
-            console.error("simulateMove callback error:", e);
-        }
+        } catch(e) { console.error(e); }
 
-        // restaura
-        this.board.board[from] = originalFromPiece;
-        this.board.board[to] = originalToPiece;
+        // Reverte
+        this.board.board[move.from] = originalFrom;
+        this.board.board[move.to] = originalTo;
     }
 
-    // verifica se o move vai tirar do check (simulação)
-    willRemoveCheck(move) {
-        let removed = false;
-        const color = this.board.board[move.from]?.cor;
-        if (!color) return false;
-
-        this.simulateMove(move, () => {
-            try {
-                if (this.validator && typeof this.validator.isKingInCheck === "function") {
-                    removed = !this.validator.isKingInCheck(color);
-                }
-            } catch (e) {
-                removed = false;
+    // Retorna todos os movimentos possíveis + metadados
+    getAllMovesForColor(color) {
+        const moves = [];
+        const boardArr = this.board.board;
+        for (let i = 0; i < 64; i++) {
+            const piece = boardArr[i];
+            if (piece && piece.cor === color) {
+                const possibleIndices = this.validator.getPossibleMoves(i);
+                possibleIndices.forEach(dest => {
+                    moves.push({
+                        from: i,
+                        to: dest,
+                        piece: piece,
+                        capturedPiece: boardArr[dest] // null se vazio
+                    });
+                });
             }
+        }
+        return moves;
+    }
+
+    // Verifica se a casa está atacada (utilitário simples)
+    isSquareAttacked(index, enemyMoves) {
+        return enemyMoves.some(m => m.to === index);
+    }
+
+    // Verifica se o movimento tira o próprio rei de xeque (para lógica de repetição)
+    willRemoveCheck(move) {
+        let safe = false;
+        const myColor = move.piece.cor;
+        this.simulateMove(move, () => {
+            safe = !this.validator.isKingInCheck(myColor);
         });
-        return removed;
+        return safe;
+    }
+
+    valueOfPiece(piece) {
+        if (!piece) return 0;
+        return this.pieceValueBySymbol[piece.tipo] || 1;
+    }
+
+    // Função de aplicação real (herdada da sua versão anterior)
+    applyMoveWithEPAndRegister(move) {
+        const piece = this.board.board[move.from];
+        let epCapturedPos = null;
+        
+        // Lógica En Passant
+        if (this.enPassant?.isEnPassantMove) {
+            epCapturedPos = this.enPassant.isEnPassantMove(move.from, move.to, piece);
+        }
+
+        // Executa no tabuleiro real
+        if (epCapturedPos !== null) {
+            this.board.movePiece(move.from, move.to, epCapturedPos);
+        } else {
+            this.board.movePiece(move.from, move.to);
+        }
+
+        // Registra Double Step para En Passant futuro
+        if (this.enPassant?.registerDoubleStep) {
+            this.enPassant.registerDoubleStep(move.from, move.to, piece);
+        }
     }
 }
