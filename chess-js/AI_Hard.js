@@ -3,7 +3,7 @@
 // não repete o último movimento sem motivo, avalia sacrifícios por valor.
 // Aprendizado de máquina para ser implementado...
 
-export class AI_Medium {
+export class AI_Hard {
     constructor(board, validator, enPassant) {
         this.board = board;
         this.validator = validator;
@@ -371,4 +371,5 @@ export class AI_Medium {
         return removed;
     }
 }
+
 
