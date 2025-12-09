@@ -45,7 +45,7 @@ export class MoveValidator {
 			}
 			return null;
 		} catch (e) {
-			console.error("Erro na checagem de En Passant:", e);
+			//console.error("Erro na checagem de En Passant:", e);
 			return null; // Nunca atrapalhar o fluxo principal
 		}
 	}
@@ -144,7 +144,7 @@ export class MoveValidator {
 				// En Passant: se o módulo estiver plugado, peça os alvos possíveis para este peão
 				if (this.enPassant && typeof this.enPassant.getEnPassantTargetsForPawn === 'function') {
 					const epTargets = this.enPassant.getEnPassantTargetsForPawn(pos);
-					console.log(`DEBUG: Peão em ${pos} checando EP. Alvos retornados:`, epTargets);
+					//console.log(`DEBUG: Peão em ${pos} checando EP. Alvos retornados:`, epTargets);
 					for (let t of epTargets) {
 						// Segurança: apenas adicionar se a casa de destino estiver vazia (condição de en passant)
 						// E a peça capturada deve ser o Peão que acabou de se mover 2 casas
