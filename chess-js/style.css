@@ -267,6 +267,39 @@ h1 {
     border-color: #aaa;
 }
 
+/* Destaque da célula de destino válida */
+.cell.valid-move {
+    /* Define o fundo da célula destino como um verde transparente */
+    background-color: rgba(0, 128, 0, 0.4); 
+    cursor: pointer;
+}
+
+/* Ponto visual para células vazias */
+.valid-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 15px; /* Tamanho do ponto */
+    width: 15px;
+    background-color: green;
+    border-radius: 50%;
+    opacity: 0.8;
+    z-index: 10;
+}
+
+/* Destaque para células ocupadas (indica captura) */
+.valid-move .piece {
+    /* Adiciona uma borda verde para indicar que a peça pode ser capturada */
+    box-shadow: 0 0 0 4px green inset;
+    border-radius: 50%; /* Para melhor visualização */
+}
+
+/* Garante que o container de peça no tabuleiro permita o posicionamento do ponto */
+#chessboard .cell {
+    position: relative; /* Necessário para posicionar o .valid-dot */
+}
+
 /* ============================
    AJUSTES PARA CELULAR (SOLUÇÃO DEFINITIVA DE ESTABILIDADE)
 ============================ */
@@ -301,4 +334,5 @@ h1 {
         /* Alternativa: font-size: 38px; (Se 1em não funcionar) */
     }
 }
+
 
