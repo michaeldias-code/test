@@ -1,4 +1,8 @@
 /* ============================
+   style.css — UNIFICADO (Layout V2 + Estética V1 + Responsividade V2/vmin)
+============================ */
+
+/* ============================
    GLOBAL / BODY
 ============================ */
 body {
@@ -8,7 +12,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start; /* Alinha o conteúdo ao topo */
+    min-height: 100vh;
 }
 
 /* ============================
@@ -23,24 +28,28 @@ h1 {
 }
 
 /* ============================
-   CONTAINER PRINCIPAL
+   CONTAINER PRINCIPAL (GRID USADA PELO VIEW.JS)
 ============================ */
 #chess-container {
     display: grid;
+    /* Coluna 1: Ranks (Auto) | Coluna 2: Tabuleiro (1 Frac.) */
     grid-template-columns: auto 1fr;
+    /* Linha 1: Tabuleiro (1 Frac.) | Linha 2: Files (Auto) */
     grid-template-rows: 1fr auto;
     gap: 0;
     margin: 0 auto;
-    width: 100%;
-    max-width: 600px; /* Tamanho máximo no desktop */
-    max-height: 600px;
-    height: 100%;
+    /* Usa vmin para responsividade (como no V1, mas aplicado ao container) */
+    width: 90vmin;
+    height: 90vmin;
     box-sizing: border-box;
     position: relative;
+    /* Estilo da borda/sombra do tabuleiro (mantido do V1) */
+    border: 3px solid #000;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5); 
 }
 
 /* ============================
-   RANKS (números à esquerda)
+   RANKS (números à esquerda) - GERADO PELO VIEW.JS
 ============================ */
 #rank-area {
     grid-row: 1;
@@ -49,13 +58,14 @@ h1 {
     grid-template-rows: repeat(8, 1fr);
     align-items: center;
     justify-items: center;
-    font-size: clamp(10px, 2.8vw, 20px);
+    /* Fonte usando vmin para responsividade (Adaptado do V1) */
+    font-size: calc(90vmin * 0.04);
     font-weight: bold;
     padding-right: 4px;
 }
 
 /* ============================
-   FILES (letras embaixo)
+   FILES (letras embaixo) - GERADO PELO VIEW.JS
 ============================ */
 #file-area {
     grid-row: 2;
@@ -64,8 +74,10 @@ h1 {
     grid-template-columns: repeat(8, 1fr);
     justify-items: center;
     align-items: center;
-    font-size: clamp(12px, 3vw, 22px);
+    /* Fonte usando vmin para responsividade (Adaptado do V1) */
+    font-size: calc(90vmin * 0.04);
     font-weight: bold;
+    padding-top: 4px;
 }
 
 /* ============================
@@ -79,8 +91,9 @@ h1 {
     grid-template-rows: repeat(8, 1fr);
     width: 100%;
     height: 100%;
-    border: 3px solid #000;
-    box-shadow: 0 0 10px #000;
+    /* Remove a borda e sombra do #chessboard, pois já está no #chess-container */
+    border: none;
+    box-shadow: none;
     box-sizing: border-box;
 }
 
@@ -91,10 +104,12 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: clamp(22px, 5vw, 46px);
+    /* Responsividade e fonte adaptadas do V1 */
+    font-size: 4.5vmin;
+    user-select: none;
 }
 
-/* cores */
+/* cores (V1) */
 .white { background: #f0d9b5; }
 .black { background: #b58863; }
 
@@ -103,33 +118,71 @@ h1 {
 ============================ */
 .piece {
     pointer-events: none;
-    font-size: clamp(22px, 5vw, 46px);
+    /* Responsividade e fonte adaptadas do V1 */
+    font-size: calc(90vmin / 10);
 }
 
 .piece.brancas {
-    color: #fff;
-    text-shadow: 1px 1px 2px #000;
+    color: #ffffff;
+    text-shadow: 1px 1px 3px black;
 }
 
 .piece.pretas {
-    color: #000;
-    text-shadow: 1px 1px 2px #fff;
+    color: #000000;
+    text-shadow: 1px 1px 2px white;
 }
 
 /* ============================
-   SELEÇÃO E ÚLTIMO LANCE
+   SELEÇÃO E ÚLTIMO LANCE (V1)
 ============================ */
 .selected {
     outline: 3px solid yellow;
+    outline-offset: -2px;
 }
 
 .ai-move {
-    background-color: rgba(255, 255, 0, 0.45);
+    background-color: rgba(255, 255, 0, 0.5);
+    transition: background-color 0.3s ease;
 }
 
 /* ============================
-   Estilo para o Modal de Game Over
+   CONTROLES E UI (V2)
 ============================ */
+
+#difficulty-container {
+    margin: 20px 0;
+    font-size: 1.2em;
+}
+
+#difficulty {
+    padding: 8px;
+    font-size: 1em;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+#restart-btn {
+    display: block;
+    margin: 25px auto;
+    padding: 12px 24px;
+    background: #222;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#restart-btn:hover {
+    background: #444;
+    transform: scale(1.05);
+}
+
+/* ============================
+   MODAL DE FIM DE JOGO (V2)
+============================ */
+
 .game-over-modal {
     position: fixed;
     top: 0;
@@ -137,10 +190,10 @@ h1 {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.6);
-    display: none; /* Inicialmente escondido */
+    display: none; /* Controlado pelo JS */
     justify-content: center;
     align-items: center;
-    z-index: 9999; /* Fica acima de tudo */
+    z-index: 9999;
 }
 
 .game-over-content {
@@ -148,37 +201,9 @@ h1 {
     padding: 20px 40px;
     border-radius: 10px;
     text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
-/* Estilos para os botões de fim de jogo */
-.game-over-message {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 24px;
-    font-weight: bold;
-    color: red;
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 10px 20px;
-    border-radius: 8px;
-    text-align: center;
-    z-index: 1000;
-}
-
-.replay-button, .show-board-button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    margin: 10px 5px;
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-/* Estilo para os botões */
 .replay-button, .no-button {
     padding: 10px 20px;
     margin: 10px;
@@ -198,94 +223,51 @@ h1 {
     color: white;
 }
 
-
-
-.close-btn {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 1em;
-    cursor: pointer;
-    background-color: #ff6347;
-    color: white;
-    border: none;
-    border-radius: 5px;
+/* Opcional: Estilo básico para o modal de promoção */
+.promotion-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
 }
-
-.close-btn:hover {
-    background-color: #ff4500;
+.promotion-box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
-
-/* Botão de Reiniciar */
-#restart-btn {
-    display: block;
-    margin: 25px auto;
-    padding: 12px 24px;
-    background: #222;
-    color: white;
-    font-size: 16px;
-    border: none;
+.promo-piece {
+    font-size: 32px;
+    padding: 8px 12px;
+    margin: 0 5px;
     border-radius: 8px;
     cursor: pointer;
-    transition: 0.2s;
+    border: 2px solid #ccc;
+    background: #eee;
+    transition: background 0.2s;
+}
+.promo-piece:hover {
+    background: #ddd;
+    border-color: #aaa;
 }
 
-#restart-btn:hover {
-    background: #444;
-    transform: scale(1.05);
-}
-
-#restart-btn:active {
-    transform: translateY(0px);
-    box-shadow: 0 3px 8px rgba(0,0,0,0.25);
-}
-
-#difficulty-container {
-    margin: 20px 0;
-    font-size: 1.2em;
-}
-
-#difficulty {
-    padding: 8px;
-    font-size: 1em;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-}
 
 /* ============================
-   AJUSTES PARA CELULAR
+   AJUSTES PARA CELULAR (garantido pelo VMIN, mas adicionamos um ajuste extra)
 ============================ */
 @media (max-width: 600px) {
-    /* Aumenta o tamanho do container para 30% maior */
+    /* O VMIN já funciona bem, mas este bloco garante compatibilidade */
     #chess-container {
-        width: 110vw !important; /* Aumenta o tamanho do container no celular (30% maior) */
-        height: 110vw !important; /* Aumenta também a altura */
+        width: 95vw;
+        height: 95vw;
     }
-
-    /* Ajusta o tabuleiro para ocupar todo o tamanho */
-    #chessboard {
-        width: 100%;
-        height: 100%;
+    
+    /* Reajusta a fonte para telas muito pequenas, se necessário */
+    .cell, .piece {
+        font-size: clamp(30px, 6vw, 50px);
     }
-
-    /* Aumenta o tamanho das células e das peças no celular em 30% */
-    .cell {
-        font-size: clamp(29px, 7vw, 60px) !important; /* Tamanho das células 30% maior */
-    }
-
-    .piece {
-        font-size: clamp(29px, 7vw, 60px) !important; /* Tamanho das peças 30% maior */
-    }
-
-    /* Ajusta o espaçamento das notações para não invadir o tabuleiro */
-    #rank-area {
-        padding-right: 8px !important;
-    }
-
-    #file-area {
-        padding-top: 8px !important;
-    }
-}
-
-body.consolemode #chess-container {
-    display: none; /* Esconde o tabuleiro */
 }
