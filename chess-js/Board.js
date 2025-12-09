@@ -117,37 +117,36 @@ export class Board {
     	console.log(`Movido ${piece.tipo} de ${fromNotation} para ${toNotation}`);
 	}
 	
-    printBoard() {
-  // console.log(""); // linha extra para separar
-       // for (let r = 0; r < 8; r++) {
-       //     let row = "";
-       //     for (let c = 0; c < 8; c++) {
-       //         const p = this.board[r * 8 + c];
-       //         row += p ? p.tipo : ".";
-       //         row += " ";
-       //     }
-       //     console.log(row);
-       // }
-       // console.log(""); // linha extra para separar
-		console.clear();
-		const EMPTY = "　"; // espaço que tem a MESMA largura que ♙, ♟ etc
+	printBoard() {
+		// console.log(""); // linha extra para separar
+		// for (let r = 0; r < 8; r++) {
+		//     let row = "";
+		//     for (let c = 0; c < 8; c++) {
+		//         const p = this.board[r * 8 + c];
+		//         row += p ? p.tipo : ".";
+		//         row += " ";
+		//     }
+		//     console.log(row);
+		// }
+		// console.log(""); // linha extra para separar
 	
-		console.log("   a  b  c  d  e  f  g  h");
+		console.clear();
+	
+		const EMPTY = "　"; // espaço de largura igual às peças
+	
+		console.log("a b c d e f g h");
 	
 		for (let row = 0; row < 8; row++) {
-			let linha = (8 - row) + "  ";
+			let linha = "";
 	
 			for (let col = 0; col < 8; col++) {
 				const piece = this.board[row * 8 + col];
 				const symbol = piece ? piece.symbol : EMPTY;
-	
 				linha += symbol + " ";
 			}
 	
-			console.log(linha + (8 - row));
+			console.log(linha);
 		}
-	
-		console.log("   a  b  c  d  e  f  g  h");
 	}
     
     
@@ -167,6 +166,7 @@ export class Board {
         }
     }
 }
+
 
 
 
