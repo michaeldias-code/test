@@ -79,7 +79,11 @@ export class Board {
         this.board[to] = this.board[from];
         this.board[from] = null;
     }
-
+	
+	row(i) {
+        return Math.floor(i / 8);
+    }
+	
     notationToIndex(pos) {
         const files = "abcdefgh";
         const file = files.indexOf(pos[0].toLowerCase()); // coluna: a-h
@@ -306,3 +310,4 @@ export class Board {
         }
     }
 }
+
