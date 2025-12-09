@@ -1,8 +1,8 @@
 // AI.js (AI Controller/Manager)
 
-import AI_Easy from './AI_Easy.js';
-import AI_Medium from './AI_Medium.js'; 
-import AI_Hard from './AI_Hard.js';   
+import {AI_Easy} from './AI_Easy.js';
+import {AI_Medium} from './AI_Medium.js'; 
+import {AI_Hard} from './AI_Hard.js';   
 
 class AI {
     /**
@@ -81,5 +81,6 @@ class AI {
 }
 
 export default AI;
+
 
 
