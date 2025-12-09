@@ -145,11 +145,11 @@ export class GameController {
 
 		// 1. ZERA o alvo EP do turno anterior ANTES de checar movimentos,
 		//    pois o EP só dura 1 turno.
-		if (this.enPassant) {
-			this.enPassant.setTarget(this.board.enPassantTargetPos);
+		//if (this.enPassant) {
+		//	this.enPassant.setTarget(this.board.enPassantTargetPos);
 			// ZERAR AQUI EVITARIA ERROS, mas o Board precisa que a informação EP seja transferida
 			// antes que o novo alvo seja calculado em movePiece().
-		}
+		//}
 
 		const validMoves = this.validator.getPossibleMoves(from);
 		if (!validMoves.includes(to)) return false;
@@ -277,16 +277,15 @@ this.logCheckState(this.currentTurn);
 
 				this.aiTimerId = null;
 
-				this.currentTurn = "brancas";
+this.currentTurn = "brancas";
 
-				// 11. Configura alvo EP para o próximo turno da Branca
-				//if (this.enPassant) {
-				//	this.enPassant.setTarget(this.board.enPassantTargetPos);
-				//}
-				//this.board.enPassantTargetPos = null; // Limpa o estado no board
+// 11. Configura alvo EP para o próximo turno da Branca
+if (this.enPassant) {
+    this.enPassant.setTarget(this.board.enPassantTargetPos); // CORRETO: Sincroniza o alvo da IA
+}
+this.board.enPassantTargetPos = null; // Limpa o estado no board (CORRETO)
 
-				this.logCheckState(this.currentTurn);
-
+this.logCheckState(this.currentTurn);
 			}, 300);
 		}
 
