@@ -266,35 +266,36 @@ h1 {
 }
 
 /* ============================
-   AJUSTES PARA CELULAR (SOLUÇÃO FINAL DE ESTABILIDADE)
+   AJUSTES PARA CELULAR (SOLUÇÃO DEFINITIVA DE ESTABILIDADE)
 ============================ */
 @media (max-width: 600px) {
     #chess-container {
-        /* Usamos VW para garantir que ele se encaixe na largura da tela */
         width: 95vw; 
-        
-        /* Removemos a altura e usamos aspect-ratio */
         height: auto; 
         aspect-ratio: 1 / 1; 
-
         max-width: none;
         max-height: none;
         margin-bottom: 40px; 
     }
     
-    /* CHAVE 1: O tabuleiro precisa ser dimensionado explicitamente para 100% */
     #chessboard {
         width: 100%;
         height: 100%;
-        /* Garante que o aspecto 1/1 não seja perdido no #chessboard */
         aspect-ratio: 1 / 1; 
     }
 
-    /* CHAVE 2: As células (casas) usam um Aspect Ratio próprio */
-    /* Isso garante que cada célula seja um quadrado perfeito, independente do conteúdo da peça. */
     .cell {
         aspect-ratio: 1 / 1; 
-        /* Mantemos o font-size para a peça dentro da célula */
-        font-size: clamp(35px, 8vw, 60px); 
+        /* CHAVE 1: Remove o font-size do .cell (deixa ele herdar) */
+        /* Deixamos o .piece controlar o tamanho */
+    }
+
+    /* CHAVE 2: Força o tamanho da peça a ser baseado em 'em' ou 'px' (medida fixa)
+       em vez de 'vw' (que é instável no mobile) */
+    .piece {
+        /* Usa uma medida relativa ao tamanho da célula (herdada) */
+        font-size: 1em; 
+        /* Define um tamanho FIXO e razoável no mobile, se 1em for instável */
+        /* Alternativa: font-size: 38px; (Se 1em não funcionar) */
     }
 }
