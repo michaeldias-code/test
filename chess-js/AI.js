@@ -1,61 +1,83 @@
-// AI.js (AI Controller)
+// AI.js (AI Controller/Manager)
 
 import AI_Easy from './AI_Easy.js';
-import AI_Medium from './AI_Medium.js';
-// Você adicionaria o AI_Hard aqui quando for a hora.
+import AI_Medium from './AI_Medium.js'; 
+import AI_Hard from './AI_Hard.js';   
 
 class AI {
-    constructor(difficulty = 'easy') {
-        // Mapeamento das classes de estratégia
+    /**
+     * @param {string} [initialDifficulty='easy'] - O nível de dificuldade inicial.
+     */
+    constructor(initialDifficulty = 'easy') {
         this.strategies = {
             'easy': AI_Easy,
             'medium': AI_Medium,
-            // 'hard': AI_Hard,
+            'hard': AI_Hard,
         };
         
-        // Instância da estratégia de IA atualmente selecionada
         this.currentStrategy = null; 
         
-        // Define a dificuldade inicial
-        this.setDifficulty(difficulty);
+        const difficultyToSet = this.strategies[initialDifficulty.toLowerCase()] 
+                                ? initialDifficulty.toLowerCase() 
+                                : 'easy';
+
+        this.setDifficulty(difficultyToSet);
     }
 
     /**
-     * Define a estratégia de IA a ser usada com base na string de dificuldade.
-     * @param {string} difficulty - 'easy', 'medium', etc.
+     * Define a estratégia de IA a ser usada.
+     * @param {string} difficulty - 'easy', 'medium', 'hard', etc.
      */
     setDifficulty(difficulty) {
-        const StrategyClass = this.strategies[difficulty];
+        const difficultyKey = difficulty.toLowerCase();
+        const StrategyClass = this.strategies[difficultyKey];
 
         if (StrategyClass) {
-            // Cria uma nova instância da estratégia (AI_Easy, AI_Medium, etc.)
             this.currentStrategy = new StrategyClass();
-            console.log(`AI Dificuldade definida para: ${difficulty}`);
+            console.log(`✅ AI Dificuldade definida para: ${difficultyKey}`);
         } else {
-            console.error(`Dificuldade desconhecida: ${difficulty}. Usando 'easy'.`);
-            this.currentStrategy = new AI_Easy();
+            console.error(`❌ Dificuldade desconhecida: ${difficulty}. Falha na definição.`);
+            if (!this.currentStrategy) {
+                this.currentStrategy = new AI_Easy();
+                console.log(`✅ AI Dificuldade forçada para: easy (fallback)`);
+            }
         }
     }
 
     /**
-     * MÉTODO PÚBLICO PRINCIPAL: Mantém a mesma interface para os outros módulos.
-     * Delega a chamada para a estratégia de IA selecionada.
-     * * @param {object} boardState - O estado atual do tabuleiro (e.g., array, objeto FEN).
-     * @param {string} playerColor - A cor da peça que a IA está jogando ('w' ou 'b').
-     * @returns {object} O melhor movimento encontrado.
+     * Método público principal para obter um movimento.
+     * **CORREÇÃO:** Inclui a chamada de delegação completa para a estratégia.
+     * * @param {object} boardState - O estado atual do tabuleiro.
+     * @param {string} playerColor - A cor da peça que a IA está jogando.
+     * @returns {object|null} O movimento escolhido.
      */
     getBestMove(boardState, playerColor) {
-        if (!this.currentStrategy || !this.currentStrategy.findMove) {
-            console.error("Estratégia de IA não inicializada ou faltando método findMove.");
-            return null; // Retorna um valor seguro, ou talvez um movimento aleatório
+        if (!this.currentStrategy || typeof this.currentStrategy.findMove !== 'function') {
+            console.error("AI: Estratégia de IA não inicializada ou método 'findMove' ausente.");
+            return null; 
         }
         
-        // **A ORQUESTRAÇÃO ACONTECE AQUI:** // Chama o método específico da estratégia (Easy, Medium, etc.)
+        // *** AQUI ESTÁ A CHAMA DELEGADA COMPLETA ***
         return this.currentStrategy.findMove(boardState, playerColor);
     }
 
-    // Você pode ter outros métodos públicos aqui que também delegam ou executam lógica do controlador
-    // ...
+    /**
+     * Exemplo de método original que precisa ser mantido ou delegado.
+     * Se este método existia no seu AI.js original, ele deve continuar aqui.
+     * Você pode delegá-lo à estratégia atual (se ela tiver um método correspondente)
+     * ou usar lógica de controle aqui.
+     */
+    isThinking() {
+        // Exemplo de delegação: Se a estratégia atual tiver um método 'isSearching'
+        if (this.currentStrategy && typeof this.currentStrategy.isSearching === 'function') {
+            return this.currentStrategy.isSearching();
+        }
+        
+        // Lógica de controle: Se não houver método de delegação, o controlador assume um padrão.
+        return false; 
+    }
+    
+    // Inclua quaisquer outros métodos públicos que seu motor de jogo utiliza!
 }
 
 export default AI;
