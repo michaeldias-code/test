@@ -45,6 +45,7 @@ export class GameController {
 		//this.ai = new AI(this.board, this.validator, this.enPassant, "easy");
 		this.ai = new AI(this.board, this.validator, this.enPassant, this.difficulty);
 
+		this.moveHistory = []; // <<<< ADICIONE ESTA LINHA
 
 		//consoleMode
 		const isConsoleMode = window.location.href.includes("consolemode");
@@ -181,6 +182,8 @@ export class GameController {
 		// O método this.board.movePiece (já alterado) é capaz de tratar o movimento EP.
 		this.board.movePiece(from, to, epCapturedPos);
 		
+		this.moveHistory.push({ from, to, pieceType: piece.tipo, color: piece.cor });
+		
 		// 4. Registra novo alvo EP se o peão moveu 2 casas (Board já faz isso em movePiece)
 		// O Board armazena o novo alvo em this.board.enPassantTargetPos.
 
@@ -292,15 +295,15 @@ this.logCheckState(this.currentTurn);
 
 				this.aiTimerId = null;
 
-this.currentTurn = "brancas";
-
-// 11. Configura alvo EP para o próximo turno da Branca
-if (this.enPassant) {
-    this.enPassant.setTarget(this.board.enPassantTargetPos); // CORRETO: Sincroniza o alvo da IA
-}
-this.board.enPassantTargetPos = null; // Limpa o estado no board (CORRETO)
-
-this.logCheckState(this.currentTurn);
+				this.currentTurn = "brancas";
+				
+				// 11. Configura alvo EP para o próximo turno da Branca
+				if (this.enPassant) {
+					this.enPassant.setTarget(this.board.enPassantTargetPos); // CORRETO: Sincroniza o alvo da IA
+				}
+				this.board.enPassantTargetPos = null; // Limpa o estado no board (CORRETO)
+				
+				this.logCheckState(this.currentTurn);
 			}, 300);
 		}
 
@@ -383,14 +386,24 @@ this.logCheckState(this.currentTurn);
 	logCheckState(cor) {
 		if (this.validator.isKingInCheck(cor)) {
 			console.log(`?? Check em ${cor}!`);
-	
+		
 			if (this.validator.isCheckmate(cor)) {
 				console.log(`?? Checkmate! ${cor === "brancas" ? "pretas" : "brancas"} venceu!`);
 				this.gameOver = true;
-				this.view.onGameOver({ 
-					winner: cor === "brancas" ? "pretas" : "brancas",
+				
+				// <<<< CORREÇÃO: DEFINIR 'winner' AQUI >>>>
+				const winner = cor === "brancas" ? "pretas" : "brancas"; 
+				
+				this.view.onGameOver({ 
+					winner: winner,
 					reason: "checkmate"
 				});
+				
+				if (this.ai.constructor.name === 'AI_Hard') {
+					// 'winner' agora está definida e pode ser usada.
+					const result = (winner === "pretas") ? 1 : -1;
+					this.ai.updateLearning(this.moveHistory.filter(m => m.color === "pretas"), result);
+				}
 			}
 		}
 	}
@@ -418,6 +431,8 @@ this.logCheckState(this.currentTurn);
 		this.lastMove = null;
 	
 		this.view.board = this.board;
+		
+		this.moveHistory = [];
 		this.view.selected = null;
 		this.view.lastMove = null;
 	
@@ -427,8 +442,4 @@ this.logCheckState(this.currentTurn);
 		console.log("Jogo reiniciado!");
 	}
 }
-
-
-
-
 
