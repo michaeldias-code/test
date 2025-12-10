@@ -140,6 +140,9 @@ export class AI_Hard extends AI_Medium {
                 learning: this.learning,
                 totalGames: this.totalGames
             };
+            // LOG DE CONFIRMAÇÃO DE SALVAMENTO
+            console.log("✅ AI_Hard: Salvando dados. Total de jogos:", this.totalGames, "Tamanho (aprox):", JSON.stringify(data).length, "bytes.");
+
             localStorage.setItem('AI_HardEvo_Data', JSON.stringify(data));
         } catch (e) {
             console.warn("Falha ao salvar aprendizado:", e);
@@ -149,9 +152,20 @@ export class AI_Hard extends AI_Medium {
     // carregar do localStorage
     loadLearning() {
         try {
-            const data = JSON.parse(localStorage.getItem('AI_HardEvo_Data'));
+            const dataStr = localStorage.getItem('AI_HardEvo_Data');
+            
+            if (dataStr) {
+                console.log("📦 AI_Hard: Dados encontrados no localStorage.");
+            } else {
+                 console.log("❌ AI_Hard: Nenhum dado encontrado no localStorage.");
+                 return {};
+            }
+            
+            const data = JSON.parse(dataStr);
             if (data && data.learning) {
                 this.totalGames = data.totalGames || 0;
+                // LOG DE CONFIRMAÇÃO DE CARREGAMENTO
+                console.log(`🧠 AI_Hard: Carregamento bem-sucedido! ${this.totalGames} jogos lidos.`);
                 return data.learning;
             }
             return {};
@@ -160,5 +174,4 @@ export class AI_Hard extends AI_Medium {
             return {};
         }
     }
-    // ... Aqui estariam os métodos isForbiddenRepeat, willRemoveCheck, evaluateMove, etc., herdados do AI_Medium.
 }
