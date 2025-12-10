@@ -117,20 +117,22 @@ export class AI_Hard extends AI_Medium {
     // ... métodos updateLearning, saveLearning, loadLearning (mantidos) ...
 
     updateLearning(movesSequence, result) {
-        // ... código mantido, mas garanta que 'result' seja +1, 0, ou -1 ...
         this.totalGames += 1;
 
         movesSequence.forEach(move => {
+            // Log para debug
+            console.log(`⚙️ AI_Hard: Processando movimento para aprendizado: ${move.from}-${move.to}. Resultado: ${result}`);
+            
             const key = `${move.from}-${move.to}`;
             if (!this.learning[key]) this.learning[key] = { score: 0, count: 0 };
             
-            // O score agora reflete o resultado: +1 (vitória) ou -1 (derrota)
             this.learning[key].score += result; 
             this.learning[key].count += 1;
         });
 
-        this.saveLearning();
-        console.log(`? AI_Hard: Aprendizado atualizado! Resultado: ${result}. Total de jogos: ${this.totalGames}`);
+        this.saveLearning(); 
+        // Este log deve aparecer DEPOIS do log de salvamento
+        console.log(`? AI_Hard: Aprendizado atualizado (COMPLETO)! Resultado final: ${result}. Total de jogos: ${this.totalGames}`);
     }
     
    // salvar no localStorage
