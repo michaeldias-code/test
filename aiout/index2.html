@@ -1,18 +1,28 @@
 <!DOCTYPE html>
 <html>
 <body>
-<button onclick="play()">Tocar nota</button>
+
+<button id="btn">Tocar nota</button>
 
 <script src="https://unpkg.com/soundfont-player"></script>
 <script>
 let inst;
-const ctx = new AudioContext();
+let ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-Soundfont.instrument(ctx, "trumpet").then(i => inst = i);
+document.getElementById("btn").onclick = async () => {
+  // Necessário para liberar áudio no navegador
+  if (ctx.state === "suspended") {
+    await ctx.resume();
+  }
 
-function play() {
-  inst.play("C4");
-}
+  // Carrega o instrumento se ainda não carregou
+  if (!inst) {
+    inst = await Soundfont.instrument(ctx, "trumpet");
+  }
+
+  inst.play("C4"); // toca a notinha
+};
 </script>
+
 </body>
 </html>
