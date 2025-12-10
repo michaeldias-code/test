@@ -294,7 +294,7 @@ h1 {
     /* Adiciona uma borda verde para indicar que a peça pode ser capturada */
     box-shadow: 0 0 0 4px green inset;
     border-radius: 50%; /* Para melhor visualização */
-    border: 0,8;
+    border: 2px solid green;
 }
 
 /* Garante que o container de peça no tabuleiro permita o posicionamento do ponto */
@@ -336,7 +336,3 @@ h1 {
         /* Alternativa: font-size: 38px; (Se 1em não funcionar) */
     }
 }
-
-
-
-
