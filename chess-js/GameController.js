@@ -402,6 +402,12 @@ this.logCheckState(this.currentTurn);
 				if (this.ai.constructor.name === 'AI_Hard') {
 					// 'winner' agora está definida e pode ser usada.
 					const result = (winner === "pretas") ? 1 : -1;
+                    const aiMoves = this.moveHistory.filter(m => m.color === "pretas");
+                    
+                    // Adicione este log para verificar o objeto:
+                    console.log("📝 GameController: Movimentos da IA sendo enviados:", aiMoves);
+
+
 					this.ai.updateLearning(this.moveHistory.filter(m => m.color === "pretas"), result);
 				}
 			}
@@ -442,4 +448,3 @@ this.logCheckState(this.currentTurn);
 		console.log("Jogo reiniciado!");
 	}
 }
-
