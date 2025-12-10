@@ -23,17 +23,16 @@ export class AI_Hard extends AI_Medium {
         let myMoves = this.getAllMovesForColor(color);
         if (myMoves.length === 0) return null;
 
-        // FILTROS HERDADOS (Medium)
-        myMoves = myMoves.filter(m => !this.isForbiddenRepeat(m));
-        myMoves = myMoves.filter(m => {
-            if (!this.lastMove) return true;
-            if (m.from === this.lastMove.to && m.to === this.lastMove.from) {
-                if (m.capturedPiece) return true;
-                if (this.willRemoveCheck(m)) return true;
-                return false;
-            }
-            return true;
-        });
+        // filtros Medium/Hard
+        
+        // 1. FILTRO DE REPETIÇÃO:
+        // Substituímos o isForbiddenRepeat e o filtro de vai-e-vem pelo método único: isBadRepeat
+        myMoves = myMoves.filter(m => !this.isBadRepeat(m, enemyColor)); // <<<< CORREÇÃO AQUI
+
+        // Se o filtro removeu todos, recupera para evitar travamento
+        if (myMoves.length === 0) {
+            myMoves = this.getAllMovesForColor(color); 
+        }
 
         // NOVO FILTRO HARD: EVITAR MOVIMENTOS QUE HISTORICAMENTE RESULTARAM EM DERROTA
         let initialMovesCount = myMoves.length;
