@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+<button onclick="play()">Tocar nota</button>
+
+<script src="https://unpkg.com/soundfont-player"></script>
+<script>
+let inst;
+const ctx = new AudioContext();
+
+Soundfont.instrument(ctx, "trumpet").then(i => inst = i);
+
+function play() {
+  inst.play("C4");
+}
+</script>
+</body>
+</html>
