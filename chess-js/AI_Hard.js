@@ -56,25 +56,30 @@ export class AI_Hard extends AI_Medium {
         }
 
 
-        // calcular score combinado: heurística + aprendizado
-        const scoredMoves = myMoves.map(m => {
-            // HEURÍSTICA (mantida a lógica de captura + contra-ataque)
-            let heuristic = this.evaluateMove(m, color, enemyColor); // Assume que você tem um evaluateMove mais robusto no Medium
+    	    // calcular score combinado: heurística + aprendizado
+	        const scoredMoves = myMoves.map(m => {
+            // HEURÍSTICA: Combina Captura e Posicionamento do Medium
+            let heuristic = 0;
             
-            // Se o Medium não tem evaluateMove, use o seu cálculo original:
-            /*
-            let heuristic = 0;
+            // 1. Avalia o ganho/perda da Captura (Se houver)
             if (m.capturedPiece) {
-                const wouldBeAttacked = this.wouldBeAttackedAfterMove(m, enemyColor);
-                heuristic = this.valueOfPiece(m.capturedPiece);
-                if (wouldBeAttacked) {
-                    heuristic -= this.estimatedAttackerValueOnSquareAfterMove(m, enemyColor);
-                }
+                // Usamos a avaliação completa de captura do Medium
+                heuristic += this.evaluateCapture(m, enemyColor); 
             }
-            */
 
-            // APRENDIZADO
-            const key = `${m.from}-${m.to}`;
+            // 2. Avalia o Posicionamento (Sempre adiciona)
+            heuristic += this.evaluatePositionalScore(m);
+            
+            // 3. (OPCIONAL) Grande penalidade por colocar peça sob ataque, se não estiver capturando
+            const isSuicide = !m.capturedPiece && this.wouldBeAttackedAfterMove(m, enemyColor);
+            if (isSuicide) {
+                // Penaliza a IA por jogar uma peça (ex: cavalo) onde ela será imediatamente capturada
+                heuristic -= this.valueOfPiece(m.piece) * 0.5; // Exemplo: Perde metade do valor
+            }
+
+
+            // APRENDIZADO
+            const key = `${m.from}-${m.to}`;
             let learned = 0;
             if (this.learning[key]) {
                 // média ponderada do aprendizado
