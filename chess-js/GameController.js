@@ -190,7 +190,7 @@ export class GameController {
 			color: piece.cor,
 			captured: capturedPiece ? capturedPiece.tipo : null 
 		});
-		let logMsg = `?? Jogador: ${this.indexToNotation(from)} -> ${this.indexToNotation(to)}`;
+		let logMsg = `▶️ Jogador: ${this.indexToNotation(from)} -> ${this.indexToNotation(to)}`;
 		// 4. Registra novo alvo EP se o peão moveu 2 casas (Board já faz isso em movePiece)
 		// O Board armazena o novo alvo em this.board.enPassantTargetPos.
 		if (capturedPiece) {
@@ -454,7 +454,8 @@ this.logCheckState(this.currentTurn);
 	
 		this.view.render();
 		this.view.hidePromotionModal();
-	
+
+		
 		console.log("Jogo reiniciado!");
 	}
 }
