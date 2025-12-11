@@ -287,10 +287,15 @@ this.logCheckState(this.currentTurn);
 					this.view.lastMove = { from: m.from, to: m.to };
 					this.view.render();
 					this.view.highlightCell(m.to);
-					console.log(
-						`▶️ IA: ${this.indexToNotation(m.from)} -> ${this.indexToNotation(m.to)}` +
-						(epCapturedPosAI !== null ? ' (En Passant aplicado pela IA)' : '')
-					);
+					let logMsg = `▶️ IA: ${this.indexToNotation(m.from)} -> ${this.indexToNotation(m.to)}`;
+					
+					if (capturedPiece) {
+						logMsg += ` (${movedPiece.tipo} captura ${capturedPiece.tipo})`;
+					} else if (epCapturedPosAI !== null) {
+						logMsg += ` (${movedPiece.tipo} captura En Passant ${capturedPiece?.tipo || '♙/♟'})`;
+					}
+					
+					console.log(logMsg);
 
 					/* ?? PROMOÇÃO DE PEÃO PELA IA */
 					const moved = this.board.board[m.to];
@@ -430,7 +435,8 @@ this.logCheckState(this.currentTurn);
 		if (this.aiTimerId) {
 			clearTimeout(this.aiTimerId);
 			this.aiTimerId = null;
-		}	
+		}
+	
 		this.board = new Board();
 	
 		// recriar EnPassant
