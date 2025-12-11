@@ -285,6 +285,13 @@ export class AI_Medium {
         return rated.map(r => r.move);
     }
 
+	indexToNotation(i) {
+    	const files = "abcdefgh";
+    	const file = files[i % 8];
+    	const rank = 8 - Math.floor(i / 8);
+    	return `${file}${rank}`;
+	}
+	
     // pick preferable among safe moves: choose capture of higher value, else random
     pickPreferableMove(moves) {
         const captures = moves.filter(m => m.capturedPiece);
@@ -378,7 +385,9 @@ export class AI_Medium {
 
         	const isThreatened = enemyMoves.some(m => m.to === i);
         	if (isThreatened) {
-            	console.log(`⚠️ Peça ameaçada: ${piece.tipo} em ${i}`);
+				
+				console.log(`⚠️ Peça ameaçada: ${piece.tipo} em ${indexToNotation(i)}`);
+            	//console.log(`⚠️ Peça ameaçada: ${piece.tipo} em ${i}`);
             	threatened.push({ index: i, piece });
         	}
     	}
@@ -405,4 +414,5 @@ export class AI_Medium {
         return removed;
     }
 }
+
 
