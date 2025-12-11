@@ -223,14 +223,18 @@ export class AI_Medium {
     }
 
     // verifica se um quadrado será atacado depois de aplicar move (simulação)
-    wouldBeAttackedAfterMove(move, enemyColor) {
-        let attacked = false;
-        this.simulateMove(move, () => {
-            const enemyMoves = this.getAllMovesForColor(enemyColor);
-            attacked = enemyMoves.some(em => em.to === move.to);
-        });
-        return attacked;
-    }
+	wouldBeAttackedAfterMove(move, enemyColor) {
+    	let attacked = false;
+    	this.simulateMove(move, () => {
+        	const enemyMoves = this.getAllMovesForColor(enemyColor);
+        	attacked = enemyMoves.some(em => em.to === move.to);
+
+        	console.log(`Movimento de ${move.piece.tipo} ${move.from} -> ${move.to} ` +
+                    `foi simulado, atacado depois? ${attacked}`);
+    	});
+    	return attacked;
+	}
+
 
     // estima valor do atacante que pode capturar nessa casa após move (menor valor atacante)
     estimatedAttackerValueOnSquareAfterMove(move, enemyColor) {
@@ -364,20 +368,23 @@ export class AI_Medium {
     }
 
 	getThreatenedPieces(color) {
-		const threatened = [];
-		const enemyColor = color === "brancas" ? "pretas" : "brancas";
-		const enemyMoves = this.getAllMovesForColor(enemyColor);
-	
-		for (let i = 0; i < 64; i++) {
-			const piece = this.board.board[i];
-			if (!piece || piece.cor !== color) continue;
-			// se algum movimento inimigo ataca a casa da peça
-			if (enemyMoves.some(m => m.to === i)) {
-				threatened.push({ index: i, piece });
-			}
-		}
-		return threatened;
+    	const threatened = [];
+    	const enemyColor = color === "brancas" ? "pretas" : "brancas";
+	    const enemyMoves = this.getAllMovesForColor(enemyColor);
+
+    	for (let i = 0; i < 64; i++) {
+        	const piece = this.board.board[i];
+        	if (!piece || piece.cor !== color) continue;
+
+        	const isThreatened = enemyMoves.some(m => m.to === i);
+        	if (isThreatened) {
+            	console.log(`⚠️ Peça ameaçada: ${piece.tipo} em ${i}`);
+            	threatened.push({ index: i, piece });
+        	}
+    	}
+    	return threatened;
 	}
+
 
 
     // verifica se o move vai tirar do check (simulação)
@@ -398,3 +405,4 @@ export class AI_Medium {
         return removed;
     }
 }
+
