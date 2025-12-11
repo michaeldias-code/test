@@ -1,29 +1,562 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor Visual de CSS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #2d2d2d;
+            padding: 15px;
+            border-bottom: 2px solid #444;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-blue { background: #2196F3; color: white; }
+        .btn-blue:hover { background: #1976D2; }
+        .btn-purple { background: #9C27B0; color: white; }
+        .btn-purple:hover { background: #7B1FA2; }
+        .btn-green { background: #4CAF50; color: white; }
+        .btn-green:hover { background: #45a049; }
+
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .view-btn {
+            padding: 8px 16px;
+            background: #444;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .view-btn.active {
+            background: #2196F3;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .visual-panel, .code-panel {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .visual-panel {
+            background: #2d2d2d;
+            border-right: 2px solid #444;
+        }
+
+        .code-panel {
+            background: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .preview-frame {
+            background: white;
+            border-radius: 8px;
+            min-height: 500px;
+            width: 100%;
+        }
+
+        .code-section h3 {
+            margin-bottom: 10px;
+            color: #2196F3;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            background: #2d2d2d;
+            color: #4CAF50;
+            border: 1px solid #444;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .css-textarea {
+            color: #64B5F6;
+            min-height: 300px;
+        }
+
+        .properties-panel {
+            background: #2d2d2d;
+            border-top: 2px solid #444;
+            padding: 20px;
+            display: none;
+        }
+
+        .properties-panel.active {
+            display: block;
+        }
+
+        .properties-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .properties-header h3 {
+            font-size: 18px;
+        }
+
+        .selector-name {
+            color: #64B5F6;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .close-btn:hover {
+            color: white;
+        }
+
+        .properties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .property-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .property-item input,
+        .property-item select {
+            width: 100%;
+            padding: 8px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: white;
+        }
+
+        .property-item input[type="color"] {
+            height: 40px;
+            cursor: pointer;
+        }
+
+        .instructions {
+            background: #2d2d2d;
+            border-top: 2px solid #444;
+            padding: 15px;
+            text-align: center;
+            color: #aaa;
+        }
+
+        .selected-element {
+            outline: 3px solid #2196F3 !important;
+            outline-offset: 2px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
 <body>
+    <div class="header">
+        <h1>🎨 Editor Visual de CSS</h1>
+        <div class="toolbar">
+            <input type="file" id="html-file" accept=".html" class="hidden">
+            <button class="btn btn-blue" onclick="document.getElementById('html-file').click()">📤 Importar HTML</button>
+            
+            <input type="file" id="css-file" accept=".css" class="hidden">
+            <button class="btn btn-purple" onclick="document.getElementById('css-file').click()">📤 Importar CSS</button>
+            
+            <button class="btn btn-green" onclick="downloadHTML()">💾 Baixar HTML</button>
+            <button class="btn btn-green" onclick="downloadCSS()">💾 Baixar CSS</button>
+        </div>
+        <div class="view-toggle">
+            <button class="view-btn" onclick="setView('visual')">👁️ Visual</button>
+            <button class="view-btn active" onclick="setView('split')">📱 Split</button>
+            <button class="view-btn" onclick="setView('code')">💻 Código</button>
+        </div>
+    </div>
 
-<button id="btn">Tocar nota C4</button>
+    <div class="main-content">
+        <div class="visual-panel" id="visual-panel">
+            <iframe id="preview-frame" class="preview-frame"></iframe>
+        </div>
 
-<script src="https://unpkg.com/soundfont-player"></script>
-<script>
-const ctx = new (window.AudioContext || window.webkitAudioContext)();
-let trumpet;
+        <div class="code-panel" id="code-panel">
+            <div class="code-section">
+                <h3>HTML</h3>
+                <textarea id="html-code" rows="8" oninput="updatePreview()"><div class="container">
+  <h1>Título Principal</h1>
+  <p class="text">Este é um parágrafo de exemplo. Clique em qualquer elemento para editá-lo visualmente!</p>
+  <button class="btn">Botão de Ação</button>
+  <div class="box">
+    <h2>Subtítulo</h2>
+    <p>Mais conteúdo aqui.</p>
+  </div>
+</div></textarea>
+            </div>
 
-document.getElementById("btn").onclick = async () => {
-  // Garante que o AudioContext está ativo
-  if (ctx.state === "suspended") {
-    await ctx.resume();
-  }
+            <div class="code-section">
+                <h3>CSS</h3>
+                <textarea id="css-code" class="css-textarea" oninput="updatePreview()">.container {
+  padding: 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  max-width: 800px;
+  margin: 20px auto;
+}
 
-  // Carrega o instrumento apenas uma vez
-  if (!trumpet) {
-    trumpet = await Soundfont.instrument(ctx, "trumpet");
-  }
+h1 {
+  color: white;
+  font-size: 36px;
+  margin-bottom: 15px;
+  text-align: center;
+}
 
-  // Toca a nota C4
-  trumpet.play("C4");
-};
-</script>
+h2 {
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 10px;
+}
 
+.text {
+  color: white;
+  font-size: 18px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.btn {
+  background: #4CAF50;
+  color: white;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  display: block;
+  margin: 20px auto;
+}
+
+.box {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="properties-panel" id="properties-panel">
+        <div class="properties-header">
+            <h3>Editando: <span class="selector-name" id="current-selector">-</span></h3>
+            <button class="close-btn" onclick="closeProperties()">✕</button>
+        </div>
+        <div class="properties-grid">
+            <div class="property-item">
+                <label>Cor de Fundo</label>
+                <input type="color" id="prop-background" oninput="updateProperty('background', this.value)">
+            </div>
+            <div class="property-item">
+                <label>Cor do Texto</label>
+                <input type="color" id="prop-color" oninput="updateProperty('color', this.value)">
+            </div>
+            <div class="property-item">
+                <label>Tamanho da Fonte (px)</label>
+                <input type="number" id="prop-font-size" oninput="updateProperty('font-size', this.value + 'px')">
+            </div>
+            <div class="property-item">
+                <label>Padding (px)</label>
+                <input type="number" id="prop-padding" oninput="updateProperty('padding', this.value + 'px')">
+            </div>
+            <div class="property-item">
+                <label>Margin (px)</label>
+                <input type="number" id="prop-margin" oninput="updateProperty('margin', this.value + 'px')">
+            </div>
+            <div class="property-item">
+                <label>Border Radius (px)</label>
+                <input type="number" id="prop-border-radius" oninput="updateProperty('border-radius', this.value + 'px')">
+            </div>
+            <div class="property-item">
+                <label>Alinhamento</label>
+                <select id="prop-text-align" onchange="updateProperty('text-align', this.value)">
+                    <option value="left">Esquerda</option>
+                    <option value="center">Centro</option>
+                    <option value="right">Direita</option>
+                    <option value="justify">Justificado</option>
+                </select>
+            </div>
+            <div class="property-item">
+                <label>Peso da Fonte</label>
+                <select id="prop-font-weight" onchange="updateProperty('font-weight', this.value)">
+                    <option value="normal">Normal</option>
+                    <option value="bold">Negrito</option>
+                    <option value="lighter">Leve</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="instructions" id="instructions">
+        💡 Clique em qualquer elemento na visualização para editá-lo visualmente
+    </div>
+
+    <script>
+        let selectedElement = null;
+        let currentSelector = null;
+
+        // Atualiza preview
+        function updatePreview() {
+            const iframe = document.getElementById('preview-frame');
+            const html = document.getElementById('html-code').value;
+            const css = document.getElementById('css-code').value;
+
+            const fullHTML = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body { padding: 20px; font-family: Arial, sans-serif; }
+                        .selected-element { outline: 3px solid #2196F3 !important; outline-offset: 2px; }
+                        ${css}
+                    </style>
+                </head>
+                <body>${html}</body>
+                </html>
+            `;
+
+            const doc = iframe.contentDocument;
+            doc.open();
+            doc.write(fullHTML);
+            doc.close();
+
+            // Adiciona eventos de clique
+            setTimeout(() => {
+                doc.body.addEventListener('click', handleElementClick);
+            }, 100);
+        }
+
+        // Clique no elemento
+        function handleElementClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const doc = document.getElementById('preview-frame').contentDocument;
+            doc.querySelectorAll('.selected-element').forEach(el => {
+                el.classList.remove('selected-element');
+            });
+
+            e.target.classList.add('selected-element');
+            selectedElement = e.target;
+
+            // Define seletor
+            const tag = e.target.tagName.toLowerCase();
+            const className = e.target.className.replace('selected-element', '').trim();
+            const id = e.target.id;
+
+            if (id) currentSelector = `#${id}`;
+            else if (className) currentSelector = `.${className.split(' ')[0]}`;
+            else currentSelector = tag;
+
+            document.getElementById('current-selector').textContent = currentSelector;
+
+            // Pega estilos computados
+            const computed = doc.defaultView.getComputedStyle(e.target);
+            document.getElementById('prop-background').value = rgbToHex(computed.backgroundColor);
+            document.getElementById('prop-color').value = rgbToHex(computed.color);
+            document.getElementById('prop-font-size').value = parseInt(computed.fontSize);
+            document.getElementById('prop-padding').value = parseInt(computed.padding);
+            document.getElementById('prop-margin').value = parseInt(computed.margin);
+            document.getElementById('prop-border-radius').value = parseInt(computed.borderRadius);
+            document.getElementById('prop-text-align').value = computed.textAlign;
+            document.getElementById('prop-font-weight').value = computed.fontWeight;
+
+            // Mostra painel
+            document.getElementById('properties-panel').classList.add('active');
+            document.getElementById('instructions').style.display = 'none';
+        }
+
+        // Fecha painel de propriedades
+        function closeProperties() {
+            document.getElementById('properties-panel').classList.remove('active');
+            document.getElementById('instructions').style.display = 'block';
+            const doc = document.getElementById('preview-frame').contentDocument;
+            doc.querySelectorAll('.selected-element').forEach(el => {
+                el.classList.remove('selected-element');
+            });
+        }
+
+        // Atualiza propriedade CSS
+        function updateProperty(property, value) {
+            if (!currentSelector) return;
+
+            let css = document.getElementById('css-code').value;
+            const regex = new RegExp(`(${currentSelector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{[^}]*?)${property}\\s*:[^;]+;`, 'g');
+
+            if (regex.test(css)) {
+                css = css.replace(regex, `$1${property}: ${value};`);
+            } else {
+                const blockRegex = new RegExp(`(${currentSelector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{[^}]*)(\\})`, 'g');
+                if (blockRegex.test(css)) {
+                    css = css.replace(blockRegex, `$1  ${property}: ${value};\n$2`);
+                } else {
+                    css += `\n\n${currentSelector} {\n  ${property}: ${value};\n}`;
+                }
+            }
+
+            document.getElementById('css-code').value = css;
+            updatePreview();
+        }
+
+        // RGB para HEX
+        function rgbToHex(rgb) {
+            if (!rgb || rgb === 'rgba(0, 0, 0, 0)') return '#ffffff';
+            const match = rgb.match(/\d+/g);
+            if (!match) return '#000000';
+            return '#' + match.slice(0, 3).map(x => {
+                const hex = parseInt(x).toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+        }
+
+        // Importar arquivos
+        document.getElementById('html-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('html-code').value = event.target.result;
+                    updatePreview();
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        document.getElementById('css-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('css-code').value = event.target.result;
+                    updatePreview();
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Download arquivos
+        function downloadHTML() {
+            const html = document.getElementById('html-code').value;
+            const fullHTML = `<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+${html}
+</body>
+</html>`;
+            download('index.html', fullHTML);
+        }
+
+        function downloadCSS() {
+            const css = document.getElementById('css-code').value;
+            download('styles.css', css);
+        }
+
+        function download(filename, text) {
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+        }
+
+        // Alternar visualização
+        function setView(mode) {
+            const visual = document.getElementById('visual-panel');
+            const code = document.getElementById('code-panel');
+            const buttons = document.querySelectorAll('.view-btn');
+
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            if (mode === 'visual') {
+                visual.style.display = 'block';
+                visual.style.flex = '1';
+                code.style.display = 'none';
+                buttons[0].classList.add('active');
+            } else if (mode === 'code') {
+                visual.style.display = 'none';
+                code.style.display = 'flex';
+                code.style.flex = '1';
+                buttons[2].classList.add('active');
+            } else {
+                visual.style.display = 'block';
+                code.style.display = 'flex';
+                visual.style.flex = '1';
+                code.style.flex = '1';
+                buttons[1].classList.add('active');
+            }
+        }
+
+        // Inicializa
+        updatePreview();
+    </script>
 </body>
 </html>
