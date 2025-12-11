@@ -50,16 +50,19 @@ export class AI_Medium {
 
 		const threatened = this.getThreatenedPieces(color);
 		if (threatened.length > 0) {
-			// pegar movimentos que tiram peças ameaçadas do ataque
+			console.log("⚠️ Tentando fugir de peças ameaçadas:", threatened.map(t => t.piece.tipo));
 			const escapeMoves = myMoves.filter(m =>
 				threatened.some(t => t.index === m.from) && !this.wouldBeAttackedAfterMove(m, enemyColor)
 			);
+			console.log("Possíveis movimentos de fuga:", escapeMoves.map(m => `${m.piece.tipo} ${indexToNotation(m.from)}->${indexToNotation(m.to)}`));
+		
 			if (escapeMoves.length > 0) {
-				// escolher aleatoriamente entre movimentos seguros de fuga
 				const chosen = escapeMoves[Math.floor(Math.random() * escapeMoves.length)];
 				this.applyMoveWithEPAndRegister(chosen);
 				this.lastMove = { from: chosen.from, to: chosen.to };
 				return chosen;
+			} else {
+				console.log("Nenhum movimento de fuga seguro encontrado.");
 			}
 		}
 
@@ -375,23 +378,21 @@ export class AI_Medium {
     }
 
 	getThreatenedPieces(color) {
-    	const threatened = [];
-    	const enemyColor = color === "brancas" ? "pretas" : "brancas";
-	    const enemyMoves = this.getAllMovesForColor(enemyColor);
-
-    	for (let i = 0; i < 64; i++) {
-        	const piece = this.board.board[i];
-        	if (!piece || piece.cor !== color) continue;
-
-        	const isThreatened = enemyMoves.some(m => m.to === i);
-        	if (isThreatened) {
-				
-				console.log(`⚠️ Peça ameaçada: ${piece.tipo} em ${indexToNotation(i)}`);
-            	//console.log(`⚠️ Peça ameaçada: ${piece.tipo} em ${i}`);
-            	threatened.push({ index: i, piece });
-        	}
-    	}
-    	return threatened;
+		const threatened = [];
+		const enemyColor = color === "brancas" ? "pretas" : "brancas";
+		const enemyMoves = this.getAllMovesForColor(enemyColor);
+	
+		for (let i = 0; i < 64; i++) {
+			const piece = this.board.board[i];
+			if (!piece || piece.cor !== color) continue;
+	
+			if (enemyMoves.some(m => m.to === i)) {
+				console.log(`⚠️ Peça ameaçada: ${piece.tipo} em ${indexToNotation(i)} (índice ${i})`);
+				threatened.push({ index: i, piece });
+			}
+		}
+		console.log(`Peças ameaçadas para ${color}:`, threatened.map(t => `${t.piece.tipo}@${indexToNotation(t.index)}`));
+		return threatened;
 	}
 
 
@@ -414,5 +415,4 @@ export class AI_Medium {
         return removed;
     }
 }
-
 
