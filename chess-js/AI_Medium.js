@@ -57,7 +57,12 @@ export class AI_Medium {
 			console.log("Possíveis movimentos de fuga:", escapeMoves.map(m => `${m.piece.tipo} ${this.indexToNotation(m.from)}->${this.indexToNotation(m.to)}`));
 		
 			if (escapeMoves.length > 0) {
-				const chosen = escapeMoves[Math.floor(Math.random() * escapeMoves.length)];
+				// priorizar capturas entre os movimentos de fuga
+				const captureEscapes = escapeMoves.filter(m => m.capturedPiece);
+				const chosen = captureEscapes.length > 0
+					? captureEscapes[Math.floor(Math.random() * captureEscapes.length)]
+					: escapeMoves[Math.floor(Math.random() * escapeMoves.length)];
+			
 				this.applyMoveWithEPAndRegister(chosen);
 				this.lastMove = { from: chosen.from, to: chosen.to };
 				return chosen;
