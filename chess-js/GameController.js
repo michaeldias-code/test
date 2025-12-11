@@ -172,6 +172,7 @@ export class GameController {
 
 		console.log(`DEBUG validator.getPossibleMoves para ${this.indexToNotation(from)} (${from}) =>`, validMoves);
 		
+		const capturedPiece = this.board.board[to] || null;//-> NOVO
 		// 2. Tenta detectar se o movimento é um En Passant
 		let epCapturedPos = null;
 		if (this.enPassant && piece.tipo in {'♙':1, '♟':1}) {
@@ -182,15 +183,24 @@ export class GameController {
 		// O método this.board.movePiece (já alterado) é capaz de tratar o movimento EP.
 		this.board.movePiece(from, to, epCapturedPos);
 		
-		this.moveHistory.push({ from, to, pieceType: piece.tipo, color: piece.cor });
-		
+		this.moveHistory.push({ //ALTERADO
+			from, 
+			to, 
+			pieceType: piece.tipo, 
+			color: piece.cor,
+			captured: capturedPiece ? capturedPiece.tipo : null 
+		});
+		let logMsg = `?? Jogador: ${this.indexToNotation(from)} -> ${this.indexToNotation(to)}`;
 		// 4. Registra novo alvo EP se o peão moveu 2 casas (Board já faz isso em movePiece)
 		// O Board armazena o novo alvo em this.board.enPassantTargetPos.
+		if (capturedPiece) {
+			logMsg += ` (${piece.tipo} captura ${capturedPiece.tipo})`;
+		} else if (epCapturedPos !== null) {
+			const epPiece = this.board.board[epCapturedPos];
+			logMsg += ` (${piece.tipo} captura En Passant ${epPiece?.tipo || '♙/♟'})`;
+		}
 
-		console.log(
-			`?? Jogador: ${this.indexToNotation(from)} -> ${this.indexToNotation(to)}` +
-			(epCapturedPos !== null ? ' (En Passant aplicado)' : '')
-		);
+		console.log(logMsg); //NOVO
 		
 		// Detecta roque (Reis são ♔ e ♚)
 		if (piece.tipo === "♔" || piece.tipo === "♚") {
