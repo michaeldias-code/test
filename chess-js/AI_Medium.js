@@ -54,7 +54,7 @@ export class AI_Medium {
 			const escapeMoves = myMoves.filter(m =>
 				threatened.some(t => t.index === m.from) && !this.wouldBeAttackedAfterMove(m, enemyColor)
 			);
-			console.log("Possíveis movimentos de fuga:", escapeMoves.map(m => `${m.piece.tipo} ${indexToNotation(m.from)}->${indexToNotation(m.to)}`));
+			console.log("Possíveis movimentos de fuga:", escapeMoves.map(m => `${m.piece.tipo} ${this.indexToNotation(m.from)}->${this.indexToNotation(m.to)}`));
 		
 			if (escapeMoves.length > 0) {
 				const chosen = escapeMoves[Math.floor(Math.random() * escapeMoves.length)];
@@ -68,7 +68,6 @@ export class AI_Medium {
 
         // 3) tentar capturas (priorizar melhores)
         const captureMoves = myMoves.filter(m => m.capturedPiece !== null);
-		
 		
 		// filtra capturas que não deixam a peça capturada imediatamente (evitar suicídio)
 		const safeCaptures = captureMoves.filter(m => !this.wouldBeAttackedAfterMove(m, enemyColor));
@@ -413,6 +412,7 @@ export class AI_Medium {
         return removed;
     }
 }
+
 
 
 
