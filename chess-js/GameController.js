@@ -196,11 +196,9 @@ export class GameController {
 		if (capturedPiece != null) {
 			// captura normal
 			logMsg += ` (${movedPiece.tipo} captura ${capturedPiece.tipo})`;
-		} 
-		else if (epCapturedPosAI != null) {
-			// captura en passant (captura a peça que estava ao lado, não no destino)
-			const epPiece = this.board.lastCapturedPiece || { tipo: '♙/♟' }; 
-			logMsg += ` (${movedPiece.tipo} captura En Passant ${epPiece.tipo})`;
+		} else if (epCapturedPos !== null) {
+			const epPiece = this.board.board[epCapturedPos];
+			logMsg += ` (${piece.tipo} captura En Passant ${epPiece?.tipo || '♙/♟'})`;
 		}
 
 		console.log(logMsg); //NOVO
