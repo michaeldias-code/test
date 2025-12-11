@@ -193,11 +193,14 @@ export class GameController {
 		let logMsg = `▶️ Jogador: ${this.indexToNotation(from)} -> ${this.indexToNotation(to)}`;
 		// 4. Registra novo alvo EP se o peão moveu 2 casas (Board já faz isso em movePiece)
 		// O Board armazena o novo alvo em this.board.enPassantTargetPos.
-		if (capturedPiece) {
-			logMsg += ` (${piece.tipo} captura ${capturedPiece.tipo})`;
-		} else if (epCapturedPos !== null) {
-			const epPiece = this.board.board[epCapturedPos];
-			logMsg += ` (${piece.tipo} captura En Passant ${epPiece?.tipo || '♙/♟'})`;
+		if (capturedPiece != null) {
+			// captura normal
+			logMsg += ` (${movedPiece.tipo} captura ${capturedPiece.tipo})`;
+		} 
+		else if (epCapturedPosAI != null) {
+			// captura en passant (captura a peça que estava ao lado, não no destino)
+			const epPiece = this.board.lastCapturedPiece || { tipo: '♙/♟' }; 
+			logMsg += ` (${movedPiece.tipo} captura En Passant ${epPiece.tipo})`;
 		}
 
 		console.log(logMsg); //NOVO
