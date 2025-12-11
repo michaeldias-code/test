@@ -154,55 +154,47 @@ export class GameController {
 
 	movePiece(from, to) {
 		if (this.gameOver) return false;
-
+	
 		const piece = this.board.board[from];
 		if (!piece) return false;
 		if (piece.cor !== this.currentTurn) return false;
-
-		// 1. ZERA o alvo EP do turno anterior ANTES de checar movimentos,
-		//    pois o EP só dura 1 turno.
-		//if (this.enPassant) {
-		//	this.enPassant.setTarget(this.board.enPassantTargetPos);
-			// ZERAR AQUI EVITARIA ERROS, mas o Board precisa que a informação EP seja transferida
-			// antes que o novo alvo seja calculado em movePiece().
-		//}
-
+	
 		const validMoves = this.validator.getPossibleMoves(from);
 		if (!validMoves.includes(to)) return false;
-
+	
 		console.log(`DEBUG validator.getPossibleMoves para ${this.indexToNotation(from)} (${from}) =>`, validMoves);
-		
-		const capturedPiece = this.board.board[to] || null;//-> NOVO
-		// 2. Tenta detectar se o movimento é um En Passant
+	
+		// --- SALVA A PEÇA DE DESTINO ANTES DO MOVIMENTO ---
+		const capturedPiece = this.board.board[to] || null;
+	
+		// --- Verifica En Passant ---
 		let epCapturedPos = null;
-		if (this.enPassant && piece.tipo in {'♙':1, '♟':1}) {
+		let epPiece = null;
+		if (this.enPassant && piece.tipo in { '♙': 1, '♟': 1 }) {
 			epCapturedPos = this.enPassant.isEnPassantMove(from, to, piece);
+			if (epCapturedPos !== null) epPiece = this.board.board[epCapturedPos];
 		}
-
-		// 3. Executa o movimento, passando a posição EP capturada se for um EP
-		// O método this.board.movePiece (já alterado) é capaz de tratar o movimento EP.
+	
+		// --- Executa o movimento ---
 		this.board.movePiece(from, to, epCapturedPos);
-		
-		this.moveHistory.push({ //ALTERADO
-			from, 
-			to, 
-			pieceType: piece.tipo, 
+	
+		// --- Salva no histórico de movimentos ---
+		this.moveHistory.push({
+			from,
+			to,
+			pieceType: piece.tipo,
 			color: piece.cor,
-			captured: capturedPiece ? capturedPiece.tipo : null 
+			captured: epPiece ? epPiece.tipo : (capturedPiece ? capturedPiece.tipo : null)
 		});
+	
+		// --- Log detalhado ---
 		let logMsg = `▶️ Jogador: ${this.indexToNotation(from)} -> ${this.indexToNotation(to)}`;
-		// 4. Registra novo alvo EP se o peão moveu 2 casas (Board já faz isso em movePiece)
-		// O Board armazena o novo alvo em this.board.enPassantTargetPos.
-		if (capturedPiece != null) {
-			// captura normal
+		if (epPiece) {
+			logMsg += ` (${piece.tipo} captura ${epPiece.tipo} por En Passant)`;
+		} else if (capturedPiece) {
 			logMsg += ` (${piece.tipo} captura ${capturedPiece.tipo})`;
-		} 
-		else if (epCapturedPos !== null) {
-			const epPiece = this.board.board[epCapturedPos];
-			logMsg += ` (${piece.tipo} captura En Passant ${epPiece?.tipo || '♙/♟'})`;
 		}
-
-		console.log(logMsg); //NOVO
+		console.log(logMsg);
 		
 		// Detecta roque (Reis são ♔ e ♚)
 		if (piece.tipo === "♔" || piece.tipo === "♚") {
@@ -484,3 +476,4 @@ this.logCheckState(this.currentTurn);
 		console.log("Jogo reiniciado!");
 	}
 }
+
