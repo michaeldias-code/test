@@ -173,56 +173,61 @@ export class AI_Medium {
     }
 
     // escolhe melhor captura segundo ganho material (simula riscos).
-    chooseBestCapture(captureMoves, myColor, enemyMoves) {
-        // para cada captura: calcular se é segura; se não for, avaliar ganho líquido
-        const evaluated = captureMoves.map(m => {
-            const capturedVal = this.valueOfPiece(m.capturedPiece);
-            // simula se ficará atacado depois
-            const wouldBeAttacked = this.wouldBeAttackedAfterMove(m, myColor === "brancas" ? "pretas" : "brancas");
-            let netGain = capturedVal;
-            if (wouldBeAttacked) {
-                // se atacado, estimar menor atacante que pode capturar no próximo turno
-                const attackerVal = this.estimatedAttackerValueOnSquareAfterMove(m, myColor === "brancas" ? "pretas" : "brancas");
-                // se não houver atacante, attackerVal = 0
-                netGain = capturedVal - attackerVal;
-            }
-            return { move: m, capturedVal, wouldBeAttacked, netGain };
-        });
-
-		// filtra capturas com netGain <= 0 (evita suicídios)
+	chooseBestCapture(captureMoves, myColor, enemyMoves) {
+		// Para cada captura: calcular se é segura; se não for, avaliar ganho líquido
+		const evaluated = captureMoves.map(m => {
+			const capturedVal = this.valueOfPiece(m.capturedPiece);
+			// Simula se a peça ficará atacada depois
+			const wouldBeAttacked = this.wouldBeAttackedAfterMove(
+				m, 
+				myColor === "brancas" ? "pretas" : "brancas"
+			);
+			let netGain = capturedVal;
+			if (wouldBeAttacked) {
+				// Se atacado, estimar menor atacante que pode capturar no próximo turno
+				const attackerVal = this.estimatedAttackerValueOnSquareAfterMove(
+					m, 
+					myColor === "brancas" ? "pretas" : "brancas"
+				);
+				// Se não houver atacante, attackerVal = 0
+				netGain = capturedVal - attackerVal;
+			}
+			return { move: m, capturedVal, wouldBeAttacked, netGain };
+		});
+	
+		// Filtra capturas com netGain <= 0 (evita suicídios)
 		const safeEvaluated = evaluated.filter(e => e.netGain > 0);
-		
-		// se houver capturas seguras, usar só elas
+	
+		// Se houver capturas seguras, usar apenas elas
 		const usedEvaluated = safeEvaluated.length > 0 ? safeEvaluated : evaluated;
-
-
-        // priorizar capturas com netGain > 0 e maiores capturedVal
-        //const positive = evaluated.filter(e => e.netGain > 0);
+	
+		// Priorizar capturas com netGain > 0 e maiores capturedVal
 		const positive = usedEvaluated.filter(e => e.netGain > 0);
+	
+		if (positive.length > 0) {
+			// Ordenar por capturedVal desc, netGain desc
+			positive.sort((a, b) => {
+				if (b.capturedVal !== a.capturedVal) return b.capturedVal - a.capturedVal;
+				return b.netGain - a.netGain;
+			});
+			// Se empate no capturedVal e netGain, escolher aleatório entre os empates
+			const topVal = positive[0].capturedVal;
+			const topCandidates = positive.filter(x => x.capturedVal === topVal);
+			return topCandidates[Math.floor(Math.random() * topCandidates.length)].move;
+		}
+	
+		// Se não tem positive netGain, talvez aceitar captura neutra (netGain === 0)
+		const neutral = evaluated.filter(e => e.netGain === 0);
+		if (neutral.length > 0) {
+			const topVal = Math.max(...neutral.map(n => n.capturedVal));
+			const topCandidates = neutral.filter(x => x.capturedVal === topVal);
+			return topCandidates[Math.floor(Math.random() * topCandidates.length)].move;
+		}
+	
+		// Nenhuma captura recomendada
+		return null;
+	}
 
-        if (positive.length > 0) {
-            // ordenar por capturedVal desc, netGain desc
-            positive.sort((a, b) => {
-                if (b.capturedVal !== a.capturedVal) return b.capturedVal - a.capturedVal;
-                return b.netGain - a.netGain;
-            });
-            // se empate no capturedVal e netGain, escolher aleatório entre empates
-            const topVal = positive[0].capturedVal;
-            const topCandidates = positive.filter(x => x.capturedVal === topVal);
-            return topCandidates[Math.floor(Math.random() * topCandidates.length)].move;
-        }
-
-        // se não tem positive netGain, talvez aceitar captura neutra (netGain === 0)
-        const neutral = evaluated.filter(e => e.netGain === 0);
-        if (neutral.length > 0) {
-            const topVal = Math.max(...neutral.map(n => n.capturedVal));
-            const topCandidates = neutral.filter(x => x.capturedVal === topVal);
-            return topCandidates[Math.floor(Math.random() * topCandidates.length)].move;
-        }
-
-        // nenhuma captura recomendada
-        return null;
-    }
 
     // verifica se um quadrado será atacado depois de aplicar move (simulação)
 	wouldBeAttackedAfterMove(move, enemyColor) {
@@ -412,7 +417,6 @@ export class AI_Medium {
         return removed;
     }
 }
-
 
 
 
