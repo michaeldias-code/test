@@ -189,11 +189,11 @@ export class GameController {
 	
 		// --- Log detalhado ---
 		let logMsg = `▶️ Jogador: ${this.indexToNotation(from)} -> ${this.indexToNotation(to)}`;
-		if (epPiece) {
-			logMsg += ` (${piece.tipo} captura ${epPiece.tipo} por En Passant)`;
-		} else if (capturedPiece) {
-			logMsg += ` (${piece.tipo} captura ${capturedPiece.tipo})`;
-		}
+		//if (epPiece) {
+		//	logMsg += ` (${piece.tipo} captura ${epPiece.tipo} por En Passant)`;
+		//} else if (capturedPiece) {
+		//	logMsg += ` (${piece.tipo} captura ${capturedPiece.tipo})`;
+		//}
 		console.log(logMsg);
 		
 		// Detecta roque (Reis são ♔ e ♚)
@@ -298,17 +298,16 @@ this.logCheckState(this.currentTurn);
 					let logMsg = `▶️ IA: ${this.indexToNotation(m.from)} -> ${this.indexToNotation(m.to)}`;
 				
 					// escrever info da captura (NUNCA acessa .tipo sem verificar)
-					if (capturedPieceAI !== null && capturedPieceAI !== undefined) {
-						const tipoCapturado = capturedPieceAI?.tipo || "??";
+					//if (capturedPieceAI !== null && capturedPieceAI !== undefined) {
+					//	const tipoCapturado = capturedPieceAI?.tipo || "??";
 					
-						if (epCapturedPosAI !== null) {
-							logMsg += ` (${movedPiece.tipo} captura En Passant ${tipoCapturado})`;
-						} else {
-							logMsg += ` (${movedPiece.tipo} captura ${tipoCapturado})`;
-						}
-					}
+					//	if (epCapturedPosAI !== null) {
+					//		logMsg += ` (${movedPiece.tipo} captura En Passant ${tipoCapturado})`;
+					//	} else {
+					//		logMsg += ` (${movedPiece.tipo} captura ${tipoCapturado})`;
+					//	}
+					//}
 
-				
 					console.log(logMsg);
 				
 					// promoção
@@ -476,4 +475,5 @@ this.logCheckState(this.currentTurn);
 		console.log("Jogo reiniciado!");
 	}
 }
+
 
