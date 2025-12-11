@@ -195,8 +195,9 @@ export class GameController {
 		// O Board armazena o novo alvo em this.board.enPassantTargetPos.
 		if (capturedPiece != null) {
 			// captura normal
-			logMsg += ` (${movedPiece.tipo} captura ${capturedPiece.tipo})`;
-		} else if (epCapturedPos !== null) {
+			logMsg += ` (${piece.tipo} captura ${capturedPiece.tipo})`;
+		} 
+		else if (epCapturedPos !== null) {
 			const epPiece = this.board.board[epCapturedPos];
 			logMsg += ` (${piece.tipo} captura En Passant ${epPiece?.tipo || '♙/♟'})`;
 		}
@@ -274,10 +275,20 @@ this.logCheckState(this.currentTurn);
 				// A IA usará o estado EP que acabamos de definir
 				const m = this.ai.makeMove("pretas");
 				
-				if (m) {
-					// 9. Lógica de En Passant para a IA
+	if (			m) {
+					// peça que vai se mover
 					const movedPiece = this.board.board[m.from];
+				
+					// peça que estava no destino ANTES de mover (para detectar captura)
+					const targetPieceAI = this.board.board[m.to];
+				
+					// detectar en passant ANTES do movimento
 					let epCapturedPosAI = null;
+					if (this.enPassant && movedPiece && (movedPiece.tipo === "♙" || movedPiece.tipo === "♟")) {
+						epCapturedPosAI = this.enPassant.isEnPassantMove(m.from, m.to, movedPiece);
+					}					
+				
+					
 					if (this.enPassant && movedPiece && movedPiece.tipo in {'♙':1, '♟':1}) {
 						epCapturedPosAI = this.enPassant.isEnPassantMove(m.from, m.to, movedPiece);
 					}
@@ -290,10 +301,15 @@ this.logCheckState(this.currentTurn);
 					this.view.highlightCell(m.to);
 					let logMsg = `▶️ IA: ${this.indexToNotation(m.from)} -> ${this.indexToNotation(m.to)}`;
 					
-					if (capturedPiece) {
-						logMsg += ` (${movedPiece.tipo} captura ${capturedPiece.tipo})`;
-					} else if (epCapturedPosAI !== null) {
-						logMsg += ` (${movedPiece.tipo} captura En Passant ${capturedPiece?.tipo || '♙/♟'})`;
+					
+					
+					if (targetPieceAI != null) {
+						// captura normal
+						logMsg += ` (${movedPiece.tipo} captura ${targetPieceAI.tipo})`;
+					}
+					else if (epCapturedPosAI !== null) {
+						const epPieceAI = this.board.board[epCapturedPosAI];
+						logMsg += ` (${movedPiece.tipo} captura En Passant ${epPieceAI?.tipo || '♙/♟'})`;
 					}
 					
 					console.log(logMsg);
