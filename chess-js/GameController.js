@@ -305,14 +305,17 @@ this.logCheckState(this.currentTurn);
 				
 					let logMsg = `▶️ IA: ${this.indexToNotation(m.from)} -> ${this.indexToNotation(m.to)}`;
 				
-					// escrever info da captura
-					if (capturedPieceAI) {
+					// escrever info da captura (NUNCA acessa .tipo sem verificar)
+					if (capturedPieceAI !== null && capturedPieceAI !== undefined) {
+						const tipoCapturado = capturedPieceAI?.tipo || "??";
+					
 						if (epCapturedPosAI !== null) {
-							logMsg += ` (${movedPiece.tipo} captura En Passant ${capturedPieceAI.tipo})`;
+							logMsg += ` (${movedPiece.tipo} captura En Passant ${tipoCapturado})`;
 						} else {
-							logMsg += ` (${movedPiece.tipo} captura ${capturedPieceAI.tipo})`;
+							logMsg += ` (${movedPiece.tipo} captura ${tipoCapturado})`;
 						}
 					}
+
 				
 					console.log(logMsg);
 				
