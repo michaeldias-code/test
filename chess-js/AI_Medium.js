@@ -387,11 +387,11 @@ export class AI_Medium {
 			if (!piece || piece.cor !== color) continue;
 	
 			if (enemyMoves.some(m => m.to === i)) {
-				console.log(`⚠️ Peça ameaçada: ${piece.tipo} em ${indexToNotation(i)} (índice ${i})`);
+				console.log(`⚠️ Peça ameaçada: ${piece.tipo} em ${this.indexToNotation(i)} (índice ${i})`);
 				threatened.push({ index: i, piece });
 			}
 		}
-		console.log(`Peças ameaçadas para ${color}:`, threatened.map(t => `${t.piece.tipo}@${indexToNotation(t.index)}`));
+		console.log(`Peças ameaçadas para ${color}:`, threatened.map(t => `${t.piece.tipo}@${this.indexToNotation(t.index)}`));
 		return threatened;
 	}
 
@@ -415,4 +415,5 @@ export class AI_Medium {
         return removed;
     }
 }
+
 
