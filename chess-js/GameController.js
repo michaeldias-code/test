@@ -288,7 +288,7 @@ this.logCheckState(this.currentTurn);
 					this.view.render();
 					this.view.highlightCell(m.to);
 					console.log(
-						`?? IA: ${this.indexToNotation(m.from)} -> ${this.indexToNotation(m.to)}` +
+						`▶️ IA: ${this.indexToNotation(m.from)} -> ${this.indexToNotation(m.to)}` +
 						(epCapturedPosAI !== null ? ' (En Passant aplicado pela IA)' : '')
 					);
 
@@ -430,8 +430,7 @@ this.logCheckState(this.currentTurn);
 		if (this.aiTimerId) {
 			clearTimeout(this.aiTimerId);
 			this.aiTimerId = null;
-		}
-	
+		}	
 		this.board = new Board();
 	
 		// recriar EnPassant
@@ -454,8 +453,7 @@ this.logCheckState(this.currentTurn);
 	
 		this.view.render();
 		this.view.hidePromotionModal();
-
-		
+	
 		console.log("Jogo reiniciado!");
 	}
 }
