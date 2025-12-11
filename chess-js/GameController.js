@@ -275,53 +275,47 @@ this.logCheckState(this.currentTurn);
 				// A IA usará o estado EP que acabamos de definir
 				const m = this.ai.makeMove("pretas");
 				
-	if (			m) {
-					// peça que vai se mover
+				if (m) {
+				
 					const movedPiece = this.board.board[m.from];
 				
-					// peça que estava no destino ANTES de mover (para detectar captura)
+					// peça no destino antes do movimento (pode ser null e está tudo bem)
 					const targetPieceAI = this.board.board[m.to];
 				
-					// detectar en passant ANTES do movimento
+					// detectar en passant ANTES de mover
 					let epCapturedPosAI = null;
 					if (this.enPassant && movedPiece && (movedPiece.tipo === "♙" || movedPiece.tipo === "♟")) {
 						epCapturedPosAI = this.enPassant.isEnPassantMove(m.from, m.to, movedPiece);
-					}					
-				
-					
-					if (this.enPassant && movedPiece && movedPiece.tipo in {'♙':1, '♟':1}) {
-						epCapturedPosAI = this.enPassant.isEnPassantMove(m.from, m.to, movedPiece);
 					}
-					
-					// 10. Aplica o movimento da IA
+				
+					// aplica movimento
 					this.board.movePiece(m.from, m.to, epCapturedPosAI);
-
+				
 					this.view.lastMove = { from: m.from, to: m.to };
 					this.view.render();
 					this.view.highlightCell(m.to);
+				
 					let logMsg = `▶️ IA: ${this.indexToNotation(m.from)} -> ${this.indexToNotation(m.to)}`;
-					
-					
-					
-					if (targetPieceAI != null) {
-						// captura normal
+				
+					// CAPTURA NORMAL
+					if (targetPieceAI) {
 						logMsg += ` (${movedPiece.tipo} captura ${targetPieceAI.tipo})`;
 					}
+					// CAPTURA EN PASSANT
 					else if (epCapturedPosAI !== null) {
 						const epPieceAI = this.board.board[epCapturedPosAI];
-						logMsg += ` (${movedPiece.tipo} captura En Passant ${epPieceAI?.tipo || '♙/♟'})`;
+						logMsg += ` (${movedPiece.tipo} captura En Passant ${epPieceAI?.tipo || '?'})`;
 					}
-					
+				
 					console.log(logMsg);
-
-					/* ?? PROMOÇÃO DE PEÃO PELA IA */
+				
+					// PROMOÇÃO
 					const moved = this.board.board[m.to];
-					// Usar this.board.row(m.to) para checar a linha correta
 					if (moved && moved.tipo === "♟" && this.board.row(m.to) === 7) {
-						this.promotePawn(m.to, "rainha"); // Peão preto promove
+						this.promotePawn(m.to, "rainha");
 					}
 					if (moved && moved.tipo === "♙" && this.board.row(m.to) === 0) {
-						this.promotePawn(m.to, "rainha"); // Peão branco (na promoção da IA)
+						this.promotePawn(m.to, "rainha");
 					}
 				}
 
