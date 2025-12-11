@@ -395,8 +395,6 @@ export class AI_Medium {
 		return threatened;
 	}
 
-
-
     // verifica se o move vai tirar do check (simulação)
     willRemoveCheck(move) {
         let removed = false;
@@ -415,5 +413,6 @@ export class AI_Medium {
         return removed;
     }
 }
+
 
 
