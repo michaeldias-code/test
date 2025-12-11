@@ -279,16 +279,24 @@ this.logCheckState(this.currentTurn);
 				
 					const movedPiece = this.board.board[m.from];
 				
-					// peça no destino antes do movimento (pode ser null e está tudo bem)
-					const targetPieceAI = this.board.board[m.to];
-				
-					// detectar en passant ANTES de mover
+					// IDENTIFICA SE É EN PASSANT
 					let epCapturedPosAI = null;
 					if (this.enPassant && movedPiece && (movedPiece.tipo === "♙" || movedPiece.tipo === "♟")) {
 						epCapturedPosAI = this.enPassant.isEnPassantMove(m.from, m.to, movedPiece);
 					}
 				
-					// aplica movimento
+					// CAPTURA CORRETA DA PEÇA ALVO (ANTES DE MOVER!)
+					let capturedPieceAI = null;
+				
+					if (epCapturedPosAI !== null) {
+						// captura en passant
+						capturedPieceAI = this.board.board[epCapturedPosAI];
+					} else {
+						// captura normal
+						capturedPieceAI = this.board.board[m.to];
+					}
+				
+					// AGORA SIM mover
 					this.board.movePiece(m.from, m.to, epCapturedPosAI);
 				
 					this.view.lastMove = { from: m.from, to: m.to };
@@ -297,19 +305,18 @@ this.logCheckState(this.currentTurn);
 				
 					let logMsg = `▶️ IA: ${this.indexToNotation(m.from)} -> ${this.indexToNotation(m.to)}`;
 				
-					// CAPTURA NORMAL
-					if (targetPieceAI) {
-						logMsg += ` (${movedPiece.tipo} captura ${targetPieceAI.tipo})`;
-					}
-					// CAPTURA EN PASSANT
-					else if (epCapturedPosAI !== null) {
-						const epPieceAI = this.board.board[epCapturedPosAI];
-						logMsg += ` (${movedPiece.tipo} captura En Passant ${epPieceAI?.tipo || '?'})`;
+					// escrever info da captura
+					if (capturedPieceAI) {
+						if (epCapturedPosAI !== null) {
+							logMsg += ` (${movedPiece.tipo} captura En Passant ${capturedPieceAI.tipo})`;
+						} else {
+							logMsg += ` (${movedPiece.tipo} captura ${capturedPieceAI.tipo})`;
+						}
 					}
 				
 					console.log(logMsg);
 				
-					// PROMOÇÃO
+					// promoção
 					const moved = this.board.board[m.to];
 					if (moved && moved.tipo === "♟" && this.board.row(m.to) === 7) {
 						this.promotePawn(m.to, "rainha");
