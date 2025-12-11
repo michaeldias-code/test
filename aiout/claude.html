@@ -1,383 +1,3 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Download, Upload, Move, Palette, Type, Box, Trash2, Copy, Eye, Code } from 'lucide-react';
-
-export default function VisualCSSEditor() {
-  const [html, setHtml] = useState('<div class="container">\n  <h1>Título</h1>\n  <p class="text">Parágrafo de exemplo</p>\n  <button class="btn">Botão</button>\n</div>');
-  const [css, setCss] = useState(`.container {
-  padding: 20px;
-  background: #f0f0f0;
-  border-radius: 8px;
-}
-
-h1 {
-  color: #333;
-  font-size: 32px;
-  margin-bottom: 10px;
-}
-
-.text {
-  color: #666;
-  font-size: 16px;
-  margin-bottom: 20px;
-}
-
-.btn {
-  background: #4CAF50;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}`);
-  
-  const [selectedElement, setSelectedElement] = useState(null);
-  const [viewMode, setViewMode] = useState('split'); // 'visual', 'code', 'split'
-  const iframeRef = useRef(null);
-  const [elementStyles, setElementStyles] = useState({});
-
-  // Atualiza o iframe com HTML + CSS
-  useEffect(() => {
-    if (iframeRef.current) {
-      const doc = iframeRef.current.contentDocument;
-      const fullHTML = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { padding: 20px; font-family: Arial, sans-serif; }
-            .selected-element { outline: 3px solid #2196F3 !important; outline-offset: 2px; }
-            ${css}
-          </style>
-        </head>
-        <body>${html}</body>
-        </html>
-      `;
-      doc.open();
-      doc.write(fullHTML);
-      doc.close();
-
-      // Adiciona evento de clique nos elementos
-      doc.body.addEventListener('click', handleElementClick);
-    }
-  }, [html, css]);
-
-  // Seleciona elemento ao clicar
-  const handleElementClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    const doc = iframeRef.current.contentDocument;
-    doc.querySelectorAll('.selected-element').forEach(el => {
-      el.classList.remove('selected-element');
-    });
-    
-    e.target.classList.add('selected-element');
-    
-    const tagName = e.target.tagName.toLowerCase();
-    const className = e.target.className.replace('selected-element', '').trim();
-    const id = e.target.id;
-    
-    let selector = tagName;
-    if (id) selector = `#${id}`;
-    else if (className) selector = `.${className.split(' ')[0]}`;
-    
-    setSelectedElement({
-      selector,
-      element: e.target
-    });
-    
-    // Extrai estilos computados
-    const computedStyles = window.getComputedStyle(e.target);
-    setElementStyles({
-      background: rgbToHex(computedStyles.backgroundColor),
-      color: rgbToHex(computedStyles.color),
-      fontSize: parseInt(computedStyles.fontSize),
-      padding: parseInt(computedStyles.padding),
-      margin: parseInt(computedStyles.margin),
-      borderRadius: parseInt(computedStyles.borderRadius),
-      width: computedStyles.width,
-      height: computedStyles.height,
-      display: computedStyles.display,
-      textAlign: computedStyles.textAlign,
-      fontWeight: computedStyles.fontWeight
-    });
-  };
-
-  // Converte RGB para HEX
-  const rgbToHex = (rgb) => {
-    if (!rgb || rgb === 'rgba(0, 0, 0, 0)') return '#ffffff';
-    const match = rgb.match(/\d+/g);
-    if (!match) return '#000000';
-    return '#' + match.slice(0, 3).map(x => {
-      const hex = parseInt(x).toString(16);
-      return hex.length === 1 ? '0' + hex : hex;
-    }).join('');
-  };
-
-  // Atualiza CSS quando propriedade muda
-  const updateCSS = (property, value) => {
-    if (!selectedElement) return;
-    
-    const selector = selectedElement.selector;
-    const cssLines = css.split('\n');
-    let updated = false;
-    let inBlock = false;
-    let blockStart = -1;
-    
-    // Procura o seletor no CSS
-    for (let i = 0; i < cssLines.length; i++) {
-      if (cssLines[i].includes(selector + ' {')) {
-        inBlock = true;
-        blockStart = i;
-        continue;
-      }
-      
-      if (inBlock && cssLines[i].includes('}')) {
-        // Adiciona propriedade antes do fechamento
-        if (!updated) {
-          cssLines.splice(i, 0, `  ${property}: ${value};`);
-        }
-        break;
-      }
-      
-      if (inBlock && cssLines[i].includes(property + ':')) {
-        cssLines[i] = `  ${property}: ${value};`;
-        updated = true;
-      }
-    }
-    
-    // Se seletor não existe, cria novo bloco
-    if (blockStart === -1) {
-      cssLines.push('');
-      cssLines.push(`${selector} {`);
-      cssLines.push(`  ${property}: ${value};`);
-      cssLines.push(`}`);
-    }
-    
-    setCss(cssLines.join('\n'));
-    
-    // Atualiza estado local
-    setElementStyles(prev => ({
-      ...prev,
-      [property]: value
-    }));
-  };
-
-  // Importa arquivos
-  const handleImportHTML = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => setHtml(event.target.result);
-      reader.readAsText(file);
-    }
-  };
-
-  const handleImportCSS = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => setCss(event.target.result);
-      reader.readAsText(file);
-    }
-  };
-
-  // Exporta CSS
-  const downloadCSS = () => {
-    const blob = new Blob([css], { type: 'text/css' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'styles.css';
-    a.click();
-  };
-
-  // Exporta HTML
-  const downloadHTML = () => {
-    const fullHTML = `<!DOCTYPE html>
-<html>
-<head>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-${html}
-</body>
-</html>`;
-    const blob = new Blob([fullHTML], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'index.html';
-    a.click();
-  };
-
-  return (
-    <div className="flex flex-col h-screen bg-gray-900 text-white">
-      {/* Header */}
-      <div className="bg-gray-800 p-4 border-b border-gray-700">
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Palette className="w-6 h-6" />
-            Editor Visual de CSS
-          </h1>
-          
-          <div className="flex gap-2 flex-wrap">
-            <label className="px-4 py-2 bg-blue-600 rounded cursor-pointer hover:bg-blue-700 flex items-center gap-2">
-              <Upload className="w-4 h-4" />
-              HTML
-              <input type="file" accept=".html" onChange={handleImportHTML} className="hidden" />
-            </label>
-            
-            <label className="px-4 py-2 bg-purple-600 rounded cursor-pointer hover:bg-purple-700 flex items-center gap-2">
-              <Upload className="w-4 h-4" />
-              CSS
-              <input type="file" accept=".css" onChange={handleImportCSS} className="hidden" />
-            </label>
-            
-            <button onClick={downloadHTML} className="px-4 py-2 bg-green-600 rounded hover:bg-green-700 flex items-center gap-2">
-              <Download className="w-4 h-4" />
-              HTML
-            </button>
-            
-            <button onClick={downloadCSS} className="px-4 py-2 bg-green-600 rounded hover:bg-green-700 flex items-center gap-2">
-              <Download className="w-4 h-4" />
-              CSS
-            </button>
-          </div>
-        </div>
-        
-        {/* View Mode Toggle */}
-        <div className="flex gap-2 mt-3">
-          <button 
-            onClick={() => setViewMode('visual')}
-            className={`px-3 py-1 rounded ${viewMode === 'visual' ? 'bg-blue-600' : 'bg-gray-700'}`}
-          >
-            <Eye className="w-4 h-4 inline mr-1" />
-            Visual
-          </button>
-          <button 
-            onClick={() => setViewMode('code')}
-            className={`px-3 py-1 rounded ${viewMode === 'code' ? 'bg-blue-600' : 'bg-gray-700'}`}
-          >
-            <Code className="w-4 h-4 inline mr-1" />
-            Código
-          </button>
-          <button 
-            onClick={() => setViewMode('split')}
-            className={`px-3 py-1 rounded ${viewMode === 'split' ? 'bg-blue-600' : 'bg-gray-700'}`}
-          >
-            <Box className="w-4 h-4 inline mr-1" />
-            Split
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Visual Editor */}
-        {(viewMode === 'visual' || viewMode === 'split') && (
-          <div className={`${viewMode === 'split' ? 'w-1/2' : 'w-full'} p-4 overflow-auto border-r border-gray-700`}>
-            <div className="bg-white rounded-lg overflow-hidden" style={{ minHeight: '500px' }}>
-              <iframe
-                ref={iframeRef}
-                className="w-full h-full"
-                style={{ minHeight: '500px', border: 'none' }}
-                title="preview"
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Code Editor */}
-        {(viewMode === 'code' || viewMode === 'split') && (
-          <div className={`${viewMode === 'split' ? 'w-1/2' : 'w-full'} flex flex-col`}>
-            <div className="flex-1 p-4 overflow-auto">
-              <h3 className="text-lg font-bold mb-2">HTML</h3>
-              <textarea
-                value={html}
-                onChange={(e) => setHtml(e.target.value)}
-                className="w-full h-48 p-3 bg-gray-800 text-green-400 font-mono text-sm rounded border border-gray-700"
-                spellCheck="false"
-              />
-              
-              <h3 className="text-lg font-bold mb-2 mt-4">CSS</h3>
-              <textarea
-                value={css}
-                onChange={(e) => setCss(e.target.value)}
-                className="w-full flex-1 p-3 bg-gray-800 text-blue-400 font-mono text-sm rounded border border-gray-700"
-                style={{ minHeight: '300px' }}
-                spellCheck="false"
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Property Panel */}
-      {selectedElement && (
-        <div className="bg-gray-800 border-t border-gray-700 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-bold">
-              Editando: <span className="text-blue-400">{selectedElement.selector}</span>
-            </h3>
-            <button 
-              onClick={() => setSelectedElement(null)}
-              className="text-gray-400 hover:text-white"
-            >
-              ✕
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-sm mb-1">Cor de Fundo</label>
-              <input
-                type="color"
-                value={elementStyles.background || '#ffffff'}
-                onChange={(e) => updateCSS('background', e.target.value)}
-                className="w-full h-10 rounded cursor-pointer"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm mb-1">Cor do Texto</label>
-              <input
-                type="color"
-                value={elementStyles.color || '#000000'}
-                onChange={(e) => updateCSS('color', e.target.value)}
-                className="w-full h-10 rounded cursor-pointer"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm mb-1">Tamanho da Fonte</label>
-              <input
-                type="number"
-                value={elementStyles.fontSize || 16}
-                onChange={(e) => updateCSS('font-size', e.target.value + 'px')}
-                className="w-full p-2 bg-gray-700 rounded"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm mb-1">Padding</label>
-              <input
-                type="number"
-                value={elementStyles.padding || 0}
-                onChange={(e) => updateCSS('padding', e.target.value + 'px')}
-                className="w-full p-2 bg-gray-700 rounded"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm mb-1">Margin</label>
-              <input
-                type="number"
-                value={elementStyles.margin || 0}
-                onChange={(e) => updateCSS('margin', e.target.value + 'px')}
-                className="w-full p-2 bg-gray-700 rounded"
-              />
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -432,6 +52,8 @@ ${html}
         .btn-purple:hover { background: #7B1FA2; }
         .btn-green { background: #4CAF50; color: white; }
         .btn-green:hover { background: #45a049; }
+        .btn-orange { background: #FF9800; color: white; }
+        .btn-orange:hover { background: #F57C00; }
 
         .view-toggle {
             display: flex;
@@ -510,6 +132,8 @@ ${html}
             border-top: 2px solid #444;
             padding: 20px;
             display: none;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .properties-panel.active {
@@ -584,20 +208,52 @@ ${html}
             outline-offset: 2px;
         }
 
+        .draggable-element {
+            cursor: move !important;
+        }
+
+        .resizable-element {
+            position: relative;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #2196F3;
+            border: 2px solid white;
+            border-radius: 50%;
+            bottom: -5px;
+            right: -5px;
+            cursor: nwse-resize;
+            z-index: 1000;
+        }
+
         .hidden {
             display: none;
+        }
+
+        .mode-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #FF9800;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🎨 Editor Visual de CSS</h1>
+        <h1>🎨 Editor Visual de CSS <span class="mode-indicator" id="mode-indicator">Modo: Selecionar</span></h1>
         <div class="toolbar">
             <input type="file" id="html-file" accept=".html" class="hidden">
             <button class="btn btn-blue" onclick="document.getElementById('html-file').click()">📤 Importar HTML</button>
             
             <input type="file" id="css-file" accept=".css" class="hidden">
             <button class="btn btn-purple" onclick="document.getElementById('css-file').click()">📤 Importar CSS</button>
+            
+            <button class="btn btn-orange" id="drag-mode-btn" onclick="toggleDragMode()">🖱️ Modo Arrastar</button>
             
             <button class="btn btn-green" onclick="downloadHTML()">💾 Baixar HTML</button>
             <button class="btn btn-green" onclick="downloadCSS()">💾 Baixar CSS</button>
@@ -619,11 +275,11 @@ ${html}
                 <h3>HTML</h3>
                 <textarea id="html-code" rows="8" oninput="updatePreview()"><div class="container">
   <h1>Título Principal</h1>
-  <p class="text">Este é um parágrafo de exemplo. Clique em qualquer elemento para editá-lo visualmente!</p>
+  <p class="text">Este é um parágrafo de exemplo. Clique para editar ou ative o modo arrastar!</p>
   <button class="btn">Botão de Ação</button>
   <div class="box">
     <h2>Subtítulo</h2>
-    <p>Mais conteúdo aqui.</p>
+    <p>Mais conteúdo aqui. Arraste-me!</p>
   </div>
 </div></textarea>
             </div>
@@ -699,6 +355,14 @@ h2 {
                 <input type="number" id="prop-font-size" oninput="updateProperty('font-size', this.value + 'px')">
             </div>
             <div class="property-item">
+                <label>Largura (px ou auto)</label>
+                <input type="text" id="prop-width" oninput="updateProperty('width', this.value)">
+            </div>
+            <div class="property-item">
+                <label>Altura (px ou auto)</label>
+                <input type="text" id="prop-height" oninput="updateProperty('height', this.value)">
+            </div>
+            <div class="property-item">
                 <label>Padding (px)</label>
                 <input type="number" id="prop-padding" oninput="updateProperty('padding', this.value + 'px')">
             </div>
@@ -709,6 +373,15 @@ h2 {
             <div class="property-item">
                 <label>Border Radius (px)</label>
                 <input type="number" id="prop-border-radius" oninput="updateProperty('border-radius', this.value + 'px')">
+            </div>
+            <div class="property-item">
+                <label>Position</label>
+                <select id="prop-position" onchange="updateProperty('position', this.value)">
+                    <option value="static">Static</option>
+                    <option value="relative">Relative</option>
+                    <option value="absolute">Absolute</option>
+                    <option value="fixed">Fixed</option>
+                </select>
             </div>
             <div class="property-item">
                 <label>Alinhamento</label>
@@ -731,12 +404,18 @@ h2 {
     </div>
 
     <div class="instructions" id="instructions">
-        💡 Clique em qualquer elemento na visualização para editá-lo visualmente
+        💡 Clique para editar propriedades | Use "Modo Arrastar" para mover e redimensionar elementos
     </div>
 
     <script>
         let selectedElement = null;
         let currentSelector = null;
+        let isDragMode = false;
+        let draggedElement = null;
+        let offsetX = 0;
+        let offsetY = 0;
+        let isResizing = false;
+        let resizeElement = null;
 
         // Atualiza preview
         function updatePreview() {
@@ -752,6 +431,13 @@ h2 {
                         * { margin: 0; padding: 0; box-sizing: border-box; }
                         body { padding: 20px; font-family: Arial, sans-serif; }
                         .selected-element { outline: 3px solid #2196F3 !important; outline-offset: 2px; }
+                        .draggable-element { cursor: move !important; }
+                        .resize-handle { 
+                            position: absolute; width: 10px; height: 10px; 
+                            background: #2196F3; border: 2px solid white; 
+                            border-radius: 50%; bottom: -5px; right: -5px; 
+                            cursor: nwse-resize; z-index: 1000; 
+                        }
                         ${css}
                     </style>
                 </head>
@@ -764,14 +450,186 @@ h2 {
             doc.write(fullHTML);
             doc.close();
 
-            // Adiciona eventos de clique
             setTimeout(() => {
                 doc.body.addEventListener('click', handleElementClick);
+                doc.body.addEventListener('mousedown', handleMouseDown);
+                doc.addEventListener('mousemove', handleMouseMove);
+                doc.addEventListener('mouseup', handleMouseUp);
             }, 100);
+        }
+
+        // Toggle modo arrastar
+        function toggleDragMode() {
+            isDragMode = !isDragMode;
+            const btn = document.getElementById('drag-mode-btn');
+            const indicator = document.getElementById('mode-indicator');
+            
+            if (isDragMode) {
+                btn.style.background = '#4CAF50';
+                indicator.textContent = 'Modo: Arrastar';
+                indicator.style.background = '#4CAF50';
+                enableDragMode();
+            } else {
+                btn.style.background = '#FF9800';
+                indicator.textContent = 'Modo: Selecionar';
+                indicator.style.background = '#FF9800';
+                disableDragMode();
+            }
+        }
+
+        function enableDragMode() {
+            const doc = document.getElementById('preview-frame').contentDocument;
+            const elements = doc.body.querySelectorAll('*');
+            
+            elements.forEach(el => {
+                if (el !== doc.body && el !== doc.documentElement) {
+                    el.classList.add('draggable-element');
+                    
+                    // Garantir position para arrastar
+                    const computed = doc.defaultView.getComputedStyle(el);
+                    if (computed.position === 'static') {
+                        el.style.position = 'relative';
+                    }
+                }
+            });
+        }
+
+        function disableDragMode() {
+            const doc = document.getElementById('preview-frame').contentDocument;
+            const elements = doc.body.querySelectorAll('.draggable-element');
+            elements.forEach(el => el.classList.remove('draggable-element'));
+            
+            // Remove resize handles
+            doc.querySelectorAll('.resize-handle').forEach(h => h.remove());
+        }
+
+        // Mouse down - inicia drag ou resize
+        function handleMouseDown(e) {
+            if (!isDragMode) return;
+            
+            const doc = document.getElementById('preview-frame').contentDocument;
+            
+            // Verifica se clicou no handle de resize
+            if (e.target.classList.contains('resize-handle')) {
+                e.preventDefault();
+                e.stopPropagation();
+                isResizing = true;
+                resizeElement = e.target.parentElement;
+                return;
+            }
+
+            // Inicia drag
+            if (e.target !== doc.body && e.target !== doc.documentElement) {
+                e.preventDefault();
+                draggedElement = e.target;
+                
+                const rect = draggedElement.getBoundingClientRect();
+                const iframeRect = doc.defaultView.frameElement.getBoundingClientRect();
+                
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+
+                // Remove outros handles
+                doc.querySelectorAll('.resize-handle').forEach(h => h.remove());
+                
+                // Adiciona handle de resize
+                const handle = doc.createElement('div');
+                handle.className = 'resize-handle';
+                draggedElement.style.position = 'relative';
+                draggedElement.appendChild(handle);
+            }
+        }
+
+        // Mouse move - arrasta ou redimensiona
+        function handleMouseMove(e) {
+            if (!isDragMode) return;
+
+            const doc = document.getElementById('preview-frame').contentDocument;
+            const iframeRect = doc.defaultView.frameElement.getBoundingClientRect();
+
+            // Resize
+            if (isResizing && resizeElement) {
+                e.preventDefault();
+                const rect = resizeElement.getBoundingClientRect();
+                const newWidth = e.clientX - rect.left;
+                const newHeight = e.clientY - rect.top;
+                
+                if (newWidth > 20) resizeElement.style.width = newWidth + 'px';
+                if (newHeight > 20) resizeElement.style.height = newHeight + 'px';
+                
+                updateCSSFromElement(resizeElement);
+                return;
+            }
+
+            // Drag
+            if (draggedElement) {
+                e.preventDefault();
+                
+                const computed = doc.defaultView.getComputedStyle(draggedElement);
+                const currentLeft = parseInt(computed.left) || 0;
+                const currentTop = parseInt(computed.top) || 0;
+                
+                const rect = draggedElement.getBoundingClientRect();
+                const newLeft = e.clientX - offsetX - rect.left + currentLeft;
+                const newTop = e.clientY - offsetY - rect.top + currentTop;
+
+                draggedElement.style.left = newLeft + 'px';
+                draggedElement.style.top = newTop + 'px';
+            }
+        }
+
+        // Mouse up - finaliza drag/resize
+        function handleMouseUp(e) {
+            if (draggedElement) {
+                updateCSSFromElement(draggedElement);
+                draggedElement = null;
+            }
+            if (isResizing) {
+                isResizing = false;
+                resizeElement = null;
+            }
+        }
+
+        // Atualiza CSS baseado no elemento
+        function updateCSSFromElement(element) {
+            const tag = element.tagName.toLowerCase();
+            const className = element.className.replace('selected-element', '').replace('draggable-element', '').trim();
+            const id = element.id;
+
+            let selector = tag;
+            if (id) selector = `#${id}`;
+            else if (className) selector = `.${className.split(' ')[0]}`;
+
+            const style = element.style;
+            if (style.left) updatePropertyInCSS(selector, 'left', style.left);
+            if (style.top) updatePropertyInCSS(selector, 'top', style.top);
+            if (style.width) updatePropertyInCSS(selector, 'width', style.width);
+            if (style.height) updatePropertyInCSS(selector, 'height', style.height);
+            if (style.position) updatePropertyInCSS(selector, 'position', style.position);
+        }
+
+        function updatePropertyInCSS(selector, property, value) {
+            let css = document.getElementById('css-code').value;
+            const regex = new RegExp(`(${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{[^}]*?)${property}\\s*:[^;]+;`, 'g');
+
+            if (regex.test(css)) {
+                css = css.replace(regex, `$1${property}: ${value};`);
+            } else {
+                const blockRegex = new RegExp(`(${selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{[^}]*)(\\})`, 'g');
+                if (blockRegex.test(css)) {
+                    css = css.replace(blockRegex, `$1  ${property}: ${value};\n$2`);
+                } else {
+                    css += `\n\n${selector} {\n  ${property}: ${value};\n}`;
+                }
+            }
+
+            document.getElementById('css-code').value = css;
         }
 
         // Clique no elemento
         function handleElementClick(e) {
+            if (isDragMode) return;
+
             e.preventDefault();
             e.stopPropagation();
 
@@ -783,7 +641,6 @@ h2 {
             e.target.classList.add('selected-element');
             selectedElement = e.target;
 
-            // Define seletor
             const tag = e.target.tagName.toLowerCase();
             const className = e.target.className.replace('selected-element', '').trim();
             const id = e.target.id;
@@ -794,23 +651,23 @@ h2 {
 
             document.getElementById('current-selector').textContent = currentSelector;
 
-            // Pega estilos computados
             const computed = doc.defaultView.getComputedStyle(e.target);
             document.getElementById('prop-background').value = rgbToHex(computed.backgroundColor);
             document.getElementById('prop-color').value = rgbToHex(computed.color);
             document.getElementById('prop-font-size').value = parseInt(computed.fontSize);
+            document.getElementById('prop-width').value = computed.width;
+            document.getElementById('prop-height').value = computed.height;
             document.getElementById('prop-padding').value = parseInt(computed.padding);
             document.getElementById('prop-margin').value = parseInt(computed.margin);
             document.getElementById('prop-border-radius').value = parseInt(computed.borderRadius);
+            document.getElementById('prop-position').value = computed.position;
             document.getElementById('prop-text-align').value = computed.textAlign;
             document.getElementById('prop-font-weight').value = computed.fontWeight;
 
-            // Mostra painel
             document.getElementById('properties-panel').classList.add('active');
             document.getElementById('instructions').style.display = 'none';
         }
 
-        // Fecha painel de propriedades
         function closeProperties() {
             document.getElementById('properties-panel').classList.remove('active');
             document.getElementById('instructions').style.display = 'block';
@@ -820,7 +677,6 @@ h2 {
             });
         }
 
-        // Atualiza propriedade CSS
         function updateProperty(property, value) {
             if (!currentSelector) return;
 
@@ -842,7 +698,6 @@ h2 {
             updatePreview();
         }
 
-        // RGB para HEX
         function rgbToHex(rgb) {
             if (!rgb || rgb === 'rgba(0, 0, 0, 0)') return '#ffffff';
             const match = rgb.match(/\d+/g);
@@ -853,7 +708,6 @@ h2 {
             }).join('');
         }
 
-        // Importar arquivos
         document.getElementById('html-file').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -878,7 +732,6 @@ h2 {
             }
         });
 
-        // Download arquivos
         function downloadHTML() {
             const html = document.getElementById('html-code').value;
             const fullHTML = `<!DOCTYPE html>
@@ -908,7 +761,6 @@ ${html}
             document.body.removeChild(element);
         }
 
-        // Alternar visualização
         function setView(mode) {
             const visual = document.getElementById('visual-panel');
             const code = document.getElementById('code-panel');
@@ -935,36 +787,7 @@ ${html}
             }
         }
 
-        // Inicializa
         updatePreview();
     </script>
 </body>
-    </html>       </div>
-            
-            <div>
-              <label className="block text-sm mb-1">Peso da Fonte</label>
-              <select
-                value={elementStyles.fontWeight || 'normal'}
-                onChange={(e) => updateCSS('font-weight', e.target.value)}
-                className="w-full p-2 bg-gray-700 rounded"
-              >
-                <option value="normal">Normal</option>
-                <option value="bold">Negrito</option>
-                <option value="lighter">Leve</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Instructions */}
-      {!selectedElement && (
-        <div className="bg-gray-800 border-t border-gray-700 p-4 text-center text-gray-400">
-          💡 Clique em qualquer elemento na visualização para editá-lo visualmente
-        </div>
-      )}
-    </div>
-  );
-}
-
-
+</html>
