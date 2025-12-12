@@ -31,7 +31,7 @@ h1 {
     text-align: center;
     margin: 10px 0;
     font-size: clamp(1.5em, 5vw, 2.5em);
-    color: blue; /*#333;*/
+    color: #333;
 }
 
 #difficulty-container {
@@ -331,6 +331,7 @@ h1 {
         /* Alternativa: font-size: 38px; (Se 1em não funcionar) */
     }
 }
+
 
 
 
