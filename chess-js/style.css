@@ -290,7 +290,7 @@ h1 {
 .cell.valid-move .piece {
     /* Adiciona uma borda interna (box-shadow inset) verde para indicar que a peça pode ser capturada */
     box-shadow: 0 0 0 4px green inset;
-    border-radius: 50%; /* Mantém o formato circular do destaque */
+    border-radius: 5%; /* Mantém o formato circular do destaque */
 }
 /* ============================
    AJUSTES PARA CELULAR (SOLUÇÃO DEFINITIVA DE ESTABILIDADE)
@@ -331,6 +331,7 @@ h1 {
         /* Alternativa: font-size: 38px; (Se 1em não funcionar) */
     }
 }
+
 
 
 
