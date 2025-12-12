@@ -168,13 +168,17 @@ h1 {
    CONTROLES E UI
 ============================ */
 
+#difficulty-container {
+   text-align: center;
+   margin-top: -30px;
+   margin-left: 20px;
+ }
+
 #difficulty {
     padding: 8px;
     font-size: 1em;
     border-radius: 5px;
     border: 1px solid #ccc;
-    margin-top: -30px;
-    margin-left: 20px;
 }
 
 /* ============================
@@ -324,6 +328,7 @@ h1 {
         /* Alternativa: font-size: 38px; (Se 1em não funcionar) */
     }
 }
+
 
 
 
