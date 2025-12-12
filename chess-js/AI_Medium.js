@@ -241,7 +241,7 @@ export class AI_Medium {
         	const enemyMoves = this.getAllMovesForColor(enemyColor);
         	attacked = enemyMoves.some(em => em.to === move.to);
 
-        	console.log(`Movimento de ${move.piece.tipo} ${move.from} -> ${move.to} ` +
+        	console.log(`Movimento de ${move.piece.tipo} ${this.indexToNotation(move.from)} -> ${this.indexToNotation(move.to)} ` +
                     `foi simulado, atacado depois? ${attacked}`);
     	});
     	return attacked;
@@ -403,7 +403,6 @@ export class AI_Medium {
 		console.log(`Peças ameaçadas para ${color}:`, threatened.map(t => `${t.piece.tipo}@${this.indexToNotation(t.index)}`));
 		return threatened;
 	}
-
     // verifica se o move vai tirar do check (simulação)
     willRemoveCheck(move) {
         let removed = false;
@@ -422,6 +421,5 @@ export class AI_Medium {
         return removed;
     }
 }
-
 
 
