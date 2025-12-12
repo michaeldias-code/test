@@ -281,7 +281,7 @@ h1 {
     cursor: pointer;
     
     /* NOVIDADE: Adiciona uma leve borda verde à célula */
-    /*border: 2px solid green; */
+    border: 0.5px solid green; 
     /* Use box-sizing: border-box se o layout do tabuleiro quebrar para garantir que a borda fique dentro */
 }
 
@@ -331,6 +331,7 @@ h1 {
         /* Alternativa: font-size: 38px; (Se 1em não funcionar) */
     }
 }
+
 
 
 
