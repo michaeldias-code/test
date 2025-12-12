@@ -179,7 +179,7 @@ h1 {
    BOTÃO DE REINICIAR (Aumenta margem de segurança)
 ============================ */
 #restart-btn {
-    display: block;
+    /*display: block;*/
     /* CHAVE 6: Aumenta a margem superior para garantir espaço abaixo do tabuleiro */
     margin: 30px auto 10px auto; 
     padding: 12px 24px;
@@ -190,6 +190,7 @@ h1 {
     border-radius: 8px;
     cursor: pointer;
     transition: 0.2s;
+    margin-left: 40px;
 }
 
 
@@ -319,4 +320,5 @@ h1 {
         /* Alternativa: font-size: 38px; (Se 1em não funcionar) */
     }
 }
+
 
