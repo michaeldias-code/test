@@ -306,6 +306,9 @@ h1 {
     }
      #difficulty-container {
         text-align: center;
+        margin-top: 0px;
+        margin-left: 0px;
+
     }
     #chessboard {
         width: 100%;
@@ -328,6 +331,7 @@ h1 {
         /* Alternativa: font-size: 38px; (Se 1em não funcionar) */
     }
 }
+
 
 
 
