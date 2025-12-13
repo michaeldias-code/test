@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Comparador de Texto</title>
+
+<style>
+body {
+    font-family: Consolas, monospace;
+    background: #f5f5f5;
+    padding: 10px;
+}
+
+textarea {
+    width: 48%;
+    height: 200px;
+}
+
+.container, .diff-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+button {
+    margin: 10px 0;
+    padding: 8px 16px;
+}
+
+.diff {
+    width: 50%;
+    border: 1px solid #ccc;
+    background: white;
+    overflow-x: auto;
+}
+
+.line {
+    display: flex;
+}
+
+.line-number {
+    width: 50px;
+    background: #eee;
+    text-align: right;
+    padding-right: 5px;
+    user-select: none;
+}
+
+.line-content {
+    padding-left: 10px;
+    white-space: pre;
+}
+
+/* Destaques */
+.added { background: #c8f7c5; }
+.removed { background: #f7c5c5; }
+.modified { background: #fff3b0; }
+.same { background: white; }
+
+.warning {
+    background: #fff3cd;
+    padding: 8px;
+    margin: 10px 0;
+    border: 1px solid #ffeeba;
+}
+</style>
+</head>
+
+<body>
+
+<h3>Comparador de Texto (Modo Híbrido)</h3>
+
+<input type="file" id="file1">
+<input type="file" id="file2">
+
+<div class="container">
+    <textarea id="text1" placeholder="Texto 1"></textarea>
+    <textarea id="text2" placeholder="Texto 2"></textarea>
+</div>
+
+<button onclick="compare()">Comparar</button>
+
+<div id="warning"></div>
+
+<div class="diff-container">
+    <div id="diff1" class="diff"></div>
+    <div id="diff2" class="diff"></div>
+</div>
+
+<script>
+const LIMIT = 2000;
+
+/* ---------- LOAD FILE ---------- */
+function loadFile(input, textarea) {
+    input.addEventListener("change", () => {
+        const reader = new FileReader();
+        reader.onload = e => textarea.value = e.target.result;
+        reader.readAsText(input.files[0]);
+    });
+}
+
+loadFile(file1, text1);
+loadFile(file2, text2);
+
+/* ---------- MAIN ---------- */
+function compare() {
+    const a = text1.value.split("\n");
+    const b = text2.value.split("\n");
+
+    diff1.innerHTML = "";
+    diff2.innerHTML = "";
+    warning.innerHTML = "";
+
+    if (Math.max(a.length, b.length) > LIMIT) {
+        warning.innerHTML = `
+            <div class="warning">
+                ⚠ Arquivo grande (${Math.max(a.length, b.length)} linhas).  
+                Usando comparação rápida.
+            </div>`;
+        simpleDiff(a, b);
+    } else {
+        smartDiff(a, b);
+    }
+}
+
+/* ---------- SIMPLE (FAST) ---------- */
+function simpleDiff(a, b) {
+    const max = Math.max(a.length, b.length);
+    for (let i = 0; i < max; i++) {
+        let c1 = "same", c2 = "same";
+        if (a[i] === undefined) c2 = "added";
+        else if (b[i] === undefined) c1 = "removed";
+        else if (a[i] !== b[i]) c1 = c2 = "modified";
+
+        diff1.appendChild(line(i+1, a[i] ?? "", c1));
+        diff2.appendChild(line(i+1, b[i] ?? "", c2));
+    }
+}
+
+/* ---------- SMART (LCS) ---------- */
+function smartDiff(a, b) {
+    const lcs = buildLCS(a, b);
+    let i = 0, j = 0, n = 1;
+
+    lcs.forEach(line => {
+        while (a[i] !== line) {
+            diff1.appendChild(lineEl(n++, a[i++], "removed"));
+            diff2.appendChild(lineEl("", "", "same"));
+        }
+        while (b[j] !== line) {
+            diff1.appendChild(lineEl("", "", "same"));
+            diff2.appendChild(lineEl(n++, b[j++], "added"));
+        }
+        diff1.appendChild(lineEl(n, a[i++], "same"));
+        diff2.appendChild(lineEl(n++, b[j++], "same"));
+    });
+}
+
+/* ---------- LCS CORE ---------- */
+function buildLCS(a, b) {
+    const dp = Array(a.length+1).fill(null)
+        .map(() => Array(b.length+1).fill(0));
+
+    for (let i = a.length-1; i >= 0; i--)
+        for (let j = b.length-1; j >= 0; j--)
+            dp[i][j] = a[i] === b[j]
+                ? dp[i+1][j+1] + 1
+                : Math.max(dp[i+1][j], dp[i][j+1]);
+
+    let i = 0, j = 0, res = [];
+    while (i < a.length && j < b.length) {
+        if (a[i] === b[j]) {
+            res.push(a[i]); i++; j++;
+        } else dp[i+1][j] >= dp[i][j+1] ? i++ : j++;
+    }
+    return res;
+}
+
+/* ---------- UI ---------- */
+function line(num, text, cls) {
+    const d = document.createElement("div");
+    d.className = "line";
+    d.innerHTML = `
+        <div class="line-number">${num}</div>
+        <div class="line-content ${cls}">${escape(text)}</div>`;
+    return d;
+}
+
+function lineEl(num, text, cls) {
+    return line(num, text, cls);
+}
+
+function escape(str) {
+    return str.replace(/[&<>]/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+}
+</script>
+
+</body>
+</html>
