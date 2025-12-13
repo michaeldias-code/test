@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Afinador Cromático</title>
+<title>Afinador Cromático Profissional</title>
 <style>
 body {
   background:#111;
@@ -17,8 +17,12 @@ button {
 #note {
   font-size:72px;
 }
-#freq {
+#status {
   font-size:20px;
+  margin:10px;
+}
+#freq {
+  font-size:18px;
 }
 #meter {
   width:300px;
@@ -33,7 +37,7 @@ button {
 }
 #needle {
   width:2px;
-  height:100px;
+  height:120px;
   background:red;
   margin:20px auto;
   transform-origin:bottom center;
@@ -46,14 +50,16 @@ button {
 <button id="start">Iniciar</button>
 
 <div id="note">–</div>
+<div id="status">–</div>
 <div id="freq">0 Hz</div>
 
 <div id="meter"><div id="level"></div></div>
 <div id="needle"></div>
 
 <script>
-const noteNames = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 let ctx, analyser;
+let lastPitch = null;
 
 document.getElementById("start").onclick = async () => {
   ctx = new AudioContext();
@@ -70,11 +76,11 @@ document.getElementById("start").onclick = async () => {
 
   const hp = ctx.createBiquadFilter();
   hp.type = "highpass";
-  hp.frequency.value = 80;
+  hp.frequency.value = 70;
 
   const lp = ctx.createBiquadFilter();
   lp.type = "lowpass";
-  lp.frequency.value = 1200;
+  lp.frequency.value = 1500;
 
   analyser = ctx.createAnalyser();
   analyser.fftSize = 2048;
@@ -97,40 +103,70 @@ function update() {
   const pitch = yin(buf, ctx.sampleRate);
 
   if (pitch > 0) {
-    const midi = 69 + 12*Math.log2(pitch/440);
-    const note = noteNames[Math.round(midi)%12];
-    const cents = (midi - Math.round(midi))*100;
+    // suavização temporal
+    lastPitch = lastPitch
+      ? lastPitch*0.8 + pitch*0.2
+      : pitch;
 
-    document.getElementById("note").textContent = note;
-    document.getElementById("freq").textContent = pitch.toFixed(2)+" Hz";
-    document.getElementById("needle").style.transform =
-      `rotate(${Math.max(-45,Math.min(45,cents))}deg)`;
+    display(lastPitch);
   }
 
   requestAnimationFrame(update);
 }
 
-// YIN com limiar
+function display(freq) {
+  const midi = 69 + 12*Math.log2(freq/440);
+  const note = notes[Math.round(midi)%12];
+  const cents = (midi - Math.round(midi))*100;
+
+  document.getElementById("note").textContent = note;
+  document.getElementById("freq").textContent = freq.toFixed(2)+" Hz";
+
+  const clamped = Math.max(-50,Math.min(50,cents));
+  document.getElementById("needle").style.transform =
+    `rotate(${clamped}deg)`;
+
+  const status = document.getElementById("status");
+  if (Math.abs(cents) < 5) {
+    status.textContent = "✔ AFINADO";
+    status.style.color = "lime";
+  } else {
+    status.textContent = "Desvio: "+cents.toFixed(1)+" cents";
+    status.style.color = "#eee";
+  }
+}
+
+// YIN com CMND
 function yin(buf, sr) {
   const SIZE = buf.length;
-  const minTau = Math.floor(sr/1000);
-  const maxTau = Math.floor(sr/80);
-  let bestTau = -1;
-  let bestVal = Infinity;
+  const minFreq = 70;
+  const maxFreq = 1000;
+  const minTau = Math.floor(sr/maxFreq);
+  const maxTau = Math.floor(sr/minFreq);
 
-  for (let tau=minTau; tau<maxTau; tau++) {
+  let yinBuf = new Float32Array(maxTau);
+  for (let tau=1; tau<maxTau; tau++) {
     let sum = 0;
     for (let i=0; i<SIZE-tau; i++) {
       let d = buf[i]-buf[i+tau];
       sum += d*d;
     }
-    if (sum < bestVal) {
-      bestVal = sum;
-      bestTau = tau;
-    }
+    yinBuf[tau] = sum;
   }
 
-  return bestTau>0 ? sr/bestTau : -1;
+  let runningSum = 0;
+  for (let tau=1; tau<maxTau; tau++) {
+    runningSum += yinBuf[tau];
+    yinBuf[tau] *= tau / runningSum;
+  }
+
+  const threshold = 0.15;
+  for (let tau=minTau; tau<maxTau; tau++) {
+    if (yinBuf[tau] < threshold) {
+      return sr / tau;
+    }
+  }
+  return -1;
 }
 </script>
 </body>
