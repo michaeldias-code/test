@@ -14,37 +14,49 @@ const needle = document.getElementById('needle');
 
 startButton.onclick = startTuner;
 
+// tuner.js (Substitua a função startTuner)
+
 function startTuner() {
     startButton.disabled = true;
     
-    // Cria AudioContext (compatibilidade com navegadores)
+    // Configura o AudioContext e tenta iniciá-lo ou retomá-lo
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    
-    // Configura o Analisador
-    analyser = audioContext.createAnalyser();
-    analyser.fftSize = 2048; // Tamanho do buffer para FFT
-    const bufferLength = analyser.fftSize;
-    
-    // Array para armazenar os dados de frequência (magnitude)
-    const dataArray = new Uint8Array(bufferLength);
 
-    // 1. Acesso ao microfone
+    // Tenta retomar o contexto, necessário para alguns navegadores
+    if (audioContext.state === 'suspended') {
+        audioContext.resume().then(() => {
+            console.log('AudioContext resumed successfully.');
+            initializeMicrophone();
+        }).catch(err => {
+            console.error('Failed to resume AudioContext:', err);
+            handleError("Erro: Não foi possível iniciar o contexto de áudio.");
+        });
+    } else {
+        initializeMicrophone();
+    }
+}
+
+function initializeMicrophone() {
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 2048;
+    
     navigator.mediaDevices.getUserMedia({ audio: true })
         .then(stream => {
             mediaStreamSource = audioContext.createMediaStreamSource(stream);
-            // Conecta o microfone ao analisador, mas não ao destino (speakers)
             mediaStreamSource.connect(analyser); 
-            
-            // 2. Inicia o loop de processamento
+            console.log('Microfone conectado com sucesso.');
             processAudio();
         })
         .catch(err => {
-            console.error('Erro ao acessar o microfone: ' + err);
-            noteDisplay.textContent = "Erro: Microfone negado.";
-            startButton.disabled = false;
+            console.error('Erro ao acessar o microfone: ', err);
+            handleError("Erro: Microfone negado ou não encontrado.");
         });
 }
 
+function handleError(message) {
+    noteDisplay.textContent = message;
+    startButton.disabled = false;
+}
 function processAudio() {
     // Pega a informação de frequência (domínio do tempo)
     // Usaremos getFloatTimeDomainData para um algoritmo mais preciso (ACF)
@@ -91,7 +103,7 @@ function autoCorrelate(buffer, sampleRate) {
     const maxOffset = Math.floor(SIZE / 2); // Busca até metade do buffer
     let bestOffset = -1;
     let bestCorrelation = -Infinity;
-    let threshold = 0.2; // Limiar mínimo de volume (RMS)
+    let threshold = 0.05; // <<<< AJUSTE AQUI: Reduzido para 0.05 para aumentar a sensibilidade.
     let minCorrelation = 0.9; // Limiar mínimo para a correlação
 
     let rms = 0;
