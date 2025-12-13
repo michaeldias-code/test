@@ -103,17 +103,24 @@ function autoCorrelate(buffer, sampleRate) {
     const maxOffset = Math.floor(SIZE / 2); // Busca até metade do buffer
     let bestOffset = -1;
     let bestCorrelation = -Infinity;
-    let threshold = 0.05; // <<<< AJUSTE AQUI: Reduzido para 0.05 para aumentar a sensibilidade.
+    let threshold = 0.01; // Ajuste para maior sensibilidade
     let minCorrelation = 0.9; // Limiar mínimo para a correlação
 
     let rms = 0;
     for(let i = 0; i < SIZE; i++) {
-        rms += buffer[i] * buffer[i];
+        const val = buffer[i];
+        rms += val * val;
     }
     rms = Math.sqrt(rms / SIZE);
 
-    if(rms < threshold) return -1; // Silêncio ou muito baixo
+    // 🔥 LOG DE DIAGNÓSTICO DE VOLUME
+    console.log(`RMS (Volume): ${rms.toFixed(4)}`);
 
+    if(rms < threshold) {
+        console.log("DIAGNÓSTICO: VOLUME ABAIXO DO LIMIAR.");
+        return -1; 
+    } 
+	
     // 1. Calcula Autocorrelação discreta e encontra o melhor pico
     for (let offset = 1; offset < maxOffset; offset++) {
         let correlation = 0;
@@ -137,7 +144,11 @@ function autoCorrelate(buffer, sampleRate) {
     }
 
     // Nenhuma correlação forte encontrada
-    if (bestOffset === -1) return -1;
+    if (bestOffset === -1) {
+	        console.log(`DIAGNÓSTICO: Correlação máxima fraca ou nula (${bestCorrelation.toFixed(4)})`);
+        return -1;
+    }
+
 
     // 2. Interpolação Parabólica para aumentar a precisão (Sub-pixel/Sub-lag)
     // Refina o pico usando os pontos vizinhos (lag - 1, lag, lag + 1)
