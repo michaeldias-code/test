@@ -67,27 +67,27 @@ export class MoveValidator {
 	// ---------------------------------------
 	// CHECA SE MOVIMENTO DESLIZANTE QUEBRA BORDAS
 	// ---------------------------------------
-	slidingStepOk(start, next, offset) {
-		const sr = this.row(start);
-		const sc = this.col(start);
-		const nr = this.row(next);
-		const nc = this.col(next);
-
-		switch (offset) {
-			case -1: return nr === sr && nc === sc - 1;
-			case 1: return nr === sr && nc === sc + 1;
-
-			case -8: return nc === sc && nr === sr - 1;
-			case 8: return nc === sc && nr === sr + 1;
-
-			case -9: return (nr === sr - 1) && (nc === sc - 1);
-			case -7: return (nr === sr - 1) && (nc === sc + 1);
-			case 7: return (nr === sr + 1) && (nc === sc - 1);
-			case 9: return (nr === sr + 1) && (nc === sc + 1);
-
-			default: return false;
-		}
-	}
+	//slidingStepOk(start, next, offset) {
+	//	const sr = this.row(start);
+	//	const sc = this.col(start);
+	//	const nr = this.row(next);
+	//	const nc = this.col(next);
+	//
+	//	switch (offset) {
+	//		case -1: return nr === sr && nc === sc - 1;
+	//		case 1: return nr === sr && nc === sc + 1;
+	//
+	//		case -8: return nc === sc && nr === sr - 1;
+	//		case 8: return nc === sc && nr === sr + 1;
+	//
+	//		case -9: return (nr === sr - 1) && (nc === sc - 1);
+	//		case -7: return (nr === sr - 1) && (nc === sc + 1);
+	//		case 7: return (nr === sr + 1) && (nc === sc - 1);
+	//		case 9: return (nr === sr + 1) && (nc === sc + 1);
+	//
+	//		default: return false;
+	//	}
+	//}
 
 	// ---------------------------------------
 	// MOVIMENTOS DESLIZANTES
@@ -98,10 +98,22 @@ export class MoveValidator {
 
 		for (let d of directions) {
 			let p = pos + d;
+            let startRow = this.row(pos); // Nova variável para checagem de wrap
+            let current = pos; // Nova variável para rastrear a posição anterior
+			
+			// Troca: while (this.isValidPosition(p) && this.slidingStepOk(p - d, p, d)) {
+            while (this.isValidPosition(p)) {
+                
+                // === NOVO: CHECAGEM DE WRAP-AROUND (Horizontal e Diagonal) ===
+                // Se a diferença de coluna for maior que 1, ou a linha mudou mas deveria ser a mesma.
+                // Esta checagem é fundamental e substitui o slidingStepOk
+                if (Math.abs(d) !== 8 && (this.col(p) - this.col(current) !== d) && Math.abs(this.col(p) - this.col(current)) !== 1) {
+                    // Se o movimento horizontal ou diagonal pulou para a outra ponta
+                    if (Math.abs(this.col(p) - this.col(current)) > 1) break; 
+                }
 
-			while (this.isValidPosition(p) && this.slidingStepOk(p - d, p, d)) {
 				const target = this.board[p];
-
+				// ... (resto da lógica de push e break)
 				if (!target) {
 					moves.push(p);
 				} else {
@@ -109,6 +121,7 @@ export class MoveValidator {
 					break;
 				}
 
+                current = p; // Atualiza a posição atual
 				p += d;
 			}
 		}
