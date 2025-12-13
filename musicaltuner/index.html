@@ -3,173 +3,74 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Professional Tuner</title>
-
+<title>Mic Test</title>
 <style>
 body {
-    font-family: Arial, sans-serif;
     background: #111;
-    color: #eee;
+    color: white;
     text-align: center;
-    padding: 30px;
+    font-family: Arial;
+    padding: 40px;
 }
-
 button {
-    padding: 12px 25px;
-    font-size: 18px;
-    cursor: pointer;
+    font-size: 20px;
+    padding: 15px 30px;
 }
-
-#volume {
+#bar {
     width: 300px;
-    height: 12px;
+    height: 20px;
     background: #333;
-    margin: 20px auto;
-    border-radius: 6px;
-    overflow: hidden;
+    margin: 30px auto;
 }
-
-#volume span {
-    display: block;
+#bar div {
     height: 100%;
     width: 0%;
     background: lime;
-    transition: width 0.05s;
-}
-
-#note {
-    font-size: 64px;
-    margin-top: 20px;
-}
-
-#freq {
-    font-size: 20px;
-    opacity: 0.7;
-}
-
-#needle {
-    width: 4px;
-    height: 120px;
-    background: red;
-    margin: 20px auto;
-    transform-origin: bottom center;
-    transition: transform 0.05s;
 }
 </style>
 </head>
-
 <body>
 
-<h1>🎵 Chromatic Tuner</h1>
-<button id="start">Start Tuner</button>
+<h1>🎤 Microphone Test</h1>
+<button id="start">Start</button>
 
-<div id="volume"><span></span></div>
-
-<div id="note">--</div>
-<div id="freq">0 Hz</div>
-
-<div id="needle"></div>
+<div id="bar"><div></div></div>
 
 <script>
-const startBtn = document.getElementById("start");
-const volumeBar = document.querySelector("#volume span");
-const noteEl = document.getElementById("note");
-const freqEl = document.getElementById("freq");
-const needle = document.getElementById("needle");
+const btn = document.getElementById("start");
+const bar = document.querySelector("#bar div");
 
-let audioCtx, analyser, mic;
-const buffer = new Float32Array(4096);
+let ctx, analyser, data;
 
-const A4 = 440;
-const notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
-
-startBtn.onclick = async () => {
-    startBtn.disabled = true;
-
-    audioCtx = new AudioContext();
+btn.onclick = async () => {
+    ctx = new AudioContext();
+    await ctx.resume();
 
     const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false
-        }
+        audio: true
     });
 
-    analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 4096;
+    analyser = ctx.createAnalyser();
+    analyser.fftSize = 2048;
+    data = new Float32Array(analyser.fftSize);
 
-    mic = audioCtx.createMediaStreamSource(stream);
+    const mic = ctx.createMediaStreamSource(stream);
     mic.connect(analyser);
 
-    update();
+    loop();
 };
 
-function update() {
-    analyser.getFloatTimeDomainData(buffer);
+function loop() {
+    analyser.getFloatTimeDomainData(data);
 
-    // RMS (volume)
     let sum = 0;
-    for (let i = 0; i < buffer.length; i++) {
-        sum += buffer[i] * buffer[i];
+    for (let i = 0; i < data.length; i++) {
+        sum += data[i] * data[i];
     }
-    const rms = Math.sqrt(sum / buffer.length);
-    volumeBar.style.width = Math.min(100, rms * 800) + "%";
+    const rms = Math.sqrt(sum / data.length);
 
-    const pitch = yin(buffer, audioCtx.sampleRate);
-
-    if (pitch !== -1) {
-        const midi = 69 + 12 * Math.log2(pitch / A4);
-        const noteIndex = Math.round(midi) % 12;
-        const cents = (midi - Math.round(midi)) * 100;
-
-        noteEl.textContent = notes[noteIndex];
-        freqEl.textContent = pitch.toFixed(2) + " Hz";
-
-        const clamped = Math.max(-50, Math.min(50, cents));
-        needle.style.transform = `rotate(${clamped * 0.9}deg)`;
-    }
-
-    requestAnimationFrame(update);
-}
-
-/* ===== YIN ===== */
-function yin(buffer, sampleRate) {
-    const threshold = 0.15;
-    const size = buffer.length;
-    const half = size / 2;
-
-    let yinBuf = new Float32Array(half);
-    let rms = 0;
-
-    for (let i = 0; i < size; i++) rms += buffer[i] * buffer[i];
-    rms = Math.sqrt(rms / size);
-    if (rms < 0.005) return -1;
-
-    for (let t = 0; t < half; t++) {
-        let sum = 0;
-        for (let i = 0; i < half; i++) {
-            const d = buffer[i] - buffer[i + t];
-            sum += d * d;
-        }
-        yinBuf[t] = sum;
-    }
-
-    let runningSum = 0;
-    yinBuf[0] = 1;
-    for (let t = 1; t < half; t++) {
-        runningSum += yinBuf[t];
-        yinBuf[t] *= t / runningSum;
-    }
-
-    for (let t = 2; t < half; t++) {
-        if (yinBuf[t] < threshold) {
-            while (t + 1 < half && yinBuf[t + 1] < yinBuf[t]) t++;
-            return sampleRate / t;
-        }
-    }
-
-    return -1;
+    bar.style.width = Math.min(100, rms * 1000) + "%";
+    requestAnimationFrame(loop);
 }
 </script>
 
