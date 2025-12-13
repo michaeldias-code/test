@@ -3,65 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <title>Afinador Cromático Profissional</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 body {
-  background:#111;
-  color:#eee;
-  font-family:Arial, sans-serif;
-  text-align:center;
+  background: radial-gradient(circle at top, #222, #000);
+  color: #eee;
+  font-family: "Segoe UI", Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
 }
+
+h1 {
+  font-weight: 300;
+  margin-bottom: 10px;
+}
+
 button {
-  padding:12px 20px;
-  font-size:16px;
+  padding: 12px 26px;
+  font-size: 16px;
+  border-radius: 30px;
+  border: none;
+  background: linear-gradient(135deg, #6366f1, #7c3aed);
+  color: white;
+  cursor: pointer;
 }
+
+button:disabled {
+  opacity: 0.5;
+}
+
 #note {
-  font-size:72px;
+  font-size: 96px;
+  font-weight: 600;
+  margin-top: 20px;
 }
+
+#octave {
+  font-size: 32px;
+  opacity: 0.7;
+}
+
 #status {
-  font-size:20px;
-  margin:10px;
+  font-size: 22px;
+  margin: 10px;
 }
+
 #freq {
-  font-size:18px;
+  font-size: 16px;
+  opacity: 0.8;
 }
-#meter {
-  width:300px;
-  height:10px;
-  background:#333;
-  margin:10px auto;
+
+/* Agulha */
+.meter {
+  position: relative;
+  width: 280px;
+  height: 140px;
+  margin: 30px auto;
+  overflow: hidden;
 }
-#level {
-  height:100%;
-  width:0%;
-  background:lime;
+
+.scale {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-top: 2px solid #444;
+  border-radius: 140px 140px 0 0;
 }
-#needle {
-  width:2px;
-  height:120px;
-  background:red;
-  margin:20px auto;
-  transform-origin:bottom center;
+
+.scale span {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 12px;
+  background: #555;
+}
+
+.needle {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  height: 130px;
+  background: red;
+  transform-origin: bottom center;
+  transform: translateX(-50%) rotate(0deg);
+  transition: transform 0.1s linear;
+}
+
+/* Volume */
+.volume {
+  width: 260px;
+  height: 8px;
+  background: #333;
+  border-radius: 4px;
+  margin: 10px auto;
+}
+
+.volume-level {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, lime, yellow, red);
+  border-radius: 4px;
+  transition: width 0.1s;
 }
 </style>
 </head>
+
 <body>
 
 <h1>🎵 Afinador Cromático</h1>
-<button id="start">Iniciar</button>
+<button id="start">Iniciar Afinador</button>
 
 <div id="note">–</div>
-<div id="status">–</div>
-<div id="freq">0 Hz</div>
+<div id="octave">–</div>
+<div id="status">Aguardando som…</div>
+<div id="freq">0.00 Hz</div>
 
-<div id="meter"><div id="level"></div></div>
-<div id="needle"></div>
+<div class="meter">
+  <div class="scale"></div>
+  <div class="needle" id="needle"></div>
+</div>
+
+<div class="volume">
+  <div class="volume-level" id="volume"></div>
+</div>
 
 <script>
 const notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const A4 = 440;
+
 let ctx, analyser;
-let lastPitch = null;
+let lastFreq = null;
 
 document.getElementById("start").onclick = async () => {
+  document.getElementById("start").disabled = true;
+
   ctx = new AudioContext();
 
   const stream = await navigator.mediaDevices.getUserMedia({
@@ -80,7 +158,7 @@ document.getElementById("start").onclick = async () => {
 
   const lp = ctx.createBiquadFilter();
   lp.type = "lowpass";
-  lp.frequency.value = 1500;
+  lp.frequency.value = 1600;
 
   analyser = ctx.createAnalyser();
   analyser.fftSize = 2048;
@@ -97,75 +175,88 @@ function update() {
   analyser.getFloatTimeDomainData(buf);
 
   const rms = Math.sqrt(buf.reduce((s,v)=>s+v*v,0)/buf.length);
-  document.getElementById("level").style.width =
+  document.getElementById("volume").style.width =
     Math.min(100, rms*300) + "%";
 
-  const pitch = yin(buf, ctx.sampleRate);
+  const freq = yin(buf, ctx.sampleRate);
 
-  if (pitch > 0) {
-    // suavização temporal
-    lastPitch = lastPitch
-      ? lastPitch*0.8 + pitch*0.2
-      : pitch;
+  if (freq > 0) {
+    lastFreq = lastFreq
+      ? lastFreq * 0.85 + freq * 0.15
+      : freq;
 
-    display(lastPitch);
+    display(lastFreq);
   }
 
   requestAnimationFrame(update);
 }
 
 function display(freq) {
-  const midi = 69 + 12*Math.log2(freq/440);
-  const note = notes[Math.round(midi)%12];
-  const cents = (midi - Math.round(midi))*100;
+  const midi = 69 + 12 * Math.log2(freq / A4);
+  const midiRound = Math.round(midi);
+
+  const note = notes[(midiRound % 12 + 12) % 12];
+  const octave = Math.floor(midiRound / 12) - 1;
+
+  const targetFreq = A4 * Math.pow(2, (midiRound - 69) / 12);
+  const cents = 1200 * Math.log2(freq / targetFreq);
 
   document.getElementById("note").textContent = note;
-  document.getElementById("freq").textContent = freq.toFixed(2)+" Hz";
+  document.getElementById("octave").textContent = "Oitava " + octave;
+  document.getElementById("freq").textContent = freq.toFixed(2) + " Hz";
 
-  const clamped = Math.max(-50,Math.min(50,cents));
+  const clamped = Math.max(-50, Math.min(50, cents));
   document.getElementById("needle").style.transform =
-    `rotate(${clamped}deg)`;
+    `translateX(-50%) rotate(${clamped}deg)`;
 
   const status = document.getElementById("status");
+
   if (Math.abs(cents) < 5) {
     status.textContent = "✔ AFINADO";
     status.style.color = "lime";
+    document.getElementById("needle").style.background = "lime";
+  } else if (cents > 0) {
+    status.textContent = `AGUDO +${cents.toFixed(1)} cents`;
+    status.style.color = "#ffcc00";
+    document.getElementById("needle").style.background = "red";
   } else {
-    status.textContent = "Desvio: "+cents.toFixed(1)+" cents";
-    status.style.color = "#eee";
+    status.textContent = `GRAVE ${cents.toFixed(1)} cents`;
+    status.style.color = "#ffcc00";
+    document.getElementById("needle").style.background = "red";
   }
 }
 
-// YIN com CMND
+/* YIN com CMND (robusto) */
 function yin(buf, sr) {
-  const SIZE = buf.length;
   const minFreq = 70;
-  const maxFreq = 1000;
-  const minTau = Math.floor(sr/maxFreq);
-  const maxTau = Math.floor(sr/minFreq);
+  const maxFreq = 1500;
+  const minTau = Math.floor(sr / maxFreq);
+  const maxTau = Math.floor(sr / minFreq);
 
-  let yinBuf = new Float32Array(maxTau);
-  for (let tau=1; tau<maxTau; tau++) {
+  const yinBuf = new Float32Array(maxTau);
+
+  for (let tau = 1; tau < maxTau; tau++) {
     let sum = 0;
-    for (let i=0; i<SIZE-tau; i++) {
-      let d = buf[i]-buf[i+tau];
-      sum += d*d;
+    for (let i = 0; i < buf.length - tau; i++) {
+      const d = buf[i] - buf[i + tau];
+      sum += d * d;
     }
     yinBuf[tau] = sum;
   }
 
   let runningSum = 0;
-  for (let tau=1; tau<maxTau; tau++) {
+  for (let tau = 1; tau < maxTau; tau++) {
     runningSum += yinBuf[tau];
     yinBuf[tau] *= tau / runningSum;
   }
 
   const threshold = 0.15;
-  for (let tau=minTau; tau<maxTau; tau++) {
+  for (let tau = minTau; tau < maxTau; tau++) {
     if (yinBuf[tau] < threshold) {
       return sr / tau;
     }
   }
+
   return -1;
 }
 </script>
