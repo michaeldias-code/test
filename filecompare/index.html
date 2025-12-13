@@ -2,124 +2,722 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Comparador de Texto</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparador de Texto Pro</title>
 
 <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    font-family: Consolas, monospace;
-    background: #f5f5f5;
-    padding: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
 }
 
-textarea {
-    width: 48%;
-    height: 200px;
+.header {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
 }
 
-.container, .diff-container {
+.header h1 {
+    font-size: 2.5em;
+    font-weight: 300;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.header p {
+    opacity: 0.9;
+    font-size: 1.1em;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+.toolbar {
+    background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+    padding: 20px;
+    border-bottom: 2px solid #dee2e6;
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+}
+
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+
+.file-input-wrapper input[type=file] {
+    position: absolute;
+    left: -9999px;
+}
+
+.file-input-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.file-input-label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.file-name {
+    display: inline-block;
+    margin-left: 10px;
+    color: #495057;
+    font-size: 0.9em;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 button {
-    margin: 10px 0;
-    padding: 8px 16px;
+    padding: 10px 25px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1em;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.diff {
-    width: 50%;
-    border: 1px solid #ccc;
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.options {
+    display: flex;
+    gap: 20px;
+    margin-left: auto;
+    flex-wrap: wrap;
+}
+
+.option-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.option-group label {
+    font-size: 0.9em;
+    color: #495057;
+    cursor: pointer;
+    user-select: none;
+}
+
+.option-group input[type="checkbox"] {
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.text-area-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    background: #f8f9fa;
+    padding: 20px;
+}
+
+.text-area-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.text-area-wrapper h3 {
+    color: #495057;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+textarea {
+    width: 100%;
+    height: 250px;
+    padding: 15px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    resize: vertical;
+    transition: border-color 0.3s;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.comment-config {
+    background: #f8f9fa;
+    padding: 20px;
+    border-top: 2px solid #dee2e6;
+    display: none;
+}
+
+.comment-config.visible {
+    display: block;
+}
+
+.comment-config h3 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+}
+
+.comment-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.comment-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.comment-input-group label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9em;
+}
+
+.comment-input-group input {
+    padding: 10px;
+    border: 2px solid #dee2e6;
+    border-radius: 5px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+}
+
+.comment-input-group input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.comment-input-group small {
+    color: #6c757d;
+    font-size: 0.85em;
+}
+
+.preset-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.preset-buttons button {
+    padding: 8px 15px;
+    font-size: 0.9em;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stats {
+    background: #e7f3ff;
+    padding: 15px 20px;
+    border-left: 4px solid #0066cc;
+    margin: 0 20px 20px 20px;
+    border-radius: 5px;
+    display: none;
+}
+
+.stats.visible {
+    display: block;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #0066cc;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    color: #495057;
+    margin-top: 5px;
+}
+
+.warning {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 15px 20px;
+    margin: 0 20px 20px 20px;
+    border-radius: 5px;
+    color: #856404;
+    display: none;
+}
+
+.warning.visible {
+    display: block;
+}
+
+.diff-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    background: #f8f9fa;
+    padding: 20px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.diff-panel {
     background: white;
+    border: 2px solid #dee2e6;
     overflow-x: auto;
+}
+
+.diff-panel:first-child {
+    border-radius: 8px 0 0 8px;
+    border-right: 1px solid #dee2e6;
+}
+
+.diff-panel:last-child {
+    border-radius: 0 8px 8px 0;
+    border-left: 1px solid #dee2e6;
+}
+
+.diff-header {
+    background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+    padding: 10px 15px;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: #495057;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .line {
     display: flex;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 13px;
+    line-height: 1.6;
 }
 
 .line-number {
-    width: 50px;
-    background: #eee;
+    min-width: 50px;
+    background: #f8f9fa;
     text-align: right;
-    padding-right: 5px;
+    padding: 2px 10px;
+    color: #6c757d;
+    border-right: 2px solid #dee2e6;
     user-select: none;
+    font-weight: 500;
 }
 
 .line-content {
-    padding-left: 10px;
-    white-space: pre;
+    padding: 2px 10px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    flex: 1;
 }
 
-/* Destaques */
-.added { background: #c8f7c5; }
-.removed { background: #f7c5c5; }
-.modified { background: #fff3b0; }
-.same { background: white; }
+.added {
+    background: linear-gradient(90deg, #d4edda 0%, #c3e6cb 100%);
+    border-left: 3px solid #28a745;
+}
 
-.warning {
-    background: #fff3cd;
-    padding: 8px;
-    margin: 10px 0;
-    border: 1px solid #ffeeba;
+.removed {
+    background: linear-gradient(90deg, #f8d7da 0%, #f5c6cb 100%);
+    border-left: 3px solid #dc3545;
+}
+
+.modified {
+    background: linear-gradient(90deg, #fff3cd 0%, #ffeaa7 100%);
+    border-left: 3px solid #ffc107;
+}
+
+.same {
+    background: white;
+}
+
+.empty-line {
+    background: #f8f9fa;
+    opacity: 0.5;
+}
+
+.char-diff {
+    background: rgba(255, 0, 0, 0.3);
+    font-weight: bold;
+    padding: 2px;
+    border-radius: 3px;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-top: 2px solid #dee2e6;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+@media (max-width: 768px) {
+    .text-area-container,
+    .diff-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .diff-panel:first-child {
+        border-radius: 8px 8px 0 0;
+        border-right: 2px solid #dee2e6;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .diff-panel:last-child {
+        border-radius: 0 0 8px 8px;
+        border-left: 2px solid #dee2e6;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .toolbar {
+        justify-content: center;
+    }
+    
+    .options {
+        margin-left: 0;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<h3>Comparador de Texto (Modo Híbrido)</h3>
-
-<input type="file" id="file1">
-<input type="file" id="file2">
-
-<div class="container">
-    <textarea id="text1" placeholder="Texto 1"></textarea>
-    <textarea id="text2" placeholder="Texto 2"></textarea>
+<div class="header">
+    <h1>ðŸ“ Comparador de Texto Pro</h1>
+    <p>Compare arquivos e textos com precisÃ£o linha por linha</p>
 </div>
 
-<button onclick="compare()">Comparar</button>
-
-<div id="warning"></div>
-
-<div class="diff-container">
-    <div id="diff1" class="diff"></div>
-    <div id="diff2" class="diff"></div>
+<div class="container">
+    <div class="toolbar">
+        <div class="file-input-wrapper">
+            <input type="file" id="file1" accept=".txt,.js,.css,.html,.json,.xml,.md">
+            <label for="file1" class="file-input-label">ðŸ“ Arquivo 1</label>
+            <span class="file-name" id="filename1"></span>
+        </div>
+        
+        <div class="file-input-wrapper">
+            <input type="file" id="file2" accept=".txt,.js,.css,.html,.json,.xml,.md">
+            <label for="file2" class="file-input-label">ðŸ“ Arquivo 2</label>
+            <span class="file-name" id="filename2"></span>
+        </div>
+        
+        <button onclick="compare()">âš¡ Comparar</button>
+        <button onclick="clearAll()">ðŸ—‘ï¸ Limpar</button>
+        
+        <div class="options">
+            <div class="option-group">
+                <input type="checkbox" id="ignoreCase" checked>
+                <label for="ignoreCase">Ignorar maiÃºsculas</label>
+            </div>
+            <div class="option-group">
+                <input type="checkbox" id="ignoreSpaces" checked>
+                <label for="ignoreSpaces">Ignorar espaÃ§os</label>
+            </div>
+            <div class="option-group">
+                <input type="checkbox" id="charLevel">
+                <label for="charLevel">Diff por caractere</label>
+            </div>
+            <div class="option-group">
+                <input type="checkbox" id="programmerMode">
+                <label for="programmerMode">ðŸ”§ Modo Programador</label>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-area-container">
+        <div class="text-area-wrapper">
+            <h3>Texto 1</h3>
+            <textarea id="text1" placeholder="Cole o texto 1 aqui ou carregue um arquivo..."></textarea>
+        </div>
+        <div class="text-area-wrapper">
+            <h3>Texto 2</h3>
+            <textarea id="text2" placeholder="Cole o texto 2 aqui ou carregue um arquivo..."></textarea>
+        </div>
+    </div>
+    
+    <div id="commentConfig" class="comment-config">
+        <h3>âš™ï¸ ConfiguraÃ§Ã£o de ComentÃ¡rios</h3>
+        <div class="comment-inputs">
+            <div class="comment-input-group">
+                <label>ComentÃ¡rios de linha Ãºnica (separados por vÃ­rgula):</label>
+                <input type="text" id="singleLineComments" placeholder="Exemplo: //, #, --" value="//, #, --">
+                <small>Ignora tudo apÃ³s o sÃ­mbolo atÃ© o fim da linha</small>
+            </div>
+            <div class="comment-input-group">
+                <label>ComentÃ¡rios de bloco (separados por vÃ­rgula, use | para separar abertura/fechamento):</label>
+                <input type="text" id="blockComments" placeholder="Exemplo: /*|*/, <!--|--> " value="/*|*/, <!--|--> ">
+                <small>Ignora tudo entre os sÃ­mbolos de abertura e fechamento</small>
+            </div>
+        </div>
+        <div class="preset-buttons">
+            <button onclick="setPreset('javascript')">JavaScript/C/Java</button>
+            <button onclick="setPreset('python')">Python</button>
+            <button onclick="setPreset('html')">HTML/XML</button>
+            <button onclick="setPreset('sql')">SQL</button>
+            <button onclick="setPreset('css')">CSS</button>
+        </div>
+    </div>
+    
+    <div id="warning" class="warning"></div>
+    
+    <div id="stats" class="stats">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="totalLines">0</div>
+                <div class="stat-label">Linhas totais</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value added" style="color: #28a745;" id="addedLines">0</div>
+                <div class="stat-label">Linhas adicionadas</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value removed" style="color: #dc3545;" id="removedLines">0</div>
+                <div class="stat-label">Linhas removidas</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value modified" style="color: #ffc107;" id="modifiedLines">0</div>
+                <div class="stat-label">Linhas modificadas</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="similarity">100%</div>
+                <div class="stat-label">Similaridade</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="diff-container">
+        <div class="diff-panel">
+            <div class="diff-header">Texto 1</div>
+            <div id="diff1"></div>
+        </div>
+        <div class="diff-panel">
+            <div class="diff-header">Texto 2</div>
+            <div id="diff2"></div>
+        </div>
+    </div>
+    
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color added"></div>
+            <span>Adicionado</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color removed"></div>
+            <span>Removido</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color modified"></div>
+            <span>Modificado</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color same"></div>
+            <span>Igual</span>
+        </div>
+    </div>
 </div>
 
 <script>
 const LIMIT = 2000;
+let statsData = { added: 0, removed: 0, modified: 0, same: 0 };
+
+/* ---------- MODE TOGGLE ---------- */
+document.getElementById('programmerMode').addEventListener('change', function() {
+    const commentConfig = document.getElementById('commentConfig');
+    if (this.checked) {
+        commentConfig.classList.add('visible');
+    } else {
+        commentConfig.classList.remove('visible');
+    }
+});
+
+/* ---------- PRESETS ---------- */
+function setPreset(lang) {
+    const presets = {
+        javascript: {
+            single: '//, #',
+            block: '/*|*/'
+        },
+        python: {
+            single: '#',
+            block: '"""|\"\"\", \'\'\'|\'\'\''
+        },
+        html: {
+            single: '',
+            block: '<!--|-->'
+        },
+        sql: {
+            single: '--, #',
+            block: '/*|*/'
+        },
+        css: {
+            single: '',
+            block: '/*|*/'
+        }
+    };
+    
+    const preset = presets[lang];
+    if (preset) {
+        document.getElementById('singleLineComments').value = preset.single;
+        document.getElementById('blockComments').value = preset.block;
+    }
+}
+
+/* ---------- COMMENT REMOVAL ---------- */
+function removeComments(text) {
+    if (!document.getElementById('programmerMode').checked) return text;
+    
+    let result = text;
+    
+    const singleComments = document.getElementById('singleLineComments').value
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0);
+    
+    const blockComments = document.getElementById('blockComments').value
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+        .map(s => {
+            const parts = s.split('|');
+            return { start: parts[0], end: parts[1] };
+        });
+    
+    // Remover comentÃ¡rios de bloco primeiro
+    blockComments.forEach(({ start, end }) => {
+        if (start && end) {
+            const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(escapeRegex(start) + '[\\s\\S]*?' + escapeRegex(end), 'g');
+            result = result.replace(regex, '');
+        }
+    });
+    
+    // Remover comentÃ¡rios de linha Ãºnica
+    singleComments.forEach(comment => {
+        if (comment) {
+            const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(escapeRegex(comment) + '.*$', 'gm');
+            result = result.replace(regex, '');
+        }
+    });
+    
+    return result;
+}
 
 /* ---------- LOAD FILE ---------- */
-function loadFile(input, textarea) {
+function loadFile(input, textarea, filenameEl) {
     input.addEventListener("change", () => {
-        const reader = new FileReader();
-        reader.onload = e => textarea.value = e.target.result;
-        reader.readAsText(input.files[0]);
+        if (input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                textarea.value = e.target.result;
+                filenameEl.textContent = input.files[0].name;
+            };
+            reader.readAsText(input.files[0]);
+        }
     });
 }
 
-loadFile(file1, text1);
-loadFile(file2, text2);
+loadFile(file1, text1, filename1);
+loadFile(file2, text2, filename2);
+
+/* ---------- PREPROCESSING ---------- */
+function preprocessLine(line) {
+    let processed = line;
+    if (document.getElementById('ignoreCase').checked) {
+        processed = processed.toLowerCase();
+    }
+    if (document.getElementById('ignoreSpaces').checked) {
+        processed = processed.trim();
+    }
+    return processed;
+}
 
 /* ---------- MAIN ---------- */
 function compare() {
-    const a = text1.value.split("\n");
-    const b = text2.value.split("\n");
+    let text1Content = document.getElementById('text1').value;
+    let text2Content = document.getElementById('text2').value;
+    
+    if (document.getElementById('programmerMode').checked) {
+        text1Content = removeComments(text1Content);
+        text2Content = removeComments(text2Content);
+    }
+    
+    const a = text1Content.split("\n");
+    const b = text2Content.split("\n");
 
-    diff1.innerHTML = "";
-    diff2.innerHTML = "";
-    warning.innerHTML = "";
+    document.getElementById('diff1').innerHTML = "";
+    document.getElementById('diff2').innerHTML = "";
+    document.getElementById('warning').innerHTML = "";
+    statsData = { added: 0, removed: 0, modified: 0, same: 0 };
 
     if (Math.max(a.length, b.length) > LIMIT) {
-        warning.innerHTML = `
-            <div class="warning">
-                ⚠ Arquivo grande (${Math.max(a.length, b.length)} linhas).  
-                Usando comparação rápida.
-            </div>`;
+        document.getElementById('warning').innerHTML = `âš ï¸ <strong>Arquivo grande detectado</strong> (${Math.max(a.length, b.length)} linhas). Usando comparaÃ§Ã£o rÃ¡pida.`;
+        document.getElementById('warning').classList.add('visible');
         simpleDiff(a, b);
     } else {
+        document.getElementById('warning').classList.remove('visible');
         smartDiff(a, b);
     }
+    
+    updateStats(a.length, b.length);
 }
 
 /* ---------- SIMPLE (FAST) ---------- */
@@ -127,74 +725,157 @@ function simpleDiff(a, b) {
     const max = Math.max(a.length, b.length);
     for (let i = 0; i < max; i++) {
         let c1 = "same", c2 = "same";
-        if (a[i] === undefined) c2 = "added";
-        else if (b[i] === undefined) c1 = "removed";
-        else if (a[i] !== b[i]) c1 = c2 = "modified";
+        
+        if (a[i] === undefined) {
+            c2 = "added";
+            statsData.added++;
+        } else if (b[i] === undefined) {
+            c1 = "removed";
+            statsData.removed++;
+        } else if (preprocessLine(a[i]) !== preprocessLine(b[i])) {
+            c1 = c2 = "modified";
+            statsData.modified++;
+        } else {
+            statsData.same++;
+        }
 
-        diff1.appendChild(line(i+1, a[i] ?? "", c1));
-        diff2.appendChild(line(i+1, b[i] ?? "", c2));
+        document.getElementById('diff1').appendChild(createLine(i+1, a[i] ?? "", c1));
+        document.getElementById('diff2').appendChild(createLine(i+1, b[i] ?? "", c2));
     }
 }
 
 /* ---------- SMART (LCS) ---------- */
 function smartDiff(a, b) {
-    const lcs = buildLCS(a, b);
+    const aProcessed = a.map(preprocessLine);
+    const bProcessed = b.map(preprocessLine);
+    const lcs = buildLCS(aProcessed, bProcessed);
+    
     let i = 0, j = 0, n = 1;
 
     lcs.forEach(line => {
-        while (a[i] !== line) {
-            diff1.appendChild(lineEl(n++, a[i++], "removed"));
-            diff2.appendChild(lineEl("", "", "same"));
+        while (aProcessed[i] !== line) {
+            document.getElementById('diff1').appendChild(createLine(n++, a[i++], "removed"));
+            document.getElementById('diff2').appendChild(createLine("", "", "empty-line"));
+            statsData.removed++;
         }
-        while (b[j] !== line) {
-            diff1.appendChild(lineEl("", "", "same"));
-            diff2.appendChild(lineEl(n++, b[j++], "added"));
+        while (bProcessed[j] !== line) {
+            document.getElementById('diff1').appendChild(createLine("", "", "empty-line"));
+            document.getElementById('diff2').appendChild(createLine(n++, b[j++], "added"));
+            statsData.added++;
         }
-        diff1.appendChild(lineEl(n, a[i++], "same"));
-        diff2.appendChild(lineEl(n++, b[j++], "same"));
+        document.getElementById('diff1').appendChild(createLine(n, a[i++], "same"));
+        document.getElementById('diff2').appendChild(createLine(n++, b[j++], "same"));
+        statsData.same++;
     });
+    
+    while (i < a.length) {
+        document.getElementById('diff1').appendChild(createLine(n++, a[i++], "removed"));
+        document.getElementById('diff2').appendChild(createLine("", "", "empty-line"));
+        statsData.removed++;
+    }
+    while (j < b.length) {
+        document.getElementById('diff1').appendChild(createLine("", "", "empty-line"));
+        document.getElementById('diff2').appendChild(createLine(n++, b[j++], "added"));
+        statsData.added++;
+    }
 }
 
 /* ---------- LCS CORE ---------- */
 function buildLCS(a, b) {
-    const dp = Array(a.length+1).fill(null)
-        .map(() => Array(b.length+1).fill(0));
+    const dp = Array(a.length + 1).fill(null)
+        .map(() => Array(b.length + 1).fill(0));
 
-    for (let i = a.length-1; i >= 0; i--)
-        for (let j = b.length-1; j >= 0; j--)
+    for (let i = a.length - 1; i >= 0; i--) {
+        for (let j = b.length - 1; j >= 0; j--) {
             dp[i][j] = a[i] === b[j]
-                ? dp[i+1][j+1] + 1
-                : Math.max(dp[i+1][j], dp[i][j+1]);
+                ? dp[i + 1][j + 1] + 1
+                : Math.max(dp[i + 1][j], dp[i][j + 1]);
+        }
+    }
 
     let i = 0, j = 0, res = [];
     while (i < a.length && j < b.length) {
         if (a[i] === b[j]) {
-            res.push(a[i]); i++; j++;
-        } else dp[i+1][j] >= dp[i][j+1] ? i++ : j++;
+            res.push(a[i]);
+            i++;
+            j++;
+        } else {
+            dp[i + 1][j] >= dp[i][j + 1] ? i++ : j++;
+        }
     }
     return res;
 }
 
+/* ---------- CHARACTER DIFF ---------- */
+function getCharDiff(str1, str2) {
+    if (!document.getElementById('charLevel').checked) return escapeHtml(str1);
+    
+    let result = '';
+    const maxLen = Math.max(str1.length, str2.length);
+    
+    for (let i = 0; i < maxLen; i++) {
+        const char = str1[i] || '';
+        if (char !== str2[i]) {
+            result += `<span class="char-diff">${escapeHtml(char)}</span>`;
+        } else {
+            result += escapeHtml(char);
+        }
+    }
+    return result;
+}
+
 /* ---------- UI ---------- */
-function line(num, text, cls) {
-    const d = document.createElement("div");
-    d.className = "line";
-    d.innerHTML = `
-        <div class="line-number">${num}</div>
-        <div class="line-content ${cls}">${escape(text)}</div>`;
-    return d;
+function createLine(num, text, cls) {
+    const div = document.createElement("div");
+    div.className = "line";
+    
+    const lineNum = document.createElement("div");
+    lineNum.className = "line-number";
+    lineNum.textContent = num;
+    
+    const lineContent = document.createElement("div");
+    lineContent.className = `line-content ${cls}`;
+    lineContent.innerHTML = cls === "modified" ? getCharDiff(text, "") : escapeHtml(text);
+    
+    div.appendChild(lineNum);
+    div.appendChild(lineContent);
+    
+    return div;
 }
 
-function lineEl(num, text, cls) {
-    return line(num, text, cls);
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
 }
 
-function escape(str) {
-    return str.replace(/[&<>]/g, c =>
-        ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function updateStats(len1, len2) {
+    const total = Math.max(len1, len2);
+    const totalChanges = statsData.added + statsData.removed + statsData.modified;
+    const similarity = total > 0 ? Math.round(((total - totalChanges) / total) * 100) : 100;
+    
+    document.getElementById('totalLines').textContent = total;
+    document.getElementById('addedLines').textContent = statsData.added;
+    document.getElementById('removedLines').textContent = statsData.removed;
+    document.getElementById('modifiedLines').textContent = statsData.modified;
+    document.getElementById('similarity').textContent = similarity + '%';
+    
+    document.getElementById('stats').classList.add('visible');
+}
+
+function clearAll() {
+    document.getElementById('text1').value = '';
+    document.getElementById('text2').value = '';
+    document.getElementById('diff1').innerHTML = '';
+    document.getElementById('diff2').innerHTML = '';
+    document.getElementById('filename1').textContent = '';
+    document.getElementById('filename2').textContent = '';
+    document.getElementById('warning').classList.remove('visible');
+    document.getElementById('stats').classList.remove('visible');
+    document.getElementById('file1').value = '';
+    document.getElementById('file2').value = '';
 }
 </script>
 
 </body>
 </html>
-
