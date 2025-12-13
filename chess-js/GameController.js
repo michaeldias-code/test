@@ -364,6 +364,8 @@ this.logCheckState(this.currentTurn);
 		const piece = this.board.board[pos];
 		if (!piece) return;
 		const cor = piece.cor;
+	    let nomePeca = "";
+
 	
 		// Mapeamento de SÍMBOLO para NOME (se for o caso)
 		if (escolha === "♕" || escolha === "♛") nomePeca = "rainha";
