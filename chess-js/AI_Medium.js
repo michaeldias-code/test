@@ -274,9 +274,15 @@ export class AI_Medium {
 			}
 		}
 
+		// 🔥 NOVO LOG DE DIAGNÓSTICO 🔥
+		console.log(`[DIAGNÓSTICO ${color.toUpperCase()}] Movimentos Gerados:`);
+		moves.filter(m => m.piece.tipo.includes('♞') && this.indexToNotation(m.from) === 'b4')
+			.forEach(m => {
+				console.log(` Cavalo b4 -> ${this.indexToNotation(m.to)} (Captura: ${m.capturedPiece ? m.capturedPiece.tipo : 'Nulo'})`);
+			});
+		
 		return moves;
 	}
-
 	isForbiddenRepeat(move) {
 		if (!this.lastMove) return false;
 		if (move.from === this.lastMove.from && move.to === this.lastMove.to) {
