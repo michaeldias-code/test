@@ -2,77 +2,136 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mic Test</title>
+<title>Afinador Cromático</title>
 <style>
 body {
-    background: #111;
-    color: white;
-    text-align: center;
-    font-family: Arial;
-    padding: 40px;
+  background:#111;
+  color:#eee;
+  font-family:Arial, sans-serif;
+  text-align:center;
 }
 button {
-    font-size: 20px;
-    padding: 15px 30px;
+  padding:12px 20px;
+  font-size:16px;
 }
-#bar {
-    width: 300px;
-    height: 20px;
-    background: #333;
-    margin: 30px auto;
+#note {
+  font-size:72px;
 }
-#bar div {
-    height: 100%;
-    width: 0%;
-    background: lime;
+#freq {
+  font-size:20px;
+}
+#meter {
+  width:300px;
+  height:10px;
+  background:#333;
+  margin:10px auto;
+}
+#level {
+  height:100%;
+  width:0%;
+  background:lime;
+}
+#needle {
+  width:2px;
+  height:100px;
+  background:red;
+  margin:20px auto;
+  transform-origin:bottom center;
 }
 </style>
 </head>
 <body>
 
-<h1>🎤 Microphone Test</h1>
-<button id="start">Start</button>
+<h1>🎵 Afinador Cromático</h1>
+<button id="start">Iniciar</button>
 
-<div id="bar"><div></div></div>
+<div id="note">–</div>
+<div id="freq">0 Hz</div>
+
+<div id="meter"><div id="level"></div></div>
+<div id="needle"></div>
 
 <script>
-const btn = document.getElementById("start");
-const bar = document.querySelector("#bar div");
+const noteNames = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+let ctx, analyser;
 
-let ctx, analyser, data;
+document.getElementById("start").onclick = async () => {
+  ctx = new AudioContext();
 
-btn.onclick = async () => {
-    ctx = new AudioContext();
-    await ctx.resume();
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: {
+      echoCancellation:false,
+      noiseSuppression:false,
+      autoGainControl:false
+    }
+  });
 
-    const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true
-    });
+  const src = ctx.createMediaStreamSource(stream);
 
-    analyser = ctx.createAnalyser();
-    analyser.fftSize = 2048;
-    data = new Float32Array(analyser.fftSize);
+  const hp = ctx.createBiquadFilter();
+  hp.type = "highpass";
+  hp.frequency.value = 80;
 
-    const mic = ctx.createMediaStreamSource(stream);
-    mic.connect(analyser);
+  const lp = ctx.createBiquadFilter();
+  lp.type = "lowpass";
+  lp.frequency.value = 1200;
 
-    loop();
+  analyser = ctx.createAnalyser();
+  analyser.fftSize = 2048;
+
+  src.connect(hp);
+  hp.connect(lp);
+  lp.connect(analyser);
+
+  update();
 };
 
-function loop() {
-    analyser.getFloatTimeDomainData(data);
+function update() {
+  const buf = new Float32Array(analyser.fftSize);
+  analyser.getFloatTimeDomainData(buf);
 
+  const rms = Math.sqrt(buf.reduce((s,v)=>s+v*v,0)/buf.length);
+  document.getElementById("level").style.width =
+    Math.min(100, rms*300) + "%";
+
+  const pitch = yin(buf, ctx.sampleRate);
+
+  if (pitch > 0) {
+    const midi = 69 + 12*Math.log2(pitch/440);
+    const note = noteNames[Math.round(midi)%12];
+    const cents = (midi - Math.round(midi))*100;
+
+    document.getElementById("note").textContent = note;
+    document.getElementById("freq").textContent = pitch.toFixed(2)+" Hz";
+    document.getElementById("needle").style.transform =
+      `rotate(${Math.max(-45,Math.min(45,cents))}deg)`;
+  }
+
+  requestAnimationFrame(update);
+}
+
+// YIN com limiar
+function yin(buf, sr) {
+  const SIZE = buf.length;
+  const minTau = Math.floor(sr/1000);
+  const maxTau = Math.floor(sr/80);
+  let bestTau = -1;
+  let bestVal = Infinity;
+
+  for (let tau=minTau; tau<maxTau; tau++) {
     let sum = 0;
-    for (let i = 0; i < data.length; i++) {
-        sum += data[i] * data[i];
+    for (let i=0; i<SIZE-tau; i++) {
+      let d = buf[i]-buf[i+tau];
+      sum += d*d;
     }
-    const rms = Math.sqrt(sum / data.length);
+    if (sum < bestVal) {
+      bestVal = sum;
+      bestTau = tau;
+    }
+  }
 
-    bar.style.width = Math.min(100, rms * 1000) + "%";
-    requestAnimationFrame(loop);
+  return bestTau>0 ? sr/bestTau : -1;
 }
 </script>
-
 </body>
 </html>
