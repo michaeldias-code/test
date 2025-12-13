@@ -1,4 +1,4 @@
-// AI_Medium.js - vGem-Corrigido - com LOGS
+// AI_Medium.js - vGem-Corrigido - com LOGS DE SIMULAÇÃO ATIVADOS
 
 export class AI_Medium {
 	constructor(board, validator, enPassant) {
@@ -85,7 +85,7 @@ export class AI_Medium {
 				
 				const chosen = activeResponses[0];
 				
-				console.log(`MOVE ESCOLHIDO (Resposta Ativa): ${this.formatMoveLog(chosen)}`); // 📌 LOG
+				console.log(`MOVE ESCOLHIDO (Resposta Ativa): ${this.formatMoveLog(chosen)}`); 
 				this.applyMoveWithEPAndRegister(chosen);
 				this.lastMove = { from: chosen.from, to: chosen.to };
 				return chosen; 
@@ -105,7 +105,7 @@ export class AI_Medium {
 					? captureEscapes[Math.floor(Math.random() * captureEscapes.length)]
 					: escapeMoves[Math.floor(Math.random() * escapeMoves.length)];
 			
-				console.log(`MOVE ESCOLHIDO (Fuga Segura): ${this.formatMoveLog(chosen)}`); // 📌 LOG
+				console.log(`MOVE ESCOLHIDO (Fuga Segura): ${this.formatMoveLog(chosen)}`); 
 				this.applyMoveWithEPAndRegister(chosen);
 				this.lastMove = { from: chosen.from, to: chosen.to };
 				return chosen; 
@@ -126,7 +126,7 @@ export class AI_Medium {
 		if (captureMoves.length > 0) {
 			const bestCapture = this.chooseBestCapture(captureMoves, color, enemyMoves);
 			if (bestCapture) {
-				console.log(`MOVE ESCOLHIDO (Melhor Captura): ${this.formatMoveLog(bestCapture)}`); // 📌 LOG
+				console.log(`MOVE ESCOLHIDO (Melhor Captura): ${this.formatMoveLog(bestCapture)}`); 
 				this.applyMoveWithEPAndRegister(bestCapture);
 				this.lastMove = { from: bestCapture.from, to: bestCapture.to };
 				return bestCapture;
@@ -135,7 +135,7 @@ export class AI_Medium {
 		
 		if (captureMoves.length > 0) {
 			const forcedCapture = captureMoves[Math.floor(Math.random() * captureMoves.length)];
-			console.log(`MOVE ESCOLHIDO (Captura Forçada/Fallback): ${this.formatMoveLog(forcedCapture)}`); // 📌 LOG
+			console.log(`MOVE ESCOLHIDO (Captura Forçada/Fallback): ${this.formatMoveLog(forcedCapture)}`); 
 			this.applyMoveWithEPAndRegister(forcedCapture);
 			this.lastMove = { from: forcedCapture.from, to: forcedCapture.to };
 			return forcedCapture;
@@ -146,7 +146,7 @@ export class AI_Medium {
 		const safeMoves = myMoves.filter(m => !m.capturedPiece && !this.wouldBeAttackedAfterMove(m, enemyColor));
 		if (safeMoves.length > 0) {
 			const chosen = this.pickPreferableMove(safeMoves);
-			console.log(`MOVE ESCOLHIDO (Movimento Seguro): ${this.formatMoveLog(chosen)}`); // 📌 LOG
+			console.log(`MOVE ESCOLHIDO (Movimento Seguro): ${this.formatMoveLog(chosen)}`); 
 			this.applyMoveWithEPAndRegister(chosen);
 			this.lastMove = { from: chosen.from, to: chosen.to };
 			return chosen;
@@ -156,7 +156,7 @@ export class AI_Medium {
 		const leastRiskMoves = this.rankMovesByRisk(myMoves, enemyColor);
 		if (leastRiskMoves.length > 0) {
 			const chosen = leastRiskMoves[0];
-			console.log(`MOVE ESCOLHIDO (Mínimo Risco): ${this.formatMoveLog(chosen)}`); // 📌 LOG
+			console.log(`MOVE ESCOLHIDO (Mínimo Risco): ${this.formatMoveLog(chosen)}`); 
 			this.applyMoveWithEPAndRegister(chosen);
 			this.lastMove = { from: chosen.from, to: chosen.to };
 			return chosen;
@@ -164,7 +164,7 @@ export class AI_Medium {
 
 		// 6) fallback: escolher aleatório entre todos os movimentos
 		const random = myMoves[Math.floor(Math.random() * myMoves.length)];
-		console.log(`MOVE ESCOLHIDO (Fallback Aleatório): ${this.formatMoveLog(random)}`); // 📌 LOG
+		console.log(`MOVE ESCOLHIDO (Fallback Aleatório): ${this.formatMoveLog(random)}`); 
 		this.applyMoveWithEPAndRegister(random);
 		this.lastMove = { from: random.from, to: random.to };
 		return random;
@@ -172,19 +172,15 @@ export class AI_Medium {
 
 	/* ---------------- Helper utilities ---------------- */
 
-	// ----------------------------------------------------
-	// NOVO: Formata Log de Movimento (para depuração)
-	// ----------------------------------------------------
 	formatMoveLog(move) {
 		const from = this.indexToNotation(move.from);
 		const to = this.indexToNotation(move.to);
 		const pieceType = move.piece.tipo;
-		let log = `${pieceType} ${from}-${to}`; // Padrão: Peça Origem-Destino
+		let log = `${pieceType} ${from}-${to}`;
 
 		if (move.capturedPiece) {
 			const capturedType = move.capturedPiece.tipo;
 			
-			// Determina se é uma captura EP
 			let isEnPassant = false;
 			try {
 				if (this.enPassant && typeof this.enPassant.isEnPassantMove === "function") {
@@ -203,7 +199,6 @@ export class AI_Medium {
 
 		return log;
 	}
-	// ----------------------------------------------------
 	
 	expandSlidingMove(from, to, pieceType) {
 		const expandedMoves = [];
@@ -359,6 +354,10 @@ export class AI_Medium {
 			const enemyMoves = this.getAllMovesForColor(enemyColor); 
 			attacked = enemyMoves.some(em => em.to === move.to);
 		});
+		
+		// 📌 LOG DE SIMULAÇÃO REATIVADO PARA CADA MOVIMENTO
+		console.log(`SIMULAÇÃO DE SEGURANÇA: ${move.piece.tipo} ${this.indexToNotation(move.from)} -> ${this.indexToNotation(move.to)} foi atacado depois? ${attacked}`);
+		
 		return attacked;
 	}
 
