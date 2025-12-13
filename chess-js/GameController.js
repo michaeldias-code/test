@@ -363,30 +363,26 @@ this.logCheckState(this.currentTurn);
 	promotePawn(pos, escolha) {
 		const piece = this.board.board[pos];
 		if (!piece) return;
-	
 		const cor = piece.cor;
 	
-		const simboloParaNome = {
-			"?": "rainha", "?": "rainha",
-			"?": "torre",  "?": "torre",
-			"?": "bispo",  "?": "bispo",
-			"?": "cavalo", "?": "cavalo"
-		};
-		
-		if (simboloParaNome[escolha]) {
-			escolha = simboloParaNome[escolha];
-		}
+		// Mapeamento de SÍMBOLO para NOME (se for o caso)
+		if (escolha === "♕" || escolha === "♛") nomePeca = "rainha";
+		else if (escolha === "♖" || escolha === "♜") nomePeca = "torre";
+		else if (escolha === "♗" || escolha === "♝") nomePeca = "bispo";
+		else if (escolha === "♘" || escolha === "♞") nomePeca = "cavalo";
+		else nomePeca = escolha; // Se o modal enviar "rainha" (improvável, mas seguro)
+
 		
 		// Mapa final que coloca o símbolo correto no tabuleiro de acordo com a cor
 		const mapa = {
-			rainha: cor === "brancas" ? "?" : "?",
-			torre:  cor === "brancas" ? "?" : "?",
-			bispo:  cor === "brancas" ? "?" : "?",
-			cavalo: cor === "brancas" ? "?" : "?"
+			rainha: cor === "brancas" ? "♕" : "♛",
+			torre:  cor === "brancas" ? "♖" : "♜",
+			bispo:  cor === "brancas" ? "♗" : "♝",
+			cavalo: cor === "brancas" ? "♘" : "♞"
 		};
 		
-		piece.tipo = mapa[escolha];
-
+	    const simboloFinal = mapa[nomePeca] || escolha; 
+		piece.tipo = simboloFinal;
 	
 		console.log(
 			`?? Promoção concluída em ${this.indexToNotation(pos)} para: ${escolha}`
@@ -475,5 +471,4 @@ this.logCheckState(this.currentTurn);
 		console.log("Jogo reiniciado!");
 	}
 }
-
 
