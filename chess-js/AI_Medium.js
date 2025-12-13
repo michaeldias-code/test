@@ -50,14 +50,61 @@ export class AI_Medium {
 
 		const threatened = this.getThreatenedPieces(color);
 		if (threatened.length > 0) {
-			console.log("⚠️ Tentando fugir de peças ameaçadas:", threatened.map(t => t.piece.tipo));
+			console.log("⚠️ Tentando responder a ameaças...");
+			
+			// --- 1. CALCULAR RESPOSTAS ATIVAS (Capturar o atacante) ---
+			let activeResponses = [];
+			const allCaptures = myMoves.filter(m => m.capturedPiece);
+			
+			for (const threat of threatened) {
+				// Encontra quem ataca a peça ameaçada
+				const attackersPos = this.getAttackersOnSquare(threat.index, enemyColor);
+				
+				// Filtra capturas que removem um desses atacantes, garantindo ganho líquido.
+				const safeNeutralizingCaptures = allCaptures.filter(m => {
+					// O movimento captura um atacante?
+					if (!attackersPos.includes(m.to)) return false; 
+					
+					// Verifica se o movimento é materialmente vantajoso (netGain > 0)
+					const capturedVal = this.valueOfPiece(m.capturedPiece);
+					const attackerValAfter = this.estimatedAttackerValueOnSquareAfterMove(m, enemyColor);
+					
+					// Se a IA ganhar material ou empatar o valor (netGain >= 0)
+					return (capturedVal - attackerValAfter) >= 0; 
+				});
+
+				activeResponses.push(...safeNeutralizingCaptures);
+			}
+			
+			// Remove duplicatas (um movimento pode resolver várias ameaças)
+			activeResponses = Array.from(new Set(activeResponses));
+
+			
+			// --- 2. EXECUTAR RESPOSTA ATIVA SE SEGURA/VANTAGEM ---
+
+			if (activeResponses.length > 0) {
+				console.log("Possíveis respostas ativas (Capturas de atacantes):", activeResponses.length);
+				
+				// Priorizar a captura do atacante de maior valor
+				activeResponses.sort((a, b) => this.valueOfPiece(b.capturedPiece) - this.valueOfPiece(a.capturedPiece));
+				
+				const chosen = activeResponses[0];
+				
+				this.applyMoveWithEPAndRegister(chosen);
+				this.lastMove = { from: chosen.from, to: chosen.to };
+				return chosen; // <--- MOVE ESCOLHIDO: CAPTURA DE ATACANTE
+			}
+			
+			// --- 3. EXECUTAR FUGA PASSIVA (Se a resposta ativa falhou) ---
+			
+			console.log("⚠️ Tentando fugir de peças ameaçadas (Passiva)...");
 			const escapeMoves = myMoves.filter(m =>
 				threatened.some(t => t.index === m.from) && !this.wouldBeAttackedAfterMove(m, enemyColor)
 			);
-			console.log("Possíveis movimentos de fuga:", escapeMoves.map(m => `${m.piece.tipo} ${this.indexToNotation(m.from)}->${this.indexToNotation(m.to)}`));
-		
+			console.log("Possíveis movimentos de fuga (Passiva):", escapeMoves.length);
+	
 			if (escapeMoves.length > 0) {
-				// priorizar capturas entre os movimentos de fuga
+				// priorizar fugas que resultam em captura (se a fuga também captura uma peça secundária)
 				const captureEscapes = escapeMoves.filter(m => m.capturedPiece);
 				const chosen = captureEscapes.length > 0
 					? captureEscapes[Math.floor(Math.random() * captureEscapes.length)]
@@ -65,9 +112,9 @@ export class AI_Medium {
 			
 				this.applyMoveWithEPAndRegister(chosen);
 				this.lastMove = { from: chosen.from, to: chosen.to };
-				return chosen;
+				return chosen; // <--- MOVE ESCOLHIDO: FUGA SEGURA
 			} else {
-				console.log("Nenhum movimento de fuga seguro encontrado.");
+				console.log("Nenhuma resposta (ativa ou passiva) segura encontrada. Prosseguindo.");
 			}
 		}
 
@@ -177,6 +224,24 @@ export class AI_Medium {
         return false;
     }
 
+	// Adicionar em Helper utilities
+	getAttackersOnSquare(squareIndex, attackerColor) {
+		const attackers = [];
+		// Você não precisa re-calcular todos os movimentos do inimigo aqui,
+		// pode reusar a lógica do isCellAttacked ou getPossibleMoves.
+		
+		// Usando a lógica do isCellAttacked do MoveValidator.js, mas no AI_Medium.js
+		// Requer que o MoveValidator exponha uma função de ataques 'raw' ou que o AI_Medium a simule.
+		
+		// VERSÃO SIMPLES (Depende de getAllMovesForColor)
+		const enemyMoves = this.getAllMovesForColor(attackerColor);
+		for (const m of enemyMoves) {
+			if (m.to === squareIndex) {
+				attackers.push(m.from); // retorna o índice de origem do atacante
+			}
+		}
+		return attackers; // Retorna uma lista de índices dos atacantes
+	}
     // escolhe melhor captura segundo ganho material (simula riscos).
 	chooseBestCapture(captureMoves, myColor, enemyMoves) {
 		// Para cada captura: calcular se é segura; se não for, avaliar ganho líquido
@@ -421,5 +486,3 @@ export class AI_Medium {
         return removed;
     }
 }
-
-
