@@ -1,36 +1,227 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Afinador Musical JS</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; }
-        #tuner-display { margin-top: 20px; font-size: 3em; font-weight: bold; }
-        #note { color: #333; }
-        #frequency { font-size: 0.5em; color: #777; }
-        #indicator { 
-            width: 300px; height: 30px; margin: 20px auto; 
-            background: linear-gradient(to right, red, yellow, green, yellow, red); 
-            position: relative; border-radius: 5px;
-        }
-        #needle { 
-            width: 4px; height: 40px; background: black; 
-            position: absolute; bottom: 0; left: 50%; transform-origin: bottom center; 
-            transform: translateX(-50%) rotate(0deg); transition: transform 0.1s;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Professional YIN Tuner</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+h1 {
+    margin-bottom: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.panel {
+    background: #111827;
+    padding: 20px 30px;
+    border-radius: 10px;
+    margin-top: 20px;
+    text-align: center;
+    width: 280px;
+}
+
+.note {
+    font-size: 48px;
+    font-weight: bold;
+}
+
+.freq {
+    font-size: 18px;
+    opacity: 0.8;
+}
+
+.needle-box {
+    position: relative;
+    width: 200px;
+    height: 100px;
+    margin: 15px auto;
+    border-top: 2px solid #555;
+}
+
+.needle {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 3px;
+    height: 90px;
+    background: #22c55e;
+    transform-origin: bottom;
+    transform: translateX(-50%) rotate(0deg);
+}
+
+.volume {
+    width: 200px;
+    height: 8px;
+    background: #374151;
+    border-radius: 4px;
+    margin: 10px auto;
+}
+
+.volume > div {
+    height: 100%;
+    width: 0%;
+    background: #22c55e;
+    border-radius: 4px;
+}
+</style>
 </head>
+
 <body>
-    <h1>Afinador Musical</h1>
-    <button id="start-button">Iniciar Afinador (Permitir Microfone)</button>
-    <div id="tuner-display">
-        <div id="note">Aguardando...</div>
-        <div id="frequency">0.0 Hz</div>
+
+<h1>🎵 YIN Tuner</h1>
+<button id="start">Iniciar Afinador</button>
+
+<div class="panel">
+    <div class="note" id="note">--</div>
+    <div class="freq" id="freq">0.00 Hz</div>
+
+    <div class="needle-box">
+        <div class="needle" id="needle"></div>
     </div>
-    <div id="indicator">
-        <div id="needle"></div>
+
+    <div class="volume">
+        <div id="vol"></div>
     </div>
-    <script src="tuner.js"></script>
+
+    <div id="status" style="opacity:.7">Aguardando...</div>
+</div>
+
+<script>
+/* ================= CONFIGURAÇÃO ================= */
+
+const A4 = 440;
+const notes = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+
+let audioContext, analyser, source;
+
+/* ================= BOTÃO ================= */
+
+document.getElementById("start").onclick = async () => {
+    document.getElementById("start").disabled = true;
+
+    audioContext = new (window.AudioContext || window.webkitAudioContext)({
+        latencyHint: "interactive"
+    });
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false
+        }
+    });
+
+    analyser = audioContext.createAnalyser();
+    analyser.fftSize = 2048;
+
+    source = audioContext.createMediaStreamSource(stream);
+    source.connect(analyser);
+
+    processAudio();
+};
+
+/* ================= LOOP ================= */
+
+function processAudio() {
+    const buffer = new Float32Array(analyser.fftSize);
+
+    function loop() {
+        analyser.getFloatTimeDomainData(buffer);
+
+        // RMS (volume real)
+        let rms = 0;
+        for (let i = 0; i < buffer.length; i++) {
+            rms += buffer[i] * buffer[i];
+        }
+        rms = Math.sqrt(rms / buffer.length);
+
+        document.getElementById("vol").style.width =
+            Math.min(100, rms * 300) + "%";
+
+        if (rms > 0.005) {
+            const pitch = yin(buffer, audioContext.sampleRate);
+            if (pitch > 0) updateUI(pitch);
+        } else {
+            document.getElementById("status").textContent = "Silêncio";
+        }
+
+        requestAnimationFrame(loop);
+    }
+
+    loop();
+}
+
+/* ================= YIN ================= */
+
+function yin(buffer, sampleRate) {
+    const size = buffer.length;
+    const half = size / 2;
+    const yinBuf = new Float32Array(half);
+
+    for (let tau = 0; tau < half; tau++) {
+        let sum = 0;
+        for (let i = 0; i < half; i++) {
+            const d = buffer[i] - buffer[i + tau];
+            sum += d * d;
+        }
+        yinBuf[tau] = sum;
+    }
+
+    // Cumulative Mean Normalized Difference
+    yinBuf[0] = 1;
+    let runningSum = 0;
+    for (let i = 1; i < half; i++) {
+        runningSum += yinBuf[i];
+        yinBuf[i] *= i / runningSum;
+    }
+
+    const threshold = 0.1;
+    for (let tau = 2; tau < half; tau++) {
+        if (yinBuf[tau] < threshold) {
+            return sampleRate / tau;
+        }
+    }
+
+    return -1;
+}
+
+/* ================= UI ================= */
+
+function updateUI(freq) {
+    document.getElementById("freq").textContent =
+        freq.toFixed(2) + " Hz";
+
+    const midi = 69 + 12 * Math.log2(freq / A4);
+    const noteIndex = Math.round(midi) % 12;
+    const note = notes[noteIndex];
+
+    const cents = Math.floor((midi - Math.round(midi)) * 100);
+
+    document.getElementById("note").textContent = note;
+    document.getElementById("status").textContent =
+        Math.abs(cents) < 5 ? "Afinado ✔" : `${cents} cents`;
+
+    const angle = Math.max(-50, Math.min(50, cents)) * 0.9;
+    document.getElementById("needle").style.transform =
+        `translateX(-50%) rotate(${angle}deg)`;
+}
+</script>
+
 </body>
 </html>
