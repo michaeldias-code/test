@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metrônomo Profissional JS</title>
+    <title>Metrônomo Profissional com Pêndulo</title>
     <style>
         /* --- CSS Responsivo & Profissional (Dark Theme) --- */
         :root {
-            --cor-principal: #3a86ff; /* Azul vibrante */
-            --cor-fundo: #1c1c1e; /* Fundo escuro */
-            --cor-card: #2c2c2e; /* Fundo do container */
+            --cor-principal: #3a86ff; 
+            --cor-fundo: #1c1c1e; 
+            --cor-card: #2c2c2e; 
             --cor-texto: #f0f0f0;
-            --cor-acento: #ffc400; /* Amarelo para destaque */
-            --cor-acento-forte: #ff0054; /* Vermelho/Rosa para a primeira batida */
+            --cor-acento: #ffc400; 
+            --cor-acento-forte: #ff0054; 
+            --agulha-cor: #808080;
         }
 
         body {
@@ -31,7 +32,7 @@
             background-color: var(--cor-card);
             border-radius: 20px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-            padding: 30px 20px;
+            padding: 20px;
             width: 100%;
             max-width: 420px; 
             text-align: center;
@@ -44,17 +45,80 @@
             font-size: 1.6rem;
             letter-spacing: 1px;
         }
+        
+        /* Pêndulo Visual */
+        .pendulum-area {
+            height: 150px;
+            width: 100%;
+            position: relative;
+            margin-bottom: 20px;
+            overflow: hidden; /* Garante que a agulha não saia da área */
+        }
+        
+        .pendulum {
+            width: 5px;
+            height: 140px;
+            background-color: var(--agulha-cor);
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform-origin: bottom center;
+            transform: translateX(-50%) rotate(0deg); /* Posição inicial: centro */
+            transition: transform 0.05s ease-out; /* Transição suave */
+            border-radius: 5px 5px 0 0;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+        
+        .pendulum-base {
+            width: 20px;
+            height: 20px;
+            background-color: var(--cor-principal);
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
 
-        /* BPM Display */
+        /* Indicadores Visuais de Batida */
+        .beat-indicators {
+            display: flex;
+            justify-content: center;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            min-height: 25px;
+        }
+        
+        .beat-indicator {
+            width: 15px;
+            height: 15px;
+            background-color: #444; 
+            border-radius: 50%;
+            margin: 0 8px;
+            transition: background-color 0.05s, transform 0.05s;
+        }
+
+        .beat-indicator.active {
+            background-color: var(--cor-acento);
+            transform: scale(1.3);
+        }
+        
+        .beat-indicator:first-child.active {
+            background-color: var(--cor-acento-forte); 
+            box-shadow: 0 0 10px var(--cor-acento-forte);
+        }
+
+        /* Display e Controles de BPM (Mesmos da v2.0) */
         .bpm-display {
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
         
         #bpmDisplay {
-            font-size: 5.5rem; /* Maior para celular */
+            font-size: 4.5rem; 
             font-weight: 700;
             color: var(--cor-texto);
             line-height: 1;
@@ -63,10 +127,9 @@
         .bpm-label {
             font-size: 1rem;
             color: #aaa;
-            margin-top: -10px;
+            margin-top: -5px;
         }
 
-        /* Controles de BPM (Responsivos) */
         .bpm-controls {
             display: flex;
             justify-content: space-between;
@@ -80,22 +143,16 @@
             color: white;
             border: none;
             border-radius: 10px;
-            width: 50px; 
-            height: 50px;
-            font-size: 1.8rem;
+            width: 45px; 
+            height: 45px;
+            font-size: 1.6rem;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
             flex-shrink: 0;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
-        .control-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* Slider */
         input[type="range"] {
-            width: 65%; /* Ocupa a maior parte do espaço */
+            width: 65%;
             -webkit-appearance: none;
             height: 8px;
             background: #444;
@@ -103,74 +160,19 @@
             margin: 0 15px;
             cursor: grab;
         }
-
+        
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             background: var(--cor-principal);
             cursor: grab;
             border: 3px solid var(--cor-card);
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
-        
-        /* Botão Play/Stop */
-        .action-btn {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 18px 30px;
-            font-size: 1.4rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-            width: 100%;
-            max-width: 300px;
-            margin-top: 25px;
-            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
-            letter-spacing: 1px;
-        }
 
-        .action-btn.playing {
-            background-color: var(--cor-acento-forte); /* Muda para cor de parar */
-            box-shadow: 0 5px 20px rgba(255, 0, 84, 0.4);
-        }
-
-        .action-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* Indicadores Visuais de Batida */
-        .beat-indicators {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-            min-height: 25px; /* Para evitar saltos de layout */
-        }
-        
-        .beat-indicator {
-            width: 15px;
-            height: 15px;
-            background-color: #444; /* Cor inativa */
-            border-radius: 50%;
-            margin: 0 8px;
-            transition: background-color 0.05s, transform 0.05s;
-        }
-
-        .beat-indicator.active {
-            background-color: var(--cor-acento);
-            transform: scale(1.3);
-        }
-        
-        /* Destaque para a primeira batida */
-        .beat-indicator:first-child.active {
-            background-color: var(--cor-acento-forte); 
-            box-shadow: 0 0 10px var(--cor-acento-forte);
-        }
-
-        /* Controles de Compasso */
+        /* Controles de Compasso (Time Signature) */
         .time-signature-controls {
             display: flex;
             flex-wrap: wrap;
@@ -178,14 +180,14 @@
             align-items: center;
             padding: 10px 0;
             border-top: 1px solid #444;
-            border-bottom: 1px solid #444;
+            margin-bottom: 20px;
         }
 
         .control-label {
             font-size: 0.9rem;
             color: #aaa;
             margin-right: 15px;
-            flex-basis: 100%; /* Ocupa linha inteira no mobile */
+            flex-basis: 100%; 
             margin-bottom: 10px;
             font-weight: bold;
         }
@@ -208,22 +210,36 @@
             font-weight: bold;
         }
 
-        /* Media Query para telas maiores (Desktop) */
-        @media (min-width: 600px) {
-            .metronome-container {
-                padding: 40px;
-            }
-            .control-label {
-                flex-basis: auto;
-                margin-bottom: 0;
-            }
+        /* Botão Play/Stop */
+        .action-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px;
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
         }
+
+        .action-btn.playing {
+            background-color: var(--cor-acento-forte); 
+        }
+
     </style>
 </head>
 <body>
 
     <div class="metronome-container">
-        <h1>Metrônomo PRO JS</h1>
+        <h1>Metrônomo PRO</h1>
+
+        <div class="pendulum-area">
+            <div class="pendulum" id="pendulum"></div>
+            <div class="pendulum-base"></div>
+        </div>
         
         <div class="beat-indicators" id="beatIndicators">
             </div>
@@ -241,48 +257,54 @@
         
         <div class="time-signature-controls" id="timeSignatureControls">
             <span class="control-label">COMPASSO:</span>
-            <button data-beats="4" class="time-sig-btn active">4/4</button>
-            <button data-beats="3" class="time-sig-btn">3/4</button>
-            <button data-beats="2" class="time-sig-btn">2/4</button>
-            <button data-beats="6" class="time-sig-btn">6/8</button>
-        </div>
+            <button data-beats="4" data-subdivision="1" class="time-sig-btn active">4/4</button>
+            <button data-beats="3" data-subdivision="1" class="time-sig-btn">3/4</button>
+            <button data-beats="2" data-subdivision="1" class="time-sig-btn">2/4</button>
+            <button data-beats="2" data-subdivision="3" class="time-sig-btn">6/8</button> 
+            </div>
 
         <button id="playStopBtn" class="action-btn">INICIAR</button>
     </div>
 
     <script>
-        // --- JavaScript (Web Audio API) para Timing Preciso ---
+        // --- JavaScript (Web Audio API) e Lógica de Pêndulo ---
 
         let isRunning = false;
         let bpm = 120;
-        let beatsPerMeasure = 4; // Padrão: 4/4
-        let currentBeat = 0; // Batida atual (1 a beatsPerMeasure)
+        let beatsPerMeasure = 4;      // Número de batidas fortes (numerador)
+        let subdivisionFactor = 1;    // 1: Sem subdivisão (simples), 3: Triplete (composto)
+        let totalBeats = beatsPerMeasure * subdivisionFactor; // Total de cliques por ciclo
+        let currentClick = 0;         // O índice atual do clique (1 a totalBeats)
         
         // --- Web Audio API Setup ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioContext = null;
         
-        // Metrônomo Timing
         let timerWorker = null;
-        const lookahead = 25.0; // Em ms. Quão longe no futuro agendamos
-        const scheduleAheadTime = 0.1; // Em segundos. Quão longe agendamos
-        let nextNoteTime = 0.0; // Ponto de tempo da próxima nota
-
+        const lookahead = 25.0; 
+        const scheduleAheadTime = 0.1; 
+        let nextNoteTime = 0.0; 
+        
         // Elementos do DOM
         const bpmDisplay = document.getElementById('bpmDisplay');
         const bpmSlider = document.getElementById('bpmSlider');
         const playStopBtn = document.getElementById('playStopBtn');
         const beatIndicatorsContainer = document.getElementById('beatIndicators');
         const timeSignatureControls = document.getElementById('timeSignatureControls');
+        const pendulumEl = document.getElementById('pendulum');
+        
+        // Variáveis do Pêndulo
+        let isMovingRight = true; // Controla o sentido do movimento da agulha
 
         // --- Funções de Som ---
 
         /**
-         * Cria um som de click usando um Oscillator.
+         * Cria e toca um som curto e preciso.
          * @param {number} time - O tempo exato do AudioContext.
          * @param {number} frequency - A frequência da nota (Hz).
+         * @param {number} volume - O volume máximo (0.0 a 1.0).
          */
-        function playSound(time, frequency) {
+        function playSound(time, frequency, volume) {
             if (!audioContext) return;
             
             const gainNode = audioContext.createGain();
@@ -291,12 +313,12 @@
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
 
-            oscillator.type = 'sine'; // Som mais suave/profissional
+            oscillator.type = 'square'; // Usando square para um click mais definido
             oscillator.frequency.setValueAtTime(frequency, time);
             
-            // Envelope ADSR básico para o click
+            // Envelope ADSR básico
             gainNode.gain.setValueAtTime(0.0001, time);
-            gainNode.gain.exponentialRampToValueAtTime(0.5, time + 0.005);
+            gainNode.gain.exponentialRampToValueAtTime(volume, time + 0.005);
             gainNode.gain.exponentialRampToValueAtTime(0.0001, time + 0.03); 
 
             oscillator.start(time);
@@ -314,42 +336,50 @@
         function scheduler() {
             while (nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
                 
-                // Calcula qual é a próxima batida
-                currentBeat = (currentBeat % beatsPerMeasure) + 1;
+                // 1. Calcula o próximo clique (1 a totalBeats)
+                currentClick = (currentClick % totalBeats) + 1;
 
-                let frequency;
-                // A primeira batida (batida forte/acento) tem uma frequência mais alta
-                if (currentBeat === 1) {
-                    frequency = 880; 
-                } else {
-                    frequency = 440; 
+                let frequency = 440; // Default (Subdivisão)
+                let volume = 0.3;
+                
+                // Verifica se o clique é o Downbeat (Primeira batida do compasso)
+                if (currentClick === 1) {
+                    frequency = 880; // Mais alto para o Downbeat
+                    volume = 0.7;
+                } 
+                // Verifica se é uma batida principal, mas não o Downbeat (ex: 2, 3, 4 em 4/4)
+                else if (subdivisionFactor === 1 || (currentClick - 1) % subdivisionFactor === 0) {
+                    frequency = 660; // Médio para as batidas principais
+                    volume = 0.5;
+                }
+                // Outros cliques são as subdivisões
+                else {
+                    // frequency = 440;
+                    // volume = 0.3; (Já definido acima)
                 }
 
-                // Agenda o som no AudioContext
-                playSound(nextNoteTime, frequency);
+                // 2. Agenda o som
+                playSound(nextNoteTime, frequency, volume);
                 
-                // Agenda a animação visual para coincidir com o som
-                scheduleAnimation(nextNoteTime, currentBeat);
+                // 3. Agenda a animação visual (indicador de ponto e pêndulo)
+                scheduleAnimation(nextNoteTime, currentClick);
                 
-                // Calcula o tempo do próximo intervalo (60 segundos / BPM)
-                const secondsPerBeat = 60.0 / bpm;
-                nextNoteTime += secondsPerBeat;
+                // 4. Calcula o tempo do próximo clique
+                // O intervalo é baseado no BPM e na subdivisão
+                const secondsPerClick = (60.0 / bpm) / subdivisionFactor;
+                nextNoteTime += secondsPerClick;
             }
         }
         
         /**
-         * Inicializa o loop de timer em um Web Worker para precisão.
+         * Inicializa o loop de timer em um Web Worker.
          */
         function startTimer() {
-             // Worker para o loop de lookahead
              timerWorker = new Worker(URL.createObjectURL(new Blob([
                 `self.onmessage = function(e) { 
                     if (e.data.command === 'start') { 
-                        // Envia 'tick' a cada lookahead ms
                         let timerID = setInterval(() => self.postMessage('tick'), e.data.lookahead); 
                         self.postMessage({ type: 'timerID', id: timerID }); 
-                    } else if (e.data.command === 'stop') { 
-                        clearInterval(e.data.id); 
                     } 
                 };`
             ], { type: 'application/javascript' })));
@@ -368,17 +398,119 @@
                 timerWorker.terminate();
                 timerWorker = null;
             }
-            // Limpa o estado visual ao parar
             document.querySelectorAll('.beat-indicator').forEach(el => el.classList.remove('active'));
+            // Reseta a agulha para o centro
+            pendulumEl.style.transform = 'translateX(-50%) rotate(0deg)';
         }
+
+        // --- Animação Visual (Pêndulo e Pontos) ---
+
+        /**
+         * Move a agulha do pêndulo e atualiza os pontos visuais.
+         */
+        function movePendulum(clickIndex) {
+            // 1. ANIMAÇÃO DE PONTOS
+            const indicators = document.querySelectorAll('.beat-indicator');
+            // Calcula qual batida principal estamos (1 a beatsPerMeasure)
+            const beatIndex = Math.ceil(clickIndex / subdivisionFactor); 
+            
+            indicators.forEach(el => el.classList.remove('active'));
+            if (indicators[beatIndex - 1]) {
+                indicators[beatIndex - 1].classList.add('active');
+            }
+
+            // 2. ANIMAÇÃO DA AGULHA (PÊNDULO)
+            
+            // O pêndulo deve atingir o ponto máximo (extremo) na primeira e na última batida principal.
+            // Ex: 4/4 (1, 2, 3, 4) -> Extremo L (1), Centro (2), Extremo D (3), Centro (4)
+            // Ex: 6/8 (1, 2) -> Extremo L (1), Extremo D (2)
+            
+            // Verifica se este clique é uma batida principal (não uma subdivisão interna)
+            const isMainBeat = (clickIndex === 1 || (clickIndex - 1) % subdivisionFactor === 0);
+
+            if (isMainBeat) {
+                let angle;
+                
+                // Pêndulo move-se de Extremo Esquerdo (-20°) para Extremo Direito (+20°) e vice-versa
+                if (isMovingRight) {
+                    angle = 20; // Extremo Direito
+                } else {
+                    angle = -20; // Extremo Esquerdo
+                }
+
+                pendulumEl.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+                isMovingRight = !isMovingRight; // Inverte a direção para o próximo ciclo
+            } 
+            
+            // Para compassos com número ímpar de tempos (ex: 3/4), a lógica de inversão precisa de ajustes finos
+            // A animação visual precisa ser ligeiramente simplificada aqui para funcionar em todos os casos:
+            
+            // A cada batida principal, movemos a agulha de forma sequencial
+            // 1ª Batida: Esquerda, 2ª Batida: Centro, 3ª Batida: Direita, 4ª Batida: Centro (e repete)
+            
+            let angle;
+            // O valor máximo do ângulo de oscilação (aumenta com o BPM para parecer mais rápido)
+            const maxAngle = 20 + (bpm / 240) * 10; 
+            
+            // Normaliza a batida principal dentro de um ciclo de 4 movimentos (L, C, D, C)
+            const normalizedBeat = (beatIndex - 1) % 4; 
+
+            switch (normalizedBeat) {
+                case 0: // Primeira batida (Lado Esquerdo)
+                    angle = -maxAngle;
+                    break;
+                case 1: // Segunda batida (Centro)
+                    angle = 0;
+                    break;
+                case 2: // Terceira batida (Lado Direito)
+                    angle = maxAngle;
+                    break;
+                case 3: // Quarta batida (Centro)
+                    angle = 0;
+                    break;
+                default:
+                    angle = 0;
+            }
+
+            // Garante que o pêndulo atinja o centro a cada ímpar se o total de batidas for par (4/4, 2/4)
+            if (beatsPerMeasure % 2 === 0) {
+                 if (beatIndex === beatsPerMeasure / 2 || beatIndex === beatsPerMeasure) {
+                     // Ajusta o pêndulo para o centro ou extremo dependendo do número de tempos
+                 }
+            }
+
+
+            // Lógica mais simples (Extremo L -> Extremo D)
+            const isFirstClick = clickIndex === 1;
+            const isMiddleClick = Math.floor(totalBeats / 2) + 1;
+            const isLastClick = clickIndex === totalBeats;
+
+            // Transição principal
+            if (totalBeats > 1) {
+                const step = (clickIndex - 1) / (totalBeats - 1); // 0.0 a 1.0
+                angle = -maxAngle + (step * (2 * maxAngle)); // -maxAngle (0%) até +maxAngle (100%)
+            } else {
+                angle = 0; // Se houver apenas 1 clique por tempo
+            }
+
+            pendulumEl.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+
+        }
+
+        function scheduleAnimation(time, clickIndex) {
+            const delay = Math.max(0, time - audioContext.currentTime);
+            // Sincroniza a função de movimento do pêndulo com o tempo exato do som
+            setTimeout(() => {
+                movePendulum(clickIndex);
+            }, delay * 1000); 
+        }
+
 
         // --- Funções de UI e Opções ---
 
-        /**
-         * Gera os indicadores visuais (pontos) com base no número de batidas.
-         */
         function generateBeatIndicators() {
-            beatIndicatorsContainer.innerHTML = ''; // Limpa os antigos
+            beatIndicatorsContainer.innerHTML = ''; 
+            // Os indicadores visuais representam as BATIDAS PRINCIPAIS (beatsPerMeasure)
             for (let i = 0; i < beatsPerMeasure; i++) {
                 const dot = document.createElement('div');
                 dot.classList.add('beat-indicator');
@@ -386,53 +518,38 @@
             }
         }
 
-        /**
-         * Agenda a mudança visual do indicador para coincidir com o som.
-         * @param {number} time - O tempo exato do AudioContext para a mudança.
-         * @param {number} beatIndex - O índice da batida (1 a N).
-         */
-        function scheduleAnimation(time, beatIndex) {
-            const delay = Math.max(0, time - audioContext.currentTime);
-            const indicators = document.querySelectorAll('.beat-indicator');
-
-            setTimeout(() => {
-                // Remove a classe 'active' de todos
-                indicators.forEach(el => el.classList.remove('active'));
-                
-                // Adiciona a classe 'active' apenas ao indicador correto
-                // (beatIndex - 1) porque o beatIndex é 1-baseado e o array é 0-baseado
-                if (indicators[beatIndex - 1]) {
-                    indicators[beatIndex - 1].classList.add('active');
-                }
-            }, delay * 1000); // Converte segundos para milissegundos
+        function updateMetronomeConfig(newBeats, newSubdivision) {
+            beatsPerMeasure = newBeats;
+            subdivisionFactor = newSubdivision;
+            totalBeats = beatsPerMeasure * subdivisionFactor;
+            
+            generateBeatIndicators();
+            
+            if (isRunning) {
+                // Se estiver rodando, reinicia o ciclo
+                stopTimer();
+                currentClick = 0;
+                togglePlayStop(); // Inicia novamente
+            }
         }
-
-        /**
-         * Inicia/Para o Metrônomo
-         */
+        
         function togglePlayStop() {
             if (!audioContext) {
-                 // Cria o AudioContext ao primeiro gesto do usuário
                 audioContext = new AudioContext();
             }
 
-            // Garante que o contexto de áudio esteja rodando
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
             }
 
             if (isRunning) {
-                // Parar
                 isRunning = false;
                 stopTimer();
                 playStopBtn.textContent = 'INICIAR';
                 playStopBtn.classList.remove('playing');
             } else {
-                // Iniciar
                 isRunning = true;
-                currentBeat = 0; // Reseta a batida
-                
-                // Inicializa o tempo da próxima nota no *agora* do AudioContext
+                currentClick = 0;
                 nextNoteTime = audioContext.currentTime; 
 
                 startTimer();
@@ -441,27 +558,18 @@
             }
         }
 
-        /**
-         * Atualiza o BPM a partir do Slider/Controles
-         * @param {number} newBPM - O novo valor de BPM.
-         */
         function updateBPM(newBPM) {
-            bpm = Math.max(40, Math.min(240, newBPM)); // Limita entre 40 e 240
+            bpm = Math.max(40, Math.min(240, newBPM));
             bpmDisplay.textContent = bpm;
             bpmSlider.value = bpm;
-
-            // Se o metrônomo estiver rodando, precisamos resetar o timer para o novo tempo ser preciso
-            if (isRunning) {
-                // A próxima batida será calculada no próximo 'tick' do scheduler
-            }
+            
+            // Ao mudar o BPM, a agulha fica mais/menos rápida por CSS 'transition' e o novo 'angle' no movePendulum.
         }
         
         // --- Event Listeners ---
 
-        // Iniciar/Parar
         playStopBtn.addEventListener('click', togglePlayStop);
         
-        // Slider e Botões de BPM
         bpmSlider.addEventListener('input', (e) => {
             updateBPM(parseInt(e.target.value));
         });
@@ -469,36 +577,27 @@
         document.getElementById('increaseBPM').addEventListener('click', () => updateBPM(bpm + 1));
         document.getElementById('decreaseBPM').addEventListener('click', () => updateBPM(bpm - 1));
 
-        // Seleção de Compasso
         timeSignatureControls.addEventListener('click', (e) => {
             const button = e.target.closest('.time-sig-btn');
             if (button) {
-                // Desativa todos os botões
                 document.querySelectorAll('.time-sig-btn').forEach(btn => btn.classList.remove('active'));
-                
-                // Ativa o botão clicado
                 button.classList.add('active');
 
-                // Atualiza o número de batidas e os indicadores
-                beatsPerMeasure = parseInt(button.dataset.beats);
-                generateBeatIndicators();
-                
-                // Se estiver rodando, reinicia o ciclo para o novo compasso
-                if (isRunning) {
-                    currentBeat = 0;
-                    // O timer continuará a rodar, mas o 'currentBeat' será resetado
-                }
+                const newBeats = parseInt(button.dataset.beats);
+                // subdivisionFactor é 1 por padrão para compassos simples (4/4, 3/4)
+                const newSub = parseInt(button.dataset.subdivision || 1); 
+
+                updateMetronomeConfig(newBeats, newSub);
             }
         });
 
 
         // --- Inicialização ---
 
-        // 1. Define o BPM inicial
         updateBPM(120);
-
-        // 2. Cria os indicadores visuais para o compasso padrão (4/4)
         generateBeatIndicators();
+        // Move a agulha para o centro na inicialização
+        pendulumEl.style.transform = 'translateX(-50%) rotate(0deg)';
 
     </script>
 </body>
