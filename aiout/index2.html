@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metrônomo Profissional</title>
+    <title>Metrônomo Profissional JS</title>
     <style>
-        /* --- CSS Responsivo Mobile-First --- */
+        /* --- CSS Responsivo & Profissional (Dark Theme) --- */
         :root {
-            --cor-principal: #007bff;
-            --cor-fundo: #f4f7f6;
-            --cor-texto: #333;
+            --cor-principal: #3a86ff; /* Azul vibrante */
+            --cor-fundo: #1c1c1e; /* Fundo escuro */
+            --cor-card: #2c2c2e; /* Fundo do container */
+            --cor-texto: #f0f0f0;
+            --cor-acento: #ffc400; /* Amarelo para destaque */
+            --cor-acento-forte: #ff0054; /* Vermelho/Rosa para a primeira batida */
         }
 
         body {
@@ -25,204 +28,280 @@
         }
 
         .metronome-container {
-            background-color: #ffffff;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            padding: 30px;
+            background-color: var(--cor-card);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            padding: 30px 20px;
             width: 100%;
-            max-width: 400px; /* Largura máxima para desktop */
+            max-width: 420px; 
             text-align: center;
+            border: 1px solid #444;
         }
 
         h1 {
             color: var(--cor-principal);
             margin-bottom: 25px;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
+            letter-spacing: 1px;
         }
 
         /* BPM Display */
         .bpm-display {
-            font-size: 4rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            height: 1.2em;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        #bpmDisplay {
+            font-size: 5.5rem; /* Maior para celular */
+            font-weight: 700;
+            color: var(--cor-texto);
+            line-height: 1;
+        }
+        
+        .bpm-label {
+            font-size: 1rem;
+            color: #aaa;
+            margin-top: -10px;
         }
 
         /* Controles de BPM (Responsivos) */
         .bpm-controls {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            padding: 0 5px;
         }
 
-        .bpm-controls button {
+        .control-btn {
             background-color: var(--cor-principal);
             color: white;
             border: none;
-            border-radius: 50%;
-            width: 60px; /* Grande o suficiente para toque */
-            height: 60px;
-            font-size: 2rem;
+            border-radius: 10px;
+            width: 50px; 
+            height: 50px;
+            font-size: 1.8rem;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            flex-shrink: 0; /* Não permite que os botões diminuam */
+            flex-shrink: 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         }
 
-        .bpm-controls button:active {
+        .control-btn:active {
             transform: scale(0.95);
         }
 
-        .bpm-slider-container {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-
+        /* Slider */
         input[type="range"] {
-            width: 100%;
+            width: 65%; /* Ocupa a maior parte do espaço */
             -webkit-appearance: none;
             height: 8px;
-            background: #ddd;
+            background: #444;
             border-radius: 5px;
-            margin: 10px 0;
+            margin: 0 15px;
+            cursor: grab;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: var(--cor-principal);
-            cursor: pointer;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            cursor: grab;
+            border: 3px solid var(--cor-card);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
         
         /* Botão Play/Stop */
-        #playStopBtn {
+        .action-btn {
             background-color: #28a745;
             color: white;
             border: none;
-            border-radius: 10px;
-            padding: 15px 30px;
-            font-size: 1.5rem;
+            border-radius: 12px;
+            padding: 18px 30px;
+            font-size: 1.4rem;
             font-weight: bold;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
             width: 100%;
-            max-width: 250px;
-            margin-top: 20px;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            max-width: 300px;
+            margin-top: 25px;
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+            letter-spacing: 1px;
         }
 
-        #playStopBtn.playing {
-            background-color: #dc3545;
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        .action-btn.playing {
+            background-color: var(--cor-acento-forte); /* Muda para cor de parar */
+            box-shadow: 0 5px 20px rgba(255, 0, 84, 0.4);
         }
 
-        #playStopBtn:active {
+        .action-btn:active {
             transform: scale(0.98);
         }
 
-        /* Indicador Visual da Batida */
+        /* Indicadores Visuais de Batida */
+        .beat-indicators {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            min-height: 25px; /* Para evitar saltos de layout */
+        }
+        
         .beat-indicator {
-            width: 25px;
-            height: 25px;
-            background-color: #e9ecef;
+            width: 15px;
+            height: 15px;
+            background-color: #444; /* Cor inativa */
             border-radius: 50%;
-            margin: 10px auto;
-            transition: background-color 0.1s;
+            margin: 0 8px;
+            transition: background-color 0.05s, transform 0.05s;
         }
 
         .beat-indicator.active {
-            background-color: #ffc107;
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.8);
+            background-color: var(--cor-acento);
+            transform: scale(1.3);
+        }
+        
+        /* Destaque para a primeira batida */
+        .beat-indicator:first-child.active {
+            background-color: var(--cor-acento-forte); 
+            box-shadow: 0 0 10px var(--cor-acento-forte);
         }
 
+        /* Controles de Compasso */
+        .time-signature-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 0;
+            border-top: 1px solid #444;
+            border-bottom: 1px solid #444;
+        }
+
+        .control-label {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-right: 15px;
+            flex-basis: 100%; /* Ocupa linha inteira no mobile */
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .time-sig-btn {
+            background-color: #444;
+            color: var(--cor-texto);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            margin: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .time-sig-btn.active {
+            background-color: var(--cor-principal);
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Media Query para telas maiores (Desktop) */
+        @media (min-width: 600px) {
+            .metronome-container {
+                padding: 40px;
+            }
+            .control-label {
+                flex-basis: auto;
+                margin-bottom: 0;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="metronome-container">
-        <h1>Metrônomo Profissional</h1>
+        <h1>Metrônomo PRO JS</h1>
         
-        <div class="beat-indicator" id="beatIndicator"></div>
+        <div class="beat-indicators" id="beatIndicators">
+            </div>
 
-        <div class="bpm-display" id="bpmDisplay">120</div>
+        <div class="bpm-display">
+            <span id="bpmDisplay">120</span>
+            <span class="bpm-label">BPM</span>
+        </div>
 
         <div class="bpm-controls">
-            <button id="decreaseBPM">-</button>
-            <div class="bpm-slider-container">
-                <input type="range" id="bpmSlider" min="40" max="240" value="120">
-            </div>
-            <button id="increaseBPM">+</button>
+            <button id="decreaseBPM" class="control-btn">-</button>
+            <input type="range" id="bpmSlider" min="40" max="240" value="120">
+            <button id="increaseBPM" class="control-btn">+</button>
         </div>
         
-        <button id="playStopBtn">Iniciar</button>
+        <div class="time-signature-controls" id="timeSignatureControls">
+            <span class="control-label">COMPASSO:</span>
+            <button data-beats="4" class="time-sig-btn active">4/4</button>
+            <button data-beats="3" class="time-sig-btn">3/4</button>
+            <button data-beats="2" class="time-sig-btn">2/4</button>
+            <button data-beats="6" class="time-sig-btn">6/8</button>
+        </div>
+
+        <button id="playStopBtn" class="action-btn">INICIAR</button>
     </div>
 
     <script>
-        // --- JavaScript (Web Audio API) ---
+        // --- JavaScript (Web Audio API) para Timing Preciso ---
 
         let isRunning = false;
         let bpm = 120;
-        let tempo = 4; // Quaternário (4/4)
-        let beatsPerMeasure = tempo; // Exemplo: 4 batidas por compasso
-        let currentBeat = 0;
+        let beatsPerMeasure = 4; // Padrão: 4/4
+        let currentBeat = 0; // Batida atual (1 a beatsPerMeasure)
         
         // --- Web Audio API Setup ---
-        // Cria o AudioContext global. Precisa ser iniciado após um gesto do usuário.
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioContext = null;
         
         // Metrônomo Timing
         let timerWorker = null;
-        let lookahead = 25.0; // Em ms. Quão longe no futuro agendamos (pequeno!)
-        let scheduleAheadTime = 0.1; // Em segundos. Quão longe agendamos (maior!)
+        const lookahead = 25.0; // Em ms. Quão longe no futuro agendamos
+        const scheduleAheadTime = 0.1; // Em segundos. Quão longe agendamos
         let nextNoteTime = 0.0; // Ponto de tempo da próxima nota
-        let noteResolution = 0; // 0 = 1/4 (batida), 1 = 1/8, 2 = 1/16
 
         // Elementos do DOM
         const bpmDisplay = document.getElementById('bpmDisplay');
         const bpmSlider = document.getElementById('bpmSlider');
         const playStopBtn = document.getElementById('playStopBtn');
-        const beatIndicator = document.getElementById('beatIndicator');
+        const beatIndicatorsContainer = document.getElementById('beatIndicators');
+        const timeSignatureControls = document.getElementById('timeSignatureControls');
 
         // --- Funções de Som ---
 
         /**
-         * Cria um som de click usando um Oscillator (onda quadrada).
-         * @param {number} time - O tempo exato do AudioContext para tocar a nota.
+         * Cria um som de click usando um Oscillator.
+         * @param {number} time - O tempo exato do AudioContext.
          * @param {number} frequency - A frequência da nota (Hz).
          */
         function playSound(time, frequency) {
             if (!audioContext) return;
             
-            // 1. Cria o nó de volume (GainNode)
             const gainNode = audioContext.createGain();
-            
-            // 2. Cria o nó oscilador (som)
             const oscillator = audioContext.createOscillator();
+            
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
 
-            // Ajusta a frequência e o volume
-            oscillator.type = 'square'; // Som digital, claro
+            oscillator.type = 'sine'; // Som mais suave/profissional
             oscillator.frequency.setValueAtTime(frequency, time);
             
-            // Controle de volume (Envelope ADSR básico)
-            gainNode.gain.setValueAtTime(0.0001, time); // Volume inicial muito baixo
-            gainNode.gain.exponentialRampToValueAtTime(0.5, time + 0.01); // Ataque rápido para 50%
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, time + 0.05); // Decay rápido para terminar o som
+            // Envelope ADSR básico para o click
+            gainNode.gain.setValueAtTime(0.0001, time);
+            gainNode.gain.exponentialRampToValueAtTime(0.5, time + 0.005);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, time + 0.03); 
 
-            // Inicia e para o som
             oscillator.start(time);
-            oscillator.stop(time + 0.05); // Duração muito curta para um click
+            oscillator.stop(time + 0.03); 
             
-            // Limpeza
             oscillator.onended = () => {
                 oscillator.disconnect();
                 gainNode.disconnect();
@@ -233,51 +312,55 @@
          * Calcula o tempo da próxima nota e agenda o som.
          */
         function scheduler() {
-            // Enquanto o tempo da próxima nota for menor que o tempo atual + tempo de agendamento (scheduleAheadTime)...
             while (nextNoteTime < audioContext.currentTime + scheduleAheadTime) {
                 
-                // Calcula qual é a batida atual (1, 2, 3, ou 4 do compasso 4/4)
+                // Calcula qual é a próxima batida
                 currentBeat = (currentBeat % beatsPerMeasure) + 1;
 
-                let frequency = 440; // Batida normal (A4)
+                let frequency;
+                // A primeira batida (batida forte/acento) tem uma frequência mais alta
                 if (currentBeat === 1) {
-                    frequency = 880; // Batida forte (Oitava acima)
+                    frequency = 880; 
+                } else {
+                    frequency = 440; 
                 }
 
                 // Agenda o som no AudioContext
                 playSound(nextNoteTime, frequency);
                 
-                // Calcula o tempo do próximo intervalo
+                // Agenda a animação visual para coincidir com o som
+                scheduleAnimation(nextNoteTime, currentBeat);
+                
+                // Calcula o tempo do próximo intervalo (60 segundos / BPM)
                 const secondsPerBeat = 60.0 / bpm;
                 nextNoteTime += secondsPerBeat;
             }
         }
         
         /**
-         * Loop principal do timer usando um Web Worker para precisão.
+         * Inicializa o loop de timer em um Web Worker para precisão.
          */
         function startTimer() {
-             // Cria um Web Worker para evitar bloqueio do thread principal
-            timerWorker = new Worker(URL.createObjectURL(new Blob([
-                "self.onmessage = function(e) { " +
-                "  if (e.data === 'start') { " +
-                "    let timerID = setInterval(() => self.postMessage('tick'), " + lookahead + "); " +
-                "    self.postMessage({ type: 'timerID', id: timerID }); " +
-                "  } else if (e.data === 'stop') { " +
-                "    clearInterval(e.data.id); " +
-                "  } " +
-                "};"
+             // Worker para o loop de lookahead
+             timerWorker = new Worker(URL.createObjectURL(new Blob([
+                `self.onmessage = function(e) { 
+                    if (e.data.command === 'start') { 
+                        // Envia 'tick' a cada lookahead ms
+                        let timerID = setInterval(() => self.postMessage('tick'), e.data.lookahead); 
+                        self.postMessage({ type: 'timerID', id: timerID }); 
+                    } else if (e.data.command === 'stop') { 
+                        clearInterval(e.data.id); 
+                    } 
+                };`
             ], { type: 'application/javascript' })));
 
             timerWorker.onmessage = (e) => {
                 if (e.data === 'tick') {
-                    // O worker nos diz que é hora de agendar mais notas
                     scheduler();
                 }
             };
             
-            // Inicia o timer
-            timerWorker.postMessage('start');
+            timerWorker.postMessage({ command: 'start', lookahead: lookahead });
         }
 
         function stopTimer() {
@@ -285,11 +368,44 @@
                 timerWorker.terminate();
                 timerWorker = null;
             }
-            // Garante que o indicador pare de piscar
-            beatIndicator.classList.remove('active');
+            // Limpa o estado visual ao parar
+            document.querySelectorAll('.beat-indicator').forEach(el => el.classList.remove('active'));
         }
 
-        // --- Funções de Controle e UI ---
+        // --- Funções de UI e Opções ---
+
+        /**
+         * Gera os indicadores visuais (pontos) com base no número de batidas.
+         */
+        function generateBeatIndicators() {
+            beatIndicatorsContainer.innerHTML = ''; // Limpa os antigos
+            for (let i = 0; i < beatsPerMeasure; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('beat-indicator');
+                beatIndicatorsContainer.appendChild(dot);
+            }
+        }
+
+        /**
+         * Agenda a mudança visual do indicador para coincidir com o som.
+         * @param {number} time - O tempo exato do AudioContext para a mudança.
+         * @param {number} beatIndex - O índice da batida (1 a N).
+         */
+        function scheduleAnimation(time, beatIndex) {
+            const delay = Math.max(0, time - audioContext.currentTime);
+            const indicators = document.querySelectorAll('.beat-indicator');
+
+            setTimeout(() => {
+                // Remove a classe 'active' de todos
+                indicators.forEach(el => el.classList.remove('active'));
+                
+                // Adiciona a classe 'active' apenas ao indicador correto
+                // (beatIndex - 1) porque o beatIndex é 1-baseado e o array é 0-baseado
+                if (indicators[beatIndex - 1]) {
+                    indicators[beatIndex - 1].classList.add('active');
+                }
+            }, delay * 1000); // Converte segundos para milissegundos
+        }
 
         /**
          * Inicia/Para o Metrônomo
@@ -300,14 +416,17 @@
                 audioContext = new AudioContext();
             }
 
+            // Garante que o contexto de áudio esteja rodando
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+
             if (isRunning) {
                 // Parar
                 isRunning = false;
                 stopTimer();
-                playStopBtn.textContent = 'Iniciar';
+                playStopBtn.textContent = 'INICIAR';
                 playStopBtn.classList.remove('playing');
-                // Parar a animação do indicador
-                clearInterval(animationInterval);
             } else {
                 // Iniciar
                 isRunning = true;
@@ -317,10 +436,8 @@
                 nextNoteTime = audioContext.currentTime; 
 
                 startTimer();
-                playStopBtn.textContent = 'Parar';
+                playStopBtn.textContent = 'PARAR';
                 playStopBtn.classList.add('playing');
-                // Inicia a animação do indicador
-                startBeatAnimation();
             }
         }
 
@@ -332,63 +449,56 @@
             bpm = Math.max(40, Math.min(240, newBPM)); // Limita entre 40 e 240
             bpmDisplay.textContent = bpm;
             bpmSlider.value = bpm;
-        }
 
-        // --- Animação Visual ---
-        let animationInterval;
-        
-        /**
-         * Sincroniza a animação do indicador visual com a batida.
-         */
-        function startBeatAnimation() {
-            const beatIntervalMs = (60 / bpm) * 1000;
-            
-            // Limpa qualquer intervalo anterior
-            clearInterval(animationInterval);
-
-            // Usa setTimeout para a primeira batida e, em seguida, setInterval
-            function triggerBeat() {
-                beatIndicator.classList.add('active');
-                setTimeout(() => {
-                    beatIndicator.classList.remove('active');
-                }, 50); // Duração da animação (curta e responsiva)
+            // Se o metrônomo estiver rodando, precisamos resetar o timer para o novo tempo ser preciso
+            if (isRunning) {
+                // A próxima batida será calculada no próximo 'tick' do scheduler
             }
-
-            // Garante que a primeira batida seja instantânea
-            triggerBeat();
-
-            // Seta o intervalo baseado no BPM atual
-            animationInterval = setInterval(triggerBeat, beatIntervalMs);
         }
-
+        
         // --- Event Listeners ---
 
+        // Iniciar/Parar
         playStopBtn.addEventListener('click', togglePlayStop);
         
+        // Slider e Botões de BPM
         bpmSlider.addEventListener('input', (e) => {
             updateBPM(parseInt(e.target.value));
-            if (isRunning) {
-                // Reinicia a animação se o BPM mudar
-                startBeatAnimation(); 
-            }
         });
         
-        document.getElementById('increaseBPM').addEventListener('click', () => {
-            updateBPM(bpm + 1);
-            if (isRunning) {
-                startBeatAnimation();
-            }
-        });
-        
-        document.getElementById('decreaseBPM').addEventListener('click', () => {
-            updateBPM(bpm - 1);
-            if (isRunning) {
-                startBeatAnimation();
+        document.getElementById('increaseBPM').addEventListener('click', () => updateBPM(bpm + 1));
+        document.getElementById('decreaseBPM').addEventListener('click', () => updateBPM(bpm - 1));
+
+        // Seleção de Compasso
+        timeSignatureControls.addEventListener('click', (e) => {
+            const button = e.target.closest('.time-sig-btn');
+            if (button) {
+                // Desativa todos os botões
+                document.querySelectorAll('.time-sig-btn').forEach(btn => btn.classList.remove('active'));
+                
+                // Ativa o botão clicado
+                button.classList.add('active');
+
+                // Atualiza o número de batidas e os indicadores
+                beatsPerMeasure = parseInt(button.dataset.beats);
+                generateBeatIndicators();
+                
+                // Se estiver rodando, reinicia o ciclo para o novo compasso
+                if (isRunning) {
+                    currentBeat = 0;
+                    // O timer continuará a rodar, mas o 'currentBeat' será resetado
+                }
             }
         });
 
-        // Inicializa o BPM
+
+        // --- Inicialização ---
+
+        // 1. Define o BPM inicial
         updateBPM(120);
+
+        // 2. Cria os indicadores visuais para o compasso padrão (4/4)
+        generateBeatIndicators();
 
     </script>
 </body>
