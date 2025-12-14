@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogos Clássicos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .menu-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .menu-btn:nth-child(1) { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .menu-btn:nth-child(2) { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .menu-btn:nth-child(3) { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .menu-btn:nth-child(4) { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+        .menu-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .game-container {
+            display: none;
+        }
+
+        .game-container.active {
+            display: block;
+        }
+
+        .back-btn {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .back-btn:hover {
+            background: #5568d3;
+        }
+
+        /* Palavras Cruzadas */
+        .crossword-grid {
+            display: grid;
+            gap: 2px;
+            margin: 20px auto;
+            width: fit-content;
+        }
+
+        .crossword-cell {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #ddd;
+            text-align: center;
+            font-size: 1.2em;
+            text-transform: uppercase;
+        }
+
+        .crossword-cell.black {
+            background: #333;
+            border: none;
+        }
+
+        .crossword-cell:not(.black) {
+            background: white;
+        }
+
+        .crossword-clues {
+            margin-top: 20px;
+        }
+
+        .crossword-clues h3 {
+            color: #667eea;
+            margin: 15px 0 10px 0;
+        }
+
+        .crossword-clues li {
+            margin: 5px 0;
+        }
+
+        /* Caça-Palavras */
+        .wordsearch-grid {
+            display: grid;
+            gap: 2px;
+            margin: 20px auto;
+            width: fit-content;
+        }
+
+        .wordsearch-cell {
+            width: 35px;
+            height: 35px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            background: white;
+        }
+
+        .wordsearch-cell.selected {
+            background: #4facfe;
+            color: white;
+        }
+
+        .wordsearch-cell.found {
+            background: #43e97b;
+            color: white;
+        }
+
+        .word-list {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .word-item {
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .word-item.found {
+            background: #43e97b;
+            color: white;
+            text-decoration: line-through;
+        }
+
+        /* Quebra-Cabeça */
+        .puzzle-container {
+            display: grid;
+            gap: 2px;
+            margin: 20px auto;
+            width: fit-content;
+            background: #333;
+            padding: 2px;
+        }
+
+        .puzzle-piece {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .puzzle-piece:hover {
+            transform: scale(1.05);
+        }
+
+        .puzzle-piece.empty {
+            background: #f0f0f0;
+            cursor: default;
+        }
+
+        .puzzle-controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .shuffle-btn {
+            padding: 10px 30px;
+            background: #43e97b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .shuffle-btn:hover {
+            background: #38d66b;
+        }
+
+        /* Tetris */
+        .tetris-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .tetris-board {
+            display: grid;
+            gap: 1px;
+            background: #333;
+            padding: 2px;
+        }
+
+        .tetris-cell {
+            width: 25px;
+            height: 25px;
+            background: #f0f0f0;
+        }
+
+        .tetris-cell.filled {
+            background: #667eea;
+        }
+
+        .tetris-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tetris-score, .tetris-next {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .tetris-score h3, .tetris-next h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .tetris-controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .tetris-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 0 5px;
+        }
+
+        .tetris-btn:hover {
+            background: #5568d3;
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #43e97b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Jogos Clássicos</h1>
+        
+        <div id="mainMenu" class="menu">
+            <button class="menu-btn" onclick="showGame('crossword')">📝 Palavras Cruzadas</button>
+            <button class="menu-btn" onclick="showGame('wordsearch')">🔍 Caça-Palavras</button>
+            <button class="menu-btn" onclick="showGame('puzzle')">🧩 Quebra-Cabeça</button>
+            <button class="menu-btn" onclick="showGame('tetris')">🟦 Tetris</button>
+        </div>
+
+        <!-- Palavras Cruzadas -->
+        <div id="crossword" class="game-container">
+            <button class="back-btn" onclick="showMenu()">← Voltar</button>
+            <h2 style="text-align: center; color: #667eea;">Palavras Cruzadas</h2>
+            <div class="crossword-grid" id="crosswordGrid"></div>
+            <div class="crossword-clues">
+                <h3>Horizontal:</h3>
+                <ul>
+                    <li>1. Felino doméstico (4 letras)</li>
+                    <li>4. Fruta vermelha (5 letras)</li>
+                </ul>
+                <h3>Vertical:</h3>
+                <ul>
+                    <li>1. Bebida quente (4 letras)</li>
+                    <li>2. Animal que late (3 letras)</li>
+                </ul>
+            </div>
+            <div class="message" id="crosswordMessage"></div>
+        </div>
+
+        <!-- Caça-Palavras -->
+        <div id="wordsearch" class="game-container">
+            <button class="back-btn" onclick="showMenu()">← Voltar</button>
+            <h2 style="text-align: center; color: #667eea;">Caça-Palavras</h2>
+            <div class="wordsearch-grid" id="wordsearchGrid"></div>
+            <div class="word-list" id="wordList"></div>
+            <div class="message" id="wordsearchMessage"></div>
+        </div>
+
+        <!-- Quebra-Cabeça -->
+        <div id="puzzle" class="game-container">
+            <button class="back-btn" onclick="showMenu()">← Voltar</button>
+            <h2 style="text-align: center; color: #667eea;">Quebra-Cabeça (Jogo dos 8)</h2>
+            <div class="puzzle-container" id="puzzleGrid"></div>
+            <div class="puzzle-controls">
+                <button class="shuffle-btn" onclick="shufflePuzzle()">🔀 Embaralhar</button>
+            </div>
+            <div class="message" id="puzzleMessage"></div>
+        </div>
+
+        <!-- Tetris -->
+        <div id="tetris" class="game-container">
+            <button class="back-btn" onclick="showMenu()">← Voltar</button>
+            <h2 style="text-align: center; color: #667eea;">Tetris</h2>
+            <div class="tetris-container">
+                <div class="tetris-board" id="tetrisBoard"></div>
+                <div class="tetris-info">
+                    <div class="tetris-score">
+                        <h3>Pontuação</h3>
+                        <div id="score">0</div>
+                    </div>
+                    <div class="tetris-next">
+                        <h3>Nível</h3>
+                        <div id="level">1</div>
+                    </div>
+                </div>
+            </div>
+            <div class="tetris-controls">
+                <button class="tetris-btn" onclick="startTetris()">▶️ Iniciar</button>
+                <button class="tetris-btn" onclick="pauseTetris()">⏸️ Pausar</button>
+                <button class="tetris-btn" onclick="resetTetris()">🔄 Reiniciar</button>
+            </div>
+            <p style="text-align: center; margin-top: 15px; color: #666;">
+                Use as setas ← → para mover, ↑ para girar, ↓ para descer rápido
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Navegação
+        function showGame(game) {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.querySelectorAll('.game-container').forEach(g => g.classList.remove('active'));
+            document.getElementById(game).classList.add('active');
+            
+            if (game === 'crossword') initCrossword();
+            if (game === 'wordsearch') initWordsearch();
+            if (game === 'puzzle') initPuzzle();
+            if (game === 'tetris') initTetris();
+        }
+
+        function showMenu() {
+            document.getElementById('mainMenu').style.display = 'grid';
+            document.querySelectorAll('.game-container').forEach(g => g.classList.remove('active'));
+            if (tetrisInterval) clearInterval(tetrisInterval);
+        }
+
+        // PALAVRAS CRUZADAS
+        function initCrossword() {
+            const grid = [
+                ['C', 'A', 'F', 'E'],
+                ['A', '', 'R', ''],
+                ['C', 'A', 'O', ''],
+                ['O', '', '', '']
+            ];
+            
+            const container = document.getElementById('crosswordGrid');
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(4, 40px)`;
+            
+            grid.forEach((row, i) => {
+                row.forEach((cell, j) => {
+                    const input = document.createElement('input');
+                    input.className = 'crossword-cell';
+                    if (cell === '') {
+                        input.className += ' black';
+                        input.disabled = true;
+                    } else {
+                        input.maxLength = 1;
+                        input.dataset.answer = cell;
+                        input.addEventListener('input', checkCrossword);
+                    }
+                    container.appendChild(input);
+                });
+            });
+        }
+
+        function checkCrossword() {
+            const inputs = document.querySelectorAll('.crossword-cell:not(.black)');
+            let allCorrect = true;
+            inputs.forEach(input => {
+                if (input.value.toUpperCase() !== input.dataset.answer) {
+                    allCorrect = false;
+                }
+            });
+            
+            if (allCorrect && inputs.length > 0) {
+                const filled = Array.from(inputs).every(i => i.value);
+                if (filled) {
+                    document.getElementById('crosswordMessage').textContent = '🎉 Parabéns! Você completou!';
+                }
+            }
+        }
+
+        // CAÇA-PALAVRAS
+        let wordsearchSelection = [];
+        let wordsearchFound = [];
+        
+        function initWordsearch() {
+            const words = ['GATO', 'CASA', 'BOLA', 'SOL'];
+            const size = 8;
+            const grid = Array(size).fill().map(() => Array(size).fill(''));
+            
+            // Coloca as palavras
+            words.forEach(word => {
+                let placed = false;
+                while (!placed) {
+                    const dir = Math.random() > 0.5 ? 'H' : 'V';
+                    const row = Math.floor(Math.random() * size);
+                    const col = Math.floor(Math.random() * size);
+                    
+                    if (dir === 'H' && col + word.length <= size) {
+                        let canPlace = true;
+                        for (let i = 0; i < word.length; i++) {
+                            if (grid[row][col + i] !== '' && grid[row][col + i] !== word[i]) {
+                                canPlace = false;
+                                break;
+                            }
+                        }
+                        if (canPlace) {
+                            for (let i = 0; i < word.length; i++) {
+                                grid[row][col + i] = word[i];
+                            }
+                            placed = true;
+                        }
+                    } else if (dir === 'V' && row + word.length <= size) {
+                        let canPlace = true;
+                        for (let i = 0; i < word.length; i++) {
+                            if (grid[row + i][col] !== '' && grid[row + i][col] !== word[i]) {
+                                canPlace = false;
+                                break;
+                            }
+                        }
+                        if (canPlace) {
+                            for (let i = 0; i < word.length; i++) {
+                                grid[row + i][col] = word[i];
+                            }
+                            placed = true;
+                        }
+                    }
+                }
+            });
+            
+            // Preenche espaços vazios
+            for (let i = 0; i < size; i++) {
+                for (let j = 0; j < size; j++) {
+                    if (grid[i][j] === '') {
+                        grid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+                    }
+                }
+            }
+            
+            const container = document.getElementById('wordsearchGrid');
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${size}, 35px)`;
+            
+            grid.forEach((row, i) => {
+                row.forEach((cell, j) => {
+                    const div = document.createElement('div');
+                    div.className = 'wordsearch-cell';
+                    div.textContent = cell;
+                    div.dataset.row = i;
+                    div.dataset.col = j;
+                    div.addEventListener('click', () => selectWordsearchCell(i, j));
+                    container.appendChild(div);
+                });
+            });
+            
+            const wordList = document.getElementById('wordList');
+            wordList.innerHTML = words.map(w => `<div class="word-item">${w}</div>`).join('');
+            wordsearchFound = [];
+        }
+
+        function selectWordsearchCell(row, col) {
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            if (cell.classList.contains('found')) return;
+            
+            wordsearchSelection.push({row, col, letter: cell.textContent});
+            cell.classList.add('selected');
+            
+            if (wordsearchSelection.length >= 3) {
+                checkWordsearchWord();
+            }
+        }
+
+        function checkWordsearchWord() {
+            const word = wordsearchSelection.map(s => s.letter).join('');
+            const words = ['GATO', 'CASA', 'BOLA', 'SOL'];
+            
+            if (words.includes(word) && !wordsearchFound.includes(word)) {
+                wordsearchFound.push(word);
+                wordsearchSelection.forEach(s => {
+                    const cell = document.querySelector(`[data-row="${s.row}"][data-col="${s.col}"]`);
+                    cell.classList.remove('selected');
+                    cell.classList.add('found');
+                });
+                
+                const wordItems = document.querySelectorAll('.word-item');
+                wordItems.forEach(item => {
+                    if (item.textContent === word) {
+                        item.classList.add('found');
+                    }
+                });
+                
+                if (wordsearchFound.length === words.length) {
+                    document.getElementById('wordsearchMessage').textContent = '🎉 Você encontrou todas as palavras!';
+                }
+            } else {
+                wordsearchSelection.forEach(s => {
+                    const cell = document.querySelector(`[data-row="${s.row}"][data-col="${s.col}"]`);
+                    cell.classList.remove('selected');
+                });
+            }
+            
+            wordsearchSelection = [];
+        }
+
+        // QUEBRA-CABEÇA (Jogo dos 8)
+        let puzzleState = [];
+        
+        function initPuzzle() {
+            puzzleState = [1, 2, 3, 4, 5, 6, 7, 8, 0];
+            shufflePuzzle();
+            renderPuzzle();
+        }
+
+        function shufflePuzzle() {
+            for (let i = 0; i < 100; i++) {
+                const emptyIndex = puzzleState.indexOf(0);
+                const moves = getValidMoves(emptyIndex);
+                const randomMove = moves[Math.floor(Math.random() * moves.length)];
+                [puzzleState[emptyIndex], puzzleState[randomMove]] = [puzzleState[randomMove], puzzleState[emptyIndex]];
+            }
+            renderPuzzle();
+            document.getElementById('puzzleMessage').textContent = '';
+        }
+
+        function getValidMoves(emptyIndex) {
+            const moves = [];
+            const row = Math.floor(emptyIndex / 3);
+            const col = emptyIndex % 3;
+            
+            if (row > 0) moves.push(emptyIndex - 3);
+            if (row < 2) moves.push(emptyIndex + 3);
+            if (col > 0) moves.push(emptyIndex - 1);
+            if (col < 2) moves.push(emptyIndex + 1);
+            
+            return moves;
+        }
+
+        function renderPuzzle() {
+            const container = document.getElementById('puzzleGrid');
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = 'repeat(3, 80px)';
+            
+            puzzleState.forEach((num, index) => {
+                const div = document.createElement('div');
+                div.className = 'puzzle-piece';
+                if (num === 0) {
+                    div.className += ' empty';
+                } else {
+                    div.textContent = num;
+                    div.onclick = () => movePuzzlePiece(index);
+                }
+                container.appendChild(div);
+            });
+        }
+
+        function movePuzzlePiece(index) {
+            const emptyIndex = puzzleState.indexOf(0);
+            const validMoves = getValidMoves(emptyIndex);
+            
+            if (validMoves.includes(index)) {
+                [puzzleState[emptyIndex], puzzleState[index]] = [puzzleState[index], puzzleState[emptyIndex]];
+                renderPuzzle();
+                checkPuzzleWin();
+            }
+        }
+
+        function checkPuzzleWin() {
+            const solved = puzzleState.every((num, i) => num === i + 1 || (i === 8 && num === 0));
+            if (solved) {
+                document.getElementById('puzzleMessage').textContent = '🎉 Parabéns! Você resolveu o quebra-cabeça!';
+            }
+        }
+
+        // TETRIS
+        const ROWS = 20;
+        const COLS = 10;
+        let tetrisBoard = [];
+        let currentPiece = null;
+        let tetrisInterval = null;
+        let tetrisScore = 0;
+        let tetrisLevel = 1;
+        let tetrisPaused = false;
+
+        const PIECES = [
+            [[1,1,1,1]], // I
+            [[1,1],[1,1]], // O
+            [[0,1,0],[1,1,1]], // T
+            [[1,0,0],[1,1,1]], // L
+            [[0,0,1],[1,1,1]], // J
+            [[0,1,1],[1,1,0]], // S
+            [[1,1,0],[0,1,1]]  // Z
+        ];
+
+        function initTetris() {
+            tetrisBoard = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+            tetrisScore = 0;
+            tetrisLevel = 1;
+            document.getElementById('score').textContent = tetrisScore;
+            document.getElementById('level').textContent = tetrisLevel;
+            renderTetrisBoard();
+        }
+
+        function renderTetrisBoard() {
+            const container = document.getElementById('tetrisBoard');
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${COLS}, 25px)`;
+            
+            for (let i = 0; i < ROWS; i++) {
+                for (let j = 0; j < COLS; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'tetris-cell';
+                    if (tetrisBoard[i][j]) cell.classList.add('filled');
+                    container.appendChild(cell);
+                }
+            }
+            
+            if (currentPiece) {
+                currentPiece.shape.forEach((row, i) => {
+                    row.forEach((val, j) => {
+                        if (val && currentPiece.y + i >= 0) {
+                            const index = (currentPiece.y + i) * COLS + (currentPiece.x + j);
+                            const cells = container.children;
+                            if (cells[index]) cells[index].classList.add('filled');
+                        }
+                    });
+                });
+            }
+        }
+
+        function startTetris() {
+            if (tetrisInterval) return;
+            tetrisPaused = false;
+            spawnPiece();
+            tetrisInterval = setInterval(gameLoop, 500);
+        }
+
+        function pauseTetris() {
+            tetrisPaused = !tetrisPaused;
+        }
+
+        function resetTetris() {
+            if (tetrisInterval) clearInterval(tetrisInterval);
+            tetrisInterval = null;
+            initTetris();
+        }
+
+        function spawnPiece() {
+            const shape = PIECES[Math.floor(Math.random() * PIECES.length)];
+            currentPiece = {
+                shape: shape,
+                x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2),
+                y: 0
+            };
+        }
+
+        function gameLoop() {
+            if (tetrisPaused) return;
+            
+            if (!movePiece(0, 1)) {
+                mergePiece();
+                clearLines();
+                spawnPiece();
+                
+                if (checkGameOver()) {
+                    clearInterval(tetrisInterval);
+                    tetrisInterval = null;
+                    alert('Game Over! Pontuação: ' + tetrisScore);
+                }
+            }
+            renderTetrisBoard();
+        }
+
+        function movePiece(dx, dy) {
+            currentPiece.x += dx;
+            currentPiece.y += dy;
+            
+            if (checkCollision()) {
+                currentPiece.x -= dx;
+                currentPiece.y -= dy;
+                return false;
+            }
+            return true;
+        }
+
+        function checkCollision() {
+            for (let i = 0; i < currentPiece.shape.length; i++) {
+                for (let j = 0; j < currentPiece.shape[i].length; j++) {
+                    if (currentPiece.shape[i][j]) {
+                        const newX = currentPiece.x + j;
+                        const newY = currentPiece.y + i;
+                        
+                        if (newX < 0 || newX >= COLS || newY >= ROWS) return true;
+                        if (newY >= 0 && tetrisBoard[newY][newX]) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function mergePiece() {
+            currentPiece.shape.forEach((row, i) => {
+                row.forEach((val, j) => {
+                    if (val && currentPiece.y + i >= 0) {
+                        tetrisBoard[currentPiece.y + i][currentPiece.x + j] = 1;
+                    }
+                });
+            });
+        }
+
+        function clearLines() {
+            let linesCleared = 0;
+            for (let i = ROWS - 1; i >= 0; i--) {
+                if (tetrisBoard[i].every(cell => cell === 1)) {
+                    tetrisBoard.splice(i, 1);
+                    tetrisBoard.unshift(Array(COLS).fill(0));
+                    linesCleared++;
+                    i++;
+                }
+            }
+            
+            if (linesCleared > 0) {
+                tetrisScore += linesCleared * 100 * tetrisLevel;
+                document.getElementById('score').textContent = tetrisScore;
+                
+                tetrisLevel = Math.floor(tetrisScore / 500) + 1;
+                document.getElementById('level').textContent = tetrisLevel;
+            }
+        }
+
+        function checkGameOver() {
+            return currentPiece.shape.some((row, i) => 
+                row.some((val, j) => 
+                    val && currentPiece.y + i < 0
+                )
+            );
+        }
+
+        function rotatePiece() {
+            const rotated = currentPiece.shape[0].map((_, i) =>
+                currentPiece.shape.map(row => row[i]).reverse()
+            );
+            
+            const backup = currentPiece.shape;
+            currentPiece.shape = rotated;
+            
+            if (checkCollision()) {
+                currentPiece.shape = backup;
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!currentPiece || tetrisPaused) return;
+            
+            if (e.key === 'ArrowLeft') {
+                movePiece(-1, 0);
+                renderTetrisBoard();
+            } else if (e.key === 'ArrowRight') {
+                movePiece(1, 0);
+                renderTetrisBoard();
+            } else if (e.key === 'ArrowDown') {
+                movePiece(0, 1);
+                renderTetrisBoard();
+            } else if (e.key === 'ArrowUp') {
+                rotatePiece();
+                renderTetrisBoard();
+            }
+        });
+    </script>
+</body>
+</html>
