@@ -120,21 +120,21 @@ body {
 
 <script>
 /* =====================
-   DADOS
+   DADOS (SEM ID MANUAL)
 ===================== */
 
 const DATA = {
   size: 10,
   words: [
-    { id: 1, dir: 'H', start: [0,0], word: 'CODIGO', clue: 'Instruções do computador' },
-    { id: 2, dir: 'V', start: [0,2], word: 'IDEIA', clue: 'Origem de um projeto' },
-    { id: 3, dir: 'V', start: [0,5], word: 'DRIVE', clue: 'Armazenamento' },
-    { id: 4, dir: 'H', start: [2,2], word: 'DADOS', clue: 'Informação' },
-    { id: 5, dir: 'V', start: [2,4], word: 'SOFTWARE', clue: 'Parte lógica' },
-    { id: 6, dir: 'H', start: [4,1], word: 'CACHE', clue: 'Memória rápida' },
-    { id: 7, dir: 'V', start: [4,7], word: 'HOST', clue: 'Servidor' },
-    { id: 8, dir: 'H', start: [6,4], word: 'LOOP', clue: 'Repetição' },
-    { id: 9, dir: 'H', start: [8,0], word: 'NUVEM', clue: 'Cloud' }
+    { dir: 'H', start: [0,0], word: 'CODIGO', clue: 'Instruções do computador' },
+    { dir: 'V', start: [0,2], word: 'IDEIA', clue: 'Origem de um projeto' },
+    { dir: 'V', start: [0,5], word: 'DRIVE', clue: 'Armazenamento' },
+    { dir: 'H', start: [2,2], word: 'DADOS', clue: 'Informação' },
+    { dir: 'V', start: [2,4], word: 'SOFTWARE', clue: 'Parte lógica' },
+    { dir: 'H', start: [4,1], word: 'CACHE', clue: 'Memória rápida' },
+    { dir: 'V', start: [4,7], word: 'HOST', clue: 'Servidor' },
+    { dir: 'H', start: [6,4], word: 'LOOP', clue: 'Repetição' },
+    { dir: 'H', start: [8,0], word: 'NUVEM', clue: 'Cloud' }
   ]
 };
 
@@ -145,24 +145,26 @@ const DATA = {
 const State = {
   grid: [],
   words: [],
-  activeWord: null,
-  activeCell: null
+  activeWord: null
 };
 
 /* =====================
    INIT
 ===================== */
 
+init();
+
+/* =====================
+   FUNÇÕES
+===================== */
+
 function init() {
   createGrid();
-  registerWords();
+  placeWords();
+  generateNumbers();   // 👈 NUMERAÇÃO REAL
   renderGrid();
   renderClues();
 }
-
-/* =====================
-   GRID & WORDS
-===================== */
 
 function createGrid() {
   State.grid = Array.from({ length: DATA.size }, (_, r) =>
@@ -170,33 +172,64 @@ function createGrid() {
       r, c,
       letter: '',
       correct: null,
-      words: [],
       number: null,
+      startH: false,
+      startV: false,
       el: null,
       input: null
     }))
   );
 }
 
-function registerWords() {
-  State.words = DATA.words.map(w => {
+function placeWords() {
+  DATA.words.forEach(w => {
     let [r, c] = w.start;
     const [dr, dc] = w.dir === 'H' ? [0,1] : [1,0];
-    const cells = [];
+    w.cells = [];
 
     for (let i = 0; i < w.word.length; i++) {
       const cell = State.grid[r][c];
       cell.correct = w.word[i];
-      cell.words.push(w.id);
-
-      if (i === 0) cell.number = w.id;
-
-      cells.push(cell);
+      w.cells.push(cell);
       r += dr;
       c += dc;
     }
+  });
+}
 
-    return { ...w, cells };
+/* =====================
+   NUMERAÇÃO CORRETA
+===================== */
+
+function generateNumbers() {
+  let count = 1;
+
+  for (let r = 0; r < DATA.size; r++) {
+    for (let c = 0; c < DATA.size; c++) {
+      const cell = State.grid[r][c];
+      if (!cell.correct) continue;
+
+      const startsH =
+        (!State.grid[r][c - 1] || !State.grid[r][c - 1]?.correct) &&
+        State.grid[r][c + 1]?.correct;
+
+      const startsV =
+        (!State.grid[r - 1]?.[c] || !State.grid[r - 1]?.[c]?.correct) &&
+        State.grid[r + 1]?.[c]?.correct;
+
+      if (startsH || startsV) {
+        cell.number = count++;
+
+        if (startsH) cell.startH = true;
+        if (startsV) cell.startV = true;
+      }
+    }
+  }
+
+  // Atribui o número da célula inicial a cada palavra
+  DATA.words.forEach(w => {
+    const [r, c] = w.start;
+    w.number = State.grid[r][c].number;
   });
 }
 
@@ -224,9 +257,10 @@ function renderGrid() {
 
       const input = document.createElement('input');
       input.maxLength = 1;
-      input.onfocus = () => focusCell(cell);
-      input.oninput = () => handleInput(cell);
-      input.onkeydown = e => handleKeys(e, cell);
+
+      input.onfocus = () => activateByCell(cell);
+      input.oninput = () => onInput(cell);
+      input.onkeydown = e => onKey(e, cell);
 
       cell.input = input;
       div.appendChild(input);
@@ -241,9 +275,9 @@ function renderClues() {
   const h = document.getElementById('clues-h');
   const v = document.getElementById('clues-v');
 
-  State.words.forEach(w => {
+  DATA.words.forEach(w => {
     const li = document.createElement('li');
-    li.textContent = `${w.id}. ${w.clue}`;
+    li.textContent = `${w.number}. ${w.clue}`;
     li.onclick = () => activateWord(w);
 
     (w.dir === 'H' ? h : v).appendChild(li);
@@ -252,38 +286,40 @@ function renderClues() {
 }
 
 /* =====================
-   CONTROLE
+   INTERAÇÃO
 ===================== */
 
-function focusCell(cell) {
-  const word = State.words.find(w => w.cells.includes(cell));
+function activateByCell(cell) {
+  const word = DATA.words.find(w => w.cells.includes(cell));
   activateWord(word);
-  State.activeCell = cell;
 }
 
 function activateWord(word) {
   if (!word) return;
-  clearHighlights();
+
+  clearHighlight();
   State.activeWord = word;
 
   word.cells.forEach(c => c.el.classList.add('highlight'));
   word.clueEl.classList.add('active');
 }
 
-function handleInput(cell) {
+function onInput(cell) {
   cell.letter = cell.input.value.toUpperCase();
   cell.input.value = cell.letter;
 
-  const idx = State.activeWord.cells.indexOf(cell);
-  if (idx >= 0 && State.activeWord.cells[idx + 1]) {
-    State.activeWord.cells[idx + 1].input.focus();
+  const i = State.activeWord.cells.indexOf(cell);
+  if (State.activeWord.cells[i + 1]) {
+    State.activeWord.cells[i + 1].input.focus();
   }
 }
 
-function handleKeys(e, cell) {
+function onKey(e, cell) {
   if (e.key === 'Backspace' && !cell.letter) {
-    const idx = State.activeWord.cells.indexOf(cell);
-    if (idx > 0) State.activeWord.cells[idx - 1].input.focus();
+    const i = State.activeWord.cells.indexOf(cell);
+    if (State.activeWord.cells[i - 1]) {
+      State.activeWord.cells[i - 1].input.focus();
+    }
   }
 }
 
@@ -292,7 +328,7 @@ function handleKeys(e, cell) {
 ===================== */
 
 function checkAll() {
-  State.words.forEach(w => {
+  DATA.words.forEach(w => {
     const ok = w.cells.every(c => c.letter === c.correct);
     w.cells.forEach(c => {
       c.el.classList.remove('correct','error');
@@ -301,20 +337,14 @@ function checkAll() {
   });
 }
 
-function clearHighlights() {
+function clearHighlight() {
   document.querySelectorAll('.cell').forEach(c =>
-    c.classList.remove('highlight','active')
+    c.classList.remove('highlight')
   );
   document.querySelectorAll('.clues li').forEach(l =>
     l.classList.remove('active')
   );
 }
-
-/* =====================
-   START
-===================== */
-
-init();
 </script>
 </body>
 </html>
