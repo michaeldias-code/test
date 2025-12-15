@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caça-Palavras Completo</title>
+    <style>
+        /* --- CSS Responsivo e Estilizado --- */
+        :root {
+            --grid-size: 20px; /* Tamanho base da célula */
+            --cor-principal: #2980b9; /* Azul */
+            --cor-fundo: #ecf0f1; /* Fundo claro */
+            --cor-letra: #34495e; /* Azul escuro para letras */
+            --cor-selecao: #f1c40f; /* Amarelo para seleção */
+            --cor-encontrada: #2ecc71; /* Verde para sucesso */
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--cor-fundo);
+            color: var(--cor-letra);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 900px;
+            width: 100%;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Layout em duas colunas para telas maiores */
+        .content-wrapper {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            flex-wrap: wrap; /* Envolve em telas pequenas */
+            justify-content: center;
+        }
+
+        /* --- Grid de Letras --- */
+        #wordSearchGrid {
+            display: grid;
+            border: 1px solid #bdc3c7;
+            touch-action: none; /* Essencial para toque em celular */
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .cell {
+            width: var(--grid-size);
+            height: var(--grid-size);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: calc(var(--grid-size) * 0.5); /* Fonte adaptativa */
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        /* Efeito de Seleção (Drag/Touch) */
+        .cell.selected {
+            background-color: var(--cor-selecao);
+            color: white;
+        }
+
+        /* Efeito de Encontrada */
+        .cell.found {
+            background-color: var(--cor-encontrada);
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        /* --- Lista de Palavras --- */
+        #wordList {
+            list-style: none;
+            padding: 0;
+            flex-basis: 250px;
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        #wordList li {
+            font-size: 1.1rem;
+            margin: 5px 0;
+            padding: 2px 0;
+            transition: color 0.3s;
+        }
+
+        #wordList li.found {
+            color: var(--cor-encontrada);
+            text-decoration: line-through;
+            font-weight: bold;
+        }
+
+        /* --- Responsividade --- */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            #wordSearchGrid {
+                /* Ajusta o tamanho da célula para caber na tela */
+                --grid-size: calc((100vw - 40px) / 20); 
+                min-width: 100%;
+            }
+            .game-container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>Caça-Palavras Profissional</h1>
+        <div class="content-wrapper">
+            <div id="wordSearchGrid"></div>
+            
+            <div>
+                <h2>Palavras a Encontrar:</h2>
+                <ul id="wordList"></ul>
+            </div>
+        </div>
+        <p id="message" style="margin-top: 20px; color: var(--cor-encontrada); font-weight: bold; display: none;">Parabéns! Você encontrou todas as palavras!</p>
+    </div>
+
+    <script>
+        // --- Configuração do Jogo ---
+        const GRID_SIZE = 20; // 20x20
+        const GRID_ID = 'wordSearchGrid';
+        const LIST_ID = 'wordList';
+
+        // Lista de palavras (em MAIÚSCULAS para simplificar)
+        const WORDS_TO_FIND = [
+            "ALGORITMO", "JAVASCRIPT", "PROGRAMACAO", "TECNOLOGIA",
+            "FRONTEND", "BACKEND", "SERVIDOR", "NAVEGADOR", 
+            "RESPONSIVIDADE", "COMPUTADOR", "SISTEMA", "SOFTWARE",
+            "HARDWARE", "DESENVOLVIMENTO", "API", "COMPILADOR",
+            "FLUXOGRAMA", "DADOS", "CLOUD", "DEBUG"
+        ];
+
+        // Direções de busca (Row Delta, Col Delta)
+        const DIRECTIONS = [
+            [0, 1],   // Direita (Horizontal)
+            [1, 0],   // Baixo (Vertical)
+            [1, 1],   // Diagonal Baixo-Direita
+            [1, -1],  // Diagonal Baixo-Esquerda
+            // [0, -1], // Esquerda (Opcional: palavras invertidas)
+            // [-1, 0], // Cima (Opcional: palavras invertidas)
+            // [-1, 1], // Diagonal Cima-Direita
+            // [-1, -1] // Diagonal Cima-Esquerda
+        ];
+
+        // --- Variáveis de Estado ---
+        let grid = [];
+        let foundWords = new Set();
+        let isDragging = false;
+        let startCell = null;
+        let endCell = null;
+        let selectedCells = [];
+
+        // --- Funções de Inicialização e Geração de Grid ---
+
+        /**
+         * Inicializa a matriz e o DOM do grid.
+         */
+        function initializeGrid() {
+            grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(''));
+            const gridElement = document.getElementById(GRID_ID);
+            gridElement.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
+
+            // Limpa e Adiciona Eventos de Drag/Touch
+            gridElement.innerHTML = '';
+            addDragListeners(gridElement);
+        }
+
+        /**
+         * Tenta posicionar uma palavra no grid.
+         * @param {string} word - A palavra a ser inserida.
+         * @returns {boolean} - Verdadeiro se a palavra foi colocada com sucesso.
+         */
+        function placeWord(word) {
+            // Tenta 100 vezes para evitar loops infinitos em grids cheios
+            for (let attempt = 0; attempt < 100; attempt++) {
+                const dirIndex = Math.floor(Math.random() * DIRECTIONS.length);
+                const [dr, dc] = DIRECTIONS[dirIndex];
+                
+                const startR = Math.floor(Math.random() * GRID_SIZE);
+                const startC = Math.floor(Math.random() * GRID_SIZE);
+                
+                let fits = true;
+                
+                // 1. Verifica se cabe (limite do grid)
+                const endR = startR + (word.length - 1) * dr;
+                const endC = startC + (word.length - 1) * dc;
+                
+                if (endR < 0 || endR >= GRID_SIZE || endC < 0 || endC >= GRID_SIZE) {
+                    continue; // Não cabe
+                }
+
+                // 2. Verifica colisões
+                for (let k = 0; k < word.length; k++) {
+                    const r = startR + k * dr;
+                    const c = startC + k * dc;
+                    
+                    const cellContent = grid[r][c];
+                    
+                    if (cellContent !== '' && cellContent !== word[k]) {
+                        fits = false; // Colisão com letra diferente
+                        break;
+                    }
+                }
+
+                // 3. Insere a palavra
+                if (fits) {
+                    for (let k = 0; k < word.length; k++) {
+                        const r = startR + k * dr;
+                        const c = startC + k * dc;
+                        grid[r][c] = word[k];
+                    }
+                    return true;
+                }
+            }
+            return false; // Falhou após todas as tentativas
+        }
+
+        /**
+         * Preenche as células vazias com letras aleatórias.
+         */
+        function fillEmptyCells() {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (grid[r][c] === '') {
+                        const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                        grid[r][c] = randomLetter;
+                    }
+                }
+            }
+        }
+
+        /**
+         * Renderiza o grid na tela e a lista de palavras.
+         */
+        function renderGrid() {
+            const gridElement = document.getElementById(GRID_ID);
+            const listElement = document.getElementById(LIST_ID);
+            gridElement.innerHTML = '';
+            listElement.innerHTML = '';
+
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.textContent = grid[r][c];
+                    gridElement.appendChild(cell);
+                }
+            }
+
+            WORDS_TO_FIND.forEach(word => {
+                const li = document.createElement('li');
+                li.id = `word-${word}`;
+                li.textContent = word;
+                listElement.appendChild(li);
+            });
+        }
+
+        // --- Lógica de Arrastar e Soltar (Drag/Touch) ---
+
+        function getCellFromEvent(e) {
+            let target = e.target;
+            while (target && !target.classList.contains('cell')) {
+                target = target.parentNode;
+            }
+            return target;
+        }
+
+        function addDragListeners(element) {
+            // MOUSE
+            element.addEventListener('mousedown', startDrag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('mousemove', drag);
+
+            // TOUCH (Para celular)
+            element.addEventListener('touchstart', (e) => startDrag(e.touches[0]));
+            document.addEventListener('touchend', (e) => endDrag(e.changedTouches[0]));
+            document.addEventListener('touchmove', (e) => drag(e.touches[0]));
+        }
+
+        function startDrag(e) {
+            const cell = getCellFromEvent(e);
+            if (!cell || cell.classList.contains('found')) return; // Ignora células encontradas
+            
+            isDragging = true;
+            startCell = cell;
+            endCell = cell;
+            updateSelection();
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            
+            // Previne o zoom/scroll no celular durante o arrasto
+            e.preventDefault(); 
+            
+            const cell = getCellFromEvent(e);
+            if (!cell) return;
+
+            if (cell !== endCell) {
+                endCell = cell;
+                updateSelection();
+            }
+        }
+
+        function endDrag(e) {
+            if (!isDragging) return;
+            isDragging = false;
+
+            // Finaliza o arrasto e verifica a palavra
+            if (startCell && endCell) {
+                checkSelectedWord();
+            }
+
+            // Limpa o estado da seleção
+            startCell = null;
+            endCell = null;
+            selectedCells.forEach(cell => cell.classList.remove('selected'));
+            selectedCells = [];
+        }
+
+        /**
+         * Atualiza visualmente as células selecionadas.
+         */
+        function updateSelection() {
+            if (!startCell || !endCell) return;
+
+            // Limpa seleção anterior
+            selectedCells.forEach(cell => cell.classList.remove('selected'));
+            selectedCells = [];
+
+            const r1 = parseInt(startCell.dataset.row);
+            const c1 = parseInt(startCell.dataset.col);
+            const r2 = parseInt(endCell.dataset.row);
+            const c2 = parseInt(endCell.dataset.col);
+
+            const dr = Math.sign(r2 - r1);
+            const dc = Math.sign(c2 - c1);
+
+            // Se for diagonal, horizontal ou vertical
+            if (dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc)) {
+                let r = r1;
+                let c = c1;
+
+                while (true) {
+                    const cell = document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                    if (cell) {
+                        cell.classList.add('selected');
+                        selectedCells.push(cell);
+                    }
+                    
+                    if (r === r2 && c === c2) break;
+                    
+                    r += dr;
+                    c += dc;
+                }
+            }
+        }
+        
+        /**
+         * Verifica se a sequência de letras selecionada corresponde a uma palavra na lista.
+         */
+        function checkSelectedWord() {
+            if (selectedCells.length === 0) return;
+
+            // Constrói a palavra na ordem da seleção
+            let selectedWord = selectedCells.map(cell => cell.textContent).join('');
+
+            // Constrói a palavra invertida (para cobrir buscas em direções não primárias)
+            let reversedWord = selectedCells.map(cell => cell.textContent).reverse().join('');
+            
+            // Verifica se a palavra ou sua inversa está na lista
+            let found = false;
+            let foundMatch = '';
+
+            if (WORDS_TO_FIND.includes(selectedWord)) {
+                found = true;
+                foundMatch = selectedWord;
+            } else if (WORDS_TO_FIND.includes(reversedWord)) {
+                found = true;
+                foundMatch = reversedWord;
+            }
+
+            if (found) {
+                if (!foundWords.has(foundMatch)) {
+                    // Marca a palavra como encontrada
+                    foundWords.add(foundMatch);
+
+                    // Atualiza o DOM
+                    selectedCells.forEach(cell => {
+                        cell.classList.remove('selected');
+                        cell.classList.add('found');
+                    });
+                    document.getElementById(`word-${foundMatch}`).classList.add('found');
+
+                    if (foundWords.size === WORDS_TO_FIND.length) {
+                        document.getElementById('message').style.display = 'block';
+                    }
+                } else {
+                    // Se a palavra já foi encontrada, apenas limpa a seleção
+                    selectedCells.forEach(cell => cell.classList.remove('selected'));
+                }
+            }
+            // Se não encontrou, a função endDrag limpará a seleção.
+        }
+
+        // --- Inicialização Principal ---
+
+        function initializeGame() {
+            // 1. Configuração do Grid
+            initializeGrid();
+
+            // 2. Tenta posicionar todas as palavras
+            WORDS_TO_FIND.sort((a, b) => b.length - a.length); // Tenta colocar as maiores primeiro
+            WORDS_TO_FIND.forEach(word => {
+                if (!placeWord(word)) {
+                    console.warn(`Não foi possível posicionar a palavra: ${word}. Reduza o tamanho ou adicione mais direções.`);
+                }
+            });
+
+            // 3. Preenche o restante
+            fillEmptyCells();
+
+            // 4. Renderiza
+            renderGrid();
+        }
+
+        window.onload = initializeGame;
+
+    </script>
+</body>
+</html>
