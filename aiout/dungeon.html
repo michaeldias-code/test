@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dungeon Crawler 3D</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .menu-screen, .game-screen, .gameover-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .menu-screen.active, .game-screen.active, .gameover-screen.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 4em;
+            background: linear-gradient(to right, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #d1d5db;
+            margin-bottom: 40px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            background: linear-gradient(to right, #7c3aed, #db2777);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.5);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(124, 58, 237, 0.7);
+        }
+
+        .controls-hint {
+            margin-top: 30px;
+            color: #9ca3af;
+            font-size: 0.9em;
+        }
+
+        .game-layout {
+            display: flex;
+            gap: 20px;
+        }
+
+        .main-panel {
+            flex: 1;
+        }
+
+        .stats-bar {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+        }
+
+        .stat-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            background: #000;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            display: block;
+        }
+
+        .messages {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 15px;
+            height: 120px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .message {
+            color: #d1d5db;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: start;
+            gap: 8px;
+        }
+
+        .inventory-panel {
+            width: 320px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+        }
+
+        .inventory-panel.active {
+            display: block;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .inventory-title {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
+
+        .close-btn:hover {
+            color: white;
+        }
+
+        .equipped-item {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .equipped-armor {
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .item-stats {
+            font-size: 0.85em;
+            color: #9ca3af;
+        }
+
+        .inventory-items {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .inventory-item {
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid rgba(71, 85, 105, 1);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .inventory-item:hover {
+            background: rgba(71, 85, 105, 0.5);
+            transform: translateX(5px);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .use-btn {
+            background: #7c3aed;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 5px;
+            color: white;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+
+        .use-btn:hover {
+            background: #6d28d9;
+        }
+
+        .empty-inventory {
+            color: #6b7280;
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        .stats-final {
+            font-size: 1.5em;
+            margin: 30px 0;
+            color: #d1d5db;
+        }
+
+        .stats-final div {
+            margin: 10px 0;
+        }
+
+        .inventory-btn {
+            margin-left: auto;
+            padding: 10px 20px;
+            background: #7c3aed;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .inventory-btn:hover {
+            background: #6d28d9;
+        }
+
+        @media (max-width: 1024px) {
+            .game-layout {
+                flex-direction: column;
+            }
+            
+            .inventory-panel {
+                width: 100%;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Menu Principal -->
+        <div id="menuScreen" class="menu-screen active">
+            <h1>🗡️ Dungeon Crawler 3D</h1>
+            <p class="subtitle">Explore dungeons procedurais, lute contra inimigos e evolua seu personagem</p>
+            <button class="btn" onclick="startGame()">Iniciar Aventura</button>
+            <div class="controls-hint">
+                <p>🎮 WASD - Mover | SPACE - Atacar | I - Inventário</p>
+                <p>⚔️ Derrote todos os inimigos para descer ao próximo andar</p>
+            </div>
+        </div>
+
+        <!-- Tela de Jogo -->
+        <div id="gameScreen" class="game-screen">
+            <div class="game-layout">
+                <div class="main-panel">
+                    <!-- Barra de Stats -->
+                    <div class="stats-bar">
+                        <div class="stat">
+                            <span style="color: #ef4444;">❤️</span>
+                            <span id="playerHp">100/100</span>
+                        </div>
+                        <div class="stat">
+                            <span style="color: #3b82f6;">⚔️</span>
+                            <span id="playerAttack">10</span>
+                        </div>
+                        <div class="stat">
+                            <span style="color: #8b5cf6;">🛡️</span>
+                            <span id="playerDefense">5</span>
+                        </div>
+                        <div class="stat">
+                            <span style="color: #eab308;">⚡</span>
+                            <span>Nv.<span id="playerLevel">1</span></span>
+                        </div>
+                        <div class="stat">
+                            <span style="color: #22c55e;">📊</span>
+                            <span id="playerXp">0</span> XP
+                        </div>
+                        <div class="stat">
+                            <span style="color: #fbbf24;">💰</span>
+                            <span id="playerGold">0</span>
+                        </div>
+                        <div class="stat">
+                            <span style="color: #06b6d4;">🗺️</span>
+                            <span>Andar <span id="currentFloor">1</span></span>
+                        </div>
+                        <button class="inventory-btn" onclick="toggleInventory()">
+                            📦 Inventário
+                        </button>
+                    </div>
+
+                    <!-- Canvas 3D -->
+                    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+                    <!-- Mensagens -->
+                    <div class="messages" id="messages"></div>
+                </div>
+
+                <!-- Painel de Inventário -->
+                <div id="inventoryPanel" class="inventory-panel">
+                    <div class="inventory-header">
+                        <div class="inventory-title">📦 Inventário</div>
+                        <button class="close-btn" onclick="toggleInventory()">×</button>
+                    </div>
+
+                    <div id="equippedWeapon"></div>
+                    <div id="equippedArmor"></div>
+
+                    <div class="inventory-items" id="inventoryItems"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over -->
+        <div id="gameOverScreen" class="gameover-screen">
+            <h1 style="color: #ef4444;">💀 Game Over</h1>
+            <div class="stats-final" id="finalStats"></div>
+            <button class="btn" onclick="returnToMenu()">Tentar Novamente</button>
+        </div>
+    </div>
+
+    <script>
+        // Estado do jogo
+        let gameState = {
+            screen: 'menu',
+            player: {
+                x: 1, y: 1, hp: 100, maxHp: 100, attack: 10, defense: 5,
+                level: 1, xp: 0, gold: 0, inventory: [], weapon: null, armor: null
+            },
+            dungeon: [],
+            enemies: [],
+            items: [],
+            floor: 1,
+            messages: [],
+            keysPressed: {},
+            showInventory: false
+        };
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationId = null;
+        let moveInterval = null;
+        let enemyInterval = null;
+
+        // Tipos de inimigos
+        const ENEMY_TYPES = [
+            { name: 'Goblin', hp: 20, attack: 5, xp: 10, gold: 5, color: '#22c55e' },
+            { name: 'Orc', hp: 40, attack: 8, xp: 20, gold: 10, color: '#ef4444' },
+            { name: 'Troll', hp: 60, attack: 12, xp: 30, gold: 15, color: '#8b5cf6' },
+            { name: 'Dragão', hp: 100, attack: 20, xp: 50, gold: 30, color: '#f59e0b' }
+        ];
+
+        // Tipos de items
+        const ITEM_TYPES = [
+            { type: 'potion', name: 'Poção de Vida', color: '#ef4444', effect: 'heal', value: 30 },
+            { type: 'weapon', name: 'Espada', color: '#3b82f6', effect: 'attack', value: 5 },
+            { type: 'armor', name: 'Armadura', color: '#8b5cf6', effect: 'defense', value: 3 },
+            { type: 'gold', name: 'Ouro', color: '#fbbf24', effect: 'gold', value: 20 }
+        ];
+
+        // Gerador de Dungeons
+        function generateDungeon(size = 30) {
+            const map = Array(size).fill().map(() => Array(size).fill(1));
+            const rooms = [];
+            const numRooms = 8 + Math.floor(Math.random() * 4);
+
+            for (let i = 0; i < numRooms; i++) {
+                const w = 4 + Math.floor(Math.random() * 6);
+                const h = 4 + Math.floor(Math.random() * 6);
+                const x = 1 + Math.floor(Math.random() * (size - w - 2));
+                const y = 1 + Math.floor(Math.random() * (size - h - 2));
+
+                let overlaps = false;
+                for (const room of rooms) {
+                    if (!(x + w < room.x || x > room.x + room.w || 
+                          y + h < room.y || y > room.y + room.h)) {
+                        overlaps = true;
+                        break;
+                    }
+                }
+
+                if (!overlaps) {
+                    rooms.push({ x, y, w, h });
+                    for (let dy = 0; dy < h; dy++) {
+                        for (let dx = 0; dx < w; dx++) {
+                            map[y + dy][x + dx] = 0;
+                        }
+                    }
+                }
+            }
+
+            // Conectar salas
+            for (let i = 0; i < rooms.length - 1; i++) {
+                const room1 = rooms[i];
+                const room2 = rooms[i + 1];
+                const x1 = Math.floor(room1.x + room1.w / 2);
+                const y1 = Math.floor(room1.y + room1.h / 2);
+                const x2 = Math.floor(room2.x + room2.w / 2);
+                const y2 = Math.floor(room2.y + room2.h / 2);
+
+                if (Math.random() > 0.5) {
+                    for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) map[y1][x] = 0;
+                    for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) map[y][x2] = 0;
+                } else {
+                    for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) map[y][x1] = 0;
+                    for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) map[y2][x] = 0;
+                }
+            }
+
+            return { map, rooms };
+        }
+
+        // Spawn inimigos
+        function spawnEnemies(rooms, floorNum) {
+            const enemies = [];
+            for (let i = 1; i < rooms.length; i++) {
+                const room = rooms[i];
+                const numEnemies = 1 + Math.floor(Math.random() * 3);
+                
+                for (let j = 0; j < numEnemies; j++) {
+                    const typeIndex = Math.min(Math.floor(floorNum / 2), ENEMY_TYPES.length - 1);
+                    const type = ENEMY_TYPES[typeIndex];
+                    const x = room.x + 1 + Math.floor(Math.random() * (room.w - 2));
+                    const y = room.y + 1 + Math.floor(Math.random() * (room.h - 2));
+                    
+                    enemies.push({
+                        ...type,
+                        x, y,
+                        maxHp: type.hp * floorNum,
+                        hp: type.hp * floorNum,
+                        attack: type.attack + floorNum * 2,
+                        id: Math.random()
+                    });
+                }
+            }
+            return enemies;
+        }
+
+        // Spawn items
+        function spawnItems(rooms) {
+            const items = [];
+            for (let i = 1; i < rooms.length; i++) {
+                if (Math.random() > 0.5) {
+                    const room = rooms[i];
+                    const item = ITEM_TYPES[Math.floor(Math.random() * ITEM_TYPES.length)];
+                    const x = room.x + 1 + Math.floor(Math.random() * (room.w - 2));
+                    const y = room.y + 1 + Math.floor(Math.random() * (room.h - 2));
+                    
+                    items.push({ ...item, x, y, id: Math.random() });
+                }
+            }
+            return items;
+        }
+
+        // Adicionar mensagem
+        function addMessage(msg) {
+            gameState.messages.push(msg);
+            if (gameState.messages.length > 10) {
+                gameState.messages.shift();
+            }
+            updateMessages();
+        }
+
+        // Atualizar UI
+        function updateUI() {
+            const p = gameState.player;
+            document.getElementById('playerHp').textContent = `${p.hp}/${p.maxHp}`;
+            document.getElementById('playerAttack').textContent = p.attack;
+            document.getElementById('playerDefense').textContent = p.defense;
+            document.getElementById('playerLevel').textContent = p.level;
+            document.getElementById('playerXp').textContent = p.xp;
+            document.getElementById('playerGold').textContent = p.gold;
+            document.getElementById('currentFloor').textContent = gameState.floor;
+        }
+
+        function updateMessages() {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML = gameState.messages.map(msg => 
+                `<div class="message"><span style="color: #a855f7;">▶</span> ${msg}</div>`
+            ).join('');
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function updateInventory() {
+            const p = gameState.player;
+            
+            // Arma equipada
+            const weaponDiv = document.getElementById('equippedWeapon');
+            if (p.weapon) {
+                weaponDiv.innerHTML = `
+                    <div class="equipped-item">
+                        <div class="item-name">⚔️ ${p.weapon.name}</div>
+                        <div class="item-stats">+${p.weapon.value} Ataque</div>
+                    </div>
+                `;
+            } else {
+                weaponDiv.innerHTML = '';
+            }
+
+            // Armadura equipada
+            const armorDiv = document.getElementById('equippedArmor');
+            if (p.armor) {
+                armorDiv.innerHTML = `
+                    <div class="equipped-item equipped-armor">
+                        <div class="item-name">🛡️ ${p.armor.name}</div>
+                        <div class="item-stats">+${p.armor.value} Defesa</div>
+                    </div>
+                `;
+            } else {
+                armorDiv.innerHTML = '';
+            }
+
+            // Items no inventário
+            const itemsDiv = document.getElementById('inventoryItems');
+            if (p.inventory.length === 0) {
+                itemsDiv.innerHTML = '<div class="empty-inventory">Inventário vazio</div>';
+            } else {
+                itemsDiv.innerHTML = p.inventory.map(item => `
+                    <div class="inventory-item" onclick="useItem(${item.id})">
+                        <div class="item-header">
+                            <div>
+                                <div class="item-name">${item.name}</div>
+                                <div class="item-stats">
+                                    ${item.type === 'weapon' ? `+${item.value} Ataque` : ''}
+                                    ${item.type === 'armor' ? `+${item.value} Defesa` : ''}
+                                    ${item.type === 'potion' ? `+${item.value} HP` : ''}
+                                </div>
+                            </div>
+                            <button class="use-btn">Usar</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+// Atacar
+        function attackEnemy(targetX, targetY) {
+            const enemy = gameState.enemies.find(e => e.x === targetX && e.y === targetY);
+            if (!enemy) return;
+
+            const damage = Math.max(1, gameState.player.attack - Math.floor(Math.random() * 3));
+            enemy.hp -= damage;
+
+            addMessage(`Você ataca ${enemy.name} causando ${damage} de dano!`);
+
+            if (enemy.hp <= 0) {
+                gameState.enemies = gameState.enemies.filter(e => e.id !== enemy.id);
+                const newXp = gameState.player.xp + enemy.xp;
+                const levelUp = Math.floor(newXp / 100) > gameState.player.level - 1;
+                
+                gameState.player.xp = newXp;
+                gameState.player.gold += enemy.gold;
+                
+                if (levelUp) {
+                    gameState.player.level++;
+                    gameState.player.maxHp += 20;
+                    gameState.player.hp = gameState.player.maxHp;
+                    gameState.player.attack += 3;
+                    gameState.player.defense += 2;
+                    addMessage(`LEVEL UP! Agora você é nível ${gameState.player.level}!`);
+                }
+
+                addMessage(`${enemy.name} derrotado! +${enemy.xp} XP, +${enemy.gold} ouro`);
+                
+                if (gameState.enemies.length === 0) {
+                    setTimeout(() => {
+                        addMessage('Todos os inimigos derrotados! Descendo para o próximo andar...');
+                        setTimeout(nextFloor, 2000);
+                    }, 1000);
+                }
+            } else {
+                // Contra-ataque
+                setTimeout(() => {
+                    const enemyDamage = Math.max(1, enemy.attack - gameState.player.defense);
+                    gameState.player.hp -= enemyDamage;
+                    
+                    if (gameState.player.hp <= 0) {
+                        gameOver();
+                    } else {
+                        addMessage(`${enemy.name} contra-ataca! -${enemyDamage} HP`);
+                    }
+                    updateUI();
+                }, 500);
+            }
+            
+            updateUI();
+        }
+
+        // Mover jogador
+        function movePlayer(dx, dy) {
+            const newX = gameState.player.x + dx;
+            const newY = gameState.player.y + dy;
+
+            if (!gameState.dungeon[newY] || gameState.dungeon[newY][newX] === 1) return;
+
+            const enemy = gameState.enemies.find(e => e.x === newX && e.y === newY);
+            if (enemy) {
+                attackEnemy(newX, newY);
+                return;
+            }
+
+            const item = gameState.items.find(i => i.x === newX && i.y === newY);
+            if (item) {
+                gameState.items = gameState.items.filter(i => i.id !== item.id);
+                
+                if (item.type === 'potion') {
+                    gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + item.value);
+                    addMessage(`Usou ${item.name}! +${item.value} HP`);
+                } else if (item.type === 'gold') {
+                    gameState.player.gold += item.value;
+                    addMessage(`Coletou ${item.value} ouro!`);
+                } else {
+                    gameState.player.inventory.push(item);
+                    addMessage(`Coletou ${item.name}!`);
+                }
+                updateUI();
+                updateInventory();
+            }
+
+            gameState.player.x = newX;
+            gameState.player.y = newY;
+        }
+
+        // Usar item
+        function useItem(itemId) {
+            const item = gameState.player.inventory.find(i => i.id === itemId);
+            if (!item) return;
+
+            if (item.type === 'weapon') {
+                gameState.player.weapon = item;
+                gameState.player.attack += item.value;
+                gameState.player.inventory = gameState.player.inventory.filter(i => i.id !== itemId);
+                addMessage(`${item.name} equipada! +${item.value} ataque`);
+            } else if (item.type === 'armor') {
+                gameState.player.armor = item;
+                gameState.player.defense += item.value;
+                gameState.player.inventory = gameState.player.inventory.filter(i => i.id !== itemId);
+                addMessage(`${item.name} equipada! +${item.value} defesa`);
+            }
+
+            updateUI();
+            updateInventory();
+        }
+
+        // Próximo andar
+        function nextFloor() {
+            gameState.floor++;
+            const { map, rooms } = generateDungeon();
+            const startRoom = rooms[0];
+            const startX = Math.floor(startRoom.x + startRoom.w / 2);
+            const startY = Math.floor(startRoom.y + startRoom.h / 2);
+
+            gameState.dungeon = map;
+            gameState.player.x = startX;
+            gameState.player.y = startY;
+            gameState.player.hp = gameState.player.maxHp;
+            gameState.enemies = spawnEnemies(rooms, gameState.floor);
+            gameState.items = spawnItems(rooms);
+            
+            addMessage(`Andar ${gameState.floor}! Inimigos mais fortes aparecem...`);
+            updateUI();
+        }
+
+        // Game Over
+        function gameOver() {
+            gameState.screen = 'gameOver';
+            showScreen('gameOverScreen');
+            
+            if (animationId) cancelAnimationFrame(animationId);
+            if (moveInterval) clearInterval(moveInterval);
+            if (enemyInterval) clearInterval(enemyInterval);
+
+            document.getElementById('finalStats').innerHTML = `
+                <div>Você chegou ao andar ${gameState.floor}</div>
+                <div>Nível final: ${gameState.player.level}</div>
+                <div>Ouro coletado: ${gameState.player.gold}</div>
+                <div>XP total: ${gameState.player.xp}</div>
+            `;
+            
+            addMessage('Você morreu!');
+        }
+
+        // Renderização 3D
+        function render() {
+            const width = canvas.width;
+            const height = canvas.height;
+
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.fillStyle = '#2d2d44';
+            ctx.fillRect(0, height/2, width, height/2);
+            ctx.fillStyle = '#16213e';
+            ctx.fillRect(0, 0, width, height/2);
+
+            const cellSize = 40;
+            const viewDist = 8;
+
+            // Minimap
+            const minimapSize = 150;
+            const minimapX = width - minimapSize - 20;
+            const minimapY = 20;
+            
+            ctx.fillStyle = 'rgba(0,0,0,0.7)';
+            ctx.fillRect(minimapX - 5, minimapY - 5, minimapSize + 10, minimapSize + 10);
+
+            for (let dy = -viewDist; dy <= viewDist; dy++) {
+                for (let dx = -viewDist; dx <= viewDist; dx++) {
+                    const x = gameState.player.x + dx;
+                    const y = gameState.player.y + dy;
+                    
+                    if (gameState.dungeon[y] && gameState.dungeon[y][x] !== undefined) {
+                        const mx = minimapX + (dx + viewDist) * (minimapSize / (viewDist * 2 + 1));
+                        const my = minimapY + (dy + viewDist) * (minimapSize / (viewDist * 2 + 1));
+                        const ms = minimapSize / (viewDist * 2 + 1);
+                        
+                        ctx.fillStyle = gameState.dungeon[y][x] === 1 ? '#444' : '#222';
+                        ctx.fillRect(mx, my, ms, ms);
+                    }
+                }
+            }
+
+            // Inimigos no minimap
+            gameState.enemies.forEach(enemy => {
+                const dx = enemy.x - gameState.player.x;
+                const dy = enemy.y - gameState.player.y;
+                if (Math.abs(dx) <= viewDist && Math.abs(dy) <= viewDist) {
+                    const mx = minimapX + (dx + viewDist) * (minimapSize / (viewDist * 2 + 1));
+                    const my = minimapY + (dy + viewDist) * (minimapSize / (viewDist * 2 + 1));
+                    ctx.fillStyle = enemy.color;
+                    ctx.fillRect(mx + 1, my + 1, 3, 3);
+                }
+            });
+
+            // Items no minimap
+            gameState.items.forEach(item => {
+                const dx = item.x - gameState.player.x;
+                const dy = item.y - gameState.player.y;
+                if (Math.abs(dx) <= viewDist && Math.abs(dy) <= viewDist) {
+                    const mx = minimapX + (dx + viewDist) * (minimapSize / (viewDist * 2 + 1));
+                    const my = minimapY + (dy + viewDist) * (minimapSize / (viewDist * 2 + 1));
+                    ctx.fillStyle = item.color;
+                    ctx.beginPath();
+                    ctx.arc(mx + 2, my + 2, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // Jogador no minimap
+            const pmx = minimapX + viewDist * (minimapSize / (viewDist * 2 + 1));
+            const pmy = minimapY + viewDist * (minimapSize / (viewDist * 2 + 1));
+            ctx.fillStyle = '#3b82f6';
+            ctx.fillRect(pmx + 1, pmy + 1, 4, 4);
+
+            // Renderizar paredes em pseudo-3D
+            for (let dy = -viewDist; dy <= viewDist; dy++) {
+                for (let dx = -viewDist; dx <= viewDist; dx++) {
+                    const x = gameState.player.x + dx;
+                    const y = gameState.player.y + dy;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (gameState.dungeon[y] && gameState.dungeon[y][x] === 1 && dist < viewDist) {
+                        const screenX = width/2 + (dx * cellSize / (dist + 1));
+                        const wallHeight = cellSize * 8 / (dist + 1);
+                        const screenY = height/2 - wallHeight/2;
+                        
+                        const brightness = Math.max(20, 255 - dist * 30);
+                        ctx.fillStyle = `rgb(${brightness/2}, ${brightness/2}, ${brightness})`;
+                        ctx.fillRect(screenX - wallHeight/4, screenY, wallHeight/2, wallHeight);
+                        
+                        ctx.strokeStyle = `rgb(${brightness/3}, ${brightness/3}, ${brightness/1.5})`;
+                        ctx.strokeRect(screenX - wallHeight/4, screenY, wallHeight/2, wallHeight);
+                    }
+                }
+            }
+
+            // Renderizar inimigos em 3D
+            gameState.enemies.forEach(enemy => {
+                const dx = enemy.x - gameState.player.x;
+                const dy = enemy.y - gameState.player.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist < viewDist && dist > 0) {
+                    const screenX = width/2 + (dx * cellSize / (dist + 1));
+                    const enemySize = cellSize * 6 / (dist + 1);
+                    const screenY = height/2 - enemySize/2;
+                    
+                    ctx.fillStyle = enemy.color;
+                    ctx.beginPath();
+                    ctx.arc(screenX, screenY + enemySize/2, enemySize/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // HP bar
+                    const barWidth = enemySize;
+                    const barHeight = 4;
+                    ctx.fillStyle = '#333';
+                    ctx.fillRect(screenX - barWidth/2, screenY - 10, barWidth, barHeight);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillRect(screenX - barWidth/2, screenY - 10, barWidth * (enemy.hp / enemy.maxHp), barHeight);
+                }
+            });
+
+            // Renderizar items em 3D
+            gameState.items.forEach(item => {
+                const dx = item.x - gameState.player.x;
+                const dy = item.y - gameState.player.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+                
+                if (dist < viewDist && dist > 0) {
+                    const screenX = width/2 + (dx * cellSize / (dist + 1));
+                    const itemSize = cellSize * 2 / (dist + 1);
+                    const screenY = height/2 + itemSize;
+                    
+                    ctx.fillStyle = item.color;
+                    ctx.fillRect(screenX - itemSize/2, screenY - itemSize/2, itemSize, itemSize);
+                }
+            });
+
+            animationId = requestAnimationFrame(render);
+        }
+
+        // IA dos inimigos
+        function updateEnemies() {
+            gameState.enemies = gameState.enemies.map(enemy => {
+                const dx = gameState.player.x - enemy.x;
+                const dy = gameState.player.y - enemy.y;
+                const dist = Math.abs(dx) + Math.abs(dy);
+
+                if (dist > 8) return enemy;
+
+                let newX = enemy.x;
+                let newY = enemy.y;
+
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    newX += dx > 0 ? 1 : -1;
+                } else {
+                    newY += dy > 0 ? 1 : -1;
+                }
+
+                if (gameState.dungeon[newY] && gameState.dungeon[newY][newX] === 0 && 
+                    !gameState.enemies.some(e => e.x === newX && e.y === newY && e.id !== enemy.id)) {
+                    return { ...enemy, x: newX, y: newY };
+                }
+                return enemy;
+            });
+        }
+
+        // Controles
+        document.addEventListener('keydown', (e) => {
+            if (gameState.screen !== 'playing') return;
+            
+            gameState.keysPressed[e.key.toLowerCase()] = true;
+
+            if (e.key === ' ') {
+                e.preventDefault();
+                const directions = [
+                    {dx: 0, dy: -1}, {dx: 1, dy: 0}, {dx: 0, dy: 1}, {dx: -1, dy: 0}
+                ];
+                for (const dir of directions) {
+                    const enemy = gameState.enemies.find(e => 
+                        e.x === gameState.player.x + dir.dx && 
+                        e.y === gameState.player.y + dir.dy
+                    );
+                    if (enemy) {
+                        attackEnemy(enemy.x, enemy.y);
+                        break;
+                    }
+                }
+            }
+            
+            if (e.key === 'i' || e.key === 'I') {
+                toggleInventory();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            gameState.keysPressed[e.key.toLowerCase()] = false;
+        });
+
+        // Funções de navegação
+        function showScreen(screenId) {
+            document.querySelectorAll('.menu-screen, .game-screen, .gameover-screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function startGame() {
+            gameState.screen = 'playing';
+            showScreen('gameScreen');
+            
+            const { map, rooms } = generateDungeon();
+            const startRoom = rooms[0];
+            const startX = Math.floor(startRoom.x + startRoom.w / 2);
+            const startY = Math.floor(startRoom.y + startRoom.h / 2);
+
+            gameState.dungeon = map;
+            gameState.player.x = startX;
+            gameState.player.y = startY;
+            gameState.enemies = spawnEnemies(rooms, gameState.floor);
+            gameState.items = spawnItems(rooms);
+            gameState.messages = ['Bem-vindo à dungeon! Use WASD para mover, Space para atacar.'];
+            
+            updateUI();
+            updateMessages();
+            updateInventory();
+            
+            // Iniciar loops
+            animationId = requestAnimationFrame(render);
+            
+            moveInterval = setInterval(() => {
+                if (gameState.keysPressed['w']) movePlayer(0, -1);
+                if (gameState.keysPressed['s']) movePlayer(0, 1);
+                if (gameState.keysPressed['a']) movePlayer(-1, 0);
+                if (gameState.keysPressed['d']) movePlayer(1, 0);
+            }, 150);
+
+            enemyInterval = setInterval(updateEnemies, 800);
+        }
+
+        function toggleInventory() {
+            gameState.showInventory = !gameState.showInventory;
+            const panel = document.getElementById('inventoryPanel');
+            if (gameState.showInventory) {
+                panel.classList.add('active');
+            } else {
+                panel.classList.remove('active');
+            }
+        }
+
+        function returnToMenu() {
+            if (animationId) cancelAnimationFrame(animationId);
+            if (moveInterval) clearInterval(moveInterval);
+            if (enemyInterval) clearInterval(enemyInterval);
+            
+            gameState = {
+                screen: 'menu',
+                player: {
+                    x: 1, y: 1, hp: 100, maxHp: 100, attack: 10, defense: 5,
+                    level: 1, xp: 0, gold: 0, inventory: [], weapon: null, armor: null
+                },
+                dungeon: [],
+                enemies: [],
+                items: [],
+                floor: 1,
+                messages: [],
+                keysPressed: {},
+                showInventory: false
+            };
+            
+            showScreen('menuScreen');
+        }
+    </script>
+</body>
+</html>
