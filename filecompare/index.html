@@ -441,7 +441,7 @@ textarea:focus {
 <body>
 
 <div class="header">
-    <h1>ðŸ“ Comparador de Texto Pro</h1>
+    <h1>📝 Comparador de Texto Pro</h1>
     <p>Compare arquivos e textos com precisÃ£o linha por linha</p>
 </div>
 
@@ -449,27 +449,27 @@ textarea:focus {
     <div class="toolbar">
         <div class="file-input-wrapper">
             <input type="file" id="file1" accept=".txt,.js,.css,.html,.json,.xml,.md">
-            <label for="file1" class="file-input-label">ðŸ“ Arquivo 1</label>
+            <label for="file1" class="file-input-label">📁 Arquivo 1</label>
             <span class="file-name" id="filename1"></span>
         </div>
         
         <div class="file-input-wrapper">
             <input type="file" id="file2" accept=".txt,.js,.css,.html,.json,.xml,.md">
-            <label for="file2" class="file-input-label">ðŸ“ Arquivo 2</label>
+            <label for="file2" class="file-input-label">📁 Arquivo 2</label>
             <span class="file-name" id="filename2"></span>
         </div>
         
-        <button onclick="compare()">âš¡ Comparar</button>
-        <button onclick="clearAll()">ðŸ—‘ï¸ Limpar</button>
+        <button onclick="compare()">⚡ Comparar</button>
+        <button onclick="clearAll()">🗑 Limpar</button>
         
         <div class="options">
             <div class="option-group">
                 <input type="checkbox" id="ignoreCase" checked>
-                <label for="ignoreCase">Ignorar maiÃºsculas</label>
+                <label for="ignoreCase">Ignorar maiúsculas</label>
             </div>
             <div class="option-group">
                 <input type="checkbox" id="ignoreSpaces" checked>
-                <label for="ignoreSpaces">Ignorar espaÃ§os</label>
+                <label for="ignoreSpaces">Ignorar espaços</label>
             </div>
             <div class="option-group">
                 <input type="checkbox" id="charLevel">
@@ -477,7 +477,7 @@ textarea:focus {
             </div>
             <div class="option-group">
                 <input type="checkbox" id="programmerMode">
-                <label for="programmerMode">ðŸ”§ Modo Programador</label>
+                <label for="programmerMode">🔧 Modo Programador</label>
             </div>
         </div>
     </div>
@@ -494,17 +494,17 @@ textarea:focus {
     </div>
     
     <div id="commentConfig" class="comment-config">
-        <h3>âš™ï¸ ConfiguraÃ§Ã£o de ComentÃ¡rios</h3>
+        <h3>⚙️ Configuração de Comentários</h3>
         <div class="comment-inputs">
             <div class="comment-input-group">
-                <label>ComentÃ¡rios de linha Ãºnica (separados por vÃ­rgula):</label>
+                <label>Comentários de linha única (separados por vírgula):</label>
                 <input type="text" id="singleLineComments" placeholder="Exemplo: //, #, --" value="//, #, --">
                 <small>Ignora tudo apÃ³s o sÃ­mbolo atÃ© o fim da linha</small>
             </div>
             <div class="comment-input-group">
                 <label>ComentÃ¡rios de bloco (separados por vÃ­rgula, use | para separar abertura/fechamento):</label>
                 <input type="text" id="blockComments" placeholder="Exemplo: /*|*/, <!--|--> " value="/*|*/, <!--|--> ">
-                <small>Ignora tudo entre os sÃ­mbolos de abertura e fechamento</small>
+                <small>Ignora tudo após o símbolo até o fim da linha</small>
             </div>
         </div>
         <div class="preset-buttons">
@@ -879,3 +879,4 @@ function clearAll() {
 
 </body>
 </html>
+
