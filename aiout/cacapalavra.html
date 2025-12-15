@@ -413,23 +413,41 @@
 
         // --- LÓGICA DE DRAG/TOUCH (Corrigida e Mantida) ---
 
-        function getCellFromEvent(e) {
-            let target = e.target;
-            while (target && !target.classList.contains('cell')) {
-                if (target.id === GRID_ID) { 
-                    const gridRect = target.getBoundingClientRect();
-                    const cellSize = gridRect.width / GRID_SIZE;
-                    const c = Math.floor((e.clientX - gridRect.left) / cellSize);
-                    const r = Math.floor((e.clientY - gridRect.top) / cellSize);
-                    
-                    if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) {
-                        return document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
-                    }
-                }
-                target = target.parentNode;
-            }
-            return target;
+        // --- LÓGICA DE DRAG/TOUCH (Reforçada para Dispositivos Móveis) ---
+
+function getCellFromEvent(e) {
+    let target = e.target;
+    
+    // 1. Caso A: O alvo é o próprio elemento CELL
+    while (target && !target.classList.contains('cell')) {
+        target = target.parentNode;
+    }
+    if (target && target.classList.contains('cell')) {
+        return target;
+    }
+    
+    // 2. Caso B: O toque está dentro do GRID, mas o alvo é o GRID CONTAINER
+    const gridElement = document.getElementById(GRID_ID);
+    if (e.clientX && e.clientY && gridElement) {
+        const gridRect = gridElement.getBoundingClientRect();
+        
+        // Verifica se o ponto está dentro do grid
+        if (e.clientX >= gridRect.left && e.clientX <= gridRect.right &&
+            e.clientY >= gridRect.top && e.clientY <= gridRect.bottom) {
+            
+            const cellSize = gridRect.width / GRID_SIZE;
+            const c = Math.floor((e.clientX - gridRect.left) / cellSize);
+            const r = Math.floor((e.clientY - gridRect.top) / cellSize);
+            
+            // Retorna a célula correta baseada nas coordenadas
+            return document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
         }
+    }
+    return null;
+}
+
+
+
 
         function startDrag(e) {
             if (isGameOver) return; // Não permite seleção se o jogo acabou
@@ -443,19 +461,26 @@
         }
 
         function drag(e) {
-            if (!isDragging || isGameOver) return;
-            e.preventDefault(); 
-            
-            const elementUnderPointer = document.elementFromPoint(e.clientX, e.clientY); 
-            const cell = getCellFromEvent({ target: elementUnderPointer, clientX: e.clientX, clientY: e.clientY });
+    if (!isDragging || isGameOver) return;
+    e.preventDefault(); 
+    
+    // Usa document.elementFromPoint para encontrar o elemento sob o ponteiro/dedo
+    // E garante que e.clientX e e.clientY existam
+    const x = e.clientX || (e.touches && e.touches[0].clientX);
+    const y = e.clientY || (e.touches && e.touches[0].clientY);
+    
+    if (x === undefined || y === undefined) return;
 
-            if (!cell) return;
+    // Tenta encontrar a célula usando as coordenadas (mais robusto que apenas e.target)
+    const cell = getCellFromEvent({ clientX: x, clientY: y });
 
-            if (cell !== endCell) {
-                endCell = cell;
-                updateSelection();
-            }
-        }
+    if (!cell) return;
+
+    if (cell !== endCell) {
+        endCell = cell;
+        updateSelection();
+    }
+}
 
         function endDrag(e) {
             if (!isDragging || isGameOver) return;
