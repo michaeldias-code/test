@@ -96,7 +96,7 @@ body {
   font-weight: bold;
 }
 h2{
-  color: red;
+  color: blue;
 }
 </style>
 </head>
@@ -192,8 +192,18 @@ function placeWords() {
 
     for (let i = 0; i < w.word.length; i++) {
       const cell = State.grid[r][c];
-      cell.correct = w.word[i];
+      const letter = w.word[i];
+
+      if (cell.correct && cell.correct !== letter) {
+        throw new Error(
+          `Conflito no grid (${r},${c}): ` +
+          `já existe "${cell.correct}", tentou inserir "${letter}"`
+        );
+      }
+
+      cell.correct = letter;
       w.cells.push(cell);
+
       r += dr;
       c += dc;
     }
