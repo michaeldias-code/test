@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caça-Palavras Completo</title>
+    <title>Caça-Palavras com Tempo</title>
     <style>
         /* --- CSS Responsivo e Estilizado --- */
         :root {
-            --grid-size: 20px; /* Tamanho base da célula */
-            --cor-principal: #2980b9; /* Azul */
-            --cor-fundo: #ecf0f1; /* Fundo claro */
-            --cor-letra: #34495e; /* Azul escuro para letras */
-            --cor-selecao: #f1c40f; /* Amarelo para seleção */
-            --cor-encontrada: #2ecc71; /* Verde para sucesso */
+            --grid-size-unit: 18px; /* Tamanho base da célula (reduzido para 25x25) */
+            --cor-principal: #2980b9; 
+            --cor-fundo: #ecf0f1; 
+            --cor-letra: #34495e; 
+            --cor-selecao: #f1c40f; 
+            --cor-encontrada: #2ecc71; 
+            --cor-tempo: #e74c3c; /* Vermelho para o timer */
         }
 
         body {
@@ -31,7 +32,7 @@
         .game-container {
             display: flex;
             flex-direction: column;
-            max-width: 900px;
+            max-width: 1000px;
             width: 100%;
             background-color: white;
             padding: 20px;
@@ -39,12 +40,42 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
-        /* Layout em duas colunas para telas maiores */
+        /* Área de status (Tempo e Título) */
+        .status-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #bdc3c7;
+        }
+
+        #timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--cor-principal);
+            min-width: 80px;
+            text-align: right;
+            transition: color 0.5s;
+        }
+
+        #timer.low-time {
+            color: var(--cor-tempo);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Layout em duas colunas */
         .content-wrapper {
             display: flex;
             flex-direction: row;
             gap: 20px;
-            flex-wrap: wrap; /* Envolve em telas pequenas */
+            flex-wrap: wrap; 
             justify-content: center;
         }
 
@@ -52,51 +83,86 @@
         #wordSearchGrid {
             display: grid;
             border: 1px solid #bdc3c7;
-            touch-action: none; /* Essencial para toque em celular */
+            touch-action: none; 
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
         }
 
         .cell {
-            width: var(--grid-size);
-            height: var(--grid-size);
+            width: var(--grid-size-unit);
+            height: var(--grid-size-unit);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            font-size: calc(var(--grid-size) * 0.5); /* Fonte adaptativa */
+            font-size: calc(var(--grid-size-unit) * 0.55); 
             cursor: pointer;
             user-select: none;
             position: relative;
         }
 
-        /* Efeito de Seleção (Drag/Touch) */
         .cell.selected {
             background-color: var(--cor-selecao);
             color: white;
         }
 
-        /* Efeito de Encontrada */
         .cell.found {
             background-color: var(--cor-encontrada);
             color: white;
-            border-radius: 5px;
+            border-radius: 2px;
             transition: background-color 0.3s;
         }
+        
+        .game-over-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .game-over-overlay h2 {
+            font-size: 3rem;
+            margin: 0;
+        }
+        
+        .game-over-overlay button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--cor-principal);
+            color: white;
+        }
+
 
         /* --- Lista de Palavras --- */
         #wordList {
             list-style: none;
             padding: 0;
-            flex-basis: 250px;
+            flex-basis: 300px;
             flex-grow: 1;
             text-align: left;
+            columns: 2; /* Divide a lista em duas colunas */
+            column-gap: 20px;
         }
 
         #wordList li {
-            font-size: 1.1rem;
+            font-size: 1rem;
             margin: 5px 0;
             padding: 2px 0;
             transition: color 0.3s;
+            break-inside: avoid; /* Evita quebras de linha dentro do item */
         }
 
         #wordList li.found {
@@ -112,55 +178,67 @@
             }
             #wordSearchGrid {
                 /* Ajusta o tamanho da célula para caber na tela */
-                --grid-size: calc((100vw - 40px) / 20); 
+                --grid-size-unit: calc((100vw - 40px) / 25); 
                 min-width: 100%;
             }
-            .game-container {
-                padding: 10px;
+            .status-area {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            #timer {
+                margin-top: 10px;
+                font-size: 1.5rem;
+            }
+            #wordList {
+                columns: 1; /* Uma coluna em telas pequenas */
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="game-container">
-        <h1>Caça-Palavras Profissional</h1>
+    <div class="game-container" style="position: relative;">
+        
+        <div class="status-area">
+            <h1>Caça-Palavras (25x25)</h1>
+            <div id="timer">05:00</div>
+        </div>
+
         <div class="content-wrapper">
             <div id="wordSearchGrid"></div>
             
             <div>
-                <h2>Palavras a Encontrar:</h2>
+                <h2>Palavras a Encontrar (<span id="foundCount">0</span>/<span id="totalCount">40</span>):</h2>
                 <ul id="wordList"></ul>
             </div>
         </div>
-        <p id="message" style="margin-top: 20px; color: var(--cor-encontrada); font-weight: bold; display: none;">Parabéns! Você encontrou todas as palavras!</p>
+        
     </div>
 
     <script>
-        // --- Configuração do Jogo ---
-        const GRID_SIZE = 20; // 20x20
+        // --- CONFIGURAÇÃO DO JOGO ---
+        const GRID_SIZE = 25; 
+        const GAME_DURATION_SECONDS = 300; // 5 minutos
         const GRID_ID = 'wordSearchGrid';
         const LIST_ID = 'wordList';
 
-        // Lista de palavras (em MAIÚSCULAS para simplificar)
+        // 40 palavras para um bom desafio de 25x25
         const WORDS_TO_FIND = [
             "ALGORITMO", "JAVASCRIPT", "PROGRAMACAO", "TECNOLOGIA",
-            "FRONTEND", "BACKEND", "SERVIDOR", "NAVEGADOR", 
+            "FRONTEND", "BACKEND", "SERVIDOR", "NAVEGADOR",
             "RESPONSIVIDADE", "COMPUTADOR", "SISTEMA", "SOFTWARE",
             "HARDWARE", "DESENVOLVIMENTO", "API", "COMPILADOR",
-            "FLUXOGRAMA", "DADOS", "CLOUD", "DEBUG"
+            "FLUXOGRAMA", "DADOS", "CLOUD", "DEBUG",
+            "INTELIGENCIA", "ARTIFICIAL", "MODELAGEM", "ESTRUTURA",
+            "VARIAVEL", "FUNCAO", "METODOLOGIA", "EXPERIENCIA",
+            "USUARIO", "DESIGN", "OTIMIZACAO", "CRIPTOGRAFIA",
+            "SEGURANCA", "INTERNET", "REDE", "PROJETO",
+            "CODIGO", "COMPUTACAO", "INTERACAO", "INTERFACE"
         ];
 
-        // Direções de busca (Row Delta, Col Delta)
+        // Direções de busca: Direita, Baixo, Diagonal Baixo-Direita, Diagonal Baixo-Esquerda
         const DIRECTIONS = [
-            [0, 1],   // Direita (Horizontal)
-            [1, 0],   // Baixo (Vertical)
-            [1, 1],   // Diagonal Baixo-Direita
-            [1, -1],  // Diagonal Baixo-Esquerda
-            // [0, -1], // Esquerda (Opcional: palavras invertidas)
-            // [-1, 0], // Cima (Opcional: palavras invertidas)
-            // [-1, 1], // Diagonal Cima-Direita
-            // [-1, -1] // Diagonal Cima-Esquerda
+            [0, 1], [1, 0], [1, 1], [1, -1]
         ];
 
         // --- Variáveis de Estado ---
@@ -170,29 +248,92 @@
         let startCell = null;
         let endCell = null;
         let selectedCells = [];
+        let timeLeft = GAME_DURATION_SECONDS;
+        let timerInterval = null;
+        let isGameOver = false;
 
-        // --- Funções de Inicialização e Geração de Grid ---
+        // --- LÓGICA DO TEMPO ---
 
-        /**
-         * Inicializa a matriz e o DOM do grid.
-         */
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            isGameOver = false;
+            
+            updateTimerDisplay(); // Atualiza imediatamente
+
+            timerInterval = setInterval(() => {
+                if (isGameOver) {
+                    clearInterval(timerInterval);
+                    return;
+                }
+                
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    gameOver(false); // Fim de jogo por tempo
+                }
+
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const timerElement = document.getElementById('timer');
+
+            timerElement.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Efeito visual de tempo acabando
+            if (timeLeft <= 60 && timeLeft > 0) {
+                timerElement.classList.add('low-time');
+            } else {
+                timerElement.classList.remove('low-time');
+            }
+        }
+
+        function gameOver(win) {
+            isGameOver = true;
+            clearInterval(timerInterval);
+            
+            const container = document.querySelector('.game-container');
+            const overlay = document.createElement('div');
+            overlay.classList.add('game-over-overlay');
+            
+            let message = '';
+            let subtext = '';
+
+            if (win) {
+                message = 'VITÓRIA!';
+                subtext = 'Parabéns, você encontrou todas as palavras a tempo!';
+                overlay.style.backgroundColor = 'rgba(46, 204, 113, 0.9)'; // Verde
+            } else {
+                message = 'TEMPO ESGOTADO!';
+                subtext = `Você encontrou ${foundWords.size} de ${WORDS_TO_FIND.length} palavras.`;
+                overlay.style.backgroundColor = 'rgba(231, 76, 60, 0.9)'; // Vermelho
+            }
+
+            overlay.innerHTML = `
+                <h2>${message}</h2>
+                <p>${subtext}</p>
+                <button onclick="window.location.reload()">Jogar Novamente</button>
+            `;
+            
+            container.appendChild(overlay);
+        }
+
+        // --- LÓGICA DA GERAÇÃO DO GRID (Mantida) ---
+
         function initializeGrid() {
             grid = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(''));
             const gridElement = document.getElementById(GRID_ID);
             gridElement.style.gridTemplateColumns = `repeat(${GRID_SIZE}, 1fr)`;
-
-            // Limpa e Adiciona Eventos de Drag/Touch
             gridElement.innerHTML = '';
-            addDragListeners(gridElement);
+            document.getElementById('totalCount').textContent = WORDS_TO_FIND.length;
         }
 
-        /**
-         * Tenta posicionar uma palavra no grid.
-         * @param {string} word - A palavra a ser inserida.
-         * @returns {boolean} - Verdadeiro se a palavra foi colocada com sucesso.
-         */
         function placeWord(word) {
-            // Tenta 100 vezes para evitar loops infinitos em grids cheios
             for (let attempt = 0; attempt < 100; attempt++) {
                 const dirIndex = Math.floor(Math.random() * DIRECTIONS.length);
                 const [dr, dc] = DIRECTIONS[dirIndex];
@@ -202,15 +343,13 @@
                 
                 let fits = true;
                 
-                // 1. Verifica se cabe (limite do grid)
                 const endR = startR + (word.length - 1) * dr;
                 const endC = startC + (word.length - 1) * dc;
                 
                 if (endR < 0 || endR >= GRID_SIZE || endC < 0 || endC >= GRID_SIZE) {
-                    continue; // Não cabe
+                    continue; 
                 }
 
-                // 2. Verifica colisões
                 for (let k = 0; k < word.length; k++) {
                     const r = startR + k * dr;
                     const c = startC + k * dc;
@@ -218,12 +357,11 @@
                     const cellContent = grid[r][c];
                     
                     if (cellContent !== '' && cellContent !== word[k]) {
-                        fits = false; // Colisão com letra diferente
+                        fits = false; 
                         break;
                     }
                 }
 
-                // 3. Insere a palavra
                 if (fits) {
                     for (let k = 0; k < word.length; k++) {
                         const r = startR + k * dr;
@@ -233,12 +371,9 @@
                     return true;
                 }
             }
-            return false; // Falhou após todas as tentativas
+            return false; 
         }
 
-        /**
-         * Preenche as células vazias com letras aleatórias.
-         */
         function fillEmptyCells() {
             const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             for (let r = 0; r < GRID_SIZE; r++) {
@@ -251,9 +386,6 @@
             }
         }
 
-        /**
-         * Renderiza o grid na tela e a lista de palavras.
-         */
         function renderGrid() {
             const gridElement = document.getElementById(GRID_ID);
             const listElement = document.getElementById(LIST_ID);
@@ -279,31 +411,30 @@
             });
         }
 
-        // --- Lógica de Arrastar e Soltar (Drag/Touch) ---
+        // --- LÓGICA DE DRAG/TOUCH (Corrigida e Mantida) ---
 
         function getCellFromEvent(e) {
             let target = e.target;
             while (target && !target.classList.contains('cell')) {
+                if (target.id === GRID_ID) { 
+                    const gridRect = target.getBoundingClientRect();
+                    const cellSize = gridRect.width / GRID_SIZE;
+                    const c = Math.floor((e.clientX - gridRect.left) / cellSize);
+                    const r = Math.floor((e.clientY - gridRect.top) / cellSize);
+                    
+                    if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) {
+                        return document.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                    }
+                }
                 target = target.parentNode;
             }
             return target;
         }
 
-        function addDragListeners(element) {
-            // MOUSE
-            element.addEventListener('mousedown', startDrag);
-            document.addEventListener('mouseup', endDrag);
-            document.addEventListener('mousemove', drag);
-
-            // TOUCH (Para celular)
-            element.addEventListener('touchstart', (e) => startDrag(e.touches[0]));
-            document.addEventListener('touchend', (e) => endDrag(e.changedTouches[0]));
-            document.addEventListener('touchmove', (e) => drag(e.touches[0]));
-        }
-
         function startDrag(e) {
+            if (isGameOver) return; // Não permite seleção se o jogo acabou
             const cell = getCellFromEvent(e);
-            if (!cell || cell.classList.contains('found')) return; // Ignora células encontradas
+            if (!cell || cell.classList.contains('found')) return; 
             
             isDragging = true;
             startCell = cell;
@@ -312,12 +443,12 @@
         }
 
         function drag(e) {
-            if (!isDragging) return;
-            
-            // Previne o zoom/scroll no celular durante o arrasto
+            if (!isDragging || isGameOver) return;
             e.preventDefault(); 
             
-            const cell = getCellFromEvent(e);
+            const elementUnderPointer = document.elementFromPoint(e.clientX, e.clientY); 
+            const cell = getCellFromEvent({ target: elementUnderPointer, clientX: e.clientX, clientY: e.clientY });
+
             if (!cell) return;
 
             if (cell !== endCell) {
@@ -327,28 +458,22 @@
         }
 
         function endDrag(e) {
-            if (!isDragging) return;
+            if (!isDragging || isGameOver) return;
             isDragging = false;
 
-            // Finaliza o arrasto e verifica a palavra
             if (startCell && endCell) {
                 checkSelectedWord();
             }
 
-            // Limpa o estado da seleção
             startCell = null;
             endCell = null;
             selectedCells.forEach(cell => cell.classList.remove('selected'));
             selectedCells = [];
         }
 
-        /**
-         * Atualiza visualmente as células selecionadas.
-         */
         function updateSelection() {
             if (!startCell || !endCell) return;
 
-            // Limpa seleção anterior
             selectedCells.forEach(cell => cell.classList.remove('selected'));
             selectedCells = [];
 
@@ -360,8 +485,7 @@
             const dr = Math.sign(r2 - r1);
             const dc = Math.sign(c2 - c1);
 
-            // Se for diagonal, horizontal ou vertical
-            if (dr === 0 || dc === 0 || Math.abs(dr) === Math.abs(dc)) {
+            if (dr === 0 || dc === 0 || Math.abs(r2 - r1) === Math.abs(c2 - c1)) {
                 let r = r1;
                 let c = c1;
 
@@ -380,19 +504,12 @@
             }
         }
         
-        /**
-         * Verifica se a sequência de letras selecionada corresponde a uma palavra na lista.
-         */
         function checkSelectedWord() {
             if (selectedCells.length === 0) return;
 
-            // Constrói a palavra na ordem da seleção
             let selectedWord = selectedCells.map(cell => cell.textContent).join('');
-
-            // Constrói a palavra invertida (para cobrir buscas em direções não primárias)
             let reversedWord = selectedCells.map(cell => cell.textContent).reverse().join('');
             
-            // Verifica se a palavra ou sua inversa está na lista
             let found = false;
             let foundMatch = '';
 
@@ -406,49 +523,58 @@
 
             if (found) {
                 if (!foundWords.has(foundMatch)) {
-                    // Marca a palavra como encontrada
                     foundWords.add(foundMatch);
 
-                    // Atualiza o DOM
                     selectedCells.forEach(cell => {
                         cell.classList.remove('selected');
                         cell.classList.add('found');
                     });
                     document.getElementById(`word-${foundMatch}`).classList.add('found');
-
+                    document.getElementById('foundCount').textContent = foundWords.size; // Atualiza contador
+                    
                     if (foundWords.size === WORDS_TO_FIND.length) {
-                        document.getElementById('message').style.display = 'block';
+                        gameOver(true); // Fim de jogo por vitória!
                     }
                 } else {
-                    // Se a palavra já foi encontrada, apenas limpa a seleção
                     selectedCells.forEach(cell => cell.classList.remove('selected'));
                 }
             }
-            // Se não encontrou, a função endDrag limpará a seleção.
         }
 
         // --- Inicialização Principal ---
 
         function initializeGame() {
-            // 1. Configuração do Grid
             initializeGrid();
 
-            // 2. Tenta posicionar todas as palavras
-            WORDS_TO_FIND.sort((a, b) => b.length - a.length); // Tenta colocar as maiores primeiro
+            WORDS_TO_FIND.sort((a, b) => b.length - a.length); 
             WORDS_TO_FIND.forEach(word => {
                 if (!placeWord(word)) {
-                    console.warn(`Não foi possível posicionar a palavra: ${word}. Reduza o tamanho ou adicione mais direções.`);
+                    // Fallback para palavras que não couberam, garantindo que o jogo não quebre
+                    console.warn(`Palavra removida: ${word}. Reduza o tamanho da lista ou do grid.`);
                 }
             });
 
-            // 3. Preenche o restante
             fillEmptyCells();
-
-            // 4. Renderiza
             renderGrid();
+            startTimer(); // Inicia o contador
         }
 
-        window.onload = initializeGame;
+        // Adiciona os Listeners de Drag/Touch globalmente no carregamento da página
+        window.onload = () => {
+             const gridElement = document.getElementById(GRID_ID);
+             
+             // Eventos de Mouse
+             gridElement.addEventListener('mousedown', startDrag);
+             document.addEventListener('mouseup', endDrag);
+             document.addEventListener('mousemove', drag);
+ 
+             // Eventos de Toque
+             gridElement.addEventListener('touchstart', (e) => startDrag(e.touches[0]));
+             document.addEventListener('touchend', (e) => endDrag(e.changedTouches[0]));
+             document.addEventListener('touchmove', (e) => drag(e.touches[0]));
+
+             initializeGame();
+        };
 
     </script>
 </body>
