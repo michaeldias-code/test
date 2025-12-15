@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Palavras Cruzadas</title>
 
 <style>
 :root {
-  --size: 32px;
+  --cell: 32px;
   --border: #ccc;
   --bg: #f4f6f7;
-  --cell: #fff;
   --active: #ffeaa7;
   --highlight: #f1c40f;
   --correct: #d4f8c4;
@@ -39,13 +38,11 @@ body {
 }
 
 .cell {
-  width: var(--size);
-  height: var(--size);
+  width: var(--cell);
+  height: var(--cell);
   border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
+  background: white;
 }
 
 .cell.empty {
@@ -53,8 +50,8 @@ body {
   border: none;
 }
 
-.cell.active { background: var(--active); }
 .cell.highlight { background: var(--highlight); }
+.cell.active { background: var(--active); }
 .cell.correct { background: var(--correct); }
 .cell.error { background: var(--error); }
 
@@ -63,6 +60,7 @@ body {
   top: 2px;
   left: 3px;
   font-size: 0.6rem;
+  font-weight: bold;
   color: #3498db;
 }
 
@@ -73,8 +71,8 @@ body {
   background: transparent;
   text-align: center;
   font-size: 1.2rem;
-  text-transform: uppercase;
   font-weight: bold;
+  text-transform: uppercase;
   outline: none;
 }
 
@@ -121,9 +119,9 @@ body {
 </div>
 
 <script>
-/* =======================
+/* =====================
    DADOS
-======================= */
+===================== */
 
 const DATA = {
   size: 10,
@@ -140,21 +138,20 @@ const DATA = {
   ]
 };
 
-/* =======================
+/* =====================
    ESTADO
-======================= */
+===================== */
 
 const State = {
   grid: [],
   words: [],
   activeWord: null,
-  activeCell: null,
-  direction: 'H'
+  activeCell: null
 };
 
-/* =======================
-   INICIALIZAÇÃO
-======================= */
+/* =====================
+   INIT
+===================== */
 
 function init() {
   createGrid();
@@ -163,6 +160,10 @@ function init() {
   renderClues();
 }
 
+/* =====================
+   GRID & WORDS
+===================== */
+
 function createGrid() {
   State.grid = Array.from({ length: DATA.size }, (_, r) =>
     Array.from({ length: DATA.size }, (_, c) => ({
@@ -170,6 +171,7 @@ function createGrid() {
       letter: '',
       correct: null,
       words: [],
+      number: null,
       el: null,
       input: null
     }))
@@ -186,6 +188,9 @@ function registerWords() {
       const cell = State.grid[r][c];
       cell.correct = w.word[i];
       cell.words.push(w.id);
+
+      if (i === 0) cell.number = w.id;
+
       cells.push(cell);
       r += dr;
       c += dc;
@@ -195,13 +200,13 @@ function registerWords() {
   });
 }
 
-/* =======================
+/* =====================
    RENDER
-======================= */
+===================== */
 
 function renderGrid() {
   const grid = document.getElementById('grid');
-  grid.style.gridTemplateColumns = `repeat(${DATA.size}, var(--size))`;
+  grid.style.gridTemplateColumns = `repeat(${DATA.size}, var(--cell))`;
   grid.innerHTML = '';
 
   State.grid.flat().forEach(cell => {
@@ -211,11 +216,16 @@ function renderGrid() {
     if (!cell.correct) {
       div.classList.add('empty');
     } else {
+      if (cell.number) {
+        const span = document.createElement('span');
+        span.textContent = cell.number;
+        div.appendChild(span);
+      }
+
       const input = document.createElement('input');
       input.maxLength = 1;
-
-      input.oninput = () => onInput(cell);
       input.onfocus = () => focusCell(cell);
+      input.oninput = () => handleInput(cell);
       input.onkeydown = e => handleKeys(e, cell);
 
       cell.input = input;
@@ -241,55 +251,45 @@ function renderClues() {
   });
 }
 
-/* =======================
+/* =====================
    CONTROLE
-======================= */
+===================== */
 
 function focusCell(cell) {
-  clearHighlights();
-  State.activeCell = cell;
-
-  const word = State.words.find(w => w.cells.includes(cell) && w.dir === State.direction)
-             || State.words.find(w => w.cells.includes(cell));
-
+  const word = State.words.find(w => w.cells.includes(cell));
   activateWord(word);
+  State.activeCell = cell;
 }
 
 function activateWord(word) {
   if (!word) return;
   clearHighlights();
-
   State.activeWord = word;
-  State.direction = word.dir;
 
   word.cells.forEach(c => c.el.classList.add('highlight'));
   word.clueEl.classList.add('active');
 }
 
-function onInput(cell) {
+function handleInput(cell) {
   cell.letter = cell.input.value.toUpperCase();
   cell.input.value = cell.letter;
 
-  moveNext(cell);
-}
-
-function moveNext(cell) {
-  const i = State.activeWord.cells.indexOf(cell);
-  if (i >= 0 && State.activeWord.cells[i + 1]) {
-    State.activeWord.cells[i + 1].input.focus();
+  const idx = State.activeWord.cells.indexOf(cell);
+  if (idx >= 0 && State.activeWord.cells[idx + 1]) {
+    State.activeWord.cells[idx + 1].input.focus();
   }
 }
 
 function handleKeys(e, cell) {
   if (e.key === 'Backspace' && !cell.letter) {
-    const i = State.activeWord.cells.indexOf(cell);
-    if (i > 0) State.activeWord.cells[i - 1].input.focus();
+    const idx = State.activeWord.cells.indexOf(cell);
+    if (idx > 0) State.activeWord.cells[idx - 1].input.focus();
   }
 }
 
-/* =======================
-   VERIFICAÇÃO
-======================= */
+/* =====================
+   CHECK
+===================== */
 
 function checkAll() {
   State.words.forEach(w => {
@@ -310,9 +310,9 @@ function clearHighlights() {
   );
 }
 
-/* =======================
+/* =====================
    START
-======================= */
+===================== */
 
 init();
 </script>
