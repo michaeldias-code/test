@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Guitarra Web Audio</title>
+    <style>
+        /* CSS para layout e estilo otimizado para celular */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            text-align: center; 
+            background-color: #1a1a1a; 
+            color: white; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+            /* Previne o zoom padrão do navegador móvel */
+            touch-action: manipulation;
+        }
+        h1 { padding: 10px; font-size: 1.2rem; }
+        .controls { padding: 15px; background: #333; border-bottom: 2px solid #444; }
+        .controls label { display: block; margin: 5px 0; font-size: 0.9rem; }
+        .controls input[type="range"] { width: 80%; }
+        
+        #strings { 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column-reverse; /* Inverte a ordem para a E baixa ficar em cima */
+            justify-content: space-around; 
+            background: #222; 
+        }
+        .string { 
+            height: 16.66%; 
+            border-top: 2px solid #555; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.5rem; 
+            cursor: pointer;
+            user-select: none;
+        }
+        .string:active { background-color: rgba(255, 255, 255, 0.1); } /* Feedback de toque */
+        
+        .status { padding: 8px; font-size: 0.8rem; font-weight: bold; }
+        
+        /* Cores das cordas para referência visual */
+        #string-6 { background-color: #581845; } /* E baixa (mais grossa) */
+        #string-5 { background-color: #900C3F; }
+        #string-4 { background-color: #C70039; }
+        #string-3 { background-color: #FF5733; }
+        #string-2 { background-color: #FFC300; }
+        #string-1 { background-color: #DAF7A6; color: #1a1a1a; } /* E alta (mais fina) */
+    </style>
+</head>
+<body>
+    <h1>🎸 Guitarra Web Audio Simples</h1>
+    
+    <div class="status" id="audio-status">Toque em qualquer lugar para liberar o som!</div>
+    
+    <div class="controls">
+        <label>
+            Distorção/Drive: 
+            <input type="range" id="distortion-gain" min="0" max="100" value="50" step="1">
+        </label>
+    </div>
+    
+    <div id="strings">
+        <div class="string" data-frequency="82.41" id="string-6">E Baixo (E2)</div>
+        <div class="string" data-frequency="110.00" id="string-5">A (A2)</div>
+        <div class="string" data-frequency="146.83" id="string-4">D (D3)</div>
+        <div class="string" data-frequency="196.00" id="string-3">G (G3)</div>
+        <div class="string" data-frequency="246.94" id="string-2">B (B3)</div>
+        <div class="string" data-frequency="329.63" id="string-1">E Alto (E4)</div>
+    </div>
+
+<script>
+    // ----------------------------------------------------------------------
+    // Variáveis Globais para o Web Audio API
+    // ----------------------------------------------------------------------
+    let audioContext;
+    let masterGainNode;
+    let distortionNode; 
+    const stringsContainer = document.getElementById('strings');
+    const statusDiv = document.getElementById('audio-status');
+    const distortionRange = document.getElementById('distortion-gain');
+    const activeOscillators = {}; 
+
+    // ----------------------------------------------------------------------
+    // Funções de Efeitos
+    // ----------------------------------------------------------------------
+    
+    /**
+     * Cria uma curva de Waveshaper para simular Distorção/Overdrive.
+     * @param {number} amount - Quantidade de distorção (0-100).
+     */
+    function createDistortionCurve(amount) {
+        const k = typeof amount === 'number' ? amount : 50;
+        const n_samples = 44100;
+        const curve = new Float32Array(n_samples);
+        const deg = Math.PI / 180;
+        for (let i = 0; i < n_samples; ++i) {
+            const x = i * 2 / n_samples - 1;
+            // A fórmula matemática define a forma da distorção
+            curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * k * Math.abs(x));
+        }
+        return curve;
+    }
+
+    // ----------------------------------------------------------------------
+    // Inicialização do Contexto de Áudio (Gatilho de Toque)
+    // ----------------------------------------------------------------------
+
+    function initializeAudio() {
+        // Se já está inicializado ou em processo, não faça nada
+        if (audioContext && audioContext.state !== 'suspended') return;
+        
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioContext.resume(); // Tenta iniciar/retomar imediatamente
+
+            // 1. Amplificador Principal (Master Gain)
+            masterGainNode = audioContext.createGain();
+            masterGainNode.gain.value = 0.5; 
+            masterGainNode.connect(audioContext.destination);
+
+            // 2. Efeito de Distorção (Waveshaper)
+            distortionNode = audioContext.createWaveShaper();
+            distortionNode.curve = createDistortionCurve(distortionRange.value); 
+            distortionNode.oversample = '4x'; 
+
+            // Conexão do Efeito ao Master: Distorção -> Master -> Saída
+            distortionNode.connect(masterGainNode);
+
+            statusDiv.textContent = 'Áudio Ativo. Tente tocar as cordas!';
+            statusDiv.style.backgroundColor = '#28a745'; // Verde
+            
+            // Coloque o tag aqui para ilustrar o fluxo de sinal Web Audio
+            // 
+
+        } catch (e) {
+            statusDiv.textContent = 'ERRO: Não foi possível iniciar o Web Audio API.';
+            statusDiv.style.backgroundColor = '#dc3545'; // Vermelho
+            console.error("Web Audio Init Error:", e);
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // Função para Tocar a Corda (Ativação)
+    // ----------------------------------------------------------------------
+
+    function startString(event) {
+        // Previne a rolagem ou comportamento padrão ao tocar
+        event.preventDefault(); 
+
+        initializeAudio();
+        if (!audioContext || audioContext.state !== 'running') return;
+
+        const stringElement = event.target.closest('.string');
+        if (!stringElement) return;
+
+        const freq = parseFloat(stringElement.dataset.frequency);
+        const id = stringElement.id;
+
+        // Limita a um toque por corda (evita ruído)
+        if (activeOscillators[id]) {
+            // Se já está tocando, reinicia (simula o pluck)
+            activeOscillators[id].oscillator.stop();
+            delete activeOscillators[id];
+        }
+
+        // 1. Geração do Tom
+        const oscillator = audioContext.createOscillator();
+        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+        oscillator.type = 'sawtooth'; 
+
+        // 2. Simulação de Volume/Decaimento (ADSR simplificado)
+        const oscillatorGain = audioContext.createGain();
+        oscillatorGain.gain.setValueAtTime(0, audioContext.currentTime); 
+
+        const decayTime = 1.8; // Duração total da nota em segundos
+        
+        // Rápido ataque (subir o volume)
+        oscillatorGain.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.01); 
+        // Decaimento para sustain (mantém por um breve momento)
+        oscillatorGain.gain.exponentialRampToValueAtTime(0.5, audioContext.currentTime + 0.1); 
+        // Solta/release (decaimento lento até o fim)
+        oscillatorGain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + decayTime); 
+
+        // 3. Conexão na Cadeia de Efeitos
+        oscillator.connect(oscillatorGain);
+        oscillatorGain.connect(distortionNode); // Conecta ao efeito de distorção
+
+        // 4. Iniciar e Armazenar
+        oscillator.start();
+        activeOscillators[id] = { oscillator, gain: oscillatorGain };
+
+        // Limpar o oscilador após o decaimento
+        oscillator.stop(audioContext.currentTime + decayTime);
+        oscillator.onended = () => {
+            delete activeOscillators[id];
+        };
+    }
+    
+    // ----------------------------------------------------------------------
+    // Event Listeners
+    // ----------------------------------------------------------------------
+
+    // 1. Inicializa o áudio no primeiro toque em qualquer parte do body
+    document.body.addEventListener('touchstart', initializeAudio, {once: true});
+    document.body.addEventListener('mousedown', initializeAudio, {once: true});
+
+    // 2. Event Listeners para Tocar as Cordas (Touch e Mouse para compatibilidade)
+    stringsContainer.addEventListener('touchstart', startString);
+    stringsContainer.addEventListener('mousedown', startString); 
+
+    // 3. Listener para o controle de distorção (atualização do efeito)
+    distortionRange.addEventListener('input', (e) => {
+        if (distortionNode) {
+            // A distorção precisa ser atualizada recriando a curva
+            distortionNode.curve = createDistortionCurve(parseFloat(e.target.value));
+        }
+    });
+
+</script>
+</body>
+</html>
