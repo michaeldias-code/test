@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração Correta - Permissão de Áudio Kodular</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .header p {
+            opacity: 0.95;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .alert-success {
+            background: #d1f2eb;
+            border-left: 5px solid #10b981;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .alert-success h3 {
+            color: #0f5132;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+
+        .alert-success p {
+            color: #0a3622;
+            line-height: 1.6;
+        }
+
+        .block-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+
+        .block-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .block-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .block-description {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        /* Estilos dos blocos Kodular */
+        .kodular-block {
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            display: inline-block;
+        }
+
+        .block-event {
+            background: #8B4513;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px 8px 0 0;
+            font-weight: bold;
+            font-size: 15px;
+            display: inline-block;
+            position: relative;
+        }
+
+        .block-event::before {
+            content: '⚡';
+            margin-right: 8px;
+        }
+
+        .block-body {
+            background: #ffffff;
+            padding: 20px;
+            border: 3px solid #8B4513;
+            border-top: none;
+            border-radius: 0 12px 12px 12px;
+            min-width: 400px;
+        }
+
+        .block-call {
+            background: #9C27B0;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 5px 0;
+            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(156, 39, 176, 0.3);
+        }
+
+        .block-param {
+            margin-left: 25px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .param-label {
+            background: #555;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .param-value {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+        }
+
+        .block-if {
+            background: #1E88E5;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px 8px 0 0;
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .block-if-body {
+            background: #f0f8ff;
+            padding: 15px;
+            border: 3px solid #1E88E5;
+            border-top: none;
+            border-radius: 0 12px 12px 12px;
+        }
+
+        .block-condition {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(76, 175, 80, 0.3);
+        }
+
+        .block-get {
+            background: #66BB6A;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .block-text {
+            background: #FFA726;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .block-then {
+            color: #1E88E5;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .block-indent {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .param-name {
+            background: #666;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .important-note {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+        }
+
+        .important-note h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .important-note ul {
+            margin-left: 20px;
+            color: #664d03;
+            line-height: 1.8;
+        }
+
+        .tip-box {
+            background: #e7f3ff;
+            border-left: 5px solid #2196F3;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .tip-box h3 {
+            color: #0d47a1;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+            
+            .block-body {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .block-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Configuração Correta dos Blocos Kodular</h1>
+            <p><strong>Permissão de Áudio para Afinador Musical</strong></p>
+            <div class="subtitle">
+                ✅ Esta é a configuração que resolve o problema de permissão negada automaticamente
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="alert-success">
+                <h3>✅ Solução Completa</h3>
+                <p>Copie exatamente esta configuração de blocos no seu projeto Kodular. Esta é a forma correta de solicitar e tratar a permissão de áudio, evitando que ela seja negada antes de ser pedida ao usuário.</p>
+            </div>
+
+            <!-- BLOCO 1 -->
+            <div class="block-section">
+                <div class="block-title">
+                    <div class="block-number">1</div>
+                    <span>Solicitar Permissão ao Iniciar o App</span>
+                </div>
+                
+                <div class="block-description">
+                    <strong>O que faz:</strong> Quando o app abre pela primeira vez, solicita a permissão de áudio ao usuário antes de tentar usar o microfone.
+                </div>
+
+                <div class="kodular-block">
+                    <div class="block-event">when Screen1 . Initialize</div>
+                    <div class="block-body">
+                        <div class="block-call">
+                            call Screen1 . AskForPermission
+                        </div>
+                        <div class="block-param">
+                            <span class="param-label">permission</span>
+                            <span class="param-value">"android.permission.RECORD_AUDIO"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BLOCO 2 -->
+            <div class="block-section">
+                <div class="block-title">
+                    <div class="block-number">2</div>
+                    <span>Quando Usuário PERMITIR o Áudio</span>
+                </div>
+                
+                <div class="block-description">
+                    <strong>O que faz:</strong> Se o usuário aceitar a permissão, o app pode iniciar o gravador de áudio para capturar e analisar o som do instrumento.
+                </div>
+
+                <div class="kodular-block">
+                    <div class="block-event">
+                        when Screen1 . PermissionGranted
+                        <span class="param-name">permissionName</span>
+                    </div>
+                    <div class="block-body">
+                        <div class="block-if">if</div>
+                        <div class="block-if-body">
+                            <div class="block-condition">
+                                <span>=</span>
+                                <span class="block-get">get permissionName</span>
+                                <span class="block-text">"android.permission.RECORD_AUDIO"</span>
+                            </div>
+                            
+                            <div class="block-then">then:</div>
+                            <div class="block-indent">
+                                <div class="block-call">call SoundRecorder1 . Start</div>
+                                <div style="margin-top: 10px; color: #666; font-size: 13px;">
+                                    // Agora pode usar o microfone!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tip-box">
+                    <h3>💡 Dica</h3>
+                    <p>Você pode substituir <code>SoundRecorder1.Start</code> por qualquer ação que precise do microfone, como iniciar análise de frequência ou ativar um botão.</p>
+                </div>
+            </div>
+
+            <!-- BLOCO 3 -->
+            <div class="block-section">
+                <div class="block-title">
+                    <div class="block-number">3</div>
+                    <span>Quando Usuário NEGAR o Áudio</span>
+                </div>
+                
+                <div class="block-description">
+                    <strong>O que faz:</strong> Se o usuário negar a permissão, mostra uma mensagem explicando que o afinador precisa do microfone para funcionar.
+                </div>
+
+                <div class="kodular-block">
+                    <div class="block-event">
+                        when Screen1 . PermissionDenied
+                        <span class="param-name">permissionName</span>
+                    </div>
+                    <div class="block-body">
+                        <div class="block-if">if</div>
+                        <div class="block-if-body">
+                            <div class="block-condition">
+                                <span>=</span>
+                                <span class="block-get">get permissionName</span>
+                                <span class="block-text">"android.permission.RECORD_AUDIO"</span>
+                            </div>
+                            
+                            <div class="block-then">then:</div>
+                            <div class="block-indent">
+                                <div class="block-call">
+                                    call Notifier1 . ShowAlert
+                                </div>
+                                <div class="block-param">
+                                    <span class="param-label">notice</span>
+                                    <span class="param-value">"O afinador precisa de permissão de áudio para funcionar!"</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOTAS IMPORTANTES -->
+            <div class="important-note">
+                <h3>⚠️ Pontos Críticos para Funcionar</h3>
+                <ul>
+                    <li><strong>NUNCA chame SoundRecorder.Start</strong> antes de solicitar a permissão</li>
+                    <li><strong>SEMPRE peça a permissão no evento Initialize</strong> do Screen1</li>
+                    <li><strong>Adicione a permissão nas Propriedades:</strong> Selecione Screen1 → Properties → Permissions → Adicione "android.permission.RECORD_AUDIO"</li>
+                    <li><strong>Adicione o componente Notifier:</strong> Palette → User Interface → Notifier</li>
+                    <li><strong>Use exatamente este texto:</strong> "android.permission.RECORD_AUDIO" (com pontos e tudo)</li>
+                </ul>
+            </div>
+
+            <div class="tip-box">
+                <h3>🎯 Como Usar Esta Configuração</h3>
+                <p><strong>Passo 1:</strong> Copie estes 3 blocos exatamente como estão mostrados acima</p>
+                <p><strong>Passo 2:</strong> Cole no seu projeto Kodular (área de Blocks)</p>
+                <p><strong>Passo 3:</strong> Certifique-se de que tem o componente SoundRecorder1 e Notifier1</p>
+                <p><strong>Passo 4:</strong> Teste o app - agora a permissão será solicitada corretamente!</p>
+            </div>
+
+            <div class="alert-success" style="margin-top: 30px;">
+                <h3>🎉 Resultado Esperado</h3>
+                <p>Quando o usuário abrir seu app pela primeira vez, aparecerá uma janela do Android perguntando "Permitir que [Seu App] grave áudio?". Se ele clicar em "Permitir", o afinador funcionará. Se clicar em "Negar", aparecerá sua mensagem explicativa.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
