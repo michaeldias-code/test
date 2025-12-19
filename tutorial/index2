@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia: Permissão de Áudio no Kodular</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .progress-bar {
+            background: #f0f0f0;
+            height: 8px;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-size: 24px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .step-content {
+            margin-bottom: 30px;
+        }
+
+        .instruction {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .instruction h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .instruction p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .copy-btn.copied {
+            background: #10b981;
+        }
+
+        .visual-guide {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .visual-step {
+            display: flex;
+            align-items: start;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 8px;
+        }
+
+        .visual-step-num {
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .alert-success {
+            background: #d1e7dd;
+            border-left-color: #10b981;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .alert h4 {
+            margin-bottom: 8px;
+            color: #856404;
+        }
+
+        .alert-success h4 {
+            color: #0f5132;
+        }
+
+        .alert-error h4 {
+            color: #721c24;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .checklist {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checklist-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .checkbox.checked {
+            background: #667eea;
+        }
+
+        .checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+        }
+
+        .step-info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 Configuração de Permissão de Áudio no Kodular</h1>
+            <p>Guia passo a passo para afinador musical</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <div class="content">
+            <!-- Passo 1 -->
+            <div class="step active" data-step="1">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Entendendo o Problema</div>
+                </div>
+                
+                <div class="step-content">
+                    <div class="alert alert-error">
+                        <h4>⚠️ Problema Comum</h4>
+                        <p>O Kodular pode negar a permissão antes mesmo de pedir ao usuário. Isso acontece porque a permissão não está configurada corretamente no projeto.</p>
+                    </div>
+
+                    <div class="instruction">
+                        <h3>Por que isso acontece?</h3>
+                        <p>O Android requer que as permissões sejam declaradas no <strong>AndroidManifest.xml</strong> e solicitadas em tempo de execução (runtime) para Android 6.0+.</p>
+                        <p>No Kodular, você precisa:</p>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Adicionar a permissão nas configurações do projeto</li>
+                            <li>Usar os blocos corretos para solicitar a permissão</li>
+                            <li>Verificar o status antes de usar o microfone</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" disabled>← Anterior</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Próximo →</button>
+                </div>
+            </div>
+
+            <!-- Passo 2 -->
+            <div class="step" data-step="2">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Configurar Permissões no Projeto</div>
+                </div>
+                
+                <div class="step-content">
+                    <div class="instruction">
+                        <h3>📋 Adicionar Permissão no Screen</h3>
+                        <p>Primeiro, vamos adicionar a permissão no Screen principal do seu app:</p>
+                    </div>
+
+                    <div class="visual-guide">
+                        <h3 style="margin-bottom: 15px; color: #667eea;">Passos Visuais:</h3>
+                        <div class="visual-step">
+                            <div class="visual-step-num">1</div>
+                            <div>
+                                <strong>Selecione o Screen1</strong><br>
+                                Clique no componente "Screen1" na árvore de componentes (lado esquerdo)
+                            </div>
+                        </div>
+                        <div class="visual-step">
+                            <div class="visual-step-num">2</div>
+                            <div>
+                                <strong>Vá para Properties</strong><br>
+                                No painel direito, procure a seção "Properties" (Propriedades)
+                            </div>
+                        </div>
+                        <div class="visual-step">
+                            <div class="visual-step-num">3</div>
+                            <div>
+                                <strong>Encontre "Permissions"</strong><br>
+                                Role para baixo até encontrar a propriedade chamada "Permissions"
+                            </div>
+                        </div>
+                        <div class="visual-step">
+                            <div class="visual-step-num">4</div>
+                            <div>
+                                <strong>Adicione a Permissão</strong><br>
+                                Clique em "Permissions" e na janela que abrir, adicione:<br>
+                                <code style="background: #f0f0f0; padding: 2px 8px; border-radius: 4px;">android.permission.RECORD_AUDIO</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert">
+                        <h4>💡 Dica Importante</h4>
+                        <p>Se não encontrar a opção "Permissions" nas propriedades do Screen, você pode adicionar manualmente usando a extensão "Permission" ou configurando via blocos.</p>
+                    </div>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevStep()">← Anterior</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Próximo →</button>
+                </div>
+            </div>
+
+            <!-- Passo 3 -->
+            <div class="step" data-step="3">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Adicionar Componentes Necessários</div>
+                </div>
+                
+                <div class="step-content">
+                    <div class="instruction">
+                        <h3>🔧 Componentes do Kodular</h3>
+                        <p>Você precisará adicionar estes componentes ao seu projeto:</p>
+                    </div>
+
+                    <div class="visual-guide">
+                        <h3 style="margin-bottom: 15px; color: #667eea;">Componentes a Adicionar:</h3>
+                        
+                        <div class="visual-step">
+                            <div class="visual-step-num">1</div>
+                            <div>
+                                <strong>Sound Recorder</strong><br>
+                                Categoria: Media → Sound Recorder<br>
+                                <em>Este é o componente que captura o áudio</em>
+                            </div>
+                        </div>
+
+                        <div class="visual-step">
+                            <div class="visual-step-num">2</div>
+                            <div>
+                                <strong>Permission Component (Opcional mas Recomendado)</strong><br>
+                                Categoria: Utilities → Permission<br>
+                                <em>Facilita o gerenciamento de permissões</em>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <h4>✅ Alternativa sem Permission Component</h4>
+                        <p>Se você não usar o componente Permission, pode usar os blocos nativos do Screen para solicitar permissões. Vamos ver ambas as formas!</p>
+                    </div>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevStep()">← Anterior</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Próximo →</button>
+                </div>
+            </div>
+
+            <!-- Passo 4 -->
+            <div class="step" data-step="4">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Programar os Blocos (Método 1 - Simples)</div>
+                </div>
+                
+                <div class="step-content">
+                    <div class="instruction">
+                        <h3>🧩 Blocos usando Screen.AskForPermission</h3>
+                        <p>Esta é a forma mais simples, usando apenas blocos nativos do Kodular:</p>
+                    </div>
+
+                    <div class="visual-guide">
+                        <h3 style="margin-bottom: 15px; color: #667eea;">Sequência de Blocos:</h3>
+                        
+                        <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <strong>Quando o Screen inicializar:</strong>
+                            <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;">
+                                1. <code>when Screen1.Initialize</code><br>
+                                2. <code>call Screen1.AskForPermission</code><br>
+                                3. permission = <code>"android.permission.RECORD_AUDIO"</code>
+                            </div>
+                        </div>
+
+                        <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <strong>Quando a permissão for concedida:</strong>
+                            <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;">
+                                1. <code>when Screen1.PermissionGranted</code><br>
+                                2. <code>if permissionName = "android.permission.RECORD_AUDIO"</code><br>
+                                3. <code>then call SoundRecorder1.Start</code> (ou sua ação)
+                            </div>
+                        </div>
+
+                        <div style="background: #f0f0f0; padding: 15px; border-radius: 8px;">
+                            <strong>Quando a permissão for negada:</strong>
+                            <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;">
+                                1. <code>when Screen1.PermissionDenied</code><br>
+                                2. <code>if permissionName = "android.permission.RECORD_AUDIO"</code><br>
+                                3. <code>then call Notifier1.ShowAlert</code><br>
+                                4. message = <code>"Permissão de áudio necessária para o afinador funcionar"</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert">
+                        <h4>⚠️ Importante</h4>
+                        <p>Sempre solicite a permissão ANTES de tentar usar o SoundRecorder. Nunca tente gravar sem verificar se a permissão foi concedida!</p>
+                    </div>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevStep()">← Anterior</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Próximo →</button>
+                </div>
+            </div>
+
+            <!-- Passo 5 -->
+            <div class="step" data-step="5">
+                <div class="step-header">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Programar os Blocos (Método 2 - Avançado)</div>
+                </div>
+                
+                <div class="step-content">
+                    <div class="instruction">
+                        <h3>🧩 Blocos usando Permission Component</h3>
+                        <p>Esta forma oferece mais controle sobre as permissões:</p>
+                    </div>
+
+                    <div class="visual-guide">
+                        <h3 style="margin-bottom: 15px; color: #667eea;">Sequência de Blocos:</h3>
+                        
+                        
+    <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <strong>Ao inicializar, verificar permissão:</strong>
+                            <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;">
+                                1. <code>when Screen1.Initialize</code><br>
+                                2. <code>if Permission1.IsPermissionGranted</code><br>
+                                3. permission = <code>"android.permission.RECORD_AUDIO"</code><br>
+                                4. <code>then</code> → pode usar o microfone<br>
+                                5. <code>else call Permission1.RequestPermission</code>
+                            </div>
+                        </div>
+
+                        <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                            <strong>Quando a permissão for concedida:</strong>
+                            <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;">
+                                1. <code>when Permission1.PermissionGranted</code><br>
+                                2. <code>call SoundRecorder1.Start</code> (iniciar gravação/análise)
+                            </div>
+                        </div>
+
+                        <div style="background: #f0f0f0; padding: 15px; border-radius: 8px;">
+                            <strong>Quando a permissão for negada:</strong>
+                            <div style="margin-top: 10px; padding: 10px; background: white; border-radius: 5px;">
+                                1. <code>when Permission1.PermissionDenied</code><br>
+                                2. Mostrar mensagem explicativa<br>
+                                3. Opcionalmente: <code>call Permission1.OpenSettings</code> (leva às configurações)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <h4>✅ Vantagem deste Método</h4>
+                        <p>O componente Permission oferece mais funcionalidades, como abrir as configurações do app e verificar múltiplas permissões facilmente.</p>
+                    </div>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevStep()">← Anterior</button>
+                    <button class="btn btn-primary" onclick="nextStep()">Próximo →</button>
+                </div>
+            </div>
+   <!-- Passo 6 -->
+            <div class="step" data-step="6">
+                <div class="step-header">
+                    <div class="step-number">6</div>
+                    <div class="step-title">Checklist Final & Solução de Problemas</div>
+                </div>
+                
+                <div class="step-content">
+                    <div class="checklist">
+                        <h3 style="margin-bottom: 15px; color: #667eea;">✓ Checklist de Verificação</h3>
+                        <div class="checklist-item" onclick="toggleCheck(this)">
+                            <div class="checkbox"></div>
+                            <div>Permissão RECORD_AUDIO adicionada nas propriedades do Screen</div>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheck(this)">
+                            <div class="checkbox"></div>
+                            <div>Componente SoundRecorder adicionado ao projeto</div>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheck(this)">
+                            <div class="checkbox"></div>
+                            <div>Blocos para solicitar permissão ao inicializar configurados</div>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheck(this)">
+                            <div class="checkbox"></div>
+                            <div>Blocos PermissionGranted configurados</div>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheck(this)">
+                            <div class="checkbox"></div>
+                            <div>Blocos PermissionDenied com mensagem ao usuário</div>
+                        </div>
+                        <div class="checklist-item" onclick="toggleCheck(this)">
+                            <div class="checkbox"></div>
+                            <div>Nunca chamar SoundRecorder antes de verificar permissão</div>
+                        </div>
+                    </div>
+
+                    <div class="instruction">
+                        <h3>🔧 Problemas Comuns e Soluções</h3>
+                    </div>
+
+                    <div class="alert alert-error">
+                        <h4>Problema: "Permissão negada automaticamente"</h4>
+                        <p><strong>Solução:</strong> Você está tentando usar o microfone antes de solicitar a permissão. Sempre solicite a permissão no Screen.Initialize e espere a resposta em PermissionGranted.</p>
+                    </div>
+
+                    <div class="alert alert-error">
+                        <h4>Problema: "App fecha ao tentar gravar"</h4>
+                        <p><strong>Solução:</strong> Verifique se a permissão está no AndroidManifest (propriedades do Screen) e se você está tratando o evento PermissionDenied.</p>
+                    </div>
+
+                    <div class="alert alert-error">
+                        <h4>Problema: "Não aparece a solicitação de permissão"</h4>
+                        <p><strong>Solução:</strong> Use <code>call Screen1.AskForPermission</code> explicitamente. Se já negou antes, o usuário precisa ir em Configurações → App → Permissões e ativar manualmente.</p>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <h4>🎉 Tudo Certo!</h4>
+                        <p>Se seguiu todos os passos, seu afinador musical agora deve solicitar a permissão corretamente e funcionar perfeitamente!</p>
+                    </div>
+                </div>
+
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="prevStep()">← Anterior</button>
+                    <button class="btn btn-primary" onclick="restartGuide()">🔄 Reiniciar Guia</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 6;
+
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showStep(stepNumber) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.querySelector(`.step[data-step="${stepNumber}"]`).classList.add('active');
+            currentStep = stepNumber;
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                showStep(currentStep + 1);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        }
+
+        function restartGuide() {
+            showStep(1);
+            document.querySelectorAll('.checkbox').forEach(box => {
+                box.classList.remove('checked');
+            });
+        }
+
+        function toggleCheck(element) {
+            const checkbox = element.querySelector('.checkbox');
+            checkbox.classList.toggle('checked');
+        }
+
+        // Inicializar
+        updateProgress();
+    </script>
+</body>
+</html>         
