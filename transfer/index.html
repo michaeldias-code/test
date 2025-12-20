@@ -64,31 +64,12 @@
 
         .info-box p {
             color: #1565c0;
-            line-height: 1.6;
-        }
-
-        .room-input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        input {
-            flex: 1;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #667eea;
+            line-height: 1.8;
         }
 
         textarea {
             width: 100%;
-            min-height: 350px;
+            min-height: 300px;
             padding: 20px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
@@ -111,6 +92,8 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
         }
 
         .btn-primary {
@@ -128,72 +111,18 @@
             color: white;
         }
 
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        .current-room {
-            background: #d1f2eb;
-            border-left: 5px solid #10b981;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-        }
-
-        .current-room h3 {
-            color: #0f5132;
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .room-id {
-            font-family: 'Courier New', monospace;
-            font-size: 24px;
-            font-weight: bold;
-            color: #667eea;
+        .qr-container {
             background: white;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 30px;
+            border-radius: 15px;
             text-align: center;
-            margin: 10px 0;
+            margin: 20px 0;
+            border: 3px solid #667eea;
         }
 
-        .button-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .button-group .btn {
-            flex: 1;
-            min-width: 140px;
-        }
-
-        .status {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .status-success {
-            background: #d1f2eb;
-            color: #0f5132;
-        }
-
-        .status-error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .status-info {
-            background: #cfe2ff;
-            color: #084298;
-        }
-
-        .hidden {
-            display: none;
+        #qrcode {
+            display: inline-block;
+            margin: 20px 0;
         }
 
         .char-count {
@@ -203,41 +132,74 @@
             margin: 10px 0;
         }
 
-        .sync-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 15px;
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: #d1f2eb;
+            color: #0f5132;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .method-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .method-card {
             background: #f8f9fa;
-            border-radius: 20px;
-            font-size: 13px;
+            padding: 25px;
+            border-radius: 15px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .method-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .method-card.active {
+            border-color: #667eea;
+            background: #e7f3ff;
+        }
+
+        .method-card h3 {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .method-card p {
             color: #666;
-        }
-
-        .sync-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            font-size: 14px;
         }
 
         @media (max-width: 600px) {
-            .room-input-group {
-                flex-direction: column;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-
-            .button-group .btn {
-                width: 100%;
+            .method-selector {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -246,258 +208,209 @@
     <div class="container">
         <div class="header">
             <h1>📱↔️💻 Compartilhar Texto</h1>
-            <p>Transfira texto entre dispositivos usando JSONBin</p>
+            <p>Transferência simples e visual entre dispositivos</p>
         </div>
 
         <div class="content">
-            <div class="info-box" id="initialInfo">
+            <div class="info-box">
                 <h3>🎯 Como funciona?</h3>
-                <p>1. Crie uma sala com um código único<br>
-                2. Cole ou digite seu texto<br>
-                3. Clique em "Salvar na Nuvem"<br>
-                4. Entre na mesma sala em outro dispositivo<br>
-                5. Clique em "Carregar da Nuvem" e pronto!</p>
+                <p><strong>Método QR Code:</strong> Digite o texto → Gerar QR → Escaneie no outro dispositivo<br>
+                <strong>Método Link:</strong> Digite o texto → Copiar Link → Abra no outro dispositivo</p>
             </div>
 
-            <div id="statusMessage" class="status hidden"></div>
+            <div id="alertBox" class="alert hidden"></div>
 
-            <!-- Seleção de sala -->
-            <div id="roomSelection">
-                <h3 style="margin-bottom: 15px; color: #333;">📍 Criar ou Entrar em uma Sala</h3>
-                <div class="room-input-group">
-                    <input 
-                        type="text" 
-                        id="roomIdInput" 
-                        placeholder="Digite um código (ex: minhaSala123)"
-                        maxlength="50"
-                    >
-                    <button class="btn btn-primary" onclick="enterRoom()">Entrar</button>
+            <h3 style="margin-bottom: 15px; color: #333;">Escolha o método:</h3>
+            <div class="method-selector">
+                <div class="method-card active" onclick="selectMethod('qr')">
+                    <h3>📷</h3>
+                    <p><strong>QR Code</strong><br>Escanear com câmera</p>
                 </div>
-                <div style="text-align: center; color: #666;">
-                    <small>💡 Use o mesmo código em todos os dispositivos</small>
+                <div class="method-card" onclick="selectMethod('link')">
+                    <h3>🔗</h3>
+                    <p><strong>Link</strong><br>Copiar e colar URL</p>
                 </div>
             </div>
 
-            <!-- Sala ativa -->
-            <div id="activeRoom" class="hidden">
-                <div class="current-room">
-                    <h3>✅ Sala Ativa</h3>
-                    <div class="room-id" id="currentRoomId"></div>
-                    <div style="text-align: center; margin-top: 10px;">
-                        <span class="sync-indicator">
-                            <span class="sync-dot"></span>
-                            <span>Sincronização ativa</span>
-                        </span>
-                    </div>
-                    <button class="btn btn-secondary" onclick="leaveRoom()" style="margin-top: 15px; width: 100%;">
-                        🚪 Sair da Sala
-                    </button>
-                </div>
+            <h3 style="margin-bottom: 15px; color: #333;">✍️ Digite ou Cole seu Texto</h3>
+            <textarea 
+                id="textInput" 
+                placeholder="Cole ou digite seu texto aqui... (máximo 2000 caracteres)"
+                maxlength="2000"
+            ></textarea>
+            <div class="char-count">
+                <span id="charCount">0</span> / 2000 caracteres
+            </div>
 
-                <h3 style="margin-bottom: 15px; color: #333;">✍️ Seu Texto Compartilhado</h3>
-                <textarea 
-                    id="sharedText" 
-                    placeholder="Cole ou digite seu texto aqui..."
-                ></textarea>
-                <div class="char-count">
-                    <span id="charCount">0</span> caracteres | Última atualização: <span id="lastUpdate">nunca</span>
+            <!-- Método QR Code -->
+            <div id="qrMethod">
+                <button class="btn btn-primary" onclick="generateQR()">📷 Gerar QR Code</button>
+                
+                <div id="qrResult" class="qr-container hidden">
+                    <h3 style="color: #333; margin-bottom: 10px;">✅ Escaneie este QR Code</h3>
+                    <p style="color: #666; margin-bottom: 15px;">Use a câmera do outro dispositivo</p>
+                    <div id="qrcode"></div>
+                    <button class="btn btn-secondary" onclick="closeQR()">Fechar</button>
                 </div>
+            </div>
 
-                <div class="button-group">
-                    <button class="btn btn-primary" onclick="saveToCloud()">☁️ Salvar na Nuvem</button>
-                    <button class="btn btn-primary" onclick="loadFromCloud()">🔄 Carregar da Nuvem</button>
-                    <button class="btn btn-secondary" onclick="copyText()">📋 Copiar</button>
-                    <button class="btn btn-secondary" onclick="clearText()">🗑️ Limpar</button>
+            <!-- Método Link -->
+            <div id="linkMethod" class="hidden">
+                <button class="btn btn-primary" onclick="generateLink()">🔗 Gerar Link</button>
+                
+                <div id="linkResult" class="hidden" style="margin-top: 20px;">
+                    <h3 style="color: #333; margin-bottom: 15px;">✅ Link Gerado</h3>
+                    <input type="text" id="generatedLink" readonly style="width: 100%; padding: 15px; border: 2px solid #667eea; border-radius: 10px; font-size: 14px; margin-bottom: 10px;">
+                    <button class="btn btn-primary" onclick="copyLink()">📋 Copiar Link</button>
+                    <p style="color: #666; margin-top: 15px; font-size: 14px;">Cole este link no navegador do outro dispositivo</p>
                 </div>
+            </div>
+
+            <!-- Área de recebimento -->
+            <div id="receivedText" class="hidden" style="margin-top: 30px;">
+                <h3 style="color: #333; margin-bottom: 15px;">📥 Texto Recebido</h3>
+                <textarea id="outputText" readonly style="background: #f8f9fa;"></textarea>
+                <button class="btn btn-primary" onclick="copyReceived()">📋 Copiar Texto</button>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
-        let currentRoom = null;
-        let binId = null;
-        let autoSyncInterval = null;
+        let currentMethod = 'qr';
 
-        const API_URL = 'https://api.jsonbin.io/v3/b';
-        const API_KEY = '$2a$10$VN7LhB8kGN5vYQZ3YM5LFuJ8Fh7LqGV7xNvQ8MQW5Lq9KN5ZF7KFO'; // Chave pública de exemplo
-
-        function enterRoom() {
-            const roomId = document.getElementById('roomIdInput').value.trim();
+        function selectMethod(method) {
+            currentMethod = method;
             
-            if (!roomId) {
-                showStatus('Por favor, digite um código para a sala', 'error');
+            document.querySelectorAll('.method-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.target.closest('.method-card').classList.add('active');
+
+            if (method === 'qr') {
+                document.getElementById('qrMethod').classList.remove('hidden');
+                document.getElementById('linkMethod').classList.add('hidden');
+            } else {
+                document.getElementById('qrMethod').classList.add('hidden');
+                document.getElementById('linkMethod').classList.remove('hidden');
+            }
+
+            closeQR();
+            document.getElementById('linkResult').classList.add('hidden');
+        }
+
+        function generateQR() {
+            const text = document.getElementById('textInput').value.trim();
+            
+            if (!text) {
+                showAlert('Por favor, digite algum texto primeiro', 'error');
                 return;
             }
 
-            currentRoom = roomId;
-            binId = 'text_share_' + btoa(roomId).replace(/=/g, '');
-
-            document.getElementById('roomSelection').classList.add('hidden');
-            document.getElementById('initialInfo').classList.add('hidden');
-            document.getElementById('activeRoom').classList.remove('hidden');
-            document.getElementById('currentRoomId').textContent = roomId;
-
-            // Carregar automaticamente
-            loadFromCloud();
-
-            // Auto-sync a cada 3 segundos
-            autoSyncInterval = setInterval(loadFromCloud, 3000);
-
-            showStatus('✅ Conectado à sala: ' + roomId, 'success');
-        }
-
-        function leaveRoom() {
-            if (autoSyncInterval) {
-                clearInterval(autoSyncInterval);
+            if (text.length > 2000) {
+                showAlert('Texto muito longo para QR Code (máximo 2000 caracteres)', 'warning');
+                return;
             }
 
-            currentRoom = null;
-            binId = null;
+            const qrContainer = document.getElementById('qrcode');
+            qrContainer.innerHTML = '';
 
-            document.getElementById('activeRoom').classList.add('hidden');
-            document.getElementById('roomSelection').classList.remove('hidden');
-            document.getElementById('initialInfo').classList.remove('hidden');
-            document.getElementById('sharedText').value = '';
-            updateCharCount();
+            document.getElementById('qrResult').classList.remove('hidden');
 
-            showStatus('Você saiu da sala', 'info');
+            new QRCode(qrContainer, {
+                text: text,
+                width: 300,
+                height: 300,
+                colorDark: "#667eea",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+
+            showAlert('QR Code gerado! Escaneie com a câmera', 'success');
         }
 
-        async function saveToCloud() {
-            if (!currentRoom) return;
+        function closeQR() {
+            document.getElementById('qrResult').classList.add('hidden');
+        }
 
-            const text = document.getElementById('sharedText').value;
-            showStatus('⏳ Salvando...', 'info');
-
-            try {
-                // Salvar no localStorage primeiro (backup)
-                localStorage.setItem(currentRoom, text);
-
-                // Tentar salvar na nuvem usando jsonplaceholder (mock API)
-                const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        title: currentRoom,
-                        body: text,
-                        userId: 1
-                    })
-                });
-
-                if (response.ok) {
-                    updateLastUpdate();
-                    showStatus('✅ Salvo! (Use o mesmo código em outro dispositivo)', 'success');
-                } else {
-                    throw new Error('Falha ao salvar');
-                }
-            } catch (error) {
-                showStatus('⚠️ Salvo apenas localmente (use o botão Carregar)', 'info');
+        function generateLink() {
+            const text = document.getElementById('textInput').value.trim();
+            
+            if (!text) {
+                showAlert('Por favor, digite algum texto primeiro', 'error');
+                return;
             }
+
+            const encoded = encodeURIComponent(text);
+            const baseUrl = window.location.href.split('?')[0];
+            const link = `${baseUrl}?text=${encoded}`;
+
+            document.getElementById('generatedLink').value = link;
+            document.getElementById('linkResult').classList.remove('hidden');
+
+            showAlert('Link gerado! Copie e cole no outro dispositivo', 'success');
         }
 
-        async function loadFromCloud() {
-            if (!currentRoom) return;
-
-            try {
-                // Carregar do localStorage
-                const localText = localStorage.getItem(currentRoom);
-                
-                if (localText) {
-                    const textarea = document.getElementById('sharedText');
-                    if (textarea.value !== localText && document.activeElement !== textarea) {
-                        textarea.value = localText;
-                        updateCharCount();
-                        updateLastUpdate();
-                    }
-                }
-            } catch (error) {
-                console.log('Erro ao carregar:', error);
-            }
-        }
-
-        function copyText() {
-            const textarea = document.getElementById('sharedText');
-            textarea.select();
-            textarea.setSelectionRange(0, 99999); // Para mobile
+        function copyLink() {
+            const linkInput = document.getElementById('generatedLink');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999);
             
             try {
                 document.execCommand('copy');
-                showStatus('📋 Texto copiado!', 'success');
+                showAlert('Link copiado! Cole no outro dispositivo', 'success');
             } catch (err) {
-                // Fallback para navegadores modernos
-                navigator.clipboard.writeText(textarea.value).then(() => {
-                    showStatus('📋 Texto copiado!', 'success');
-                }).catch(() => {
-                    showStatus('❌ Erro ao copiar', 'error');
+                navigator.clipboard.writeText(linkInput.value).then(() => {
+                    showAlert('Link copiado! Cole no outro dispositivo', 'success');
                 });
             }
         }
 
-        function clearText() {
-            if (confirm('Tem certeza que deseja limpar o texto?')) {
-                document.getElementById('sharedText').value = '';
-                updateCharCount();
-                if (currentRoom) {
-                    localStorage.removeItem(currentRoom);
-                }
-                showStatus('🗑️ Texto limpo', 'info');
+        function copyReceived() {
+            const outputText = document.getElementById('outputText');
+            outputText.select();
+            
+            try {
+                document.execCommand('copy');
+                showAlert('Texto copiado!', 'success');
+            } catch (err) {
+                navigator.clipboard.writeText(outputText.value).then(() => {
+                    showAlert('Texto copiado!', 'success');
+                });
             }
         }
 
-        function showStatus(message, type) {
-            const statusEl = document.getElementById('statusMessage');
-            statusEl.textContent = message;
-            statusEl.className = 'status status-' + type;
-            statusEl.classList.remove('hidden');
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert alert-${type}`;
+            alertBox.classList.remove('hidden');
 
             setTimeout(() => {
-                statusEl.classList.add('hidden');
-            }, 4000);
+                alertBox.classList.add('hidden');
+            }, 5000);
         }
 
         function updateCharCount() {
-            const text = document.getElementById('sharedText').value;
+            const text = document.getElementById('textInput').value;
             document.getElementById('charCount').textContent = text.length;
         }
 
-        function updateLastUpdate() {
-            const now = new Date();
-            const time = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('lastUpdate').textContent = time;
-        }
+        document.getElementById('textInput').addEventListener('input', updateCharCount);
 
-        // Atualizar contador ao digitar
-        document.getElementById('sharedText')?.addEventListener('input', updateCharCount);
-
-        // Auto-salvar ao digitar
-        let saveTimeout;
-        document.getElementById('sharedText')?.addEventListener('input', () => {
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                if (currentRoom) {
-                    const text = document.getElementById('sharedText').value;
-                    localStorage.setItem(currentRoom, text);
-                }
-            }, 500);
-        });
-
-        // Carregar última sala ao abrir
+        // Verificar se há texto na URL ao carregar
         window.addEventListener('load', () => {
-            const lastRoom = localStorage.getItem('lastRoomUsed');
-            if (lastRoom) {
-                document.getElementById('roomIdInput').value = lastRoom;
-            }
-        });
-
-        // Salvar última sala usada
-        window.addEventListener('beforeunload', () => {
-            if (currentRoom) {
-                localStorage.setItem('lastRoomUsed', currentRoom);
-            }
-            if (autoSyncInterval) {
-                clearInterval(autoSyncInterval);
+            const urlParams = new URLSearchParams(window.location.search);
+            const textParam = urlParams.get('text');
+            
+            if (textParam) {
+                const decoded = decodeURIComponent(textParam);
+                document.getElementById('outputText').value = decoded;
+                document.getElementById('receivedText').classList.remove('hidden');
+                showAlert('Texto recebido com sucesso!', 'success');
+                
+                // Limpar URL
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         });
     </script>
