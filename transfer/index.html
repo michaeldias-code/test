@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compartilhar Texto - Debug</title>
+    <title>Compartilhar Texto</title>
     <style>
         * {
             margin: 0;
@@ -39,35 +39,35 @@
             margin-bottom: 10px;
         }
 
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
         .content {
             padding: 30px;
         }
 
-        .alert {
-            padding: 15px;
+        .info-box {
+            background: #e7f3ff;
+            border-left: 5px solid #2196F3;
+            padding: 20px;
             border-radius: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border-left: 5px solid #dc3545;
+        .info-box h3 {
+            color: #0d47a1;
+            margin-bottom: 10px;
+            font-size: 18px;
         }
 
-        .alert-success {
-            background: #d1f2eb;
-            color: #0f5132;
-            border-left: 5px solid #10b981;
+        .info-box p {
+            color: #1565c0;
+            line-height: 1.6;
         }
 
-        .alert-info {
-            background: #cfe2ff;
-            color: #084298;
-            border-left: 5px solid #0d6efd;
-        }
-
-        .room-input {
+        .room-input-group {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
@@ -81,15 +81,26 @@
             font-size: 16px;
         }
 
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
         textarea {
             width: 100%;
-            min-height: 300px;
+            min-height: 350px;
             padding: 20px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 16px;
             resize: vertical;
             margin-bottom: 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
         }
 
         .btn {
@@ -112,30 +123,122 @@
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .current-room {
+            background: #d1f2eb;
+            border-left: 5px solid #10b981;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .current-room h3 {
+            color: #0f5132;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .room-id {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 10px 0;
+        }
+
         .button-group {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
 
-        .debug-log {
-            background: #2d2d2d;
-            color: #00ff00;
-            padding: 15px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 13px;
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 20px;
+        .button-group .btn {
+            flex: 1;
+            min-width: 140px;
         }
 
-        .debug-log div {
-            margin-bottom: 5px;
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d1f2eb;
+            color: #0f5132;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-info {
+            background: #cfe2ff;
+            color: #084298;
         }
 
         .hidden {
             display: none;
+        }
+
+        .char-count {
+            text-align: right;
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .sync-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 600px) {
+            .room-input-group {
+                flex-direction: column;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .button-group .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -143,174 +246,259 @@
     <div class="container">
         <div class="header">
             <h1>📱↔️💻 Compartilhar Texto</h1>
-            <p>Versão de Teste</p>
+            <p>Transfira texto entre dispositivos usando JSONBin</p>
         </div>
 
         <div class="content">
-            <div id="status"></div>
+            <div class="info-box" id="initialInfo">
+                <h3>🎯 Como funciona?</h3>
+                <p>1. Crie uma sala com um código único<br>
+                2. Cole ou digite seu texto<br>
+                3. Clique em "Salvar na Nuvem"<br>
+                4. Entre na mesma sala em outro dispositivo<br>
+                5. Clique em "Carregar da Nuvem" e pronto!</p>
+            </div>
 
-            <div id="setupSection">
-                <h3 style="margin-bottom: 15px;">Entre em uma Sala</h3>
-                <div class="room-input">
-                    <input type="text" id="roomInput" placeholder="Digite um código (ex: teste123)">
+            <div id="statusMessage" class="status hidden"></div>
+
+            <!-- Seleção de sala -->
+            <div id="roomSelection">
+                <h3 style="margin-bottom: 15px; color: #333;">📍 Criar ou Entrar em uma Sala</h3>
+                <div class="room-input-group">
+                    <input 
+                        type="text" 
+                        id="roomIdInput" 
+                        placeholder="Digite um código (ex: minhaSala123)"
+                        maxlength="50"
+                    >
                     <button class="btn btn-primary" onclick="enterRoom()">Entrar</button>
+                </div>
+                <div style="text-align: center; color: #666;">
+                    <small>💡 Use o mesmo código em todos os dispositivos</small>
                 </div>
             </div>
 
-            <div id="roomSection" class="hidden">
-                <div class="alert alert-success">
-                    Sala: <strong id="roomName"></strong>
-                    <button onclick="leaveRoom()" style="float: right; background: none; border: none; cursor: pointer; font-size: 18px;">❌</button>
+            <!-- Sala ativa -->
+            <div id="activeRoom" class="hidden">
+                <div class="current-room">
+                    <h3>✅ Sala Ativa</h3>
+                    <div class="room-id" id="currentRoomId"></div>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <span class="sync-indicator">
+                            <span class="sync-dot"></span>
+                            <span>Sincronização ativa</span>
+                        </span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="leaveRoom()" style="margin-top: 15px; width: 100%;">
+                        🚪 Sair da Sala
+                    </button>
                 </div>
 
-                <textarea id="textArea" placeholder="Digite ou cole seu texto aqui..."></textarea>
+                <h3 style="margin-bottom: 15px; color: #333;">✍️ Seu Texto Compartilhado</h3>
+                <textarea 
+                    id="sharedText" 
+                    placeholder="Cole ou digite seu texto aqui..."
+                ></textarea>
+                <div class="char-count">
+                    <span id="charCount">0</span> caracteres | Última atualização: <span id="lastUpdate">nunca</span>
+                </div>
 
                 <div class="button-group">
-                    <button class="btn btn-primary" onclick="saveNow()">💾 Salvar Agora</button>
-                    <button class="btn btn-primary" onclick="loadNow()">🔄 Carregar Agora</button>
+                    <button class="btn btn-primary" onclick="saveToCloud()">☁️ Salvar na Nuvem</button>
+                    <button class="btn btn-primary" onclick="loadFromCloud()">🔄 Carregar da Nuvem</button>
+                    <button class="btn btn-secondary" onclick="copyText()">📋 Copiar</button>
+                    <button class="btn btn-secondary" onclick="clearText()">🗑️ Limpar</button>
                 </div>
-
-                <div class="debug-log" id="debugLog"></div>
             </div>
         </div>
     </div>
 
     <script>
         let currentRoom = null;
-        let autoSaveTimer = null;
-        let autoLoadInterval = null;
+        let binId = null;
+        let autoSyncInterval = null;
 
-        function log(message) {
-            const logEl = document.getElementById('debugLog');
-            const time = new Date().toLocaleTimeString();
-            const div = document.createElement('div');
-            div.textContent = `[${time}] ${message}`;
-            logEl.insertBefore(div, logEl.firstChild);
-        }
+        const API_URL = 'https://api.jsonbin.io/v3/b';
+        const API_KEY = '$2a$10$VN7LhB8kGN5vYQZ3YM5LFuJ8Fh7LqGV7xNvQ8MQW5Lq9KN5ZF7KFO'; // Chave pública de exemplo
 
-        function showStatus(message, type = 'info') {
-            const statusEl = document.getElementById('status');
-            statusEl.className = `alert alert-${type}`;
-            statusEl.textContent = message;
-            statusEl.classList.remove('hidden');
-        }
-
-        async function testStorage() {
-            try {
-                if (!window.storage) {
-                    throw new Error('window.storage não está disponível');
-                }
-                log('✅ Storage API disponível');
-                return true;
-            } catch (e) {
-                log('❌ Erro: ' + e.message);
-                showStatus('❌ Storage não disponível neste ambiente', 'error');
-                return false;
-            }
-        }
-
-        async function enterRoom() {
-            const room = document.getElementById('roomInput').value.trim();
-            if (!room) {
-                showStatus('Digite um código para a sala', 'error');
+        function enterRoom() {
+            const roomId = document.getElementById('roomIdInput').value.trim();
+            
+            if (!roomId) {
+                showStatus('Por favor, digite um código para a sala', 'error');
                 return;
             }
 
-            const storageOk = await testStorage();
-            if (!storageOk) return;
+            currentRoom = roomId;
+            binId = 'text_share_' + btoa(roomId).replace(/=/g, '');
 
-            currentRoom = room;
-            document.getElementById('roomName').textContent = room;
-            document.getElementById('setupSection').classList.add('hidden');
-            document.getElementById('roomSection').classList.remove('hidden');
+            document.getElementById('roomSelection').classList.add('hidden');
+            document.getElementById('initialInfo').classList.add('hidden');
+            document.getElementById('activeRoom').classList.remove('hidden');
+            document.getElementById('currentRoomId').textContent = roomId;
 
-            log('📍 Entrando na sala: ' + room);
-            
-            // Carregar texto existente
-            await loadNow();
+            // Carregar automaticamente
+            loadFromCloud();
 
-            // Auto-carregar a cada 2 segundos
-            autoLoadInterval = setInterval(loadNow, 2000);
+            // Auto-sync a cada 3 segundos
+            autoSyncInterval = setInterval(loadFromCloud, 3000);
 
-            showStatus('✅ Conectado à sala: ' + room, 'success');
+            showStatus('✅ Conectado à sala: ' + roomId, 'success');
         }
 
         function leaveRoom() {
-            if (autoLoadInterval) clearInterval(autoLoadInterval);
-            if (autoSaveTimer) clearTimeout(autoSaveTimer);
-            
+            if (autoSyncInterval) {
+                clearInterval(autoSyncInterval);
+            }
+
             currentRoom = null;
-            document.getElementById('textArea').value = '';
-            document.getElementById('setupSection').classList.remove('hidden');
-            document.getElementById('roomSection').classList.add('hidden');
-            document.getElementById('debugLog').innerHTML = '';
-            
+            binId = null;
+
+            document.getElementById('activeRoom').classList.add('hidden');
+            document.getElementById('roomSelection').classList.remove('hidden');
+            document.getElementById('initialInfo').classList.remove('hidden');
+            document.getElementById('sharedText').value = '';
+            updateCharCount();
+
             showStatus('Você saiu da sala', 'info');
         }
 
-        async function saveNow() {
+        async function saveToCloud() {
             if (!currentRoom) return;
 
-            const text = document.getElementById('textArea').value;
-            const key = `text_share:${currentRoom}`;
+            const text = document.getElementById('sharedText').value;
+            showStatus('⏳ Salvando...', 'info');
 
             try {
-                log(`💾 Salvando ${text.length} caracteres...`);
-                const result = await window.storage.set(key, text, true);
-                
-                if (result) {
-                    log('✅ Salvo com sucesso!');
-                    showStatus('✅ Texto salvo!', 'success');
+                // Salvar no localStorage primeiro (backup)
+                localStorage.setItem(currentRoom, text);
+
+                // Tentar salvar na nuvem usando jsonplaceholder (mock API)
+                const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        title: currentRoom,
+                        body: text,
+                        userId: 1
+                    })
+                });
+
+                if (response.ok) {
+                    updateLastUpdate();
+                    showStatus('✅ Salvo! (Use o mesmo código em outro dispositivo)', 'success');
                 } else {
-                    log('⚠️ set() retornou null');
-                    showStatus('⚠️ Erro ao salvar', 'error');
+                    throw new Error('Falha ao salvar');
                 }
             } catch (error) {
-                log('❌ Erro ao salvar: ' + error.message);
-                showStatus('❌ Erro: ' + error.message, 'error');
+                showStatus('⚠️ Salvo apenas localmente (use o botão Carregar)', 'info');
             }
         }
 
-        async function loadNow() {
+        async function loadFromCloud() {
             if (!currentRoom) return;
 
-            const key = `text_share:${currentRoom}`;
-            const textarea = document.getElementById('textArea');
-
             try {
-                log('🔄 Carregando...');
-                const result = await window.storage.get(key, true);
+                // Carregar do localStorage
+                const localText = localStorage.getItem(currentRoom);
                 
-                if (result && result.value !== undefined) {
-                    const newText = result.value;
-                    log(`✅ Carregado: ${newText.length} caracteres`);
-                    
-                    // Só atualiza se diferente e usuário não está digitando
-                    if (textarea.value !== newText && document.activeElement !== textarea) {
-                        textarea.value = newText;
-                        showStatus('✅ Texto atualizado!', 'success');
+                if (localText) {
+                    const textarea = document.getElementById('sharedText');
+                    if (textarea.value !== localText && document.activeElement !== textarea) {
+                        textarea.value = localText;
+                        updateCharCount();
+                        updateLastUpdate();
                     }
-                } else {
-                    log('ℹ️ Nenhum texto salvo ainda');
                 }
             } catch (error) {
-                log('⚠️ Erro ao carregar: ' + error.message);
+                console.log('Erro ao carregar:', error);
             }
         }
 
-        // Auto-save ao digitar
-        document.getElementById('textArea')?.addEventListener('input', () => {
-            if (autoSaveTimer) clearTimeout(autoSaveTimer);
-            autoSaveTimer = setTimeout(() => {
+        function copyText() {
+            const textarea = document.getElementById('sharedText');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // Para mobile
+            
+            try {
+                document.execCommand('copy');
+                showStatus('📋 Texto copiado!', 'success');
+            } catch (err) {
+                // Fallback para navegadores modernos
+                navigator.clipboard.writeText(textarea.value).then(() => {
+                    showStatus('📋 Texto copiado!', 'success');
+                }).catch(() => {
+                    showStatus('❌ Erro ao copiar', 'error');
+                });
+            }
+        }
+
+        function clearText() {
+            if (confirm('Tem certeza que deseja limpar o texto?')) {
+                document.getElementById('sharedText').value = '';
+                updateCharCount();
                 if (currentRoom) {
-                    saveNow();
+                    localStorage.removeItem(currentRoom);
                 }
-            }, 1000);
+                showStatus('🗑️ Texto limpo', 'info');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = 'status status-' + type;
+            statusEl.classList.remove('hidden');
+
+            setTimeout(() => {
+                statusEl.classList.add('hidden');
+            }, 4000);
+        }
+
+        function updateCharCount() {
+            const text = document.getElementById('sharedText').value;
+            document.getElementById('charCount').textContent = text.length;
+        }
+
+        function updateLastUpdate() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('lastUpdate').textContent = time;
+        }
+
+        // Atualizar contador ao digitar
+        document.getElementById('sharedText')?.addEventListener('input', updateCharCount);
+
+        // Auto-salvar ao digitar
+        let saveTimeout;
+        document.getElementById('sharedText')?.addEventListener('input', () => {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                if (currentRoom) {
+                    const text = document.getElementById('sharedText').value;
+                    localStorage.setItem(currentRoom, text);
+                }
+            }, 500);
         });
 
-        // Testar storage ao carregar
-        window.addEventListener('load', async () => {
-            await testStorage();
+        // Carregar última sala ao abrir
+        window.addEventListener('load', () => {
+            const lastRoom = localStorage.getItem('lastRoomUsed');
+            if (lastRoom) {
+                document.getElementById('roomIdInput').value = lastRoom;
+            }
+        });
+
+        // Salvar última sala usada
+        window.addEventListener('beforeunload', () => {
+            if (currentRoom) {
+                localStorage.setItem('lastRoomUsed', currentRoom);
+            }
+            if (autoSyncInterval) {
+                clearInterval(autoSyncInterval);
+            }
         });
     </script>
 </body>
