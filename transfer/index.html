@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Compartilhar Texto</title>
+    <title>Compartilhar Texto - Debug</title>
     <style>
         * {
             margin: 0;
@@ -16,9 +16,6 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .container {
@@ -26,7 +23,7 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             max-width: 800px;
-            width: 100%;
+            margin: 0 auto;
             overflow: hidden;
         }
 
@@ -40,65 +37,59 @@
         .header h1 {
             font-size: 28px;
             margin-bottom: 10px;
-            color: red;
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 16px;
         }
 
         .content {
             padding: 30px;
         }
 
-        .info-box {
-            background: #e7f3ff;
-            border-left: 5px solid #2196F3;
-            padding: 20px;
+        .alert {
+            padding: 15px;
             border-radius: 10px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
-        .info-box h3 {
-            color: #0d47a1;
-            margin-bottom: 10px;
-            font-size: 18px;
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 5px solid #dc3545;
         }
 
-        .info-box p {
-            color: #1565c0;
-            line-height: 1.6;
+        .alert-success {
+            background: #d1f2eb;
+            color: #0f5132;
+            border-left: 5px solid #10b981;
         }
 
-        .room-section {
-            margin-bottom: 30px;
+        .alert-info {
+            background: #cfe2ff;
+            color: #084298;
+            border-left: 5px solid #0d6efd;
         }
 
-        .room-section h3 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 20px;
-        }
-
-        .room-input-group {
+        .room-input {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
         }
 
-        input[type="text"] {
+        input {
             flex: 1;
             padding: 15px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-size: 16px;
-            transition: border 0.3s;
         }
 
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            margin-bottom: 15px;
         }
 
         .btn {
@@ -121,116 +112,30 @@
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-secondary {
-            background: #e0e0e0;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background: #d0d0d0;
-        }
-
-        .current-room {
-            background: #d1f2eb;
-            border-left: 5px solid #10b981;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-        }
-
-        .current-room h3 {
-            color: #0f5132;
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .room-id {
-            font-family: 'Courier New', monospace;
-            font-size: 24px;
-            font-weight: bold;
-            color: #667eea;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        textarea {
-            width: 100%;
-            min-height: 300px;
-            padding: 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            resize: vertical;
-            transition: border 0.3s;
-            margin-bottom: 15px;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
         .button-group {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
 
-        .button-group .btn {
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .status {
+        .debug-log {
+            background: #2d2d2d;
+            color: #00ff00;
             padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 600;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 13px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
         }
 
-        .status-success {
-            background: #d1f2eb;
-            color: #0f5132;
-        }
-
-        .status-error {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .status-info {
-            background: #cfe2ff;
-            color: #084298;
+        .debug-log div {
+            margin-bottom: 5px;
         }
 
         .hidden {
             display: none;
-        }
-
-        .char-count {
-            text-align: right;
-            color: #666;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-
-        @media (max-width: 600px) {
-            .room-input-group {
-                flex-direction: column;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-
-            .button-group .btn {
-                width: 100%;
-            }
         }
     </style>
 </head>
@@ -238,222 +143,174 @@
     <div class="container">
         <div class="header">
             <h1>📱↔️💻 Compartilhar Texto</h1>
-            <p>Transfira texto entre seus dispositivos facilmente</p>
+            <p>Versão de Teste</p>
         </div>
 
         <div class="content">
-            <!-- Info inicial -->
-            <div class="info-box" id="initialInfo">
-                <h3>🎯 Como funciona?</h3>
-                <p>1. Crie ou entre em uma "sala" com um código<br>
-                2. Cole ou digite seu texto<br>
-                3. Abra a mesma sala em outro dispositivo<br>
-                4. Seu texto estará lá para copiar!</p>
-            </div>
+            <div id="status"></div>
 
-            <!-- Status -->
-            <div id="statusMessage" class="status hidden"></div>
-
-            <!-- Seção de criar/entrar na sala -->
-            <div class="room-section" id="roomSelection">
-                <h3>📍 Criar ou Entrar em uma Sala</h3>
-                <div class="room-input-group">
-                    <input 
-                        type="text" 
-                        id="roomIdInput" 
-                        placeholder="Digite um código (ex: minhaSala123)"
-                        maxlength="50"
-                    >
+            <div id="setupSection">
+                <h3 style="margin-bottom: 15px;">Entre em uma Sala</h3>
+                <div class="room-input">
+                    <input type="text" id="roomInput" placeholder="Digite um código (ex: teste123)">
                     <button class="btn btn-primary" onclick="enterRoom()">Entrar</button>
                 </div>
-                <div style="text-align: center; color: #666; margin-top: 10px;">
-                    <small>💡 Dica: Use o mesmo código em todos os dispositivos</small>
-                </div>
             </div>
 
-            <!-- Seção da sala ativa -->
-            <div id="activeRoom" class="hidden">
-                <div class="current-room">
-                    <h3>✅ Sala Ativa</h3>
-                    <div class="room-id" id="currentRoomId"></div>
-                    <button class="btn btn-secondary" onclick="leaveRoom()" style="margin-top: 15px; width: 100%;">
-                        🚪 Sair da Sala
-                    </button>
+            <div id="roomSection" class="hidden">
+                <div class="alert alert-success">
+                    Sala: <strong id="roomName"></strong>
+                    <button onclick="leaveRoom()" style="float: right; background: none; border: none; cursor: pointer; font-size: 18px;">❌</button>
                 </div>
 
-                <h3 style="margin-bottom: 15px; color: #333;">✍️ Seu Texto Compartilhado</h3>
-                <textarea 
-                    id="sharedText" 
-                    placeholder="Cole ou digite seu texto aqui... Ele será sincronizado automaticamente!"
-                ></textarea>
-                <div class="char-count">
-                    <span id="charCount">0</span> caracteres
-                </div>
+                <textarea id="textArea" placeholder="Digite ou cole seu texto aqui..."></textarea>
 
                 <div class="button-group">
-                    <button class="btn btn-primary" onclick="saveText()">💾 Salvar Texto</button>
-                    <button class="btn btn-secondary" onclick="copyText()">📋 Copiar Texto</button>
-                    <button class="btn btn-secondary" onclick="clearText()">🗑️ Limpar</button>
+                    <button class="btn btn-primary" onclick="saveNow()">💾 Salvar Agora</button>
+                    <button class="btn btn-primary" onclick="loadNow()">🔄 Carregar Agora</button>
                 </div>
+
+                <div class="debug-log" id="debugLog"></div>
             </div>
         </div>
     </div>
 
     <script>
         let currentRoom = null;
-        let syncInterval = null;
+        let autoSaveTimer = null;
+        let autoLoadInterval = null;
 
-        // Carregar sala salva ao abrir
-        window.addEventListener('load', () => {
-            const savedRoom = getSavedRoom();
-            if (savedRoom) {
-                document.getElementById('roomIdInput').value = savedRoom;
+        function log(message) {
+            const logEl = document.getElementById('debugLog');
+            const time = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.textContent = `[${time}] ${message}`;
+            logEl.insertBefore(div, logEl.firstChild);
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.className = `alert alert-${type}`;
+            statusEl.textContent = message;
+            statusEl.classList.remove('hidden');
+        }
+
+        async function testStorage() {
+            try {
+                if (!window.storage) {
+                    throw new Error('window.storage não está disponível');
+                }
+                log('✅ Storage API disponível');
+                return true;
+            } catch (e) {
+                log('❌ Erro: ' + e.message);
+                showStatus('❌ Storage não disponível neste ambiente', 'error');
+                return false;
             }
-        });
+        }
 
         async function enterRoom() {
-            const roomId = document.getElementById('roomIdInput').value.trim();
-            
-            if (!roomId) {
-                showStatus('Por favor, digite um código para a sala', 'error');
+            const room = document.getElementById('roomInput').value.trim();
+            if (!room) {
+                showStatus('Digite um código para a sala', 'error');
                 return;
             }
 
-            currentRoom = roomId;
-            saveRoomToMemory(roomId);
+            const storageOk = await testStorage();
+            if (!storageOk) return;
 
-            // Mostrar sala ativa
-            document.getElementById('roomSelection').classList.add('hidden');
-            document.getElementById('initialInfo').classList.add('hidden');
-            document.getElementById('activeRoom').classList.remove('hidden');
-            document.getElementById('currentRoomId').textContent = roomId;
+            currentRoom = room;
+            document.getElementById('roomName').textContent = room;
+            document.getElementById('setupSection').classList.add('hidden');
+            document.getElementById('roomSection').classList.remove('hidden');
 
+            log('📍 Entrando na sala: ' + room);
+            
             // Carregar texto existente
-            await loadText();
+            await loadNow();
 
-            // Iniciar sincronização automática a cada 1 segundo
-            syncInterval = setInterval(loadText, 1000);
+            // Auto-carregar a cada 2 segundos
+            autoLoadInterval = setInterval(loadNow, 2000);
 
-            showStatus('Conectado à sala: ' + roomId, 'success');
+            showStatus('✅ Conectado à sala: ' + room, 'success');
         }
 
         function leaveRoom() {
-            if (syncInterval) {
-                clearInterval(syncInterval);
-            }
-
+            if (autoLoadInterval) clearInterval(autoLoadInterval);
+            if (autoSaveTimer) clearTimeout(autoSaveTimer);
+            
             currentRoom = null;
-
-            // Voltar para seleção de sala
-            document.getElementById('activeRoom').classList.add('hidden');
-            document.getElementById('roomSelection').classList.remove('hidden');
-            document.getElementById('initialInfo').classList.remove('hidden');
-            document.getElementById('sharedText').value = '';
-            updateCharCount();
-
+            document.getElementById('textArea').value = '';
+            document.getElementById('setupSection').classList.remove('hidden');
+            document.getElementById('roomSection').classList.add('hidden');
+            document.getElementById('debugLog').innerHTML = '';
+            
             showStatus('Você saiu da sala', 'info');
         }
 
-        async function saveText() {
+        async function saveNow() {
             if (!currentRoom) return;
 
-            const text = document.getElementById('sharedText').value;
-            
+            const text = document.getElementById('textArea').value;
+            const key = `text_share:${currentRoom}`;
+
             try {
-                await window.storage.set(`room:${currentRoom}`, text, true);
-                showStatus('✅ Sincronizado!', 'success');
+                log(`💾 Salvando ${text.length} caracteres...`);
+                const result = await window.storage.set(key, text, true);
+                
+                if (result) {
+                    log('✅ Salvo com sucesso!');
+                    showStatus('✅ Texto salvo!', 'success');
+                } else {
+                    log('⚠️ set() retornou null');
+                    showStatus('⚠️ Erro ao salvar', 'error');
+                }
             } catch (error) {
-                showStatus('❌ Erro ao salvar. Tente novamente.', 'error');
+                log('❌ Erro ao salvar: ' + error.message);
+                showStatus('❌ Erro: ' + error.message, 'error');
             }
         }
 
-        async function loadText() {
+        async function loadNow() {
             if (!currentRoom) return;
 
+            const key = `text_share:${currentRoom}`;
+            const textarea = document.getElementById('textArea');
+
             try {
-                const result = await window.storage.get(`room:${currentRoom}`, true);
-                if (result && result.value) {
-                    const textarea = document.getElementById('sharedText');
-                    // Só atualiza se o texto mudou e o usuário não está digitando
-                    if (textarea.value !== result.value && document.activeElement !== textarea) {
-                        textarea.value = result.value;
-                        updateCharCount();
+                log('🔄 Carregando...');
+                const result = await window.storage.get(key, true);
+                
+                if (result && result.value !== undefined) {
+                    const newText = result.value;
+                    log(`✅ Carregado: ${newText.length} caracteres`);
+                    
+                    // Só atualiza se diferente e usuário não está digitando
+                    if (textarea.value !== newText && document.activeElement !== textarea) {
+                        textarea.value = newText;
+                        showStatus('✅ Texto atualizado!', 'success');
                     }
+                } else {
+                    log('ℹ️ Nenhum texto salvo ainda');
                 }
             } catch (error) {
-                // Sala ainda não tem texto, tudo ok
+                log('⚠️ Erro ao carregar: ' + error.message);
             }
         }
 
-        function copyText() {
-            const textarea = document.getElementById('sharedText');
-            textarea.select();
-            document.execCommand('copy');
-            showStatus('📋 Texto copiado!', 'success');
-        }
-
-        function clearText() {
-            if (confirm('Tem certeza que deseja limpar o texto?')) {
-                document.getElementById('sharedText').value = '';
-                updateCharCount();
-                saveText();
-            }
-        }
-
-        function showStatus(message, type) {
-            const statusEl = document.getElementById('statusMessage');
-            statusEl.textContent = message;
-            statusEl.className = 'status status-' + type;
-            statusEl.classList.remove('hidden');
-
-            setTimeout(() => {
-                statusEl.classList.add('hidden');
-            }, 4000);
-        }
-
-        function saveRoomToMemory(roomId) {
-            try {
-                localStorage.setItem('lastRoom', roomId);
-            } catch (e) {
-                // Ignorar se localStorage não estiver disponível
-            }
-        }
-
-        function getSavedRoom() {
-            try {
-                return localStorage.getItem('lastRoom');
-            } catch (e) {
-                return null;
-            }
-        }
-
-        // Atualizar contador de caracteres
-        document.getElementById('sharedText')?.addEventListener('input', updateCharCount);
-
-        function updateCharCount() {
-            const text = document.getElementById('sharedText')?.value || '';
-            const countEl = document.getElementById('charCount');
-            if (countEl) {
-                countEl.textContent = text.length;
-            }
-        }
-
-        // Auto-salvar ao digitar (com debounce)
-        let saveTimeout;
-        document.getElementById('sharedText')?.addEventListener('input', () => {
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
+        // Auto-save ao digitar
+        document.getElementById('textArea')?.addEventListener('input', () => {
+            if (autoSaveTimer) clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
                 if (currentRoom) {
-                    saveText();
+                    saveNow();
                 }
-            }, 500); // Salva 0.5 segundo após parar de digitar
+            }, 1000);
         });
 
-        // Limpar intervalo ao sair da página
-        window.addEventListener('beforeunload', () => {
-            if (syncInterval) {
-                clearInterval(syncInterval);
-            }
+        // Testar storage ao carregar
+        window.addEventListener('load', async () => {
+            await testStorage();
         });
     </script>
 </body>
