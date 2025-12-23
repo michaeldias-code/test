@@ -169,6 +169,17 @@ function displayQuestion() {
             card.appendChild(div);
         });
     }
+
+    // ✅ MOSTRAR OU ESCONDER BOTÃO FINALIZAR
+    const finishBtn = document.getElementById('finishBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    if (currentQuestion === selectedQuestions.length - 1) {
+        finishBtn.style.display = 'inline-block';
+        nextBtn.style.display = 'none';
+    } else {
+        finishBtn.style.display = 'none';
+        nextBtn.style.display = 'inline-block';
+    }
 }
 
 /* =========================
