@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Nivelamento de Python Profissional</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link para o seu CSS -->
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Teste de Nivelamento de Python</h1>
+            <p>Avaliação Profissional Completa</p>
+        </div>
+
+        <div id="welcomeScreen" class="welcome-screen">
+            <h2>Bem-vindo ao Teste de Python!</h2>
+            <p style="color: #666; font-size: 18px; margin: 20px 0;">
+                Este é um teste profissional que avaliará seu nível de Python do básico ao avançado.
+            </p>
+            <ul>
+                <li>✓ <strong>30 questões</strong> cuidadosamente selecionadas</li>
+                <li>✓ Avaliação completa <strong></strong></li>
+                <li>✓ Tempo limite: <strong>50 minutos</strong></li>
+                <!--<li>✓ <strong>Listening</strong>: 3 questões de compreensão auditiva</li>
+                <li>✓ <strong>Writing</strong>: Questões de escrita e digitação</li>
+                <li>✓ Gramática, vocabulário e compreensão de texto</li>-->
+                <li>✓ Questões variadas a cada tentativa</li>
+            </ul>
+            <button class="btn-primary" onclick="startTest()">Iniciar Teste</button>
+        </div>
+
+        <div id="testArea" class="test-area">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="timer-section">
+                <div class="timer">
+                    <span>⏱️</span>
+                    <span id="timer">50:00</span>
+                </div>
+                <div class="question-counter" id="questionCounter">Questão 1 de 30</div>
+            </div>
+
+            <div class="question-card" id="questionCard"></div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()">← Anterior</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Próxima →</button>
+                <button class="btn btn-finish" id="finishBtn" onclick="finishTest()" style="display: none;">Finalizar Teste</button>
+            </div>
+        </div>
+
+        <div id="results" class="results"></div>
+    </div>
+
+
+
+<!-- 🔹 IMPORTANTE: questionBank vem ANTES -->
+<script src="questionBank_py.js"></script>
+
+<script>
+/* =========================
+   VARIÁVEIS GERAIS
+========================= */
+let currentQuestion = 0;
+let selectedQuestions = [];
+let answers = {};
+let timeLeft = 3000;
+let timerInterval;
+let audioPlayCount = {};
+
+/* =========================
+   UTILITÁRIOS
+========================= */
+function shuffleArray(array) {
+    const a = [...array];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function speakText(text) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    speechSynthesis.speak(u);
+}
+
+/* =========================
+   INÍCIO DO TESTE
+========================= */
+function startTest() {
+    const basic = shuffleArray(questionBank.basic).slice(0, 10);
+    const intermediate = shuffleArray(questionBank.intermediate).slice(0, 10);
+    const advanced = shuffleArray(questionBank.advanced).slice(0, 10);
+
+    selectedQuestions = [...basic, ...intermediate, ...advanced];
+
+    selectedQuestions.forEach((q, i) => {
+        if (q.isListening) audioPlayCount[i] = 0;
+    });
+
+    document.getElementById('welcomeScreen').style.display = 'none';
+    document.getElementById('testArea').style.display = 'block';
+
+    startTimer();
+    displayQuestion();
+}
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        document.getElementById('timer').textContent =
+            `${m}:${s.toString().padStart(2, '0')}`;
+
+        if (timeLeft <= 0) finishTest();
+    }, 1000);
+}
+
+/* =========================
+   RENDERIZAÇÃO
+========================= */
+function displayQuestion() {
+    const q = selectedQuestions[currentQuestion];
+    const card = document.getElementById('questionCard');
+    card.innerHTML = '';
+
+    document.getElementById('questionCounter').textContent =
+        `Questão ${currentQuestion + 1} de ${selectedQuestions.length}`;
+
+    document.getElementById('progressFill').style.width =
+        `${((currentQuestion + 1) / selectedQuestions.length) * 100}%`;
+
+    card.innerHTML += `<h3>${q.level} • ${q.type}</h3>`;
+    card.innerHTML += `<p>${q.question || ''}</p>`;
+
+    if (q.passage) {
+        card.innerHTML += `<blockquote>${q.passage}</blockquote>`;
+    }
+
+    if (q.isListening) {
+        card.innerHTML += `
+            <button onclick="playAudio(${currentQuestion})">
+                ▶️ Ouvir áudio (${audioPlayCount[currentQuestion] || 0}/2)
+            </button>
+        `;
+    }
+
+    if (q.isWriting) {
+        card.innerHTML += `
+            <textarea oninput="saveWritingAnswer(this.value)">
+                ${answers[currentQuestion] || ''}
+            </textarea>
+        `;
+    }
+
+    if (q.options) {
+        q.options.forEach((opt, i) => {
+            const div = document.createElement('div');
+            div.className = 'option';
+            div.textContent = opt;
+            if (answers[currentQuestion] === i) div.classList.add('selected');
+            div.onclick = () => selectOption(i);
+            card.appendChild(div);
+        });
+    }
+}
+
+/* =========================
+   INTERAÇÕES
+========================= */
+function selectOption(i) {
+    answers[currentQuestion] = i;
+    displayQuestion();
+}
+
+function saveWritingAnswer(v) {
+    answers[currentQuestion] = v.toLowerCase().trim();
+}
+
+function playAudio(i) {
+    if (audioPlayCount[i] >= 2) return;
+    audioPlayCount[i]++;
+    speakText(selectedQuestions[i].audioText);
+    displayQuestion();
+}
+
+function nextQuestion() {
+    if (currentQuestion < selectedQuestions.length - 1) {
+        currentQuestion++;
+        displayQuestion();
+    }
+}
+
+function previousQuestion() {
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        displayQuestion();
+    }
+}
+
+/* =========================
+   FINALIZAÇÃO
+========================= */
+function finishTest() {
+    clearInterval(timerInterval);
+    document.getElementById('testArea').style.display = 'none';
+
+    let score = 0;
+
+    selectedQuestions.forEach((q, i) => {
+        const ans = answers[i];
+        if (q.isWriting && ans) {
+            if (q.correctAnswers.some(c => ans.includes(c))) score++;
+        }
+        if (q.options && ans === q.correct) score++;
+    });
+
+    showResults(score);
+}
+
+function showResults(score) {
+    const percent = Math.round((score / selectedQuestions.length) * 100);
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').innerHTML =
+        `<h2>Resultado: ${percent}% (${score}/${selectedQuestions.length})</h2>`;
+}
+</script>
+</body>
+</html>
