@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Nivelamento de Inglês Profissional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .welcome-screen h2 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-screen ul {
+            text-align: left;
+            display: inline-block;
+            margin: 30px 0;
+        }
+
+        .welcome-screen li {
+            margin: 15px 0;
+            font-size: 16px;
+            color: #555;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.3s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .test-area {
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+        }
+
+        .timer-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .timer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .question-counter {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .question-type {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .passage {
+            background: white;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+            margin: 20px 0;
+            font-style: italic;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .option {
+            background: white;
+            padding: 18px 25px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-top: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .audio-player {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .audio-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .audio-btn:hover {
+            background: #5568d3;
+            transform: scale(1.05);
+        }
+
+        .audio-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .play-count {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-finish {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-finish:hover {
+            background: #218838;
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin: 30px 0;
+        }
+
+        .result-level {
+            font-size: 72px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .result-description {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .result-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .score-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .score-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .score-item h3 {
+            color: #667eea;
+            font-size: 32px;
+            margin-bottom: 5px;
+        }
+
+        .score-item p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .level-breakdown {
+            text-align: left;
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .level-breakdown h3 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .level-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+
+        .level-bar {
+            width: 60%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .level-bar-fill {
+            height: 100%;
+            background: #667eea;
+            transition: width 0.5s;
+        }
+
+        .certificate {
+            background: white;
+            border: 3px solid #667eea;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+
+        .certificate h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .question-text {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Teste de Nivelamento de Inglês</h1>
+            <p>Avaliação Profissional Completa</p>
+        </div>
+
+        <div id="welcomeScreen" class="welcome-screen">
+            <h2>Bem-vindo ao Teste de Nivelamento!</h2>
+            <p style="color: #666; font-size: 18px; margin: 20px 0;">
+                Este é um teste profissional que avaliará seu nível de inglês do básico ao avançado.
+            </p>
+            <ul>
+                <li>✓ <strong>30 questões</strong> cuidadosamente selecionadas</li>
+                <li>✓ Avaliação completa: <strong>A1 a C2</strong> (CEFR)</li>
+                <li>✓ Tempo limite: <strong>50 minutos</strong></li>
+                <li>✓ <strong>Listening</strong>: 3 questões de compreensão auditiva</li>
+                <li>✓ <strong>Writing</strong>: Questões de escrita e digitação</li>
+                <li>✓ Gramática, vocabulário e compreensão de texto</li>
+                <li>✓ Questões variadas a cada tentativa</li>
+            </ul>
+            <button class="btn-primary" onclick="startTest()">Iniciar Teste</button>
+        </div>
+
+        <div id="testArea" class="test-area">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="timer-section">
+                <div class="timer">
+                    <span>⏱️</span>
+                    <span id="timer">50:00</span>
+                </div>
+                <div class="question-counter" id="questionCounter">Questão 1 de 30</div>
+            </div>
+
+            <div class="question-card" id="questionCard"></div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()">← Anterior</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Próxima →</button>
+                <button class="btn btn-finish" id="finishBtn" onclick="finishTest()" style="display: none;">Finalizar Teste</button>
+            </div>
+        </div>
+
+        <div id="results" class="results"></div>
+    </div>
+<script>
+        const questionBank = {
+            basic: [
+                {
+                    id: 'b1',
+                    level: 'A1',
+                    type: 'Gramática Básica',
+                    question: 'Hello! My name ___ Maria.',
+                    options: ['am', 'is', 'are', 'be'],
+                    correct: 1
+                },
+                {
+                    id: 'b2',
+                    level: 'A1',
+                    type: 'Gramática Básica',
+                    question: 'I ___ from Brazil.',
+                    options: ['am', 'is', 'are', 'be'],
+                    correct: 0
+                },
+                {
+                    id: 'b3',
+                    level: 'A1',
+                    type: 'Presente Simples',
+                    question: 'She ___ coffee every morning.',
+                    options: ['drink', 'drinks', 'drinking', 'to drink'],
+                    correct: 1
+                },
+                {
+                    id: 'b4',
+                    level: 'A2',
+                    type: 'Passado Simples',
+                    question: 'I ___ to the gym yesterday.',
+                    options: ['go', 'goes', 'went', 'going'],
+                    correct: 2
+                },
+                {
+                    id: 'b5',
+                    level: 'A2',
+                    type: 'There was/were',
+                    question: 'There ___ many people at the party last night.',
+                    options: ['was', 'were', 'is', 'are'],
+                    correct: 1
+                },
+                {
+                    id: 'b6',
+                    level: 'A2',
+                    type: 'Compreensão de Texto',
+                    passage: 'My Daily Routine: I wake up at 7 AM every day. I have breakfast with my family and then I go to work by bus. I work from 9 AM to 5 PM. After work, I usually go to the gym or meet friends for dinner.',
+                    question: 'How does the person go to work?',
+                    options: ['By car', 'By bus', 'By train', 'On foot'],
+                    correct: 1
+                },
+                {
+                    id: 'b7',
+                    level: 'A2',
+                    type: 'Preposições',
+                    question: 'My birthday is ___ December.',
+                    options: ['in', 'on', 'at', 'by'],
+                    correct: 0
+                },
+                {
+                    id: 'b8',
+                    level: 'A1',
+                    type: 'Vocabulário',
+                    question: 'What do you use to write? A ___.',
+                    options: ['pen', 'cup', 'chair', 'window'],
+                    correct: 0
+                },
+                {
+                    id: 'b9',
+                    level: 'A1',
+                    type: 'Pronomes Possessivos',
+                    question: 'This is ___ book. (the book belongs to me)',
+                    options: ['my', 'mine', 'I', 'me'],
+                    correct: 0
+                },
+                {
+                    id: 'b10',
+                    level: 'A2',
+                    type: 'Can/Could',
+                    question: '___ you help me with this exercise?',
+                    options: ['Can', 'Could', 'May', 'Both A and B'],
+                    correct: 3
+                },
+                {
+                    id: 'b11',
+                    level: 'A2',
+                    type: 'Listening',
+                    audioText: 'Hello, my name is Sarah and I work at a hospital. I am a nurse. I help doctors and take care of patients every day.',
+                    question: 'What is Sarah\'s job?',
+                    options: ['Doctor', 'Nurse', 'Teacher', 'Engineer'],
+                    correct: 1,
+                    isListening: true
+                },
+                {
+                    id: 'b12',
+                    level: 'A1',
+                    type: 'Writing',
+                    question: 'Complete the sentence: "I ___ English every day." (use the verb "study" in the correct form)',
+                    correctAnswers: ['study'],
+                    isWriting: true
+                }
+            ],
+            intermediate: [
+                {
+                    id: 'i1',
+                    level: 'B1',
+                    type: 'Condicional',
+                    question: 'If I ___ more money, I would travel around the world.',
+                    options: ['have', 'had', 'will have', 'would have'],
+                    correct: 1
+                },
+                {
+                    id: 'i2',
+                    level: 'B1',
+                    type: 'Present Perfect',
+                    question: 'She has been studying English ___ three years.',
+                    options: ['since', 'for', 'during', 'while'],
+                    correct: 1
+                },
+                {
+                    id: 'i3',
+                    level: 'B1',
+                    type: 'Compreensão de Texto',
+                    passage: 'Remote work has transformed the way companies operate. While it offers flexibility and reduced commuting time, it also presents challenges such as maintaining team cohesion and establishing clear work-life boundaries. Many employees appreciate the autonomy but miss the social interaction of an office environment.',
+                    question: 'According to the text, what is NOT mentioned as a benefit of remote work?',
+                    options: ['Flexibility', 'Less commuting', 'Higher salary', 'Autonomy'],
+                    correct: 2
+                },
+                {
+                    id: 'i4',
+                    level: 'B2',
+                    type: 'Future Perfect',
+                    question: 'By the time you arrive, I ___ dinner.',
+                    options: ['will finish', 'will have finished', 'finish', 'am finishing'],
+                    correct: 1
+                },
+                {
+                    id: 'i5',
+                    level: 'B2',
+                    type: 'Voz Passiva',
+                    question: 'The project ___ by the team before the deadline.',
+                    options: ['completed', 'was completed', 'has completed', 'completing'],
+                    correct: 1
+                },
+                {
+                    id: 'i6',
+                    level: 'B2',
+                    type: 'Vocabulário Avançado',
+                    question: 'The company decided to ___ the new policy despite employee concerns.',
+                    options: ['implement', 'compliment', 'complement', 'supplement'],
+                    correct: 0
+                },
+                {
+                    id: 'i7',
+                    level: 'B1',
+                    type: 'Phrasal Verbs',
+                    question: 'Please ___ your shoes before entering the house.',
+                    options: ['take off', 'take on', 'take up', 'take over'],
+                    correct: 0
+                },
+                {
+                    id: 'i8',
+                    level: 'B2',
+                    type: 'Reported Speech',
+                    question: 'She said she ___ the movie the week before.',
+                    options: ['has seen', 'saw', 'had seen', 'would see'],
+                    correct: 2
+                },
+                {
+                    id: 'i9',
+                    level: 'B1',
+                    type: 'Comparativos',
+                    question: 'This exam is ___ than the last one.',
+                    options: ['more difficult', 'difficulter', 'most difficult', 'difficult'],
+                    correct: 0
+                },
+                {
+                    id: 'i10',
+                    level: 'B2',
+                    type: 'Modal Verbs',
+                    question: 'You ___ have told me about the meeting! I missed it!',
+                    options: ['should', 'could', 'would', 'might'],
+                    correct: 0
+                },
+                {
+                    id: 'i11',
+                    level: 'B1',
+                    type: 'Relative Clauses',
+                    question: 'The woman ___ lives next door is a teacher.',
+                    options: ['who', 'which', 'where', 'when'],
+                    correct: 0
+                },
+                {
+                    id: 'i12',
+                    level: 'B2',
+                    type: 'Listening',
+                    audioText: 'Good morning everyone. I would like to discuss our quarterly results. Sales have increased by 15% compared to last quarter, which is excellent news. However, we need to focus more on customer retention, as we lost about 8% of our client base. Let\'s work together to improve this metric.',
+                    question: 'According to the speaker, what needs improvement?',
+                    options: ['Sales numbers', 'Customer retention', 'Quarterly reports', 'Team collaboration'],
+                    correct: 1,
+                    isListening: true
+                },
+                {
+                    id: 'i13',
+                    level: 'B1',
+                    type: 'Writing',
+                    question: 'Write a sentence using the words "although", "tired", and "finished". Your sentence should make sense grammatically.',
+                    correctAnswers: ['although', 'tired', 'finished'],
+                    isWriting: true
+                }
+            ],
+            advanced: [
+                {
+                    id: 'a1',
+                    level: 'C1',
+                    type: 'Condicional Perfeito',
+                    question: 'Had I known about the traffic, I ___ earlier.',
+                    options: ['would leave', 'will leave', 'would have left', 'had left'],
+                    correct: 2
+                },
+                {
+                    id: 'a2',
+                    level: 'C1',
+                    type: 'Vocabulário Sofisticado',
+                    question: 'The politician\'s speech was criticized for being too ___; it lacked concrete proposals.',
+                    options: ['ambiguous', 'explicit', 'coherent', 'pragmatic'],
+                    correct: 0
+                },
+                {
+                    id: 'a3',
+                    level: 'C1',
+                    type: 'Compreensão Avançada',
+                    passage: 'The paradigm shift in educational methodologies has necessitated a reevaluation of traditional pedagogical approaches. Contemporary educators must reconcile the dichotomy between time-tested practices and innovative technological integration, ensuring that neither is sacrificed at the altar of progress.',
+                    question: 'What does the passage primarily suggest?',
+                    options: [
+                        'Technology should replace traditional teaching',
+                        'Educators face challenges balancing old and new methods',
+                        'Traditional methods are obsolete',
+                        'Technology has failed in education'
+                    ],
+                    correct: 1
+                },
+                {
+                    id: 'a4',
+                    level: 'C2',
+                    type: 'Inversão',
+                    question: 'Scarcely ___ the presentation when questions began flooding in.',
+                    options: ['had I finished', 'I had finished', 'did I finish', 'I finished'],
+                    correct: 0
+                },
+                {
+                    id: 'a5',
+                    level: 'C2',
+                    type: 'Vocabulário C2',
+                    question: 'Her ___ personality made her an invaluable mediator in corporate disputes.',
+                    options: ['bellicose', 'taciturn', 'ebullient', 'phlegmatic'],
+                    correct: 3
+                },
+                {
+                    id: 'a6',
+                    level: 'C2',
+                    type: 'Expressões Idiomáticas',
+                    question: 'The CEO\'s decision to expand during the recession was considered "playing with fire." This means:',
+                    options: [
+                        'Taking a dangerous risk',
+                        'Working with enthusiasm',
+                        'Being very careful',
+                        'Following regulations strictly'
+                    ],
+                    correct: 0
+                },
+                {
+                    id: 'a7',
+                    level: 'C1',
+                    type: 'Subjuntivo',
+                    question: 'It is imperative that she ___ the meeting on time.',
+                    options: ['attends', 'attend', 'attended', 'will attend'],
+                    correct: 1
+                },
+                {
+                    id: 'a8',
+                    level: 'C2',
+                    type: 'Colocações Avançadas',
+                    question: 'The research findings ___ serious doubts on the validity of previous studies.',
+                    options: ['cast', 'throw', 'make', 'put'],
+                    correct: 0
+                },
+                {
+                    id: 'a9',
+                    level: 'C1',
+                    type: 'Particípios',
+                    question: '___ all the requirements, she was still rejected from the program.',
+                    options: ['Despite meeting', 'Despite meet', 'Although meeting', 'In spite meet'],
+                    correct: 0
+                },
+                {
+                    id: 'a10',
+                    level: 'C2',
+                    type: 'Advérbios de Modo',
+                    question: 'The lawyer argued her case ___, leaving no room for doubt.',
+                    options: ['cogent', 'cogently', 'cogence', 'cogential'],
+                    correct: 1
+                },
+                {
+                    id: 'a11',
+                    level: 'C1',
+                    type: 'Cleft Sentences',
+                    question: '___ bothers me is his lack of commitment.',
+                    options: ['What', 'That', 'Which', 'It'],
+                    correct: 0
+                },
+                {
+                    id: 'a12',
+                    level: 'C2',
+                    type: 'Vocabulário Acadêmico',
+                    question: 'The researcher\'s methodology was deemed ___ by peer reviewers.',
+                    options: ['spurious', 'meticulous', 'perfunctory', 'cursory'],
+                    correct: 1
+                },
+                {
+                    id: 'a13',
+                    level: 'C1',
+                    type: 'Listening',
+                    audioText: 'The implications of artificial intelligence on the labor market remain contentious. While proponents argue that AI will augment human capabilities and create new job categories, critics contend that widespread automation could exacerbate income inequality and render certain skill sets obsolete. A nuanced approach considering both technological advancement and social welfare appears paramount.',
+                    question: 'What is the speaker\'s stance on AI and employment?',
+                    options: [
+                        'Completely supportive of AI',
+                        'Completely against AI',
+                        'Presents both perspectives without taking a clear side',
+                        'Focused only on technological benefits'
+                    ],
+                    correct: 2,
+                    isListening: true
+                },
+                {
+                    id: 'a14',
+                    level: 'C2',
+                    type: 'Writing',
+                    question: 'Complete this sentence with an appropriate idiom or advanced expression: "Despite numerous setbacks, the entrepreneur refused to ___ and eventually succeeded."',
+                    correctAnswers: ['throw in the towel', 'give up', 'quit', 'surrender', 'back down'],
+                    isWriting: true
+                },
+                {
+                    id: 'a15',
+                    level: 'C1',
+                    type: 'Concessivas',
+                    question: '___ the overwhelming evidence, he refused to admit his mistake.',
+                    options: ['Notwithstanding', 'Despite of', 'Although', 'However'],
+                    correct: 0
+                }
+            ]
+        };
+
+        let currentQuestion = 0;
+        let selectedQuestions = [];
+        let answers = {};
+        let timeLeft = 3000; // 50 minutes
+        let timerInterval;
+        let audioPlayCount = {};
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function speakText(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            speechSynthesis.speak(utterance);
+        }
+
+        function startTest() {
+            // Seleciona 30 questões: 10 básicas, 10 intermediárias, 10 avançadas
+            const basic = shuffleArray(questionBank.basic).slice(0, 10);
+            const intermediate = shuffleArray(questionBank.intermediate).slice(0, 10);
+            const advanced = shuffleArray(questionBank.advanced).slice(0, 10);
+            
+            selectedQuestions = [...basic, ...intermediate, ...advanced];
+            
+            // Inicializa contadores de áudio
+            selectedQuestions.forEach((q, idx) => {
+                if (q.isListening) {
+                    audioPlayCount[idx] = 0;
+                }
+            });
+            
+            document.getElementById('welcomeScreen').style.display = 'none';
+            document.getElementById('testArea').style.display = 'block';
+            
+            startTimer();
+            displayQuestion();
+        }
+function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    finishTest();
+                }
+            }, 1000);
+        }
+
+
+
+//chatgpt
+/* =========================
+   RENDERIZA QUESTÕES
+========================= */
+function displayQuestion() {
+    const q = selectedQuestions[currentQuestion];
+    const card = document.getElementById('questionCard');
+    card.innerHTML = '';
+
+    // Progresso
+    document.getElementById('questionCounter').textContent =
+        `Questão ${currentQuestion + 1} de ${selectedQuestions.length}`;
+    document.getElementById('progressFill').style.width =
+        `${((currentQuestion + 1) / selectedQuestions.length) * 100}%`;
+
+    // Tipo
+    card.innerHTML += `<span class="question-type">${q.level} • ${q.type}</span>`;
+    card.innerHTML += `<div class="question-text">${q.question}</div>`;
+
+    // Texto de leitura
+    if (q.passage) {
+        card.innerHTML += `<div class="passage">${q.passage}</div>`;
+    }
+
+    // Listening
+    if (q.isListening) {
+        card.innerHTML += `
+            <div class="audio-player">
+                <button class="audio-btn" onclick="playAudio(${currentQuestion})"
+                    ${audioPlayCount[currentQuestion] >= 2 ? 'disabled' : ''}>
+                    ▶️ Play Audio
+                </button>
+                <div class="play-count">
+                    Plays: ${audioPlayCount[currentQuestion] || 0}/2
+                </div>
+            </div>
+        `;
+    }
+
+    // Writing
+    if (q.isWriting) {
+        card.innerHTML += `
+            <textarea class="text-input"
+                placeholder="Digite sua resposta aqui..."
+                oninput="saveWritingAnswer(this.value)">
+                ${answers[currentQuestion] || ''}
+            </textarea>
+        `;
+    }
+
+    // Múltipla escolha
+    if (q.options) {
+        const optionsDiv = document.createElement('div');
+        optionsDiv.className = 'options';
+
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('div');
+            btn.className = 'option';
+            btn.textContent = opt;
+            if (answers[currentQuestion] === idx) btn.classList.add('selected');
+
+            btn.onclick = () => selectOption(idx);
+            optionsDiv.appendChild(btn);
+        });
+
+        card.appendChild(optionsDiv);
+    }
+
+    // Navegação
+    document.getElementById('prevBtn').style.display =
+        currentQuestion === 0 ? 'none' : 'inline-block';
+
+    document.getElementById('nextBtn').style.display =
+        currentQuestion === selectedQuestions.length - 1 ? 'none' : 'inline-block';
+
+    document.getElementById('finishBtn').style.display =
+        currentQuestion === selectedQuestions.length - 1 ? 'inline-block' : 'none';
+}
+
+/* =========================
+   RESPOSTAS
+========================= */
+function selectOption(index) {
+    answers[currentQuestion] = index;
+    displayQuestion();
+}
+
+function saveWritingAnswer(text) {
+    answers[currentQuestion] = text.trim().toLowerCase();
+}
+
+function playAudio(index) {
+    const q = selectedQuestions[index];
+    if (!q.audioText) return;
+
+    if (audioPlayCount[index] >= 2) return;
+    audioPlayCount[index]++;
+
+    speakText(q.audioText);
+    displayQuestion();
+}
+
+/* =========================
+   NAVEGAÇÃO
+========================= */
+function nextQuestion() {
+    if (currentQuestion < selectedQuestions.length - 1) {
+        currentQuestion++;
+        displayQuestion();
+    }
+}
+
+function previousQuestion() {
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        displayQuestion();
+    }
+}
+
+/* =========================
+   FINALIZAÇÃO E AVALIAÇÃO
+========================= */
+function finishTest() {
+    clearInterval(timerInterval);
+    document.getElementById('testArea').style.display = 'none';
+
+    let score = 0;
+    let levelScore = { A1:0, A2:0, B1:0, B2:0, C1:0, C2:0 };
+
+    selectedQuestions.forEach((q, i) => {
+        const ans = answers[i];
+
+        // Writing
+        if (q.isWriting && ans) {
+            const correct = q.correctAnswers.some(c =>
+                ans.includes(c.toLowerCase())
+            );
+            if (correct) {
+                score++;
+                levelScore[q.level]++;
+            }
+        }
+
+        // Múltipla escolha / Listening
+        if (q.options && ans === q.correct) {
+            score++;
+            levelScore[q.level]++;
+        }
+    });
+
+    showResults(score, levelScore);
+}
+
+/* =========================
+   RESULTADOS
+========================= */
+function showResults(score, levelScore) {
+    const res = document.getElementById('results');
+    res.style.display = 'block';
+
+    const percent = Math.round((score / selectedQuestions.length) * 100);
+
+    let finalLevel = 'A1';
+    if (percent >= 90) finalLevel = 'C2';
+    else if (percent >= 80) finalLevel = 'C1';
+    else if (percent >= 70) finalLevel = 'B2';
+    else if (percent >= 60) finalLevel = 'B1';
+    else if (percent >= 45) finalLevel = 'A2';
+
+    res.innerHTML = `
+        <h2>🎉 Resultado Final</h2>
+
+        <div class="result-card">
+            <div class="result-level">${finalLevel}</div>
+            <div class="result-description">${percent}% de acerto</div>
+            <div class="result-subtitle">${score} de ${selectedQuestions.length} questões</div>
+        </div>
+
+        <div class="score-details">
+            ${Object.entries(levelScore).map(([lvl, val]) => `
+                <div class="score-item">
+                    <h3>${val}</h3>
+                    <p>${lvl}</p>
+                </div>
+            `).join('')}
+        </div>
+
+        <div class="certificate">
+            <h3>📜 Certificado</h3>
+            <p>Nível estimado de inglês: <strong>${finalLevel}</strong> (CEFR)</p>
+        </div>
+    `;
+}
+</script>
+</body>
+</html>
