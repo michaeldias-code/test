@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VulnLab - 10 Vulnerabilidades</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0e27;
+            color: #00ff00;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #00ff00;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 36px; margin-bottom: 10px; text-shadow: 0 0 10px #00ff00; }
+        .stats { display: flex; justify-content: center; gap: 30px; margin-top: 20px; }
+        .stat-item {
+            background: #0a0e27;
+            padding: 15px 25px;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .stat-item span { font-size: 24px; font-weight: bold; color: #00ff00; }
+        .warning {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .lab-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .lab-card {
+            background: #1a1a2e;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #333;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .lab-card:hover {
+            border-color: #00ff00;
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 255, 0, 0.3);
+        }
+        .lab-card.completed {
+            border-color: #51cf66;
+            background: #1a2e1a;
+        }
+        .lab-card.completed::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #51cf66;
+            color: black;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .lab-card h3 { color: #00ff00; margin-bottom: 10px; font-size: 18px; }
+        .difficulty {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            margin-bottom: 10px;
+        }
+        .difficulty.easy { background: #51cf66; color: black; }
+        .difficulty.medium { background: #ffd43b; color: black; }
+        .difficulty.hard { background: #ff6b6b; color: white; }
+        .lab-area { display: none; background: #1a1a2e; padding: 30px; border-radius: 10px; border: 2px solid #00ff00; }
+        .lab-area.active { display: block; }
+        .back-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        input, textarea {
+            background: #0a0e27;
+            color: #00ff00;
+            border: 2px solid #333;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            width: 100%;
+            margin: 10px 0;
+        }
+        button {
+            background: #00ff00;
+            color: black;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+        button:hover { background: #00cc00; }
+        .result {
+            background: #0a0e27;
+            padding: 20px;
+            border-radius: 5px;
+            border: 2px solid #00ff00;
+            margin-top: 20px;
+        }
+        .hint {
+            background: #ffd43b;
+            color: black;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #51cf66;
+            color: black;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .code {
+            background: #0a0e27;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .explanation {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #333; padding: 12px; text-align: left; }
+        th { background: #16213e; color: #00ff00; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔓 VulnLab - Laboratório de Segurança Web</h1>
+            <p>10 Vulnerabilidades Reais para Aprendizado</p>
+            <div class="stats">
+                <div class="stat-item"><span id="completedCount">0</span>/10 Completados</div>
+                <div class="stat-item"><span id="flagCount">0</span> FLAGS</div>
+            </div>
+        </div>
+
+        <div class="warning">
+            <h3>⚠️ AVISO EDUCACIONAL</h3>
+            <p>Ambiente controlado para fins educacionais. Nunca explore vulnerabilidades em sistemas reais sem autorização.</p>
+        </div>
+
+
+<div style="background: #16213e; padding: 20px; border-radius: 5px; margin-bottom: 20px; border-left: 5px solid #00ff00;">
+            <h3 style="color: #00ff00; margin-bottom: 10px;">📚 Sobre este projeto</h3>
+            <p style="line-height: 1.6;">
+                Este é um projeto <strong>open-source educacional</strong> para ensinar segurança web através da prática.
+                Todas as vulnerabilidades são simuladas e executam apenas no navegador.
+            </p>
+            <p style="margin-top: 10px; line-height: 1.6;">
+                <strong>Inspirado em:</strong> OWASP WebGoat, DVWA, Juice Shop<br>
+                <strong>Uso permitido para:</strong> Estudos pessoais, workshops, treinamentos, cursos de desenvolvimento seguro<br>
+                <strong>GitHub:</strong> <a href="https://github.com/michaeldias-code/test" style="color: #00ff00;">https://github.com/michaeldias-code/test</a>
+            </p>
+        </div>
+
+
+
+
+
+        <div id="labSelector" class="lab-selector">
+            <div class="lab-card" data-lab="sqli" onclick="openLab('sqli')">
+                <span class="difficulty medium">Médio</span>
+                <h3>💉 SQL Injection</h3>
+                <p>Bypass de autenticação SQL.</p>
+            </div>
+            <div class="lab-card" data-lab="xss" onclick="openLab('xss')">
+                <span class="difficulty easy">Fácil</span>
+                <h3>🔥 XSS</h3>
+                <p>Injete JavaScript malicioso.</p>
+            </div>
+            <div class="lab-card" data-lab="auth" onclick="openLab('auth')">
+                <span class="difficulty easy">Fácil</span>
+                <h3>🔑 Auth Fraca</h3>
+                <p>Descubra senhas fracas.</p>
+            </div>
+            <div class="lab-card" data-lab="idor" onclick="openLab('idor')">
+                <span class="difficulty medium">Médio</span>
+                <h3>🔍 IDOR</h3>
+                <p>Acesso não autorizado.</p>
+            </div>
+            <div class="lab-card" data-lab="path" onclick="openLab('path')">
+                <span class="difficulty hard">Difícil</span>
+                <h3>📁 Path Traversal</h3>
+                <p>Leia arquivos restritos.</p>
+            </div>
+            <div class="lab-card" data-lab="ssrf" onclick="openLab('ssrf')">
+                <span class="difficulty hard">Difícil</span>
+                <h3>🌐 SSRF</h3>
+                <p>Requisições do servidor.</p>
+            </div>
+            <div class="lab-card" data-lab="xxe" onclick="openLab('xxe')">
+                <span class="difficulty hard">Difícil</span>
+                <h3>📄 XXE</h3>
+                <p>XML External Entity.</p>
+            </div>
+            <div class="lab-card" data-lab="csrf" onclick="openLab('csrf')">
+                <span class="difficulty medium">Médio</span>
+                <h3>🎭 CSRF</h3>
+                <p>Force ações não autorizadas.</p>
+            </div>
+            <div class="lab-card" data-lab="rce" onclick="openLab('rce')">
+                <span class="difficulty hard">Difícil</span>
+                <h3>💻 Command Injection</h3>
+                <p>Execute comandos no servidor.</p>
+            </div>
+            <div class="lab-card" data-lab="deser" onclick="openLab('deser')">
+                <span class="difficulty hard">Difícil</span>
+                <h3>🧬 Deserialization</h3>
+                <p>Manipule objetos serializados.</p>
+            </div>
+        </div>
+
+        <!-- SQL Injection Lab -->
+        <div id="sqli" class="lab-area">
+            <button class="back-btn" onclick="closeLab()">← Voltar</button>
+            <h2>💉 SQL Injection</h2>
+            <div class="hint">
+                <strong>Objetivo:</strong> Login como admin sem saber a senha!<br>
+                <strong>Dica:</strong> Use ' -- ou OR
+            </div>
+            <input type="text" id="sqli-user" placeholder="Usuário">
+            <input type="password" id="sqli-pass" placeholder="Senha">
+            <button onclick="sqliLogin()">Login</button>
+            <button onclick="alert('Tente: admin\' --')">💡 Dica</button>
+            <div id="sqli-result"></div>
+        </div>
+
+        <!-- XSS Lab -->
+        <div id="xss" class="lab-area">
+            <button class="back-btn" onclick="closeLab()">← Voltar</button>
+            <h2>🔥 Cross-Site Scripting</h2>
+            <div class="hint">
+                <strong>Objetivo:</strong> Injete JavaScript na página!
+            </div>
+            <textarea id="xss-comment" rows="4" placeholder="Seu comentário..."></textarea>
+            <button onclick="xssSubmit()">Enviar</button>
+            <button onclick="alert('Tente: <script>alert(1)</script>')">💡 Dica</button>
+            <div id="xss-comments" class="result" style="margin-top: 20px;"></div>
+        </div>
+
+        <!-- Auth Lab -->
+        <div id="auth" class="lab-area">
+            <button class="back-btn" onclick="closeLab()">← Voltar</button>
+            <h2>🔑 Autenticação Fraca</h2>
+            <div class="hint">
+                <strong>Objetivo:</strong> Descubra a senha fraca!
+            </div>
+            <input type="text" id="auth-user" placeholder="Usuário" value="admin">
+            <input type="password" id="auth-pass" placeholder="Senha">
+            <button onclick="authLogin()">Login</button>
+            <button onclick="alert('Tente: admin123 ou password')">💡 Dica</button>
+            <div id="auth-result"></div>
+        </div>
+
+        <!-- IDOR Lab -->
+        <div id="idor" class="lab-area">
+            <button class="back-btn" onclick="closeLab()">← Voltar</button>
+            <h2>🔍 IDOR</h2>
+            <div class="hint">
+                <strong>Objetivo:</strong> Veja perfis de outros usuários!<br>
+                Você é user1 (ID: 1)
+            </div>
+            <input type="number" id="idor-id" value="1" placeholder="ID do usuário">
+            <button onclick="idorView()">Ver Perfil</button>
+            <button onclick="alert('Tente ID: 2 (admin tem FLAG!)')">💡 Dica</button>
+            <div id="idor-result"></div>
+        </div>
+
+        <!-- Path Traversal Lab -->
+        <div id="path" class="lab-area">
+            <button class="back-btn" onclick="closeLab()">← Voltar</button>
+            <h2>📁 Path Traversal</h2>
+            <div class="hint">
+                <strong>Objetivo:</strong> Acesse arquivos sensíveis!
+            </div>
+            <input type="text" id="path-file" value="documento.txt" placeholder="Nome do arquivo">
+            <button onclick="pathView()">Ver Arquivo</button>
+            <button onclick="alert('Tente: ../.env ou ../../etc/passwd')">💡 Dica</button>
+            <div id="path-result"></div>
+        </div>
+
+        <!-- SSRF Lab -->
+        <div id="ssrf" class="lab-area">
+            <button class="back-btn" onclick="closeLab()">← Voltar</button>
+            <h2>🌐 SSRF</h2>
+            <div class="hint">
+                <strong>Objetivo:</strong> Acesse recursos internos!
+            </div>
+            <input type="text" id="ssrf-url" value="https://example.com" placeholder="URL">
+            <button onclick="ssrfCheck()">Verificar</button>
+            <button onclick="alert('Tente: localhost:8080 ou 127.0.0.1')">💡 Dica</button>
+            <div id="ssrf-result"></div>
+        </div>
+
+        <!-- XXE Lab -->
+        <div id="xxe" class="lab-area">
+            <button class="back-btn" onclick="closeLab()">← Voltar</button>
+            <h2>📄 XXE</h2>
+            <div class="hint">
+                <strong>Objetivo:</strong> Leia arquivos via XML!
+            </div>
+            <textarea id="xxe-input" rows="8"><?xml version="1.0"?>
+<user>
+  <name>John</name>
+</user></textarea>
+            <button onclick="xxeProcess()">Processar XML</button>
+            <button onclick="alert('Adicione: <!DOCTYPE foo [<!ENTITY xxe SYSTEM \\\"file:///etc/passwd\\\">]>')">💡 Dica</button>
+            <div id="xxe-result"></div>
+        </div>
+
+        <!-- CSRF Lab -->
+        <div id="csrf" class="lab-area">
+            <button class="back-btn" onclick="closeLab()">← Voltar</button>
+            <h2>🎭 CSRF</h2>
+            <div class="hint">
+                <strong>Objetivo:</strong> Force uma transferência!<br>
+                Saldo: R$ <span id="balance">10.000</span>
+            </div>
+            <input type="text" id="csrf-to" value="user2" placeholder="Para">
+            <input type="number" id="csrf-amount" value="100" placeholder="Valor">
+            <button onclick="csrfTransfer()">Transferir</button>
+            <h4 style="margin-top: 20px;">Ataque CSRF:</h4>
+            <a href="#" onclick="csrfAttack(); return false;" style="color: #ff6b6b;">🔗 GANHE IPHONE GRÁTIS! Clique aqui!</a>
+            <div id="csrf-result"></div>
+        </div>
+
+        <!-- RCE Lab -->
+        <div id="rce" class="lab-area">
+            <button class="back-btn" onclick="closeLab()">← Voltar</button>
+            <h2>💻 Command Injection</h2>
+            <div class="hint">
+                <strong>Objetivo:</strong> Execute comandos do SO!
+            </div>
+            <input type="text" id="rce-host" value="8.8.8.8" placeholder="IP ou hostname">
+            <button onclick="rceExecute()">Ping</button>
+            <button onclick="alert('Tente: 8.8.8.8; ls ou 8.8.8.8 | cat /etc/passwd')">💡 Dica</button>
+            <div id="rce-result"></div>
+        </div>
+
+        <!-- Deserialization Lab -->
+        <div id="deser" class="lab-area">
+            <button class="back-btn" onclick="closeLab()">← Voltar</button>
+            <h2>🧬 Insecure Deserialization</h2>
+            <div class="hint">
+                <strong>Objetivo:</strong> Modifique para admin!
+            </div>
+            <textarea id="deser-cookie" rows="3">{"username":"guest","role":"user","admin":false}</textarea>
+            <button onclick="deserProcess()">Atualizar Sessão</button>
+            <button onclick="alert('Mude admin:false para admin:true')">💡 Dica</button>
+            <div id="deser-result"></div>
+        </div>
+    </div>
+
+    <script>
+        let completedLabs = new Set();
+        let collectedFlags = new Set();
+
+        function openLab(id) {
+            document.getElementById('labSelector').style.display = 'none';
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeLab() {
+            document.querySelectorAll('.lab-area').forEach(l => l.classList.remove('active'));
+            document.getElementById('labSelector').style.display = 'grid';
+        }
+
+        function markCompleted(lab, flag) {
+            if (!completedLabs.has(lab)) {
+                completedLabs.add(lab);
+                collectedFlags.add(flag);
+                document.querySelector(`[data-lab="${lab}"]`).classList.add('completed');
+                document.getElementById('completedCount').textContent = completedLabs.size;
+                document.getElementById('flagCount').textContent = collectedFlags.size;
+            }
+        }
+
+        // SQL Injection
+        function sqliLogin() {
+            const u = document.getElementById('sqli-user').value;
+            const p = document.getElementById('sqli-pass').value;
+            const r = document.getElementById('sqli-result');
+            
+            r.innerHTML = `<div class="code">SELECT * FROM users WHERE username='${u}' AND password='${p}'</div>`;
+            
+            if (u.includes("'") && (u.includes("--") || u.toLowerCase().includes("or"))) {
+                r.innerHTML += `<div class="success">✅ SQL INJECTION!<br>FLAG{SQL_BYPASS}</div>`;
+                markCompleted('sqli', 'FLAG{SQL_BYPASS}');
+            } else {
+                r.innerHTML += '<div style="color:#ff6b6b">❌ Inválido</div>';
+            }
+        }
+
+        // XSS
+        let comments = [];
+        function xssSubmit() {
+            const c = document.getElementById('xss-comment').value;
+            if (!c) return;
+            
+            comments.push(c);
+            const d = document.getElementById('xss-comments');
+            d.innerHTML = '';
+            comments.forEach((t, i) => {
+                d.innerHTML += `<div style="border:1px solid #333; padding:10px; margin:10px 0"><strong>User ${i+1}:</strong><br>${t}</div>`;
+            });
+            
+            if (c.toLowerCase().includes('<script>') || c.toLowerCase().includes('onerror')) {
+                setTimeout(() => {
+                    d.innerHTML += `<div class="success">✅ XSS EXPLORADO!<br>FLAG{XSS_SUCCESS}</div>`;
+                    markCompleted('xss', 'FLAG{XSS_SUCCESS}');
+                }, 500);
+            }
+            document.getElementById('xss-comment').value = '';
+        }
+
+        // Auth
+        function authLogin() {
+            const u = document.getElementById('auth-user').value;
+            const p = document.getElementById('auth-pass').value;
+            const r = document.getElementById('auth-result');
+            
+            if (u === 'admin' && ['admin','admin123','password','123456'].includes(p)) {
+                r.innerHTML = `<div class="success">✅ SENHA FRACA!<br>FLAG{WEAK_AUTH}</div>`;
+                markCompleted('auth', 'FLAG{WEAK_AUTH}');
+            } else {
+                r.innerHTML = '<div style="color:#ff6b6b">❌ Inválido</div>';
+            }
+        }
+
+        // IDOR
+        const users = [
+            {id:1, username:'user1', email:'user1@ex.com', secret:'Nada aqui'},
+            {id:2, username:'admin', email:'admin@ex.com', secret:'FLAG{IDOR_ACCESS}'},
+            {id:3, username:'john', email:'john@ex.com', secret:'Normal'}
+        ];
+        
+        function idorView() {
+            const id = document.getElementById('idor-id').value;
+            const r = document.getElementById('idor-result');
+            const u = users.find(x => x.id == id);
+            
+            if (!u) {
+                r.innerHTML = '<div style="color:#ff6b6b">Não encontrado</div>';
+                return;
+            }
+            
+            r.innerHTML = `<div class="result"><table>
+                <tr><th>ID</th><td>${u.id}</td></tr>
+                <tr><th>User</th><td>${u.username}</td></tr>
+                <tr><th>Email</th><td>${u.email}</td></tr>
+                <tr><th>Secret</th><td>${u.secret}</td></tr>
+            </table></div>`;
+            
+            if (id != 1) {
+                r.innerHTML += `<div class="success">✅ IDOR!<br>${u.secret}</div>`;
+                markCompleted('idor', 'FLAG{IDOR_ACCESS}');
+            }
+        }
+
+        // Path Traversal
+        const files = {
+            'documento.txt': 'Documento público',
+            '../config.txt': 'db_password=secret123',
+            '../../etc/passwd': 'root:x:0:0\nadmin:x:1000:1000',
+            '../.env': 'SECRET_KEY=xxx\nFLAG{PATH_TRAVERSAL}'
+        };
+        
+        function pathView() {
+            const f = document.getElementById('path-file').value;
+            const r = document.getElementById('path-result');
+            const c = files[f];
+            
+            if (c) {
+                r.innerHTML = `<div class="result"><div class="code">${c}</div></div>`;
+                if (f.includes('../')) {
+                    r.innerHTML += `<div class="success">✅ PATH TRAVERSAL!</div>`;
+                    if (f.includes('.env')) markCompleted('path', 'FLAG{PATH_TRAVERSAL}');
+                }
+            } else {
+                r.innerHTML = '<div style="color:#ff6b6b">Não encontrado</div>';
+            }
+        }
+
+        // SSRF
+        function ssrfCheck() {
+            const url = document.getElementById('ssrf-url').value;
+            const r = document.getElementById('ssrf-result');
+            
+            r.innerHTML = `<div class="code">Checking: ${url}</div>`;
+            
+            setTimeout(() => {
+                if (url.includes('localhost') || url.includes('127.0.0.1') || url.includes('internal')) {
+                    r.innerHTML += `<div class="result"><div class="code">{"internal-api":"active","db":"mysql://admin:pass@db:3306","flag":"FLAG{SSRF_INTERNAL}"}</div></div>`;
+                    r.innerHTML += `<div class="success">✅ SSRF!</div>`;
+                    markCompleted('ssrf', 'FLAG{SSRF_INTERNAL}');
+                } else {
+                    r.innerHTML += `<div class="result">Status: 200 OK</div>`;
+                }
+            }, 1000);
+        }
+
+        // XXE
+        function xxeProcess() {
+            const xml = document.getElementById('xxe-input').value;
+            const r = document.getElementById('xxe-result');
+            
+            if (xml.includes('<!ENTITY') && xml.includes('SYSTEM')) {
+                r.innerHTML = `<div class="result"><div class="code">root:x:0:0\nadmin:x:1000:1000\nFLAG{XXE_FILE_READ}</div></div>`;
+                r.innerHTML += `<div class="success">✅ XXE EXPLORADO!</div>`;
+                markCompleted('xxe', 'FLAG{XXE_FILE_READ}');
+            } else {
+                r.innerHTML = `<div class="result">XML processado: John</div>`;
+            }
+        }
+
+        // CSRF
+        let balance = 10000;
+        function csrfTransfer() {
+            const t = document.getElementById('csrf-to').value;
+            const a = parseInt(document.getElementById('csrf-amount').value);
+            const r = document.getElementById('csrf-result');
+            balance -= a;
+            document.getElementById('balance').textContent = balance.toLocaleString('pt-BR');
+            r.innerHTML = `<div class="result">Transferido R$ ${a} para ${t}<br>Saldo: R$ ${balance}</div>`;
+        }
+
+        function csrfAttack() {
+            const r = document.getElementById('csrf-result');
+            balance -= 5000;
+            document.getElementById('balance').textContent = balance.toLocaleString('pt-BR');
+            r.innerHTML = `<div class="success">⚠️ CSRF ATTACK!<br>R$ 5.000 roubados!<br>FLAG{CSRF_ATTACK}</div>`;
+            markCompleted('csrf', 'FLAG{CSRF_ATTACK}');
+        }
+
+        // RCE
+        function rceExecute() {
+            const h = document.getElementById('rce-host').value;
+            const r = document.getElementById('rce-result');
+            
+            r.innerHTML = `<div class="code">ping ${h}</div>`;
+            
+            setTimeout(() => {
+                if (h.includes(';') || h.includes('|') || h.includes('&')) {
+                    let out = `PING OK\n\n⚠️ COMANDO ADICIONAL:\n\n`;
+                    if (h.includes('ls')) out += 'config.php\nindex.php\n.env\n';
+                    else if (h.includes('cat') || h.includes('passwd')) out += 'root:x:0:0\nadmin:x:1000:1000\n';
+                    else out += 'Command executed\n';
+                    out += '\nFLAG{RCE_COMMAND_INJECTION}';
+                    
+                    r.innerHTML += `<div class="result"><pre>${out}</pre></div>`;
+                    r.innerHTML += `<div class="success">✅ COMMAND INJECTION!</div>`;
+                    markCompleted('rce', 'FLAG{RCE_COMMAND_INJECTION}');
+                } else {
+                    r.innerHTML += `<div class="result">PING ${h} - OK</div>`;
+                }
+            }, 1000);
+        }
+
+        // Deserialization
+        function deserProcess() {
+            const c = document.getElementById('deser-cookie').value;
+            const r = document.getElementById('deser-result');
+            
+            try {
+                const s = JSON.parse(c);
+                r.innerHTML = `<div class="result">User: ${s.username}<br>Role: ${s.role}<br>Admin: ${s.admin}</div>`;
+                
+                if (s.admin === true || s.admin === 'true') {
+                    r.innerHTML += `<div class="success">✅ DESERIALIZATION!<br>Admin privileges gained!<br>FLAG{INSECURE_DESER}</div>`;
+                    markCompleted('deser', 'FLAG{INSECURE_DESER}');
+                }
+            } catch (e) {
+                r.innerHTML = `<div style="color:#ff6b6b">Erro: ${e.message}</div>`;
+            }
+        }
+
+        console.log('%c🔓 VulnLab Loaded!', 'color:#00ff00;font-size:20px;font-weight:bold');
+        console.log('%c🎯 Colete todas as 10 FLAGS!', 'color:#00ff00;font-size:14px');
+    </script>
+</body>
+</html>
