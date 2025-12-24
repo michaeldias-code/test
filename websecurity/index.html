@@ -76,6 +76,20 @@
             justify-content: center;
             font-weight: bold;
         }
+.explanation-box {
+    background: #16213e;
+    border-left: 5px solid #00ff00;
+    padding: 20px;
+    margin-top: 20px;
+    color: #e0e0e0;
+    line-height: 1.5;
+}
+.explanation-box h4 {
+    color: #00ff00;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+.explanation-box b { color: #ffd43b; }
         .lab-card h3 { color: #00ff00; margin-bottom: 10px; font-size: 18px; }
         .difficulty {
             display: inline-block;
@@ -409,43 +423,54 @@
         }
 
         // SQL Injection
-        function sqliLogin() {
-            const u = document.getElementById('sqli-user').value;
-            const p = document.getElementById('sqli-pass').value;
-            const r = document.getElementById('sqli-result');
-            
-            r.innerHTML = `<div class="code">SELECT * FROM users WHERE username='${u}' AND password='${p}'</div>`;
-            
-            if (u.includes("'") && (u.includes("--") || u.toLowerCase().includes("or"))) {
-                r.innerHTML += `<div class="success">✅ SQL INJECTION!<br>FLAG{SQL_BYPASS}</div>`;
-                markCompleted('sqli', 'FLAG{SQL_BYPASS}');
-            } else {
-                r.innerHTML += '<div style="color:#ff6b6b">❌ Inválido</div>';
-            }
-        }
-
+function sqliLogin() {
+    const u = document.getElementById('sqli-user').value;
+    const p = document.getElementById('sqli-pass').value;
+    const r = document.getElementById('sqli-result');
+    
+    r.innerHTML = `<div class="code">SELECT * FROM users WHERE username='${u}' AND password='${p}'</div>`;
+    
+    if (u.includes("'") && (u.includes("--") || u.toLowerCase().includes("or"))) {
+        r.innerHTML += `
+            <div class="success">✅ SQL INJECTION!<br>FLAG{SQL_BYPASS}</div>
+            <div class="explanation-box">
+                <h4>🧠 O que aconteceu?</h4>
+                <p>Você usou o caractere <b>'</b> para fechar a aspa da query original e <b>--</b> para transformar o resto da linha em um comentário.</p>
+                <p>O banco de dados ignorou a verificação da senha e executou apenas: <br>
+                <code>SELECT * FROM users WHERE username='admin'</code></p>
+            </div>`;
+        markCompleted('sqli', 'FLAG{SQL_BYPASS}');
+    } else {
+        r.innerHTML += '<div style="color:#ff6b6b">❌ Inválido</div>';
+    }
+}
         // XSS
         let comments = [];
-        function xssSubmit() {
-            const c = document.getElementById('xss-comment').value;
-            if (!c) return;
-            
-            comments.push(c);
-            const d = document.getElementById('xss-comments');
-            d.innerHTML = '';
-            comments.forEach((t, i) => {
-                d.innerHTML += `<div style="border:1px solid #333; padding:10px; margin:10px 0"><strong>User ${i+1}:</strong><br>${t}</div>`;
-            });
-            
-            if (c.toLowerCase().includes('<script>') || c.toLowerCase().includes('onerror')) {
-                setTimeout(() => {
-                    d.innerHTML += `<div class="success">✅ XSS EXPLORADO!<br>FLAG{XSS_SUCCESS}</div>`;
-                    markCompleted('xss', 'FLAG{XSS_SUCCESS}');
-                }, 500);
-            }
-            document.getElementById('xss-comment').value = '';
-        }
-
+function xssSubmit() {
+    const c = document.getElementById('xss-comment').value;
+    if (!c) return;
+    
+    comments.push(c);
+    const d = document.getElementById('xss-comments');
+    d.innerHTML = '';
+    comments.forEach((t, i) => {
+        d.innerHTML += `<div style="border:1px solid #333; padding:10px; margin:10px 0"><strong>User ${i+1}:</strong><br>${t}</div>`;
+    });
+    
+    if (c.toLowerCase().includes('<script>') || c.toLowerCase().includes('onerror')) {
+        setTimeout(() => {
+            d.innerHTML += `
+                <div class="success">✅ XSS EXPLORADO!<br>FLAG{XSS_SUCCESS}</div>
+                <div class="explanation-box">
+                    <h4>🧠 O que aconteceu?</h4>
+                    <p>O site aceitou seu código <b>JavaScript</b> e o renderizou diretamente no HTML. Isso significa que qualquer usuário que ler este comentário executará o seu script.</p>
+                    <p><b>Risco:</b> Um atacante pode roubar cookies de sessão ou redirecionar usuários para sites falsos.</p>
+                </div>`;
+            markCompleted('xss', 'FLAG{XSS_SUCCESS}');
+        }, 500);
+    }
+    document.getElementById('xss-comment').value = '';
+}
         // Auth
         function authLogin() {
             const u = document.getElementById('auth-user').value;
@@ -467,29 +492,34 @@
             {id:3, username:'john', email:'john@ex.com', secret:'Normal'}
         ];
         
-        function idorView() {
-            const id = document.getElementById('idor-id').value;
-            const r = document.getElementById('idor-result');
-            const u = users.find(x => x.id == id);
-            
-            if (!u) {
-                r.innerHTML = '<div style="color:#ff6b6b">Não encontrado</div>';
-                return;
-            }
-            
-            r.innerHTML = `<div class="result"><table>
-                <tr><th>ID</th><td>${u.id}</td></tr>
-                <tr><th>User</th><td>${u.username}</td></tr>
-                <tr><th>Email</th><td>${u.email}</td></tr>
-                <tr><th>Secret</th><td>${u.secret}</td></tr>
-            </table></div>`;
-            
-            if (id != 1) {
-                r.innerHTML += `<div class="success">✅ IDOR!<br>${u.secret}</div>`;
-                markCompleted('idor', 'FLAG{IDOR_ACCESS}');
-            }
-        }
-
+function idorView() {
+    const id = document.getElementById('idor-id').value;
+    const r = document.getElementById('idor-result');
+    const u = users.find(x => x.id == id);
+    
+    if (!u) {
+        r.innerHTML = '<div style="color:#ff6b6b">Não encontrado</div>';
+        return;
+    }
+    
+    r.innerHTML = `<div class="result"><table>
+        <tr><th>ID</th><td>${u.id}</td></tr>
+        <tr><th>User</th><td>${u.username}</td></tr>
+        <tr><th>Email</th><td>${u.email}</td></tr>
+        <tr><th>Secret</th><td>${u.secret}</td></tr>
+    </table></div>`;
+    
+    if (id != 1) {
+        r.innerHTML += `
+            <div class="success">✅ IDOR EXPLORADO!</div>
+            <div class="explanation-box">
+                <h4>🧠 O que aconteceu?</h4>
+                <p>Isso é uma <b>Referência Direta a Objeto Insegura</b>. O site confiou que você só pediria o ID 1 (seu), mas não verificou se você tinha permissão para ver o ID ${id}.</p>
+                <p><b>Como corrigir:</b> O servidor deve sempre validar se o usuário logado possui permissão sobre o recurso solicitado no banco de dados.</p>
+            </div>`;
+        markCompleted('idor', 'FLAG{IDOR_ACCESS}');
+    }
+}
         // Path Traversal
         const files = {
             'documento.txt': 'Documento público',
@@ -498,54 +528,68 @@
             '../.env': 'SECRET_KEY=xxx\nFLAG{PATH_TRAVERSAL}'
         };
         
-        function pathView() {
-            const f = document.getElementById('path-file').value;
-            const r = document.getElementById('path-result');
-            const c = files[f];
-            
-            if (c) {
-                r.innerHTML = `<div class="result"><div class="code">${c}</div></div>`;
-                if (f.includes('../')) {
-                    r.innerHTML += `<div class="success">✅ PATH TRAVERSAL!</div>`;
-                    if (f.includes('.env')) markCompleted('path', 'FLAG{PATH_TRAVERSAL}');
-                }
-            } else {
-                r.innerHTML = '<div style="color:#ff6b6b">Não encontrado</div>';
-            }
+function pathView() {
+    const f = document.getElementById('path-file').value;
+    const r = document.getElementById('path-result');
+    const c = files[f];
+    
+    if (c) {
+        r.innerHTML = `<div class="result"><div class="code">${c}</div></div>`;
+        if (f.includes('../')) {
+            r.innerHTML += `
+                <div class="success">✅ PATH TRAVERSAL!</div>
+                <div class="explanation-box">
+                    <h4>🧠 O que aconteceu?</h4>
+                    <p>Você usou a sequência <b>../</b> para "subir" pastas no servidor. Isso permitiu sair do diretório de documentos públicos e ler arquivos sensíveis como o <b>.env</b>.</p>
+                    <p><b>Prevenção:</b> Nunca use nomes de arquivos vindos do usuário diretamente; use IDs ou valide se o caminho final está na pasta permitida.</p>
+                </div>`;
+            if (f.includes('.env')) markCompleted('path', 'FLAG{PATH_TRAVERSAL}');
         }
-
+    } else {
+        r.innerHTML = '<div style="color:#ff6b6b">Não encontrado</div>';
+    }
+}
         // SSRF
-        function ssrfCheck() {
-            const url = document.getElementById('ssrf-url').value;
-            const r = document.getElementById('ssrf-result');
-            
-            r.innerHTML = `<div class="code">Checking: ${url}</div>`;
-            
-            setTimeout(() => {
-                if (url.includes('localhost') || url.includes('127.0.0.1') || url.includes('internal')) {
-                    r.innerHTML += `<div class="result"><div class="code">{"internal-api":"active","db":"mysql://admin:pass@db:3306","flag":"FLAG{SSRF_INTERNAL}"}</div></div>`;
-                    r.innerHTML += `<div class="success">✅ SSRF!</div>`;
-                    markCompleted('ssrf', 'FLAG{SSRF_INTERNAL}');
-                } else {
-                    r.innerHTML += `<div class="result">Status: 200 OK</div>`;
-                }
-            }, 1000);
+ function ssrfCheck() {
+    const url = document.getElementById('ssrf-url').value;
+    const r = document.getElementById('ssrf-result');
+    r.innerHTML = `<div class="code">Checking: ${url}</div>`;
+    
+    setTimeout(() => {
+        if (url.includes('localhost') || url.includes('127.0.0.1') || url.includes('internal')) {
+            r.innerHTML += `
+                <div class="result"><div class="code">{"internal-api":"active","db":"mysql://admin:pass@db:3306","flag":"FLAG{SSRF_INTERNAL}"}</div></div>
+                <div class="success">✅ SSRF EXPLORADO!</div>
+                <div class="explanation-box">
+                    <h4>🧠 O que aconteceu?</h4>
+                    <p>Você forçou o <b>servidor</b> a fazer uma requisição para a rede interna dele (localhost). O firewall bloqueia você, mas não bloqueia o próprio servidor.</p>
+                    <p><b>Risco:</b> Acesso a metadados de nuvem (AWS/Azure) e bancos de dados internos.</p>
+                </div>`;
+            markCompleted('ssrf', 'FLAG{SSRF_INTERNAL}');
+        } else {
+            r.innerHTML += `<div class="result">Status: 200 OK</div>`;
         }
-
+    }, 1000);
+}
         // XXE
-        function xxeProcess() {
-            const xml = document.getElementById('xxe-input').value;
-            const r = document.getElementById('xxe-result');
-            
-            if (xml.includes('<!ENTITY') && xml.includes('SYSTEM')) {
-                r.innerHTML = `<div class="result"><div class="code">root:x:0:0\nadmin:x:1000:1000\nFLAG{XXE_FILE_READ}</div></div>`;
-                r.innerHTML += `<div class="success">✅ XXE EXPLORADO!</div>`;
-                markCompleted('xxe', 'FLAG{XXE_FILE_READ}');
-            } else {
-                r.innerHTML = `<div class="result">XML processado: John</div>`;
-            }
-        }
-
+function xxeProcess() {
+    const xml = document.getElementById('xxe-input').value;
+    const r = document.getElementById('xxe-result');
+    
+    if (xml.includes('<!ENTITY') && xml.includes('SYSTEM')) {
+        r.innerHTML = `
+            <div class="result"><div class="code">root:x:0:0\nadmin:x:1000:1000\nFLAG{XXE_FILE_READ}</div></div>
+            <div class="success">✅ XXE EXPLORADO!</div>
+            <div class="explanation-box">
+                <h4>🧠 O que aconteceu?</h4>
+                <p>Você definiu uma <b>Entidade Externa</b> no XML. Quando o servidor processou o arquivo, ele tentou "resolver" a entidade buscando o arquivo local especificado.</p>
+                <p><b>Correção:</b> Desabilitar a resolução de DTDs e entidades externas nos parsers de XML.</p>
+            </div>`;
+        markCompleted('xxe', 'FLAG{XXE_FILE_READ}');
+    } else {
+        r.innerHTML = `<div class="result">XML processado com sucesso!</div>`;
+    }
+}
         // CSRF
         let balance = 10000;
         function csrfTransfer() {
@@ -557,56 +601,68 @@
             r.innerHTML = `<div class="result">Transferido R$ ${a} para ${t}<br>Saldo: R$ ${balance}</div>`;
         }
 
-        function csrfAttack() {
-            const r = document.getElementById('csrf-result');
-            balance -= 5000;
-            document.getElementById('balance').textContent = balance.toLocaleString('pt-BR');
-            r.innerHTML = `<div class="success">⚠️ CSRF ATTACK!<br>R$ 5.000 roubados!<br>FLAG{CSRF_ATTACK}</div>`;
-            markCompleted('csrf', 'FLAG{CSRF_ATTACK}');
-        }
-
+ function csrfAttack() {
+    const r = document.getElementById('csrf-result');
+    balance -= 5000;
+    document.getElementById('balance').textContent = balance.toLocaleString('pt-BR');
+    r.innerHTML = `
+        <div class="success">⚠️ CSRF ATTACK!<br>R$ 5.000 roubados!<br>FLAG{CSRF_ATTACK}</div>
+        <div class="explanation-box">
+            <h4>🧠 O que aconteceu?</h4>
+            <p>O "Link do iPhone" fez um pedido para a função de transferência enquanto você estava logado. O navegador enviou seus cookies automaticamente.</p>
+            <p><b>O ponto chave:</b> O pedido foi legítimo para o banco, mas a <b>vontade</b> não foi sua. O banco falhou por não exigir um <b>Token Anti-CSRF</b> único.</p>
+        </div>`;
+    markCompleted('csrf', 'FLAG{CSRF_ATTACK}');
+}
         // RCE
-        function rceExecute() {
-            const h = document.getElementById('rce-host').value;
-            const r = document.getElementById('rce-result');
+function rceExecute() {
+    const h = document.getElementById('rce-host').value;
+    const r = document.getElementById('rce-result');
+    r.innerHTML = `<div class="code">ping ${h}</div>`;
+    
+    setTimeout(() => {
+        if (h.includes(';') || h.includes('|') || h.includes('&')) {
+            let out = `PING OK\n\n⚠️ COMANDO ADICIONAL EXECUTADO:\n\n`;
+            out += h.includes('ls') ? 'config.php\nindex.php\n' : 'root:x:0:0\n';
+            out += '\nFLAG{RCE_COMMAND_INJECTION}';
             
-            r.innerHTML = `<div class="code">ping ${h}</div>`;
-            
-            setTimeout(() => {
-                if (h.includes(';') || h.includes('|') || h.includes('&')) {
-                    let out = `PING OK\n\n⚠️ COMANDO ADICIONAL:\n\n`;
-                    if (h.includes('ls')) out += 'config.php\nindex.php\n.env\n';
-                    else if (h.includes('cat') || h.includes('passwd')) out += 'root:x:0:0\nadmin:x:1000:1000\n';
-                    else out += 'Command executed\n';
-                    out += '\nFLAG{RCE_COMMAND_INJECTION}';
-                    
-                    r.innerHTML += `<div class="result"><pre>${out}</pre></div>`;
-                    r.innerHTML += `<div class="success">✅ COMMAND INJECTION!</div>`;
-                    markCompleted('rce', 'FLAG{RCE_COMMAND_INJECTION}');
-                } else {
-                    r.innerHTML += `<div class="result">PING ${h} - OK</div>`;
-                }
-            }, 1000);
+            r.innerHTML += `
+                <div class="result"><pre>${out}</pre></div>
+                <div class="success">✅ COMMAND INJECTION!</div>
+                <div class="explanation-box">
+                    <h4>🧠 O que aconteceu?</h4>
+                    <p>Você usou caracteres separadores (como <b>;</b> ou <b>|</b>) para injetar um comando do Sistema Operacional. O servidor executou seu comando com os mesmos privilégios do site.</p>
+                    <p><b>Risco:</b> Controle total do servidor (Remote Code Execution).</p>
+                </div>`;
+            markCompleted('rce', 'FLAG{RCE_COMMAND_INJECTION}');
+        } else {
+            r.innerHTML += `<div class="result">PING ${h} - OK</div>`;
         }
-
+    }, 1000);
+}
         // Deserialization
-        function deserProcess() {
-            const c = document.getElementById('deser-cookie').value;
-            const r = document.getElementById('deser-result');
-            
-            try {
-                const s = JSON.parse(c);
-                r.innerHTML = `<div class="result">User: ${s.username}<br>Role: ${s.role}<br>Admin: ${s.admin}</div>`;
-                
-                if (s.admin === true || s.admin === 'true') {
-                    r.innerHTML += `<div class="success">✅ DESERIALIZATION!<br>Admin privileges gained!<br>FLAG{INSECURE_DESER}</div>`;
-                    markCompleted('deser', 'FLAG{INSECURE_DESER}');
-                }
-            } catch (e) {
-                r.innerHTML = `<div style="color:#ff6b6b">Erro: ${e.message}</div>`;
-            }
+function deserProcess() {
+    const c = document.getElementById('deser-cookie').value;
+    const r = document.getElementById('deser-result');
+    
+    try {
+        const s = JSON.parse(c);
+        r.innerHTML = `<div class="result">User: ${s.username}<br>Role: ${s.role}<br>Admin: ${s.admin}</div>`;
+        
+        if (s.admin === true || s.admin === 'true') {
+            r.innerHTML += `
+                <div class="success">✅ DESSERIALIZAÇÃO INSEGURA!</div>
+                <div class="explanation-box">
+                    <h4>🧠 O que aconteceu?</h4>
+                    <p>O servidor "confiou" nos dados do objeto que você enviou. Ao alterar o atributo <b>admin</b> para <b>true</b>, você manipulou a lógica do objeto na memória do servidor.</p>
+                    <p><b>Dica:</b> Em linguagens como Java ou PHP, isso pode levar a execução de código (RCE) se objetos complexos forem usados.</p>
+                </div>`;
+            markCompleted('deser', 'FLAG{INSECURE_DESER}');
         }
-
+    } catch (e) {
+        r.innerHTML = `<div style="color:#ff6b6b">Erro no JSON: ${e.message}</div>`;
+    }
+}
         console.log('%c🔓 VulnLab Loaded!', 'color:#00ff00;font-size:20px;font-weight:bold');
         console.log('%c🎯 Colete todas as 10 FLAGS!', 'color:#00ff00;font-size:14px');
     </script>
