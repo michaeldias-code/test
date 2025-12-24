@@ -176,8 +176,6 @@
             <h3>⚠️ AVISO EDUCACIONAL</h3>
             <p>Ambiente controlado para fins educacionais. Nunca explore vulnerabilidades em sistemas reais sem autorização.</p>
         </div>
-
-
 <div style="background: #16213e; padding: 20px; border-radius: 5px; margin-bottom: 20px; border-left: 5px solid #00ff00;">
             <h3 style="color: #00ff00; margin-bottom: 10px;">📚 Sobre este projeto</h3>
             <p style="line-height: 1.6;">
@@ -190,11 +188,6 @@
                 <strong>GitHub:</strong> <a href="https://github.com/michaeldias-code/test/tree/main/websecurity" style="color: #00ff00;">https://github.com/michaeldias-code/test/tree/main/websecurity</a>
             </p>
         </div>
-
-
-
-
-
         <div id="labSelector" class="lab-selector">
             <div class="lab-card" data-lab="sqli" onclick="openLab('sqli')">
                 <span class="difficulty medium">Médio</span>
@@ -357,8 +350,10 @@
             <input type="text" id="csrf-to" value="user2" placeholder="Para">
             <input type="number" id="csrf-amount" value="100" placeholder="Valor">
             <button onclick="csrfTransfer()">Transferir</button>
-            <h4 style="margin-top: 20px;">Ataque CSRF:</h4>
-            <a href="#" onclick="csrfAttack(); return false;" style="color: #ff6b6b;">🔗 GANHE IPHONE GRÁTIS! Clique aqui!</a>
+            <button onclick="alert('O ataque CSRF acontece quando você CLICA NO LINK MALICIOSO abaixo. Ele força uma transferência sem você perceber!')">💡 Dica</button>
+            <h4 style="margin-top: 20px;">⚠️ Simulação de Link Malicioso (CSRF Attack):</h4>
+            <p style="color: #ffd43b; margin: 10px 0;">Clique no link abaixo para ver o ataque CSRF em ação:</p>
+            <a href="#" onclick="csrfAttack(); return false;" style="color: #ff6b6b; font-size: 18px; text-decoration: underline;">🎁 GANHE UM IPHONE GRÁTIS! CLIQUE AQUI AGORA! 🎁</a>
             <div id="csrf-result"></div>
         </div>
 
