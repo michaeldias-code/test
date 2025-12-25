@@ -149,6 +149,10 @@ function render() {
         en: { exp: "Experience", edu: "Education", skills: "Skills", sum: "Summary" }
     }[lang];
 
+    // Lógica de Títulos: Pega o "Desired" para o topo e o "JobTitle" para o contexto
+    const displayDesired = lang === 'pt' ? cvData.personal.desired_position_pt : cvData.personal.desired_position_en;
+    const currentJobTitle = lang === 'pt' ? cvData.personal.jobtitle_pt : cvData.personal.jobtitle_en;
+
     let html = `
         <div class="header-wrapper ${photoAlign}">
             ${userPhoto ? `
@@ -156,11 +160,16 @@ function render() {
                     <div class="photo-circle"><img src="${userPhoto}"></div>
                 </div>` : ''}
             <div class="header-text" style="text-align: ${photoAlign === 'row-reverse' ? 'right' : 'left'}">
-                <h1 style="margin:0; font-size: 28pt;">${cvData.personal.fullname}</h1>
-                <div style="font-size:14pt; font-weight:600; color: var(--primary-color); margin-top:5px">
-                    ${lang === 'pt' ? cvData.personal.jobtitle : cvData.personal.desired_position_en}
+                <h1 style="margin:0; font-size: 26pt;">${cvData.personal.fullname}</h1>
+                
+                <div style="font-size:15pt; font-weight:700; color: var(--primary-color); margin-top:5px; text-transform: uppercase; letter-spacing: 1px;">
+                    ${displayDesired}
                 </div>
                 
+                <!--<div style="font-size:10pt; font-weight:400; color: #64748b; margin-top:2px; font-style: italic;">
+                   ${currentJobTitle}
+                </div>-->
+
                 <div style="font-size: 9pt; margin-top: 12px; opacity: 0.9; line-height: 1.5;">
                     <div>📍 ${cvData.personal.location} • 📞 ${cvData.personal.phone}</div>
                     <div>✉️ ${cvData.personal.email}</div>
@@ -174,7 +183,9 @@ function render() {
 
         <div class="cv-section">
             <div class="section-title">${t.sum}</div>
-            <p style="text-align:justify; font-size:10pt">${lang === 'pt' ? cvData.personal.summary_pt : cvData.personal.summary_en}</p>
+            <p style="text-align:justify; font-size:10pt; line-height:1.5;">
+                ${lang === 'pt' ? cvData.personal.summary_pt : cvData.personal.summary_en}
+            </p>
         </div>
 
         <div class="cv-section">
