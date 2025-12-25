@@ -110,6 +110,10 @@
         </select>
     </div>
 
+<button onclick="downloadModelJSON()" style="background:#475569; margin-bottom: 20px;" class="btn-export">
+    📄 Baixar Modelo JSON
+</button>
+
     <div class="control-group">
         <label>Dados JSON:</label>
         <input type="file" id="json-file" accept=".json">
@@ -169,7 +173,90 @@ document.getElementById('json-file').onchange = (e) => {
     reader.onload = (ev) => { cvData = JSON.parse(ev.target.result); render(); };
     reader.readAsText(e.target.files[0]);
 };
+function downloadModelJSON() {
+    const modelData = {
+        "personal": {
+            "fullname": "Nome Completo",
+            "jobtitle_pt": "Cargo Inicial → Cargo Intermediário → Cargo Atual",
+            "jobtitle_en": "Initial Role → Intermediate Role → Current Role",
+            "desired_position_pt": "Cargo Pretendido",
+            "desired_position_en": "Desired Position",
+            "email": "email@exemplo.com",
+            "phone": "+55119XXXXXXXX",
+            "linkedin": "linkedin.com/in/seuperfil",
+            "website": "www.seusite.com",
+            "location": "Cidade, Estado, País",
+            "remote_preference": true,
+            "availability_pt": "Imediata",
+            "availability_en": "Immediate",
+            "contract_type_pt": "CLT / Tempo Integral",
+            "contract_type_en": "Full-time",
+            "summary_pt": "Profissional de tecnologia com experiência em desenvolvimento de software e liderança técnica...",
+            "summary_en": "Technology professional with experience in software development and technical leadership..."
+        },
+        "experience": [
+            {
+                "company": "Empresa Exemplo",
+                "position_pt": "Cargo Inicial → Cargo Intermediário → Cargo Atual",
+                "position_en": "Initial Role → Intermediate Role → Current Role",
+                "period": "Ano Início – Ano Fim / Atual",
+                "description_pt": ["Liderança ou participação em projetos...", "Implementação de boas práticas..."],
+                "description_en": ["Led or contributed to projects...", "Implemented development best practices..."]
+            }
+        ],
+        "education": [
+            {
+                "degree_pt": "Curso ou Graduação",
+                "degree_en": "Degree or Program",
+                "institution": "Instituição de Ensino",
+                "period": "Ano Início – Ano Fim"
+            }
+        ],
+        "skills": {
+            "technical": ["Software Development", "Cloud Computing"],
+            "languages": ["Portuguese: Native", "English: Advanced"],
+            "soft": ["Leadership", "Communication"]
+        },
+        "projects": [
+            {
+                "title_pt": "Projeto ou Sistema Relevante",
+                "title_en": "Relevant Project or System",
+                "description_pt": "Descrição breve do projeto...",
+                "description_en": "Brief project description..."
+            }
+        ],
+        "volunteer": [
+            {
+                "role_pt": "Atuação Voluntária",
+                "role_en": "Volunteer Role",
+                "organization": "Organização",
+                "period": "Ano Início – Ano Fim",
+                "description_pt": "Descrição da atividade...",
+                "description_en": "Description of activity..."
+            }
+        ],
+        "certifications": [
+            {
+                "title_pt": "Nome da Certificação",
+                "title_en": "Certification Name",
+                "issuer": "Instituição Certificadora",
+                "year": "2024"
+            }
+        ],
+        "coverletter": {
+            "pt": "Olá time recrutador,\n\nTenho interesse na oportunidade...",
+            "en": "Hello Hiring Team,\n\nI am interested in the opportunity..."
+        }
+    };
 
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(modelData, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "modelo_cv.json");
+    document.body.appendChild(downloadAnchorNode); 
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+}
 function render() {
     if(!cvData) return;
 
