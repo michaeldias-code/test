@@ -41,10 +41,49 @@
         /* --- TEMPLATES --- */
         .template-modern .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; margin-bottom: 15px; }
 
-        .template-executive .header-wrapper { background: var(--primary-color); color: white; margin: -45px -45px 30px -45px; padding: 45px; }
+/*        .template-executive .header-wrapper { background: var(--primary-color); color: white; margin: -45px -45px 30px -45px; padding: 45px; }
+*/
         .template-executive .header-wrapper h1 { color: white; margin: 0; }
         .template-executive .photo-circle { border-color: white; }
         .template-executive .section-title { color: var(--primary-color); font-weight: 800; border-left: 4px solid var(--primary-color); padding-left: 10px; margin-bottom: 15px; }
+
+
+/* Correção para o Template Executivo */
+.template-executive .header-wrapper { 
+    background: var(--primary-color); 
+    color: white !important; 
+    margin: -45px -45px 30px -45px; 
+    padding: 45px; 
+}
+
+.desired-position {
+    color: var(--primary-color);
+}
+
+
+/* No Executivo, o fundo é escuro, então forçamos branco */
+.template-executive .desired-position {
+    color: white !important;
+}
+.current-job-title {
+    color: #64748b;
+}
+
+/* Força o subtítulo itálico a ficar com um tom de cinza claro no Executivo */
+.template-executive .current-job-title {
+    color: rgba(255,255,255,0.8) !important;
+}
+
+/* Garante que o container de foto não quebre o alinhamento no Executivo */
+.template-executive .photo-circle { 
+    border-color: white !important; 
+}
+
+/* Ajuste para as informações de contato no Executivo */
+.template-executive .contact-info {
+    color: white !important;
+}
+
 
         .template-minimal .section-title { color: #1e293b; border-bottom: 1px solid var(--primary-color); margin-bottom: 10px; }
 
@@ -162,15 +201,15 @@ function render() {
             <div class="header-text" style="text-align: ${photoAlign === 'row-reverse' ? 'right' : 'left'}">
                 <h1 style="margin:0; font-size: 26pt;">${cvData.personal.fullname}</h1>
                 
-                <div style="font-size:15pt; font-weight:700; color: var(--primary-color); margin-top:5px; text-transform: uppercase; letter-spacing: 1px;">
+                <div class="desired-position" style="font-size:15pt; font-weight:700; margin-top:5px; text-transform: uppercase; letter-spacing: 1px;">
                     ${displayDesired}
                 </div>
                 
-                <!--<div style="font-size:10pt; font-weight:400; color: #64748b; margin-top:2px; font-style: italic;">
-                   ${currentJobTitle}
+               <!-- <div class="current-job-title" style="font-size:10pt; font-weight:400; margin-top:2px; font-style: italic;">
+                    ${currentJobTitle}
                 </div>-->
 
-                <div style="font-size: 9pt; margin-top: 12px; opacity: 0.9; line-height: 1.5;">
+                <div class="contact-info" style="font-size: 9pt; margin-top: 12px; opacity: 0.9; line-height: 1.5;">
                     <div>📍 ${cvData.personal.location} • 📞 ${cvData.personal.phone}</div>
                     <div>✉️ ${cvData.personal.email}</div>
                     <div style="margin-top: 4px;">
@@ -180,7 +219,7 @@ function render() {
                 </div>
             </div>
         </div>
-
+		
         <div class="cv-section">
             <div class="section-title">${t.sum}</div>
             <p style="text-align:justify; font-size:10pt; line-height:1.5;">
