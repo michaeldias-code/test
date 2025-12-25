@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Designer Pro - Ultimate Custom</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&family=Roboto+Mono&family=Montserrat:wght@400;700&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --font-main: 'Inter', sans-serif;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: #323639; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 360px; background: #ffffff; border-right: 1px solid #e2e8f0; padding: 20px; overflow-y: auto; height: 100%; box-sizing: border-box; }
+        .preview-area { flex: 1; padding: 30px; overflow-y: auto; display: flex; justify-content: center; }
+        
+        .control-group { margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+        label { display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin: 10px 0 5px; }
+        select, input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        
+        #cv-render { 
+            width: 210mm; min-height: 297mm; background: white; padding: 45px; 
+            box-sizing: border-box; color: #334155; font-family: var(--font-main);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        /* --- ESTRUTURA DO HEADER DINÂMICO --- */
+        .header-wrapper { display: flex; align-items: center; gap: 30px; margin-bottom: 30px; }
+        .header-wrapper.row-reverse { flex-direction: row-reverse; }
+        .header-text { flex: 1; }
+        
+        .photo-container { width: 120px; height: 120px; flex-shrink: 0; }
+        .photo-circle { 
+            width: 100%; height: 100%; border-radius: 12px; 
+            border: 3px solid var(--primary-color); overflow: hidden; 
+        }
+        .photo-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- TEMPLATES --- */
+        .template-modern .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; margin-bottom: 15px; }
+
+        .template-executive .header-wrapper { background: var(--primary-color); color: white; margin: -45px -45px 30px -45px; padding: 45px; }
+        .template-executive .header-wrapper h1 { color: white; margin: 0; }
+        .template-executive .photo-circle { border-color: white; }
+        .template-executive .section-title { color: var(--primary-color); font-weight: 800; border-left: 4px solid var(--primary-color); padding-left: 10px; margin-bottom: 15px; }
+
+        .template-minimal .section-title { color: #1e293b; border-bottom: 1px solid var(--primary-color); margin-bottom: 10px; }
+
+        .template-creative { border-top: 15px solid var(--primary-color); }
+        .template-creative .section-title { font-family: 'Roboto Mono', monospace; background: var(--primary-color); color: white; padding: 2px 10px; }
+
+        .cv-section { margin-bottom: 25px; page-break-inside: avoid; }
+        .html2pdf__page-break { display: block; height: 0; page-break-before: always; }
+        .btn-export { width: 100%; background: #000; color: white; border: none; padding: 18px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>CV Designer Pro</h2>
+    
+    <div class="control-group">
+        <label>Foto (Opcional):</label>
+        <input type="file" id="photo-upload" accept="image/*">
+        <label>Posição da Foto:</label>
+        <select id="photo-align">
+            <option value="row">Esquerda</option>
+            <option value="row-reverse">Direita</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label>Dados JSON:</label>
+        <input type="file" id="json-file" accept=".json">
+    </div>
+
+    <div class="control-group">
+        <label>Modelo Base:</label>
+        <select id="template-select">
+            <option value="modern">Moderno</option>
+            <option value="executive">Executivo</option>
+            <option value="minimal">Minimalista</option>
+            <option value="creative">Criativo</option>
+        </select>
+        
+        <label>Cor & Fonte:</label>
+        <select id="color-palette">
+            <option value="#2563eb">Azul Royal</option>
+            <option value="#1e293b">Slate Dark</option>
+            <option value="#7c3aed">Roxo Moderno</option>
+            <option value="#059669">Verde Esmeralda</option>
+            <option value="#000000">Preto Puro</option>
+        </select>
+
+        <select id="font-select" style="margin-top:10px">
+            <option value="'Inter', sans-serif">Inter</option>
+            <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value="'Lora', serif">Lora</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label><input type="checkbox" id="include-cover" checked> Incluir Cover Letter</label>
+        <label><input type="checkbox" id="lang-toggle"> Inglês</label>
+    </div>
+
+    <button class="btn-export" onclick="exportPDF()">📥 BAIXAR PDF</button>
+</div>
+
+<div class="preview-area">
+    <div id="cv-render" class="template-modern">
+        <p style="text-align: center; color: #94a3b8; margin-top: 100px;">Aguardando JSON...</p>
+    </div>
+</div>
+
+<script>
+let cvData = null;
+let userPhoto = null;
+
+document.getElementById('photo-upload').onchange = (e) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => { userPhoto = ev.target.result; render(); };
+    reader.readAsDataURL(e.target.files[0]);
+};
+
+document.getElementById('json-file').onchange = (e) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => { cvData = JSON.parse(ev.target.result); render(); };
+    reader.readAsText(e.target.files[0]);
+};
+
+function render() {
+    if(!cvData) return;
+
+    const lang = document.getElementById("lang-toggle").checked ? 'en' : 'pt';
+    const template = document.getElementById("template-select").value;
+    const photoAlign = document.getElementById("photo-align").value;
+    const container = document.getElementById("cv-render");
+    
+    document.documentElement.style.setProperty('--primary-color', document.getElementById("color-palette").value);
+    document.documentElement.style.setProperty('--font-main', document.getElementById("font-select").value);
+    
+    container.className = `template-${template}`;
+
+    const t = {
+        pt: { exp: "Experiência Profissional", edu: "Formação", skills: "Habilidades", sum: "Resumo" },
+        en: { exp: "Experience", edu: "Education", skills: "Skills", sum: "Summary" }
+    }[lang];
+
+    let html = `
+        <div class="header-wrapper ${photoAlign}">
+            ${userPhoto ? `
+                <div class="photo-container">
+                    <div class="photo-circle"><img src="${userPhoto}"></div>
+                </div>` : ''}
+            <div class="header-text" style="text-align: ${photoAlign === 'row-reverse' ? 'right' : 'left'}">
+                <h1 style="margin:0; font-size: 28pt;">${cvData.personal.fullname}</h1>
+                <div style="font-size:14pt; font-weight:600; color: var(--primary-color); margin-top:5px">
+                    ${lang === 'pt' ? cvData.personal.jobtitle : cvData.personal.desired_position_en}
+                </div>
+                
+                <div style="font-size: 9pt; margin-top: 12px; opacity: 0.9; line-height: 1.5;">
+                    <div>📍 ${cvData.personal.location} • 📞 ${cvData.personal.phone}</div>
+                    <div>✉️ ${cvData.personal.email}</div>
+                    <div style="margin-top: 4px;">
+                        ${cvData.personal.linkedin ? `<strong>LinkedIn:</strong> ${cvData.personal.linkedin}` : ''} 
+                        ${cvData.personal.website ? ` | <strong>Web:</strong> ${cvData.personal.website}` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cv-section">
+            <div class="section-title">${t.sum}</div>
+            <p style="text-align:justify; font-size:10pt">${lang === 'pt' ? cvData.personal.summary_pt : cvData.personal.summary_en}</p>
+        </div>
+
+        <div class="cv-section">
+            <div class="section-title">${t.exp}</div>
+            ${cvData.experience.map(exp => `
+                <div style="margin-bottom:15px">
+                    <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:10pt">
+                        <span>${lang === 'pt' ? exp.position_pt : exp.position_en}</span>
+                        <span>${exp.period}</span>
+                    </div>
+                    <div style="color:var(--primary-color); font-weight:600; font-size:9pt">${exp.company}</div>
+                    <ul style="font-size:9.5pt; margin-top:5px">
+                        ${(lang === 'pt' ? exp.description_pt : exp.description_en).map(i => `<li>${i}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('')}
+        </div>
+
+        <div class="cv-section">
+            <div class="section-title">${t.edu}</div>
+            ${cvData.education.map(ed => `
+                <div style="display:flex; justify-content:space-between; font-size:10pt; margin-bottom:5px">
+                    <span><strong>${lang === 'pt' ? ed.degree_pt : ed.degree_en}</strong></span>
+                    <span>${ed.period}</span>
+                </div>
+                <div style="font-size:9pt; color:#64748b">${ed.institution}</div>
+            `).join('')}
+        </div>
+    `;
+
+    if(document.getElementById("include-cover").checked && cvData.coverletter) {
+        html += `
+            <div class="html2pdf__page-break"></div>
+            <div class="cv-section" style="padding-top:40px">
+                <div class="section-title">Cover Letter</div>
+                <p style="margin-top:30px">Dear Hiring Manager,</p>
+                <div style="line-height:1.7; text-align:justify; font-size:11pt">
+                    ${lang === 'pt' ? cvData.coverletter.pt : cvData.coverletter.en}
+                </div>
+                <p style="margin-top:50px">Best regards,<br><strong>${cvData.personal.fullname}</strong></p>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
+}
+
+async function exportPDF() {
+    const element = document.getElementById('cv-render');
+    html2pdf().set({
+        margin: 0,
+        filename: 'CV_Michael_Dias.pdf',
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+    }).from(element).save();
+}
+
+['template-select', 'color-palette', 'font-select', 'include-cover', 'lang-toggle', 'photo-align'].forEach(id => {
+    document.getElementById(id).onchange = render;
+});
+</script>
+</body>
+</html>
