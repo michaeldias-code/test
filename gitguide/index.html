@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitGuide - 1000 Projetos Open Source</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 15px 30px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        /* HOME PAGE */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            text-align: center;
+            border: 3px solid transparent;
+			display: flex;
+			flex-direction: column;
+			justify-content: space-between;
+        }
+
+        .category-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .category-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .category-description {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .category-count {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* PROJECTS LIST PAGE */
+        .projects-page {
+            display: none;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 30px;
+        }
+
+        .back-button:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .page-header {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+            background: white;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .projects-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #667eea;
+            color: white;
+        }
+
+        th {
+            padding: 20px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        td {
+            padding: 20px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tbody tr {
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .project-title-cell {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.05rem;
+        }
+
+        .license-badge {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .github-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #24292e;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .github-link:hover {
+            background: #000;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            margin-top: 50px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .projects-table {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 800px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 GitGuide</h1>
+            <p class="subtitle">Sua biblioteca com 1000 projetos Open Source do GitHub</p>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">400</div>
+                    <div>Projetos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">8</div>
+                    <div>Categorias</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">98%</div>
+                    <div>Licenças Livres</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- HOME PAGE -->
+        <div id="homePage">
+            <div class="categories-grid">
+                <div class="category-card" onclick="showCategory('web')">
+                    <div class="category-icon">🌐</div>
+                    <h2 class="category-title">Desenvolvimento Web</h2>
+                    <p class="category-description">Frameworks, bibliotecas e ferramentas essenciais para desenvolvimento web moderno</p>
+                    <span class="category-count">50 projetos</span>
+                </div>
+
+				<div class="category-card" onclick="showCategory('cms')">
+					<div class="category-icon">🛒</div>
+					<h2 class="category-title">CMS & E-commerce</h2>
+					<p class="category-description">Sistemas de gerenciamento de conteúdo, geradores de sites estáticos e plataformas de e-commerce</p>
+					<span class="category-count">50 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('devtools')">
+					<div class="category-icon">🛠️</div>
+					<h2 class="category-title">Ferramentas para Desenvolvedores</h2>
+					<p class="category-description">Editores de código, IDEs, clientes Git, ferramentas de API e terminais</p>
+					<span class="category-count">50 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('database')">
+					<div class="category-icon">🗄️</div>
+					<h2 class="category-title">Bancos de Dados</h2>
+					<p class="category-description">Bancos relacionais, NoSQL, grafos, séries temporais e vetoriais</p>
+					<span class="category-count">50 projetos</span>
+				</div>
+				<div class="category-card" onclick="showCategory('os')">
+					<div class="category-icon">🖥️</div>
+					<h2 class="category-title">Sistemas Operacionais & Desktop</h2>
+					<p class="category-description">Distribuições Linux, BSD, ambientes desktop, virtualização e componentes de sistema</p>
+					<span class="category-count">50 projetos</span>
+				</div>
+				<div class="category-card" onclick="showCategory('datascience')">
+					<div class="category-icon">🤖</div>
+					<h2 class="category-title">Data Science & IA</h2>
+					<p class="category-description">Machine learning, análise de dados e ferramentas de inteligência artificial</p>
+					<span class="category-count">50 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('devops')">
+					<div class="category-icon">☁️</div>
+					<h2 class="category-title">DevOps & Cloud</h2>
+					<p class="category-description">Ferramentas de containers, orquestração, CI/CD e infraestrutura como código</p>
+					<span class="category-count">50 projetos</span>
+				</div>
+
+                <div class="category-card" onclick="showCategory('mobile')">
+                    <div class="category-icon">📱</div>
+                    <h2 class="category-title">Desenvolvimento Mobile</h2>
+                    <p class="category-description">Frameworks e ferramentas para criar aplicativos iOS, Android e multiplataforma</p>
+                    <span class="category-count">50 projetos</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROJECTS LIST PAGE -->
+        <div id="projectsPage" class="projects-page">
+            <button class="back-button" onclick="showHome()">
+                ← Voltar para categorias
+            </button>
+
+            <div class="page-header">
+                <h2 class="page-title" id="categoryTitle"></h2>
+                <p class="page-subtitle" id="categorySubtitle"></p>
+            </div>
+
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Buscar projetos...">
+
+            <div class="projects-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 20%">Projeto</th>
+                            <th style="width: 10%">Licença</th>
+                            <th style="width: 50%">Descrição</th>
+                            <th style="width: 20%">GitHub</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>💜 Feito com amor pela comunidade Open Source</p>
+        <p style="margin-top: 10px; opacity: 0.8; font-size: 0.9rem;">
+            Todos os projetos possuem licenças livres (MIT, Apache 2.0, BSD, etc.)
+        </p>
+    </footer>
+
+    <script>
+        const categories = {
+            web: {
+                title: "Desenvolvimento Web",
+                subtitle: "Frameworks, bibliotecas e ferramentas para desenvolvimento web moderno",
+                projects: [
+                    { title: "React", license: "MIT", description: "Biblioteca JavaScript para construir interfaces de usuário interativas e componentizadas. Criada pelo Facebook.", link: "https://github.com/facebook/react" },
+                    { title: "Vue.js", license: "MIT", description: "Framework JavaScript progressivo para construir interfaces de usuário com curva de aprendizado suave.", link: "https://github.com/vuejs/vue" },
+                    { title: "Angular", license: "MIT", description: "Plataforma completa para desenvolvimento de aplicações web desenvolvida pelo Google.", link: "https://github.com/angular/angular" },
+                    { title: "Next.js", license: "MIT", description: "Framework React para produção com renderização server-side e geração estática.", link: "https://github.com/vercel/next.js" },
+                    { title: "Svelte", license: "MIT", description: "Framework que move o trabalho para compilação, resultando em aplicações mais rápidas.", link: "https://github.com/sveltejs/svelte" },
+                    { title: "Express", license: "MIT", description: "Framework web minimalista e flexível para Node.js com recursos robustos.", link: "https://github.com/expressjs/express" },
+                    { title: "Django", license: "BSD", description: "Framework web Python de alto nível usado por Instagram e Mozilla.", link: "https://github.com/django/django" },
+                    { title: "Laravel", license: "MIT", description: "Framework PHP elegante focado em produtividade do desenvolvedor.", link: "https://github.com/laravel/laravel" },
+                    { title: "Ruby on Rails", license: "MIT", description: "Framework full-stack usado por GitHub, Airbnb e Shopify.", link: "https://github.com/rails/rails" },
+                    { title: "Flask", license: "BSD", description: "Microframework Python leve e flexível para desenvolvimento web.", link: "https://github.com/pallets/flask" },
+                    { title: "Tailwind CSS", license: "MIT", description: "Framework CSS utility-first para criar designs customizados rapidamente.", link: "https://github.com/tailwindlabs/tailwindcss" },
+                    { title: "Bootstrap", license: "MIT", description: "Framework CSS mais popular do mundo para desenvolvimento responsivo.", link: "https://github.com/twbs/bootstrap" },
+                    { title: "Nuxt.js", license: "MIT", description: "Framework Vue.js para aplicações universais com server-side rendering.", link: "https://github.com/nuxt/nuxt" },
+                    { title: "Gatsby", license: "MIT", description: "Framework React baseado em GraphQL para sites rápidos e modernos.", link: "https://github.com/gatsbyjs/gatsby" },
+                    { title: "FastAPI", license: "MIT", description: "Framework Python moderno para APIs com validação automática.", link: "https://github.com/tiangolo/fastapi" },
+                    { title: "Nest.js", license: "MIT", description: "Framework Node.js progressivo para aplicações escaláveis com TypeScript.", link: "https://github.com/nestjs/nest" },
+                    { title: "Remix", license: "MIT", description: "Framework React full-stack focado em web fundamentals.", link: "https://github.com/remix-run/remix" },
+                    { title: "Astro", license: "MIT", description: "Framework moderno para sites rápidos com múltiplos frameworks UI.", link: "https://github.com/withastro/astro" },
+                    { title: "SvelteKit", license: "MIT", description: "Framework para aplicações Svelte com routing e SSR.", link: "https://github.com/sveltejs/kit" },
+                    { title: "Vite", license: "MIT", description: "Build tool extremamente rápido para desenvolvimento front-end.", link: "https://github.com/vitejs/vite" },
+                    { title: "Webpack", license: "MIT", description: "Bundler de módulos JavaScript altamente configurável.", link: "https://github.com/webpack/webpack" },
+                    { title: "Prettier", license: "MIT", description: "Formatador de código opinativo para múltiplas linguagens.", link: "https://github.com/prettier/prettier" },
+                    { title: "ESLint", license: "MIT", description: "Ferramenta de linting plugável para JavaScript/TypeScript.", link: "https://github.com/eslint/eslint" },
+                    { title: "TypeScript", license: "Apache 2.0", description: "Superset JavaScript tipado que melhora qualidade do código.", link: "https://github.com/microsoft/TypeScript" },
+                    { title: "Babel", license: "MIT", description: "Compilador JavaScript para compatibilidade com navegadores antigos.", link: "https://github.com/babel/babel" },
+                    { title: "Axios", license: "MIT", description: "Cliente HTTP baseado em promises para navegador e Node.js.", link: "https://github.com/axios/axios" },
+                    { title: "Redux", license: "MIT", description: "Container de estado previsível para aplicações JavaScript.", link: "https://github.com/reduxjs/redux" },
+                    { title: "Zustand", license: "MIT", description: "Gerenciamento de estado pequeno e escalável para React.", link: "https://github.com/pmndrs/zustand" },
+                    { title: "Pinia", license: "MIT", description: "Store type-safe e flexível para Vue.js com DevTools.", link: "https://github.com/vuejs/pinia" },
+                    { title: "Material-UI", license: "MIT", description: "Componentes React implementando Material Design do Google.", link: "https://github.com/mui/material-ui" },
+                    { title: "Ant Design", license: "MIT", description: "Sistema de design enterprise com componentes React de alta qualidade.", link: "https://github.com/ant-design/ant-design" },
+                    { title: "Chakra UI", license: "MIT", description: "Biblioteca React simples, modular e acessível.", link: "https://github.com/chakra-ui/chakra-ui" },
+                    { title: "Shadcn UI", license: "MIT", description: "Componentes reutilizáveis com Radix UI e Tailwind CSS.", link: "https://github.com/shadcn-ui/ui" },
+                    { title: "Three.js", license: "MIT", description: "Biblioteca JavaScript para gráficos 3D animados com WebGL.", link: "https://github.com/mrdoob/three.js" },
+                    { title: "Chart.js", license: "MIT", description: "Biblioteca JavaScript simples para criar gráficos.", link: "https://github.com/chartjs/Chart.js" },
+                    { title: "D3.js", license: "ISC", description: "Biblioteca para visualizações de dados dinâmicas e interativas.", link: "https://github.com/d3/d3" },
+                    { title: "Socket.io", license: "MIT", description: "Biblioteca para aplicações web em tempo real bidirecionais.", link: "https://github.com/socketio/socket.io" },
+                    { title: "Strapi", license: "MIT", description: "Headless CMS open-source líder em Node.js.", link: "https://github.com/strapi/strapi" },
+                    { title: "Prisma", license: "Apache 2.0", description: "ORM de próxima geração com type-safety para Node.js.", link: "https://github.com/prisma/prisma" },
+                    { title: "Supabase", license: "Apache 2.0", description: "Alternativa open source ao Firebase com Postgres.", link: "https://github.com/supabase/supabase" },
+                    { title: "Storybook", license: "MIT", description: "Ferramenta para desenvolvimento de componentes UI isoladamente.", link: "https://github.com/storybookjs/storybook" },
+                    { title: "Jest", license: "MIT", description: "Framework de testes JavaScript com foco em simplicidade.", link: "https://github.com/jestjs/jest" },
+                    { title: "Cypress", license: "MIT", description: "Ferramenta de testes end-to-end rápida e confiável.", link: "https://github.com/cypress-io/cypress" },
+                    { title: "Playwright", license: "Apache 2.0", description: "Framework de automação web da Microsoft para múltiplos navegadores.", link: "https://github.com/microsoft/playwright" },
+                    { title: "Electron", license: "MIT", description: "Framework para aplicações desktop usando tecnologias web.", link: "https://github.com/electron/electron" },
+                    { title: "Tauri", license: "MIT", description: "Framework para apps desktop com Rust e web frontend.", link: "https://github.com/tauri-apps/tauri" },
+                    { title: "GraphQL", license: "MIT", description: "Linguagem de consulta para APIs com runtime flexível.", link: "https://github.com/graphql/graphql-js" },
+                    { title: "Apollo Client", license: "MIT", description: "Cliente GraphQL completo com cache inteligente.", link: "https://github.com/apollographql/apollo-client" },
+                    { title: "tRPC", license: "MIT", description: "APIs TypeScript type-safe sem schemas ou geração de código.", link: "https://github.com/trpc/trpc" },
+                    { title: "Zod", license: "MIT", description: "Validação de schemas TypeScript-first com inferência de tipos.", link: "https://github.com/colinhacks/zod" }
+                ]
+            },
+            cms: {
+                title: "CMS & E-commerce",
+                subtitle: "Sistemas de gerenciamento de conteúdo, geradores de sites estáticos e plataformas de e-commerce",
+                projects: [			
+					{ title: "WordPress", license: "GPL 2.0", description: "Sistema de gerenciamento de conteúdo mais popular do mundo, powering 43% da web.", link: "https://github.com/WordPress/WordPress" },
+                    { title: "Ghost", license: "MIT", description: "Plataforma de publicação open-source profissional focada em criadores de conteúdo.", link: "https://github.com/TryGhost/Ghost" },
+                    { title: "Drupal", license: "GPL 2.0", description: "CMS open-source modular e altamente escalável para sites complexos.", link: "https://github.com/drupal/drupal" },
+                    { title: "Joomla", license: "GPL 2.0", description: "Sistema de gerenciamento de conteúdo poderoso e flexível.", link: "https://github.com/joomla/joomla-cms" },
+                    { title: "Grav", license: "MIT", description: "CMS moderno flat-file rápido e flexível sem necessidade de banco de dados.", link: "https://github.com/getgrav/grav" },
+                    { title: "October CMS", license: "MIT", description: "CMS modular baseado em Laravel focado em simplicidade e flexibilidade.", link: "https://github.com/octobercms/october" },
+                    { title: "Concrete CMS", license: "MIT", description: "CMS open-source focado em facilidade de uso com edição inline.", link: "https://github.com/concretecms/concretecms" },
+                    { title: "TYPO3", license: "GPL 2.0", description: "CMS enterprise open-source profissional e escalável.", link: "https://github.com/TYPO3/typo3" },
+                    { title: "Kirby", license: "Proprietária", description: "CMS flat-file com painel de controle bonito e flexível.", link: "https://github.com/getkirby/kirby" },
+                    { title: "Statamic", license: "Proprietária", description: "CMS Laravel flat-file moderno focado em desenvolvedor.", link: "https://github.com/statamic/cms" },
+                    { title: "Hugo", license: "Apache 2.0", description: "Gerador de sites estáticos extremamente rápido escrito em Go.", link: "https://github.com/gohugoio/hugo" },
+                    { title: "Jekyll", license: "MIT", description: "Gerador de sites estáticos simples, blog-aware escrito em Ruby.", link: "https://github.com/jekyll/jekyll" },
+                    { title: "Eleventy", license: "MIT", description: "Gerador de sites estáticos simples e mais rápido alternativa ao Jekyll.", link: "https://github.com/11ty/eleventy" },
+                    { title: "Hexo", license: "MIT", description: "Framework de blog rápido, simples e poderoso alimentado por Node.js.", link: "https://github.com/hexojs/hexo" },
+                    { title: "Pelican", license: "AGPL 3.0", description: "Gerador de sites estáticos que não requer banco de dados ou lógica server-side.", link: "https://github.com/getpelican/pelican" },
+                    { title: "VuePress", license: "MIT", description: "Gerador de sites estáticos minimalista alimentado por Vue.js.", link: "https://github.com/vuejs/vuepress" },
+                    { title: "Docusaurus", license: "MIT", description: "Gerador de sites estáticos otimizado para documentação técnica do Facebook.", link: "https://github.com/facebook/docusaurus" },
+                    { title: "MkDocs", license: "BSD", description: "Gerador de sites estáticos rápido e simples voltado para documentação de projetos.", link: "https://github.com/mkdocs/mkdocs" },
+                    { title: "Sphinx", license: "BSD", description: "Ferramenta que facilita criar documentação inteligente e bonita.", link: "https://github.com/sphinx-doc/sphinx" },
+                    { title: "GitBook", license: "Apache 2.0", description: "Ferramenta moderna para documentação técnica e publicação de conhecimento.", link: "https://github.com/GitbookIO/gitbook" },
+                    { title: "Publii", license: "GPL 3.0", description: "CMS desktop para criação de sites estáticos seguros e rápidos.", link: "https://github.com/GetPublii/Publii" },
+                    { title: "Zola", license: "MIT", description: "Gerador de sites estáticos rápido em um único binário sem dependências.", link: "https://github.com/getzola/zola" },
+                    { title: "Bridgetown", license: "MIT", description: "Framework Ruby progressivo para sites estáticos e JAMstack.", link: "https://github.com/bridgetownrb/bridgetown" },
+                    { title: "Lektor", license: "BSD", description: "CMS flat-file flexível e poderoso com painel de administração.", link: "https://github.com/lektor/lektor" },
+                    { title: "Bludit", license: "MIT", description: "CMS flat-file simples e rápido para criar sites e blogs.", link: "https://github.com/bludit/bludit" },
+                    { title: "PrestaShop", license: "OSL 3.0", description: "Solução de e-commerce open-source completa e personalizável.", link: "https://github.com/PrestaShop/PrestaShop" },
+                    { title: "Magento", license: "OSL 3.0", description: "Plataforma de e-commerce open-source líder para empresas em crescimento.", link: "https://github.com/magento/magento2" },
+                    { title: "WooCommerce", license: "GPL 3.0", description: "Plugin de e-commerce open-source customizável para WordPress.", link: "https://github.com/woocommerce/woocommerce" },
+                    { title: "OpenCart", license: "GPL 3.0", description: "Plataforma de e-commerce PHP online gratuita e open-source.", link: "https://github.com/opencart/opencart" },
+                    { title: "Shopware", license: "MIT", description: "Plataforma de e-commerce open-source líder baseada em Symfony.", link: "https://github.com/shopware/shopware" },
+                    { title: "Sylius", license: "MIT", description: "Framework de e-commerce open-source baseado em Symfony para PHP.", link: "https://github.com/Sylius/Sylius" },
+                    { title: "Saleor", license: "BSD", description: "Plataforma de e-commerce GraphQL-first headless em Python e Django.", link: "https://github.com/saleor/saleor" },
+                    { title: "Bagisto", license: "MIT", description: "Framework de e-commerce open-source Laravel headless.", link: "https://github.com/bagisto/bagisto" },
+                    { title: "Medusa", license: "MIT", description: "Alternativa open-source ao Shopify construída com Node.js.", link: "https://github.com/medusajs/medusa" },
+                    { title: "Reaction Commerce", license: "GPL 3.0", description: "Plataforma de e-commerce API-first e real-time construída com Node.js.", link: "https://github.com/reactioncommerce/reaction" },
+                    { title: "Odoo", license: "LGPL 3.0", description: "Suite completa de aplicativos de negócios open-source incluindo CRM e e-commerce.", link: "https://github.com/odoo/odoo" },
+                    { title: "ERPNext", license: "GPL 3.0", description: "Sistema ERP open-source completo para pequenas e médias empresas.", link: "https://github.com/frappe/erpnext" },
+                    { title: "Dolibarr", license: "GPL 3.0", description: "Software moderno para gerenciar pequenas empresas, freelancers e fundações.", link: "https://github.com/Dolibarr/dolibarr" },
+                    { title: "Mautic", license: "GPL 3.0", description: "Plataforma de automação de marketing open-source mais poderosa.", link: "https://github.com/mautic/mautic" },
+                    { title: "Matomo", license: "GPL 3.0", description: "Plataforma líder de analytics open-source que respeita privacidade.", link: "https://github.com/matomo-org/matomo" },
+                    { title: "Plausible", license: "AGPL 3.0", description: "Analytics web simples, open-source e amigável à privacidade.", link: "https://github.com/plausible/analytics" },
+                    { title: "Umami", license: "MIT", description: "Analytics web simples, rápido e focado em privacidade.", link: "https://github.com/umami-software/umami" },
+                    { title: "Ackee", license: "MIT", description: "Analytics auto-hospedado focado em privacidade para aqueles que se importam.", link: "https://github.com/electerious/Ackee" },
+                    { title: "Discourse", license: "GPL 2.0", description: "Plataforma de discussão open-source construída para a próxima década de internet.", link: "https://github.com/discourse/discourse" },
+                    { title: "Flarum", license: "MIT", description: "Software de fórum deliciosamente simples focado em simplicidade.", link: "https://github.com/flarum/framework" },
+                    { title: "NodeBB", license: "GPL 3.0", description: "Plataforma de fórum moderna construída em Node.js para web moderna.", link: "https://github.com/NodeBB/NodeBB" },
+                    { title: "phpBB", license: "GPL 2.0", description: "Solução de fórum open-source flat e de alta performance.", link: "https://github.com/phpbb/phpbb" },
+                    { title: "MyBB", license: "LGPL 3.0", description: "Software de fórum gratuito e open-source profissional.", link: "https://github.com/mybb/mybb" },
+                    { title: "Wiki.js", license: "AGPL 3.0", description: "Software wiki moderno e poderoso construído em Node.js.", link: "https://github.com/requarks/wiki" },
+                    { title: "BookStack", license: "MIT", description: "Plataforma simples e auto-hospedada para organizar e armazenar informação.", link: "https://github.com/BookStackApp/BookStack" }
+                ]
+            },			
+            devtools: {
+                title: "Ferramentas para Desenvolvedores",
+                subtitle: "Editores de código, IDEs, clientes Git, ferramentas de API e terminais",
+                projects: [			
+					{ title: "VS Code", license: "MIT", description: "Editor de código poderoso e leve da Microsoft com suporte a debugging e Git integrado.", link: "https://github.com/microsoft/vscode" },
+                    { title: "Neovim", license: "Apache 2.0", description: "Editor de texto extensível baseado em Vim focado em extensibilidade e usabilidade.", link: "https://github.com/neovim/neovim" },
+                    { title: "Vim", license: "Vim", description: "Editor de texto altamente configurável construído para edição de texto eficiente.", link: "https://github.com/vim/vim" },
+                    { title: "Emacs", license: "GPL 3.0", description: "Editor de texto extensível e personalizável com interpretador Lisp.", link: "https://github.com/emacs-mirror/emacs" },
+                    { title: "Atom", license: "MIT", description: "Editor de texto hackável do século 21 construído com web technologies.", link: "https://github.com/atom/atom" },
+                    { title: "Sublime Text", license: "Proprietária", description: "Editor de texto sofisticado para código, markup e prosa.", link: "https://github.com/sublimehq/sublime_text" },
+                    { title: "IntelliJ IDEA Community", license: "Apache 2.0", description: "IDE Java capaz e ergonômica da JetBrains com edição inteligente.", link: "https://github.com/JetBrains/intellij-community" },
+                    { title: "Eclipse", license: "EPL", description: "IDE extensível, plataforma e framework de aplicações open-source.", link: "https://github.com/eclipse-platform/eclipse.platform" },
+                    { title: "NetBeans", license: "Apache 2.0", description: "IDE para desenvolvimento Java, JavaScript, PHP, HTML5 e mais.", link: "https://github.com/apache/netbeans" },
+                    { title: "Zed", license: "GPL/Apache 2.0", description: "Editor de código de alta performance e colaborativo construído em Rust.", link: "https://github.com/zed-industries/zed" },
+                    { title: "Helix", license: "MPL 2.0", description: "Editor de texto modal pós-moderno escrito em Rust com seleção múltipla.", link: "https://github.com/helix-editor/helix" },
+                    { title: "Lapce", license: "Apache 2.0", description: "Editor de código rápido e poderoso escrito em Rust com UI nativa.", link: "https://github.com/lapce/lapce" },
+                    { title: "Geany", license: "GPL 2.0", description: "IDE pequeno e leve usando o toolkit GTK com recursos básicos de IDE.", link: "https://github.com/geany/geany" },
+                    { title: "Kate", license: "LGPL", description: "Editor de texto avançado do KDE com recursos poderosos.", link: "https://github.com/KDE/kate" },
+                    { title: "Brackets", license: "MIT", description: "Editor de texto moderno e open-source focado em design web.", link: "https://github.com/adobe/brackets" },
+                    { title: "Code-Server", license: "MIT", description: "VS Code rodando em servidor remoto acessível via navegador.", link: "https://github.com/coder/code-server" },
+                    { title: "Theia", license: "EPL", description: "IDE em nuvem e desktop extensível construída com tecnologias web modernas.", link: "https://github.com/eclipse-theia/theia" },
+                    { title: "Lite XL", license: "MIT", description: "Editor de texto leve escrito em Lua focado em simplicidade e performance.", link: "https://github.com/lite-xl/lite-xl" },
+                    { title: "Micro", license: "MIT", description: "Editor de texto moderno e intuitivo para terminal com suporte a mouse.", link: "https://github.com/zyedidia/micro" },
+                    { title: "Kakoune", license: "Unlicense", description: "Editor de código modal com modelo de seleção múltipla inovador.", link: "https://github.com/mawww/kakoune" },
+                    { title: "GitKraken", license: "Proprietária", description: "Cliente Git visual poderoso e intuitivo para desenvolvedores.", link: "https://github.com/gitkraken/vscode-gitlens" },
+                    { title: "Sourcetree", license: "Proprietária", description: "Cliente Git e Mercurial visual gratuito para Mac e Windows.", link: "https://github.com/atlassian/sourcetree" },
+                    { title: "Lazygit", license: "MIT", description: "UI simples para comandos git em seu terminal escrito em Go.", link: "https://github.com/jesseduffield/lazygit" },
+                    { title: "Tig", license: "GPL 2.0", description: "Interface de texto para Git baseada em ncurses com visualização de repositório.", link: "https://github.com/jonas/tig" },
+                    { title: "GitUI", license: "MIT", description: "Interface Git blazing fast para terminal escrita em Rust.", link: "https://github.com/extrawurst/gitui" },
+                    { title: "Postman", license: "Proprietária", description: "Plataforma de API para construir e usar APIs com interface poderosa.", link: "https://github.com/postmanlabs" },
+                    { title: "Insomnia", license: "MIT", description: "Cliente HTTP e GraphQL open-source para testar APIs REST e GraphQL.", link: "https://github.com/Kong/insomnia" },
+                    { title: "Hoppscotch", license: "MIT", description: "Cliente de API leve e rápido baseado em web, alternativa open-source ao Postman.", link: "https://github.com/hoppscotch/hoppscotch" },
+                    { title: "HTTPie", license: "BSD", description: "Cliente HTTP de linha de comando moderno e amigável para testar APIs.", link: "https://github.com/httpie/httpie" },
+                    { title: "Thunder Client", license: "MIT", description: "Cliente REST API leve para VS Code com interface intuitiva.", link: "https://github.com/rangav/thunder-client-support" },
+                    { title: "DBeaver", license: "Apache 2.0", description: "Ferramenta universal de banco de dados para desenvolvedores e DBAs.", link: "https://github.com/dbeaver/dbeaver" },
+                    { title: "pgAdmin", license: "PostgreSQL", description: "Plataforma de administração e desenvolvimento mais popular para PostgreSQL.", link: "https://github.com/pgadmin-org/pgadmin4" },
+                    { title: "Adminer", license: "Apache 2.0", description: "Ferramenta de gerenciamento de banco de dados em um único arquivo PHP.", link: "https://github.com/vrana/adminer" },
+                    { title: "phpMyAdmin", license: "GPL 2.0", description: "Ferramenta web gratuita para administração do MySQL e MariaDB.", link: "https://github.com/phpmyadmin/phpmyadmin" },
+                    { title: "MongoDB Compass", license: "SSPL", description: "GUI para explorar e manipular dados MongoDB com visualização de schema.", link: "https://github.com/mongodb-js/compass" },
+                    { title: "Redis Commander", license: "MIT", description: "Interface web de gerenciamento Redis com navegador de chaves e console.", link: "https://github.com/joeferner/redis-commander" },
+                    { title: "Beekeeper Studio", license: "GPL 3.0", description: "Cliente SQL moderno e fácil para MySQL, Postgres, SQLite e mais.", link: "https://github.com/beekeeper-studio/beekeeper-studio" },
+                    { title: "TablePlus", license: "Proprietária", description: "Cliente de banco de dados nativo moderno com interface limpa e intuitiva.", link: "https://github.com/TablePlus" },
+                    { title: "Sequel Ace", license: "GPL 2.0", description: "Cliente MySQL/MariaDB rápido e fácil para macOS.", link: "https://github.com/Sequel-Ace/Sequel-Ace" },
+                    { title: "DataGrip", license: "Proprietária", description: "IDE de banco de dados multiplataforma da JetBrains para SQL.", link: "https://github.com/JetBrains/DataGrip" },
+                    { title: "tmux", license: "ISC", description: "Multiplexador de terminal que permite múltiplas sessões em uma janela.", link: "https://github.com/tmux/tmux" },
+                    { title: "Terminator", license: "GPL 2.0", description: "Emulador de terminal com suporte a múltiplos terminais em uma janela.", link: "https://github.com/gnome-terminator/terminator" },
+                    { title: "Alacritty", license: "Apache 2.0", description: "Emulador de terminal acelerado por GPU mais rápido existente.", link: "https://github.com/alacritty/alacritty" },
+                    { title: "Kitty", license: "GPL 3.0", description: "Emulador de terminal acelerado por GPU rápido, rico em recursos e cross-platform.", link: "https://github.com/kovidgoyal/kitty" },
+                    { title: "WezTerm", license: "MIT", description: "Emulador de terminal acelerado por GPU implementado em Rust.", link: "https://github.com/wez/wezterm" },
+                    { title: "Hyper", license: "MIT", description: "Terminal bonito e extensível construído com tecnologias web.", link: "https://github.com/vercel/hyper" },
+                    { title: "iTerm2", license: "GPL 2.0", description: "Substituto do Terminal para macOS com recursos poderosos.", link: "https://github.com/gnachman/iTerm2" },
+                    { title: "Windows Terminal", license: "MIT", description: "Terminal moderno, rápido e eficiente da Microsoft para Windows.", link: "https://github.com/microsoft/terminal" },
+                    { title: "Tabby", license: "MIT", description: "Terminal altamente configurável para Windows, macOS e Linux.", link: "https://github.com/Eugeny/tabby" },
+                    { title: "Starship", license: "ISC", description: "Prompt de shell minimalista, rápido e personalizável para qualquer shell.", link: "https://github.com/starship/starship" }			
+                ]
+            },			
+            database: {
+                title: "Bancos de Dados",
+                subtitle: "Bancos relacionais, NoSQL, grafos, séries temporais e vetoriais",
+                projects: [			
+					{ title: "PostgreSQL", license: "PostgreSQL", description: "Banco de dados relacional open-source poderoso com mais de 30 anos de desenvolvimento ativo.", link: "https://github.com/postgres/postgres" },
+                    { title: "MySQL", license: "GPL", description: "Sistema de gerenciamento de banco de dados relacional mais popular do mundo.", link: "https://github.com/mysql/mysql-server" },
+                    { title: "MongoDB", license: "SSPL", description: "Banco de dados NoSQL orientado a documentos para aplicações modernas.", link: "https://github.com/mongodb/mongo" },
+                    { title: "Redis", license: "BSD", description: "Armazenamento de estrutura de dados em memória, usado como banco de dados e cache.", link: "https://github.com/redis/redis" },
+                    { title: "MariaDB", license: "GPL", description: "Fork do MySQL mantido pela comunidade, rápido e escalável.", link: "https://github.com/MariaDB/server" },
+                    { title: "Cassandra", license: "Apache 2.0", description: "Banco de dados NoSQL distribuído projetado para alta disponibilidade e escala.", link: "https://github.com/apache/cassandra" },
+                    { title: "CockroachDB", license: "BSL", description: "Banco SQL distribuído resiliente e escalável para aplicações cloud-native.", link: "https://github.com/cockroachdb/cockroach" },
+                    { title: "TimescaleDB", license: "Apache 2.0", description: "Banco de dados de séries temporais open-source otimizado construído sobre PostgreSQL.", link: "https://github.com/timescale/timescaledb" },
+                    { title: "ClickHouse", license: "Apache 2.0", description: "Sistema de gerenciamento de banco de dados orientado a colunas para OLAP.", link: "https://github.com/ClickHouse/ClickHouse" },
+                    { title: "Neo4j", license: "GPL 3.0", description: "Banco de dados de grafos nativo líder para armazenar e consultar relacionamentos.", link: "https://github.com/neo4j/neo4j" },
+                    { title: "InfluxDB", license: "MIT", description: "Banco de dados de séries temporais de alto desempenho para métricas e eventos.", link: "https://github.com/influxdata/influxdb" },
+                    { title: "Elasticsearch", license: "SSPL", description: "Motor de busca e análise distribuído para todos os tipos de dados.", link: "https://github.com/elastic/elasticsearch" },
+                    { title: "RethinkDB", license: "Apache 2.0", description: "Banco de dados open-source para aplicações em tempo real.", link: "https://github.com/rethinkdb/rethinkdb" },
+                    { title: "ArangoDB", license: "Apache 2.0", description: "Banco de dados nativo multi-modelo para grafos, documentos e chave-valor.", link: "https://github.com/arangodb/arangodb" },
+                    { title: "CouchDB", license: "Apache 2.0", description: "Banco de dados NoSQL que sincroniza perfeitamente entre dispositivos.", link: "https://github.com/apache/couchdb" },
+                    { title: "RavenDB", license: "AGPL 3.0", description: "Banco de dados NoSQL ACID com foco em facilidade de uso e performance.", link: "https://github.com/ravendb/ravendb" },
+                    { title: "FerretDB", license: "Apache 2.0", description: "Alternativa open-source ao MongoDB construída sobre Postgres.", link: "https://github.com/FerretDB/FerretDB" },
+                    { title: "SurrealDB", license: "BSL", description: "Banco de dados multi-modelo escalável para aplicações web, mobile e serverless.", link: "https://github.com/surrealdb/surrealdb" },
+                    { title: "PouchDB", license: "Apache 2.0", description: "Banco de dados JavaScript open-source inspirado no CouchDB para navegadores.", link: "https://github.com/pouchdb/pouchdb" },
+                    { title: "LevelDB", license: "BSD", description: "Biblioteca de armazenamento chave-valor rápida escrita pelo Google.", link: "https://github.com/google/leveldb" },
+                    { title: "RocksDB", license: "Apache 2.0", description: "Biblioteca de armazenamento embarcável de alto desempenho para chave-valor.", link: "https://github.com/facebook/rocksdb" },
+                    { title: "etcd", license: "Apache 2.0", description: "Armazenamento distribuído confiável de chave-valor para dados críticos.", link: "https://github.com/etcd-io/etcd" },
+                    { title: "Memcached", license: "BSD", description: "Sistema de cache de objetos em memória distribuído de alta performance.", link: "https://github.com/memcached/memcached" },
+                    { title: "Valkey", license: "BSD", description: "Armazenamento de dados em memória de alto desempenho fork do Redis.", link: "https://github.com/valkey-io/valkey" },
+                    { title: "DragonflyDB", license: "BSL", description: "Substituto moderno para Redis e Memcached com performance superior.", link: "https://github.com/dragonflydb/dragonfly" },
+                    { title: "KeyDB", license: "BSD", description: "Fork multi-threaded do Redis com foco em throughput e latência.", link: "https://github.com/Snapchat/KeyDB" },
+                    { title: "Apache HBase", license: "Apache 2.0", description: "Banco de dados NoSQL distribuído para grandes volumes de dados esparsos.", link: "https://github.com/apache/hbase" },
+                    { title: "ScyllaDB", license: "AGPL 3.0", description: "Banco NoSQL compatível com Cassandra com latência consistente ultra-baixa.", link: "https://github.com/scylladb/scylladb" },
+                    { title: "Dgraph", license: "Apache 2.0", description: "Banco de dados de grafos nativo distribuído escalável e rápido.", link: "https://github.com/dgraph-io/dgraph" },
+                    { title: "OrientDB", license: "Apache 2.0", description: "Banco de dados multi-modelo com suporte a grafos e documentos.", link: "https://github.com/orientechnologies/orientdb" },
+                    { title: "Apache Ignite", license: "Apache 2.0", description: "Plataforma de computação distribuída em memória para velocidade e escala.", link: "https://github.com/apache/ignite" },
+                    { title: "VictoriaMetrics", license: "Apache 2.0", description: "Banco de dados de séries temporais rápido e escalável para monitoramento.", link: "https://github.com/VictoriaMetrics/VictoriaMetrics" },
+                    { title: "QuestDB", license: "Apache 2.0", description: "Banco de dados de séries temporais de alto desempenho para analytics em tempo real.", link: "https://github.com/questdb/questdb" },
+                    { title: "Apache Druid", license: "Apache 2.0", description: "Banco de dados analytics em tempo real de alta performance.", link: "https://github.com/apache/druid" },
+                    { title: "Percona Server", license: "GPL", description: "Fork melhorado do MySQL com performance, escalabilidade e instrumentação superiores.", link: "https://github.com/percona/percona-server" },
+                    { title: "TiDB", license: "Apache 2.0", description: "Banco de dados SQL distribuído compatível com MySQL que suporta HTAP.", link: "https://github.com/pingcap/tidb" },
+                    { title: "YugabyteDB", license: "Apache 2.0", description: "Banco SQL distribuído de alta performance para aplicações cloud-native.", link: "https://github.com/yugabyte/yugabyte-db" },
+                    { title: "Vitess", license: "Apache 2.0", description: "Solução de clustering para escalar MySQL horizontalmente.", link: "https://github.com/vitessio/vitess" },
+                    { title: "Citus", license: "AGPL 3.0", description: "Extensão PostgreSQL que transforma o Postgres em banco de dados distribuído.", link: "https://github.com/citusdata/citus" },
+                    { title: "Apache Pinot", license: "Apache 2.0", description: "OLAP datastore em tempo real projetado para baixa latência em consultas.", link: "https://github.com/apache/pinot" },
+                    { title: "Milvus", license: "Apache 2.0", description: "Banco de dados vetorial open-source para aplicações de IA e busca semântica.", link: "https://github.com/milvus-io/milvus" },
+                    { title: "Weaviate", license: "BSD", description: "Banco de dados vetorial open-source nativo em cloud com busca híbrida.", link: "https://github.com/weaviate/weaviate" },
+                    { title: "Qdrant", license: "Apache 2.0", description: "Motor de busca vetorial de alto desempenho com API conveniente.", link: "https://github.com/qdrant/qdrant" },
+                    { title: "Chroma", license: "Apache 2.0", description: "Banco de dados de embeddings de IA open-source.", link: "https://github.com/chroma-core/chroma" },
+                    { title: "pgvector", license: "PostgreSQL", description: "Extensão PostgreSQL open-source para busca de similaridade vetorial.", link: "https://github.com/pgvector/pgvector" },
+                    { title: "DuckDB", license: "MIT", description: "Sistema de gerenciamento de banco de dados analítico SQL in-process.", link: "https://github.com/duckdb/duckdb" },
+                    { title: "SQLite", license: "Public Domain", description: "Biblioteca C que implementa um pequeno motor SQL embutido e autônomo.", link: "https://github.com/sqlite/sqlite" },
+                    { title: "H2 Database", license: "MPL 2.0", description: "Banco de dados SQL Java rápido, open-source e embarcável.", link: "https://github.com/h2database/h2database" },
+                    { title: "Apache Derby", license: "Apache 2.0", description: "Banco de dados relacional Java puro open-source.", link: "https://github.com/apache/derby" },
+                    { title: "Firebird", license: "IPL/IDPL", description: "Banco de dados SQL relacional com excelentes capacidades ANSI SQL.", link: "https://github.com/FirebirdSQL/firebird" }
+                ]
+            },
+            os: {
+                title: "Sistemas Operacionais & Desktop",
+                subtitle: "Distribuições Linux, BSD, ambientes desktop, virtualização e componentes de sistema",
+                projects: [			
+					{ title: "Linux Kernel", license: "GPL 2.0", description: "Kernel do sistema operacional Linux, base de inúmeras distribuições e sistemas.", link: "https://github.com/torvalds/linux" },
+                    { title: "Ubuntu", license: "GPL", description: "Distribuição Linux popular baseada em Debian, focada em usabilidade.", link: "https://github.com/ubuntu" },
+                    { title: "Fedora", license: "GPL", description: "Distribuição Linux inovadora patrocinada pela Red Hat com tecnologias de ponta.", link: "https://github.com/fedora-infra" },
+                    { title: "Debian", license: "DFSG", description: "Sistema operacional universal composto inteiramente de software livre.", link: "https://github.com/debian" },
+                    { title: "Arch Linux", license: "GPL", description: "Distribuição Linux leve e flexível seguindo filosofia KISS (Keep It Simple).", link: "https://github.com/archlinux" },
+                    { title: "Manjaro", license: "GPL", description: "Distribuição Linux amigável baseada em Arch com instalação simplificada.", link: "https://github.com/manjaro" },
+                    { title: "Pop!_OS", license: "GPL", description: "Distribuição Linux da System76 otimizada para criadores e desenvolvedores.", link: "https://github.com/pop-os" },
+                    { title: "Elementary OS", license: "GPL", description: "Sistema operacional rápido, aberto e focado em privacidade com interface elegante.", link: "https://github.com/elementary" },
+                    { title: "Zorin OS", license: "GPL", description: "Distribuição Linux poderosa projetada para facilitar transição do Windows.", link: "https://github.com/ZorinOS" },
+                    { title: "Linux Mint", license: "GPL", description: "Distribuição Linux moderna, elegante e confortável baseada em Ubuntu.", link: "https://github.com/linuxmint" },
+                    { title: "openSUSE", license: "GPL", description: "Distribuição Linux estável e versátil para desktop, servidores e desenvolvimento.", link: "https://github.com/openSUSE" },
+                    { title: "Kali Linux", license: "GPL", description: "Distribuição Linux avançada para testes de penetração e auditoria de segurança.", link: "https://github.com/kalilinux" },
+                    { title: "Parrot OS", license: "GPL", description: "Distribuição Linux para segurança, privacidade e desenvolvimento.", link: "https://github.com/ParrotSec" },
+                    { title: "Alpine Linux", license: "GPL", description: "Distribuição Linux minimalista focada em segurança, simplicidade e eficiência.", link: "https://github.com/alpinelinux" },
+                    { title: "NixOS", license: "MIT", description: "Distribuição Linux com gerenciamento de pacotes puramente funcional e reproduzível.", link: "https://github.com/NixOS/nixpkgs" },
+                    { title: "FreeBSD", license: "BSD", description: "Sistema operacional Unix-like avançado para servidores e workstations.", link: "https://github.com/freebsd/freebsd-src" },
+                    { title: "OpenBSD", license: "BSD", description: "Sistema operacional Unix-like focado em segurança, correção e criptografia.", link: "https://github.com/openbsd" },
+                    { title: "NetBSD", license: "BSD", description: "Sistema operacional Unix-like portável para múltiplas plataformas.", link: "https://github.com/NetBSD" },
+                    { title: "ReactOS", license: "GPL", description: "Sistema operacional open-source compatível com Windows NT binariamente.", link: "https://github.com/reactos/reactos" },
+                    { title: "Haiku", license: "MIT", description: "Sistema operacional open-source inspirado no BeOS focado em computação pessoal.", link: "https://github.com/haiku/haiku" },
+                    { title: "Redox OS", license: "MIT", description: "Sistema operacional tipo Unix escrito em Rust focado em segurança e confiabilidade.", link: "https://github.com/redox-os/redox" },
+                    { title: "SerenityOS", license: "BSD", description: "Sistema operacional gráfico tipo Unix construído do zero para aprendizado.", link: "https://github.com/SerenityOS/serenity" },
+                    { title: "GNOME", license: "GPL", description: "Ambiente desktop livre e open-source para sistemas Unix-like.", link: "https://github.com/GNOME" },
+                    { title: "KDE Plasma", license: "GPL", description: "Ambiente desktop bonito, moderno e altamente personalizável.", link: "https://github.com/KDE/plasma-desktop" },
+                    { title: "XFCE", license: "GPL", description: "Ambiente desktop leve e rápido para sistemas tipo Unix.", link: "https://github.com/xfce-mirror" },
+                    { title: "Cinnamon", license: "GPL", description: "Ambiente desktop do Linux Mint derivado do GNOME Shell.", link: "https://github.com/linuxmint/cinnamon" },
+                    { title: "MATE", license: "GPL", description: "Fork do GNOME 2 continuando a oferecer desktop tradicional.", link: "https://github.com/mate-desktop" },
+                    { title: "i3", license: "BSD", description: "Gerenciador de janelas tiling para X11 melhorado e totalmente documentado.", link: "https://github.com/i3/i3" },
+                    { title: "Sway", license: "MIT", description: "Compositor Wayland compatível com i3 drop-in replacement.", link: "https://github.com/swaywm/sway" },
+                    { title: "Hyprland", license: "BSD", description: "Compositor Wayland dinâmico de tiling com animações e efeitos bonitos.", link: "https://github.com/hyprwm/Hyprland" },
+                    { title: "Awesome", license: "GPL 2.0", description: "Gerenciador de janelas altamente configurável e extensível para X.", link: "https://github.com/awesomeWM/awesome" },
+                    { title: "bspwm", license: "BSD", description: "Gerenciador de janelas tiling que representa janelas como folhas de árvore binária.", link: "https://github.com/baskerville/bspwm" },
+                    { title: "dwm", license: "MIT", description: "Gerenciador de janelas dinâmico minimalista para X projetado para hackers.", link: "https://git.suckless.org/dwm" },
+                    { title: "QEMU", license: "GPL", description: "Emulador e virtualizador de máquinas genérico e open-source.", link: "https://github.com/qemu/qemu" },
+                    { title: "VirtualBox", license: "GPL", description: "Produto de virtualização poderoso x86 e AMD64/Intel64 da Oracle.", link: "https://github.com/oracle/virtualbox" },
+                    { title: "KVM", license: "GPL", description: "Solução de virtualização completa para Linux em hardware x86.", link: "https://github.com/kvm-x86/linux" },
+                    { title: "Proxmox VE", license: "AGPL 3.0", description: "Plataforma de virtualização open-source para servidores enterprise.", link: "https://github.com/proxmox" },
+                    { title: "Vagrant", license: "MIT", description: "Ferramenta para construir e gerenciar ambientes de máquinas virtuais.", link: "https://github.com/hashicorp/vagrant" },
+                    { title: "UTM", license: "Apache 2.0", description: "Máquina virtual completa para iOS e macOS permitindo rodar Windows e Linux.", link: "https://github.com/utmapp/UTM" },
+                    { title: "WINE", license: "LGPL", description: "Camada de compatibilidade para rodar aplicações Windows em Unix-like.", link: "https://github.com/wine-mirror/wine" },
+                    { title: "Bottles", license: "GPL 3.0", description: "Gerenciador de prefixos WINE com interface moderna e fácil.", link: "https://github.com/bottlesdevs/Bottles" },
+                    { title: "Lutris", license: "GPL 3.0", description: "Plataforma de jogos open-source para Linux com suporte a múltiplos emuladores.", link: "https://github.com/lutris/lutris" },
+                    { title: "Proton", license: "BSD", description: "Fork do WINE da Valve para rodar jogos Windows no Linux via Steam.", link: "https://github.com/ValveSoftware/Proton" },
+                    { title: "systemd", license: "GPL 2.0", description: "Suíte de blocos de construção fundamentais para sistemas Linux.", link: "https://github.com/systemd/systemd" },
+                    { title: "PulseAudio", license: "LGPL", description: "Servidor de som para sistemas POSIX e Windows com recursos avançados.", link: "https://github.com/pulseaudio/pulseaudio" },
+                    { title: "PipeWire", license: "MIT", description: "Servidor multimídia moderno para áudio e vídeo no Linux.", link: "https://github.com/pipewire/pipewire" },
+                    { title: "GRUB", license: "GPL 3.0", description: "Bootloader multiboot amplamente usado em sistemas Linux.", link: "https://github.com/rhboot/grub2" },
+                    { title: "Wayland", license: "MIT", description: "Protocolo de servidor de display projetado para substituir X11.", link: "https://github.com/wayland-project/wayland" },
+                    { title: "Mesa 3D", license: "MIT", description: "Implementação open-source de OpenGL, Vulkan e outras especificações gráficas.", link: "https://github.com/mesa3d/mesa" },
+                    { title: "X.Org", license: "MIT", description: "Implementação open-source do sistema de janelas X Window System.", link: "https://github.com/freedesktop/xorg-xserver" }
+                ]
+            },	
+            datascience: {
+                title: "Data Science & IA",
+                subtitle: "Machine learning, análise de dados e ferramentas de inteligência artificial",
+                projects: [			
+					{ title: "TensorFlow", license: "Apache 2.0", description: "Plataforma de machine learning end-to-end open-source desenvolvida pelo Google.", link: "https://github.com/tensorflow/tensorflow" },
+                    { title: "PyTorch", license: "BSD", description: "Framework de machine learning otimizado para desenvolvimento e produção, criado pelo Facebook.", link: "https://github.com/pytorch/pytorch" },
+                    { title: "Scikit-learn", license: "BSD", description: "Biblioteca Python para machine learning com algoritmos de classificação, regressão e clustering.", link: "https://github.com/scikit-learn/scikit-learn" },
+                    { title: "Keras", license: "Apache 2.0", description: "API de deep learning em Python de alto nível, rodando sobre TensorFlow.", link: "https://github.com/keras-team/keras" },
+                    { title: "Hugging Face Transformers", license: "Apache 2.0", description: "Biblioteca de modelos pré-treinados para NLP, visão computacional e áudio.", link: "https://github.com/huggingface/transformers" },
+                    { title: "LangChain", license: "MIT", description: "Framework para desenvolvimento de aplicações powered by language models.", link: "https://github.com/langchain-ai/langchain" },
+                    { title: "OpenCV", license: "Apache 2.0", description: "Biblioteca open-source de visão computacional e machine learning.", link: "https://github.com/opencv/opencv" },
+                    { title: "Pandas", license: "BSD", description: "Biblioteca Python para manipulação e análise de dados estruturados.", link: "https://github.com/pandas-dev/pandas" },
+                    { title: "NumPy", license: "BSD", description: "Pacote fundamental para computação científica com Python.", link: "https://github.com/numpy/numpy" },
+                    { title: "Matplotlib", license: "PSF", description: "Biblioteca Python para criar visualizações estáticas, animadas e interativas.", link: "https://github.com/matplotlib/matplotlib" },
+                    { title: "Jupyter", license: "BSD", description: "Aplicação web open-source para criar e compartilhar documentos com código executável.", link: "https://github.com/jupyter/notebook" },
+                    { title: "spaCy", license: "MIT", description: "Biblioteca industrial para processamento de linguagem natural em Python.", link: "https://github.com/explosion/spaCy" },
+                    { title: "FastAI", license: "Apache 2.0", description: "Biblioteca que simplifica treinamento de redes neurais usando práticas modernas.", link: "https://github.com/fastai/fastai" },
+                    { title: "XGBoost", license: "Apache 2.0", description: "Biblioteca otimizada de gradient boosting distribuída e escalável.", link: "https://github.com/dmlc/xgboost" },
+                    { title: "LightGBM", license: "MIT", description: "Framework de gradient boosting rápido e eficiente da Microsoft.", link: "https://github.com/microsoft/LightGBM" },
+                    { title: "YOLO", license: "GPL 3.0", description: "Sistema de detecção de objetos em tempo real state-of-the-art.", link: "https://github.com/ultralytics/yolov5" },
+                    { title: "Stable Diffusion", license: "MIT", description: "Modelo de deep learning para geração de imagens a partir de texto.", link: "https://github.com/Stability-AI/stablediffusion" },
+                    { title: "Whisper", license: "MIT", description: "Sistema de reconhecimento de fala robusto da OpenAI.", link: "https://github.com/openai/whisper" },
+                    { title: "CLIP", license: "MIT", description: "Modelo que conecta texto e imagens desenvolvido pela OpenAI.", link: "https://github.com/openai/CLIP" },
+                    { title: "Detectron2", license: "Apache 2.0", description: "Plataforma de detecção de objetos de próxima geração do Facebook AI.", link: "https://github.com/facebookresearch/detectron2" },
+                    { title: "MMDetection", license: "Apache 2.0", description: "Toolbox de detecção de objetos open-source baseado em PyTorch.", link: "https://github.com/open-mmlab/mmdetection" },
+                    { title: "DeepSpeed", license: "Apache 2.0", description: "Biblioteca de otimização de deep learning da Microsoft para velocidade e escala.", link: "https://github.com/microsoft/DeepSpeed" },
+                    { title: "Ray", license: "Apache 2.0", description: "Framework para construir e executar aplicações distribuídas.", link: "https://github.com/ray-project/ray" },
+                    { title: "MLflow", license: "Apache 2.0", description: "Plataforma open-source para gerenciar o ciclo de vida de ML.", link: "https://github.com/mlflow/mlflow" },
+                    { title: "Weights & Biases", license: "MIT", description: "Ferramenta para rastreamento de experimentos e visualização em ML.", link: "https://github.com/wandb/wandb" },
+                    { title: "DVC", license: "Apache 2.0", description: "Controle de versão para projetos de machine learning e data science.", link: "https://github.com/iterative/dvc" },
+                    { title: "Great Expectations", license: "Apache 2.0", description: "Framework para validação, documentação e profiling de dados.", link: "https://github.com/great-expectations/great_expectations" },
+                    { title: "Apache Spark", license: "Apache 2.0", description: "Engine unificado para processamento de dados em larga escala.", link: "https://github.com/apache/spark" },
+                    { title: "Dask", license: "BSD", description: "Biblioteca Python para computação paralela e escalável.", link: "https://github.com/dask/dask" },
+                    { title: "Airflow", license: "Apache 2.0", description: "Plataforma para criar, agendar e monitorar workflows programaticamente.", link: "https://github.com/apache/airflow" },
+                    { title: "Prefect", license: "Apache 2.0", description: "Framework moderno de orquestração de workflows para engenharia de dados.", link: "https://github.com/PrefectHQ/prefect" },
+                    { title: "Scrapy", license: "BSD", description: "Framework rápido e poderoso para web scraping e crawling.", link: "https://github.com/scrapy/scrapy" },
+                    { title: "Beautiful Soup", license: "MIT", description: "Biblioteca Python para extrair dados de arquivos HTML e XML.", link: "https://github.com/wention/BeautifulSoup4" },
+                    { title: "Streamlit", license: "Apache 2.0", description: "Framework para transformar scripts Python em apps web interativos.", link: "https://github.com/streamlit/streamlit" },
+                    { title: "Gradio", license: "Apache 2.0", description: "Crie interfaces web para modelos de ML rapidamente com Python.", link: "https://github.com/gradio-app/gradio" },
+                    { title: "Plotly", license: "MIT", description: "Biblioteca de gráficos interativos open-source para Python, R e JavaScript.", link: "https://github.com/plotly/plotly.py" },
+                    { title: "Seaborn", license: "BSD", description: "Biblioteca Python de visualização de dados estatísticos baseada em matplotlib.", link: "https://github.com/mwaskom/seaborn" },
+                    { title: "Bokeh", license: "BSD", description: "Biblioteca interativa de visualização para navegadores web modernos.", link: "https://github.com/bokeh/bokeh" },
+                    { title: "NetworkX", license: "BSD", description: "Pacote Python para criação, manipulação e estudo de redes complexas.", link: "https://github.com/networkx/networkx" },
+                    { title: "NLTK", license: "Apache 2.0", description: "Plataforma líder para construir programas Python de processamento de linguagem natural.", link: "https://github.com/nltk/nltk" },
+                    { title: "Gensim", license: "LGPL", description: "Biblioteca Python para modelagem de tópicos e análise semântica de documentos.", link: "https://github.com/RaRe-Technologies/gensim" },
+                    { title: "TextBlob", license: "MIT", description: "Biblioteca Python para processar dados textuais com API simples.", link: "https://github.com/sloria/TextBlob" },
+                    { title: "Stanford NLP", license: "GPL", description: "Ferramentas de processamento de linguagem natural da Universidade de Stanford.", link: "https://github.com/stanfordnlp/CoreNLP" },
+                    { title: "AllenNLP", license: "Apache 2.0", description: "Biblioteca open-source de NLP construída sobre PyTorch.", link: "https://github.com/allenai/allennlp" },
+                    { title: "Flair", license: "MIT", description: "Framework simples para NLP state-of-the-art.", link: "https://github.com/flairNLP/flair" },
+                    { title: "Prophet", license: "MIT", description: "Ferramenta do Facebook para previsão de séries temporais.", link: "https://github.com/facebook/prophet" },
+                    { title: "Statsmodels", license: "BSD", description: "Módulo Python para modelos estatísticos e testes econométricos.", link: "https://github.com/statsmodels/statsmodels" },
+                    { title: "SciPy", license: "BSD", description: "Biblioteca Python open-source para matemática, ciência e engenharia.", link: "https://github.com/scipy/scipy" },
+                    { title: "SymPy", license: "BSD", description: "Biblioteca Python para matemática simbólica.", link: "https://github.com/sympy/sympy" },
+                    { title: "OpenAI Gym", license: "MIT", description: "Toolkit para desenvolver e comparar algoritmos de reinforcement learning.", link: "https://github.com/openai/gym" }
+                ]
+            },
+            devops: {
+                title: "DevOps & Cloud",
+                subtitle: "Ferramentas de containers, orquestração, CI/CD e infraestrutura como código",
+                projects: [
+					{ title: "Docker", license: "Apache 2.0", description: "Plataforma para desenvolver, enviar e executar aplicações em containers.", link: "https://github.com/docker/docker-ce" },
+                    { title: "Kubernetes", license: "Apache 2.0", description: "Sistema de orquestração de containers open-source para automação de deploy e escala.", link: "https://github.com/kubernetes/kubernetes" },
+                    { title: "Terraform", license: "MPL 2.0", description: "Ferramenta de infraestrutura como código para construir, alterar e versionar infraestrutura.", link: "https://github.com/hashicorp/terraform" },
+                    { title: "Ansible", license: "GPL 3.0", description: "Ferramenta de automação de TI para configuração, deploy e orquestração.", link: "https://github.com/ansible/ansible" },
+                    { title: "Jenkins", license: "MIT", description: "Servidor de automação open-source para CI/CD com centenas de plugins.", link: "https://github.com/jenkinsci/jenkins" },
+                    { title: "GitLab", license: "MIT", description: "Plataforma DevOps completa com controle de versão, CI/CD e muito mais.", link: "https://github.com/gitlabhq/gitlabhq" },
+                    { title: "Prometheus", license: "Apache 2.0", description: "Sistema de monitoramento e alertas open-source com modelo de dados de séries temporais.", link: "https://github.com/prometheus/prometheus" },
+                    { title: "Grafana", license: "AGPL 3.0", description: "Plataforma open-source para análise e monitoramento com dashboards interativos.", link: "https://github.com/grafana/grafana" },
+                    { title: "Nginx", license: "BSD", description: "Servidor web HTTP de alta performance, proxy reverso e load balancer.", link: "https://github.com/nginx/nginx" },
+                    { title: "Apache HTTP Server", license: "Apache 2.0", description: "Servidor web HTTP open-source mais usado no mundo.", link: "https://github.com/apache/httpd" },
+                    { title: "Traefik", license: "MIT", description: "Proxy reverso e load balancer moderno e dinâmico para microservices.", link: "https://github.com/traefik/traefik" },
+                    { title: "Consul", license: "MPL 2.0", description: "Solução de service mesh com descoberta de serviços e configuração.", link: "https://github.com/hashicorp/consul" },
+                    { title: "Vault", license: "MPL 2.0", description: "Ferramenta para gerenciar segredos e proteger dados sensíveis.", link: "https://github.com/hashicorp/vault" },
+                    { title: "Istio", license: "Apache 2.0", description: "Service mesh open-source para conectar, gerenciar e proteger microservices.", link: "https://github.com/istio/istio" },
+                    { title: "Helm", license: "Apache 2.0", description: "Gerenciador de pacotes para Kubernetes que facilita instalação de aplicações.", link: "https://github.com/helm/helm" },
+                    { title: "ArgoCD", license: "Apache 2.0", description: "Ferramenta declarativa de GitOps continuous delivery para Kubernetes.", link: "https://github.com/argoproj/argo-cd" },
+                    { title: "Flux", license: "Apache 2.0", description: "Conjunto de ferramentas GitOps para manter clusters Kubernetes em sync.", link: "https://github.com/fluxcd/flux2" },
+                    { title: "Rancher", license: "Apache 2.0", description: "Plataforma completa de gerenciamento de containers e Kubernetes.", link: "https://github.com/rancher/rancher" },
+                    { title: "Podman", license: "Apache 2.0", description: "Ferramenta daemonless para gerenciar containers OCI e pods.", link: "https://github.com/containers/podman" },
+                    { title: "containerd", license: "Apache 2.0", description: "Runtime de containers padrão da indústria com ênfase em simplicidade.", link: "https://github.com/containerd/containerd" },
+                    { title: "Portainer", license: "Zlib", description: "Interface de gerenciamento leve para Docker, Swarm e Kubernetes.", link: "https://github.com/portainer/portainer" },
+                    { title: "GitOps Toolkit", license: "Apache 2.0", description: "Conjunto de APIs e controllers para construir plataformas GitOps.", link: "https://github.com/fluxcd/toolkit" },
+                    { title: "Packer", license: "MPL 2.0", description: "Ferramenta para criar imagens de máquinas idênticas para múltiplas plataformas.", link: "https://github.com/hashicorp/packer" },
+                    { title: "Vagrant", license: "MIT", description: "Ferramenta para construir e gerenciar ambientes de desenvolvimento virtualizados.", link: "https://github.com/hashicorp/vagrant" },
+                    { title: "Chef", license: "Apache 2.0", description: "Sistema de gerenciamento de configuração poderoso escrito em Ruby.", link: "https://github.com/chef/chef" },
+                    { title: "Puppet", license: "Apache 2.0", description: "Ferramenta de gerenciamento de configuração automatizado para infraestrutura.", link: "https://github.com/puppetlabs/puppet" },
+                    { title: "SaltStack", license: "Apache 2.0", description: "Software de automação e gerenciamento de configuração baseado em Python.", link: "https://github.com/saltstack/salt" },
+                    { title: "Nomad", license: "MPL 2.0", description: "Orquestrador simples e flexível para deploy de aplicações e containers.", link: "https://github.com/hashicorp/nomad" },
+                    { title: "OpenStack", license: "Apache 2.0", description: "Plataforma de cloud computing open-source para infraestrutura pública e privada.", link: "https://github.com/openstack/openstack" },
+                    { title: "MinIO", license: "AGPL 3.0", description: "Object storage de alta performance compatível com API S3.", link: "https://github.com/minio/minio" },
+                    { title: "Ceph", license: "LGPL", description: "Sistema de armazenamento distribuído escalável para object, block e file storage.", link: "https://github.com/ceph/ceph" },
+                    { title: "GlusterFS", license: "GPL/LGPL", description: "Sistema de arquivos de rede escalável para armazenamento distribuído.", link: "https://github.com/gluster/glusterfs" },
+                    { title: "Elasticsearch", license: "SSPL", description: "Motor de busca e análise distribuído baseado em Apache Lucene.", link: "https://github.com/elastic/elasticsearch" },
+                    { title: "Logstash", license: "Apache 2.0", description: "Pipeline de processamento de dados server-side que ingere e transforma dados.", link: "https://github.com/elastic/logstash" },
+                    { title: "Kibana", license: "SSPL", description: "Interface de visualização para dados do Elasticsearch com dashboards interativos.", link: "https://github.com/elastic/kibana" },
+                    { title: "Fluentd", license: "Apache 2.0", description: "Coletor de dados open-source para arquitetura unificada de logging.", link: "https://github.com/fluent/fluentd" },
+                    { title: "Loki", license: "AGPL 3.0", description: "Sistema de agregação de logs horizontalmente escalável inspirado no Prometheus.", link: "https://github.com/grafana/loki" },
+                    { title: "Jaeger", license: "Apache 2.0", description: "Sistema de tracing distribuído open-source para monitorar microservices.", link: "https://github.com/jaegertracing/jaeger" },
+                    { title: "Zipkin", license: "Apache 2.0", description: "Sistema de tracing distribuído que ajuda a coletar dados de timing.", link: "https://github.com/openzipkin/zipkin" },
+                    { title: "Falco", license: "Apache 2.0", description: "Ferramenta de segurança runtime nativa para cloud para detecção de ameaças.", link: "https://github.com/falcosecurity/falco" },
+                    { title: "Trivy", license: "Apache 2.0", description: "Scanner de vulnerabilidades abrangente para containers e outros artefatos.", link: "https://github.com/aquasecurity/trivy" },
+                    { title: "Harbor", license: "Apache 2.0", description: "Registry open-source que protege artefatos com políticas e scanning de vulnerabilidades.", link: "https://github.com/goharbor/harbor" },
+                    { title: "Nexus Repository", license: "EPL", description: "Gerenciador de repositório universal para binários e build artifacts.", link: "https://github.com/sonatype/nexus-public" },
+                    { title: "Artifactory", license: "AGPL 3.0", description: "Repositório universal de artefatos suportando todos os principais formatos de pacotes.", link: "https://github.com/jfrog/artifactory-user-plugins" },
+                    { title: "Tekton", license: "Apache 2.0", description: "Framework poderoso e flexível para criar sistemas CI/CD nativos em Kubernetes.", link: "https://github.com/tektoncd/pipeline" },
+                    { title: "Spinnaker", license: "Apache 2.0", description: "Plataforma de continuous delivery multi-cloud open-source.", link: "https://github.com/spinnaker/spinnaker" },
+                    { title: "Drone", license: "Apache 2.0", description: "Plataforma de continuous delivery baseada em containers.", link: "https://github.com/harness/drone" },
+                    { title: "Concourse", license: "Apache 2.0", description: "Sistema de automação open-source escrito em Go com pipelines como código.", link: "https://github.com/concourse/concourse" },
+                    { title: "CircleCI CLI", license: "MIT", description: "Ferramenta de linha de comando para trabalhar com CircleCI localmente.", link: "https://github.com/CircleCI-Public/circleci-cli" },
+                    { title: "Woodpecker CI", license: "Apache 2.0", description: "Fork do Drone CI focado em simplicidade e extensibilidade.", link: "https://github.com/woodpecker-ci/woodpecker" }			
+                ]
+            },			
+            mobile: {
+                title: "Desenvolvimento Mobile",
+                subtitle: "Frameworks e ferramentas para criar aplicativos iOS, Android e multiplataforma",
+                projects: [
+                    { title: "React Native", license: "MIT", description: "Framework para criar apps nativos usando React. Usado por Facebook, Instagram e Airbnb.", link: "https://github.com/facebook/react-native" },
+                    { title: "Flutter", license: "BSD", description: "Framework UI do Google para criar apps nativos compilados para mobile, web e desktop.", link: "https://github.com/flutter/flutter" },
+                    { title: "Ionic", license: "MIT", description: "Framework open-source para criar apps móveis híbridos com web technologies.", link: "https://github.com/ionic-team/ionic-framework" },
+                    { title: "Expo", license: "MIT", description: "Plataforma para aplicações React Native universais com ferramentas e serviços.", link: "https://github.com/expo/expo" },
+                    { title: "NativeScript", license: "Apache 2.0", description: "Framework para construir apps nativos iOS e Android usando JavaScript/TypeScript.", link: "https://github.com/NativeScript/NativeScript" },
+                    { title: "Capacitor", license: "MIT", description: "Runtime cross-platform nativo para apps web, tornando-os nativos iOS/Android.", link: "https://github.com/ionic-team/capacitor" },
+                    { title: "Kotlin Multiplatform", license: "Apache 2.0", description: "Tecnologia do Kotlin para compartilhar código entre plataformas mobile.", link: "https://github.com/JetBrains/kotlin" },
+                    { title: "Xamarin", license: "MIT", description: "Plataforma da Microsoft para criar apps nativos iOS, Android e Windows com C#.", link: "https://github.com/xamarin/Xamarin.Forms" },
+                    { title: "SwiftUI", license: "Apache 2.0", description: "Framework declarativo da Apple para construir UIs em todas as plataformas Apple.", link: "https://github.com/apple/swift" },
+                    { title: "Jetpack Compose", license: "Apache 2.0", description: "Toolkit moderno do Android para construir UIs nativas com menos código.", link: "https://github.com/androidx/androidx" },
+                    { title: "Cordova", license: "Apache 2.0", description: "Plataforma para construir apps móveis nativos usando HTML, CSS e JavaScript.", link: "https://github.com/apache/cordova" },
+                    { title: "Fastlane", license: "MIT", description: "Ferramenta para automatizar builds e releases de apps iOS e Android.", link: "https://github.com/fastlane/fastlane" },
+                    { title: "React Navigation", license: "MIT", description: "Roteamento e navegação para apps React Native.", link: "https://github.com/react-navigation/react-navigation" },
+                    { title: "Redux Toolkit", license: "MIT", description: "Conjunto oficial de ferramentas para desenvolvimento Redux eficiente.", link: "https://github.com/reduxjs/redux-toolkit" },
+                    { title: "MobX", license: "MIT", description: "Gerenciamento de estado simples e escalável através de programação reativa.", link: "https://github.com/mobxjs/mobx" },
+                    { title: "Realm", license: "Apache 2.0", description: "Banco de dados móvel rápido e eficiente para React Native e Swift.", link: "https://github.com/realm/realm-swift" },
+                    { title: "SQLite", license: "Public Domain", description: "Biblioteca C que implementa um motor de banco SQL leve e autônomo.", link: "https://github.com/sqlite/sqlite" },
+                    { title: "Firebase SDK", license: "Apache 2.0", description: "SDKs oficiais do Firebase para desenvolvimento mobile multiplataforma.", link: "https://github.com/firebase/firebase-ios-sdk" },
+                    { title: "Lottie", license: "Apache 2.0", description: "Biblioteca para renderizar animações Adobe After Effects nativamente.", link: "https://github.com/airbnb/lottie-ios" },
+                    { title: "Reanimated", license: "MIT", description: "Biblioteca React Native para animações e interações fluidas.", link: "https://github.com/software-mansion/react-native-reanimated" },
+                    { title: "Gesture Handler", license: "MIT", description: "API declarativa para gestos nativos em React Native.", link: "https://github.com/software-mansion/react-native-gesture-handler" },
+                    { title: "React Native Paper", license: "MIT", description: "Biblioteca de componentes Material Design para React Native.", link: "https://github.com/callstack/react-native-paper" },
+                    { title: "Native Base", license: "MIT", description: "Biblioteca de componentes mobile essencial para React Native.", link: "https://github.com/GeekyAnts/NativeBase" },
+                    { title: "Glide", license: "BSD", description: "Framework rápido e eficiente de carregamento de imagens para Android.", link: "https://github.com/bumptech/glide" },
+                    { title: "Picasso", license: "Apache 2.0", description: "Biblioteca poderosa de download e cache de imagens para Android.", link: "https://github.com/square/picasso" },
+                    { title: "Retrofit", license: "Apache 2.0", description: "Cliente HTTP type-safe para Android e Java desenvolvido pela Square.", link: "https://github.com/square/retrofit" },
+                    { title: "OkHttp", license: "Apache 2.0", description: "Cliente HTTP eficiente que torna networking rápido e economiza banda.", link: "https://github.com/square/okhttp" },
+                    { title: "Alamofire", license: "MIT", description: "Biblioteca HTTP networking elegante em Swift para iOS e macOS.", link: "https://github.com/Alamofire/Alamofire" },
+                    { title: "Kingfisher", license: "MIT", description: "Biblioteca Swift para download e cache de imagens da web.", link: "https://github.com/onevcat/Kingfisher" },
+                    { title: "SnapKit", license: "MIT", description: "DSL Swift para Auto Layout, tornando constraints programáticas elegantes.", link: "https://github.com/SnapKit/SnapKit" },
+                    { title: "RxSwift", license: "MIT", description: "Programação reativa com Swift, binding de dados e muito mais.", link: "https://github.com/ReactiveX/RxSwift" },
+                    { title: "RxJava", license: "Apache 2.0", description: "Extensões reativas para JVM usando Observables.", link: "https://github.com/ReactiveX/RxJava" },
+                    { title: "Dagger", license: "Apache 2.0", description: "Framework de injeção de dependências compile-time para Java e Android.", link: "https://github.com/google/dagger" },
+                    { title: "Koin", license: "Apache 2.0", description: "Framework de injeção de dependências pragmático e leve para Kotlin.", link: "https://github.com/InsertKoinIO/koin" },
+                    { title: "Room", license: "Apache 2.0", description: "Camada de abstração sobre SQLite para acesso fluente ao banco no Android.", link: "https://github.com/androidx/androidx" },
+                    { title: "Core Data", license: "Apache 2.0", description: "Framework da Apple para gerenciar model layer de apps iOS/macOS.", link: "https://github.com/apple/swift-corelibs-foundation" },
+                    { title: "Detox", license: "MIT", description: "Framework de testes E2E gray box para apps mobile desenvolvido pela Wix.", link: "https://github.com/wix/Detox" },
+                    { title: "Appium", license: "Apache 2.0", description: "Automação de testes open-source para apps nativos, híbridos e móveis.", link: "https://github.com/appium/appium" },
+                    { title: "XCTest", license: "Apache 2.0", description: "Framework de testes da Apple para apps Swift e Objective-C.", link: "https://github.com/apple/swift-corelibs-xctest" },
+                    { title: "Espresso", license: "Apache 2.0", description: "Framework conciso e confiável de testes UI para Android.", link: "https://github.com/android/android-test" },
+                    { title: "CodePush", license: "MIT", description: "Serviço cloud para deploy de atualizações de apps React Native/Cordova.", link: "https://github.com/microsoft/react-native-code-push" },
+                    { title: "Push Notifications", license: "MIT", description: "Biblioteca React Native para notificações push local e remota.", link: "https://github.com/zo0r/react-native-push-notification" },
+                    { title: "In-App Purchase", license: "MIT", description: "Módulo React Native para compras in-app em iOS e Android.", link: "https://github.com/dooboolab/react-native-iap" },
+                    { title: "Camera", license: "MIT", description: "Componente React Native Camera para iOS e Android.", link: "https://github.com/react-native-camera/react-native-camera" },
+                    { title: "Maps", license: "MIT", description: "Componentes de mapa React Native para iOS e Android.", link: "https://github.com/react-native-maps/react-native-maps" },
+                    { title: "Vector Icons", license: "MIT", description: "Conjunto de ícones personalizáveis para React Native.", link: "https://github.com/oblador/react-native-vector-icons" },
+                    { title: "AsyncStorage", license: "MIT", description: "Sistema de armazenamento key-value assíncrono para React Native.", link: "https://github.com/react-native-async-storage/async-storage" },
+					{ title: "NetInfo", license: "MIT", description: "API React Native para monitorar informações de conectividade de rede.", link: "https://github.com/react-native-netinfo/react-native-netinfo" },
+                    { title: "Device Info", license: "MIT", description: "Obter informações do dispositivo para React Native iOS e Android.", link: "https://github.com/react-native-device-info/react-native-device-info" },
+                    { title: "Permissions", license: "MIT", description: "Gerenciamento unificado de permissões para React Native em iOS e Android.", link: "https://github.com/zoontek/react-native-permissions" }
+                ]
+            }
+        };
+
+        let allProjects = [];
+        let currentCategory = '';
+
+        function showHome() {
+            document.getElementById('homePage').style.display = 'block';
+            document.getElementById('projectsPage').style.display = 'none';
+        }
+
+        function showCategory(categoryKey) {
+            currentCategory = categoryKey;
+            const category = categories[categoryKey];
+            allProjects = category.projects;
+
+            document.getElementById('categoryTitle').textContent = category.title;
+            document.getElementById('categorySubtitle').textContent = category.subtitle;
+
+            document.getElementById('homePage').style.display = 'none';
+            document.getElementById('projectsPage').style.display = 'block';
+
+            renderProjects(allProjects);
+        }
+
+        function renderProjects(projects) {
+            const tbody = document.getElementById('projectsTableBody');
+            tbody.innerHTML = projects.map(project => `
+                <tr>
+                    <td class="project-title-cell">${project.title}</td>
+                    <td><span class="license-badge">${project.license}</span></td>
+                    <td>${project.description}</td>
+                    <td>
+                        <a href="${project.link}" target="_blank" rel="noopener noreferrer" class="github-link">
+                            Ver no GitHub →
+                        </a>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filtered = allProjects.filter(p =>
+                p.title.toLowerCase().includes(searchTerm) ||
+                p.description.toLowerCase().includes(searchTerm) ||
+                p.license.toLowerCase().includes(searchTerm)
+            );
+            renderProjects(filtered);
+        });
+
+        // Inicializar mostrando a home
+        showHome();
+    </script>
+</body>
+</html>
