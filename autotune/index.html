@@ -475,16 +475,17 @@
     }
 
     async function autotune(buffer, sampleRate, strength, scale) {
-      const windowSize = 2048;
-      const hopSize = 512;
+      const windowSize = 4096; // Janela maior = melhor detecção
+      const hopSize = 1024;
       const output = new Float32Array(buffer.length);
+      const overlapAdd = new Float32Array(buffer.length); // Para contagem de sobreposição
       
       // Processar em janelas com yield para não travar
       const totalWindows = Math.floor((buffer.length - windowSize) / hopSize);
       let windowCount = 0;
       
       for (let i = 0; i < buffer.length - windowSize; i += hopSize) {
-        // Criar janela sem slice (mais eficiente)
+        // Criar janela
         const window = new Float32Array(windowSize);
         for (let j = 0; j < windowSize; j++) {
           window[j] = buffer[i + j];
@@ -497,37 +498,45 @@
           // Encontrar nota mais próxima na escala
           const targetPitch = closestNoteInScale(pitch, scale);
           
-          // Calcular correção
+          // Calcular correção - aplicar strength como fator de "velocidade"
           const ratio = targetPitch / pitch;
           const finalRatio = 1 + (ratio - 1) * strength;
           
-          // Aplicar pitch shift inline (sem criar novo array)
-          for (let j = 0; j < windowSize && i + j < output.length; j++) {
-            const sourceIndex = j / finalRatio;
-            const i1 = Math.floor(sourceIndex);
-            const i2 = Math.min(i1 + 1, windowSize - 1);
-            const frac = sourceIndex - i1;
-            
-            const shifted = window[i1] * (1 - frac) + window[i2] * frac;
+          // Phase vocoder simplificado para melhor qualidade
+          const fftSize = windowSize;
+          const shiftedWindow = phaseVocoder(window, finalRatio, fftSize);
+          
+          // Aplicar janela de Hann e adicionar
+          for (let j = 0; j < shiftedWindow.length && i + j < output.length; j++) {
             const hannWindow = 0.5 * (1 - Math.cos(2 * Math.PI * j / windowSize));
-            output[i + j] += shifted * hannWindow;
+            output[i + j] += shiftedWindow[j] * hannWindow;
+            overlapAdd[i + j] += hannWindow;
           }
         } else {
-          // Sem pitch detectado, copiar original
+          // Sem pitch detectado, copiar original com janela
           for (let j = 0; j < windowSize && i + j < output.length; j++) {
-            output[i + j] += window[j];
+            const hannWindow = 0.5 * (1 - Math.cos(2 * Math.PI * j / windowSize));
+            output[i + j] += window[j] * hannWindow;
+            overlapAdd[i + j] += hannWindow;
           }
         }
         
         // Atualizar progresso e dar chance ao navegador respirar
         windowCount++;
-        if (windowCount % 100 === 0) {
+        if (windowCount % 50 === 0) {
           updateProgress((windowCount / totalWindows) * 100);
           await new Promise(resolve => setTimeout(resolve, 0));
         }
       }
       
-      // Normalizar de forma mais eficiente
+      // Normalizar pela sobreposição
+      for (let i = 0; i < output.length; i++) {
+        if (overlapAdd[i] > 0) {
+          output[i] /= overlapAdd[i];
+        }
+      }
+      
+      // Normalizar amplitude
       let max = 0;
       for (let i = 0; i < output.length; i++) {
         const abs = Math.abs(output[i]);
@@ -535,9 +544,43 @@
       }
       
       if (max > 0) {
+        const normFactor = 0.95 / max; // Deixa margem para evitar clipping
         for (let i = 0; i < output.length; i++) {
-          output[i] /= max;
+          output[i] *= normFactor;
         }
+      }
+      
+      return output;
+    }
+    
+    function phaseVocoder(buffer, ratio, fftSize) {
+      // Implementação simplificada de phase vocoder
+      // Para produção seria ideal usar FFT, mas aqui uso interpolação de alta qualidade
+      const output = new Float32Array(buffer.length);
+      
+      for (let i = 0; i < output.length; i++) {
+        const sourcePos = i / ratio;
+        
+        // Interpolação cúbica (melhor que linear)
+        const i0 = Math.floor(sourcePos) - 1;
+        const i1 = Math.floor(sourcePos);
+        const i2 = Math.floor(sourcePos) + 1;
+        const i3 = Math.floor(sourcePos) + 2;
+        const frac = sourcePos - Math.floor(sourcePos);
+        
+        // Garantir limites
+        const s0 = (i0 >= 0 && i0 < buffer.length) ? buffer[i0] : 0;
+        const s1 = (i1 >= 0 && i1 < buffer.length) ? buffer[i1] : 0;
+        const s2 = (i2 >= 0 && i2 < buffer.length) ? buffer[i2] : 0;
+        const s3 = (i3 >= 0 && i3 < buffer.length) ? buffer[i3] : 0;
+        
+        // Interpolação cúbica de Catmull-Rom
+        const a0 = -0.5 * s0 + 1.5 * s1 - 1.5 * s2 + 0.5 * s3;
+        const a1 = s0 - 2.5 * s1 + 2 * s2 - 0.5 * s3;
+        const a2 = -0.5 * s0 + 0.5 * s2;
+        const a3 = s1;
+        
+        output[i] = a0 * frac * frac * frac + a1 * frac * frac + a2 * frac + a3;
       }
       
       return output;
@@ -545,40 +588,64 @@
 
     function detectPitch(buffer, sampleRate) {
       const SIZE = buffer.length;
-      const MAX_SAMPLES = Math.floor(SIZE / 2);
       let rms = 0;
 
-      // Calcular RMS de forma mais eficiente
+      // Calcular RMS
       for (let i = 0; i < SIZE; i++) {
         rms += buffer[i] * buffer[i];
       }
       rms = Math.sqrt(rms / SIZE);
       
-      if (rms < 0.01) return -1; // Silêncio
+      if (rms < 0.005) return -1; // Silêncio
 
-      // Autocorrelação otimizada
-      let bestOffset = -1;
-      let bestCorrelation = 0;
+      // Autocorrelação usando YIN algorithm (mais preciso)
+      const threshold = 0.1;
+      const minLag = Math.floor(sampleRate / 1000); // 1000 Hz max
+      const maxLag = Math.floor(sampleRate / 80);   // 80 Hz min
       
-      for (let offset = 20; offset < Math.min(MAX_SAMPLES, 1000); offset++) {
-        let correlation = 0;
-        const samples = Math.min(MAX_SAMPLES, 1000);
-        
-        for (let i = 0; i < samples; i++) {
-          correlation += Math.abs(buffer[i] - buffer[i + offset]);
+      // Difference function
+      const diff = new Float32Array(maxLag);
+      for (let lag = 0; lag < maxLag; lag++) {
+        let sum = 0;
+        for (let i = 0; i < SIZE - maxLag; i++) {
+          const delta = buffer[i] - buffer[i + lag];
+          sum += delta * delta;
         }
-        correlation = 1 - (correlation / samples);
-        
-        if (correlation > bestCorrelation && correlation > 0.9) {
-          bestCorrelation = correlation;
-          bestOffset = offset;
+        diff[lag] = sum;
+      }
+      
+      // Cumulative mean normalized difference
+      const cmndf = new Float32Array(maxLag);
+      cmndf[0] = 1;
+      let runningSum = 0;
+      
+      for (let lag = 1; lag < maxLag; lag++) {
+        runningSum += diff[lag];
+        cmndf[lag] = diff[lag] / (runningSum / lag);
+      }
+      
+      // Find first minimum below threshold
+      let bestLag = -1;
+      for (let lag = minLag; lag < maxLag; lag++) {
+        if (cmndf[lag] < threshold) {
+          // Parabolic interpolation for sub-sample accuracy
+          if (lag > 0 && lag < maxLag - 1) {
+            const s0 = cmndf[lag - 1];
+            const s1 = cmndf[lag];
+            const s2 = cmndf[lag + 1];
+            const adjustment = (s2 - s0) / (2 * (2 * s1 - s2 - s0));
+            bestLag = lag + adjustment;
+          } else {
+            bestLag = lag;
+          }
+          break;
         }
       }
       
-      if (bestOffset > 0) {
-        const estimate = sampleRate / bestOffset;
-        if (estimate >= 80 && estimate <= 1000) {
-          return estimate;
+      if (bestLag > 0) {
+        const pitch = sampleRate / bestLag;
+        if (pitch >= 80 && pitch <= 1000) {
+          return pitch;
         }
       }
       
