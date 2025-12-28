@@ -479,9 +479,16 @@
       const hopSize = 512;
       const output = new Float32Array(buffer.length);
       
-      // Processar em janelas
+      // Processar em janelas com yield para não travar
+      const totalWindows = Math.floor((buffer.length - windowSize) / hopSize);
+      let windowCount = 0;
+      
       for (let i = 0; i < buffer.length - windowSize; i += hopSize) {
-        const window = buffer.slice(i, i + windowSize);
+        // Criar janela sem slice (mais eficiente)
+        const window = new Float32Array(windowSize);
+        for (let j = 0; j < windowSize; j++) {
+          window[j] = buffer[i + j];
+        }
         
         // Detectar pitch
         const pitch = detectPitch(window, sampleRate);
@@ -494,13 +501,16 @@
           const ratio = targetPitch / pitch;
           const finalRatio = 1 + (ratio - 1) * strength;
           
-          // Aplicar pitch shift simples com interpolação
-          const shifted = pitchShift(window, finalRatio);
-          
-          // Combinar com janela de Hann
-          for (let j = 0; j < shifted.length && i + j < output.length; j++) {
+          // Aplicar pitch shift inline (sem criar novo array)
+          for (let j = 0; j < windowSize && i + j < output.length; j++) {
+            const sourceIndex = j / finalRatio;
+            const i1 = Math.floor(sourceIndex);
+            const i2 = Math.min(i1 + 1, windowSize - 1);
+            const frac = sourceIndex - i1;
+            
+            const shifted = window[i1] * (1 - frac) + window[i2] * frac;
             const hannWindow = 0.5 * (1 - Math.cos(2 * Math.PI * j / windowSize));
-            output[i + j] += shifted[j] * hannWindow;
+            output[i + j] += shifted * hannWindow;
           }
         } else {
           // Sem pitch detectado, copiar original
@@ -509,14 +519,21 @@
           }
         }
         
-        // Atualizar progresso
-        if (i % (hopSize * 100) === 0) {
-          updateProgress((i / buffer.length) * 100);
+        // Atualizar progresso e dar chance ao navegador respirar
+        windowCount++;
+        if (windowCount % 100 === 0) {
+          updateProgress((windowCount / totalWindows) * 100);
+          await new Promise(resolve => setTimeout(resolve, 0));
         }
       }
       
-      // Normalizar
-      const max = Math.max(...output.map(Math.abs));
+      // Normalizar de forma mais eficiente
+      let max = 0;
+      for (let i = 0; i < output.length; i++) {
+        const abs = Math.abs(output[i]);
+        if (abs > max) max = abs;
+      }
+      
       if (max > 0) {
         for (let i = 0; i < output.length; i++) {
           output[i] /= max;
@@ -529,11 +546,9 @@
     function detectPitch(buffer, sampleRate) {
       const SIZE = buffer.length;
       const MAX_SAMPLES = Math.floor(SIZE / 2);
-      let bestOffset = -1;
-      let bestCorrelation = 0;
       let rms = 0;
 
-      // Calcular RMS
+      // Calcular RMS de forma mais eficiente
       for (let i = 0; i < SIZE; i++) {
         rms += buffer[i] * buffer[i];
       }
@@ -541,24 +556,30 @@
       
       if (rms < 0.01) return -1; // Silêncio
 
-      // Autocorrelação
-      let lastCorrelation = 1;
-      for (let offset = 20; offset < MAX_SAMPLES; offset++) {
+      // Autocorrelação otimizada
+      let bestOffset = -1;
+      let bestCorrelation = 0;
+      
+      for (let offset = 20; offset < Math.min(MAX_SAMPLES, 1000); offset++) {
         let correlation = 0;
-        for (let i = 0; i < MAX_SAMPLES; i++) {
+        const samples = Math.min(MAX_SAMPLES, 1000);
+        
+        for (let i = 0; i < samples; i++) {
           correlation += Math.abs(buffer[i] - buffer[i + offset]);
         }
-        correlation = 1 - (correlation / MAX_SAMPLES);
+        correlation = 1 - (correlation / samples);
         
-        if (correlation > 0.9 && correlation > lastCorrelation) {
-          const foundOffset = offset;
-          const estimate = sampleRate / foundOffset;
-          
-          if (estimate >= 80 && estimate <= 1000) { // Faixa de voz humana
-            return estimate;
-          }
+        if (correlation > bestCorrelation && correlation > 0.9) {
+          bestCorrelation = correlation;
+          bestOffset = offset;
         }
-        lastCorrelation = correlation;
+      }
+      
+      if (bestOffset > 0) {
+        const estimate = sampleRate / bestOffset;
+        if (estimate >= 80 && estimate <= 1000) {
+          return estimate;
+        }
       }
       
       return -1;
@@ -591,21 +612,8 @@
     }
 
     function pitchShift(buffer, ratio) {
-      const output = new Float32Array(buffer.length);
-      
-      for (let i = 0; i < output.length; i++) {
-        const sourceIndex = i / ratio;
-        const i1 = Math.floor(sourceIndex);
-        const i2 = Math.ceil(sourceIndex);
-        const frac = sourceIndex - i1;
-        
-        if (i2 < buffer.length) {
-          // Interpolação linear
-          output[i] = buffer[i1] * (1 - frac) + buffer[i2] * frac;
-        }
-      }
-      
-      return output;
+      // Removida - agora inline no autotune
+      return buffer;
     }
 
     function updateProgress(percent, text) {
