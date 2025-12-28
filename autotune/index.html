@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autotune Pro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 32px;
+    }
+    
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    
+    .upload-area {
+      border: 3px dashed #667eea;
+      border-radius: 15px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 30px;
+    }
+    
+    .upload-area:hover {
+      background: #f8f9ff;
+      border-color: #764ba2;
+    }
+    
+    .upload-area.has-file {
+      border-color: #48bb78;
+      background: #f0fff4;
+    }
+    
+    input[type="file"] {
+      display: none;
+    }
+    
+    .upload-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    
+    .settings {
+      margin-bottom: 30px;
+    }
+    
+    .setting-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      border-radius: 5px;
+      background: #e2e8f0;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+    }
+    
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      border: none;
+    }
+    
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      font-size: 14px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .value-display {
+      display: inline-block;
+      margin-left: 10px;
+      color: #667eea;
+      font-weight: bold;
+    }
+    
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 10px;
+    }
+    
+    .btn-process {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    
+    .btn-process:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-process:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .btn-download {
+      background: #48bb78;
+      color: white;
+      display: none;
+    }
+    
+    .btn-download:hover {
+      background: #38a169;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3);
+    }
+    
+    .progress {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f7fafc;
+      border-radius: 10px;
+      text-align: center;
+      display: none;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    
+    .info {
+      background: #ebf8ff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #2c5282;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎵 Autotune Pro</h1>
+    <p class="subtitle">Corrija a afinação da sua voz automaticamente</p>
+    
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">📁</div>
+      <p><strong>Clique para selecionar</strong> ou arraste um arquivo de áudio</p>
+      <p style="font-size: 12px; color: #999; margin-top: 5px;">Formatos: MP3, WAV, OGG, M4A</p>
+      <input type="file" id="audioFile" accept="audio/*">
+    </div>
+    
+    <div class="settings">
+      <div class="setting-group">
+        <label>
+          Intensidade do Autotune
+          <span class="value-display" id="strengthValue">80%</span>
+        </label>
+        <input type="range" id="strength" min="0" max="100" value="80">
+        <p style="font-size: 12px; color: #666; margin-top: 5px;">
+          0% = natural | 100% = robótico (efeito T-Pain)
+        </p>
+      </div>
+      
+      <div class="setting-group">
+        <label>Escala Musical</label>
+        <select id="scale">
+          <option value="chromatic">Cromática (todas as notas)</option>
+          <option value="major">Maior (Dó maior)</option>
+          <option value="minor">Menor (Lá menor)</option>
+          <option value="pentatonic">Pentatônica</option>
+        </select>
+      </div>
+    </div>
+    
+    <button class="btn-process" id="processBtn" disabled>
+      Processar Áudio
+    </button>
+    
+    <button class="btn-download" id="downloadBtn">
+      ⬇️ Baixar Áudio Processado
+    </button>
+    
+    <div class="progress" id="progress">
+      <p id="progressText">Processando...</p>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+    
+    <div class="info">
+      <strong>💡 Dica:</strong> Para melhor resultado, use áudio com voz limpa e sem muito ruído de fundo. 
+      O processamento pode levar alguns segundos dependendo do tamanho do arquivo.
+    </div>
+  </div>
+
+  <script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('audioFile');
+    const processBtn = document.getElementById('processBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const strengthSlider = document.getElementById('strength');
+    const strengthValue = document.getElementById('strengthValue');
+    const scaleSelect = document.getElementById('scale');
+    const progress = document.getElementById('progress');
+    const progressText = document.getElementById('progressText');
+    const progressFill = document.getElementById('progressFill');
+
+    let audioBuffer = null;
+    let processedBuffer = null;
+    let audioContext = null;
+
+    // Escalas musicais (semitons relativos a C)
+    const scales = {
+      chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      major: [0, 2, 4, 5, 7, 9, 11],
+      minor: [0, 2, 3, 5, 7, 8, 10],
+      pentatonic: [0, 2, 4, 7, 9]
+    };
+
+    // Upload de arquivo
+    uploadArea.addEventListener('click', () => fileInput.click());
+    
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.background = '#f8f9ff';
+    });
+    
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.background = '';
+    });
+    
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.background = '';
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFileSelect();
+      }
+    });
+
+    fileInput.addEventListener('change', handleFileSelect);
+
+    async function handleFileSelect() {
+      const file = fileInput.files[0];
+      if (!file) return;
+
+      uploadArea.classList.add('has-file');
+      uploadArea.querySelector('p').innerHTML = `<strong>✓ ${file.name}</strong><br><span style="font-size: 12px;">Pronto para processar</span>`;
+      processBtn.disabled = false;
+      downloadBtn.style.display = 'none';
+
+      // Carregar áudio
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const arrayBuffer = await file.arrayBuffer();
+        audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      } catch (error) {
+        alert('Erro ao carregar áudio: ' + error.message);
+      }
+    }
+
+    strengthSlider.addEventListener('input', (e) => {
+      strengthValue.textContent = e.target.value + '%';
+    });
+
+    processBtn.addEventListener('click', processAudio);
+
+    async function processAudio() {
+      if (!audioBuffer) return;
+
+      processBtn.disabled = true;
+      progress.style.display = 'block';
+      downloadBtn.style.display = 'none';
+      
+      const strength = strengthSlider.value / 100;
+      const selectedScale = scales[scaleSelect.value];
+
+      try {
+        // Processar cada canal
+        const channels = [];
+        for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
+          updateProgress(0, `Processando canal ${ch + 1}/${audioBuffer.numberOfChannels}...`);
+          const channelData = audioBuffer.getChannelData(ch);
+          const processed = await autotune(channelData, audioBuffer.sampleRate, strength, selectedScale);
+          channels.push(processed);
+        }
+
+        // Criar buffer de saída
+        processedBuffer = audioContext.createBuffer(
+          channels.length,
+          channels[0].length,
+          audioBuffer.sampleRate
+        );
+
+        channels.forEach((channel, i) => {
+          processedBuffer.copyToChannel(channel, i);
+        });
+
+        updateProgress(100, 'Concluído!');
+        setTimeout(() => {
+          progress.style.display = 'none';
+          downloadBtn.style.display = 'block';
+          processBtn.disabled = false;
+        }, 1000);
+
+      } catch (error) {
+        alert('Erro ao processar: ' + error.message);
+        progress.style.display = 'none';
+        processBtn.disabled = false;
+      }
+    }
+
+    async function autotune(buffer, sampleRate, strength, scale) {
+      const windowSize = 2048;
+      const hopSize = 512;
+      const output = new Float32Array(buffer.length);
+      
+      // Processar em janelas
+      for (let i = 0; i < buffer.length - windowSize; i += hopSize) {
+        const window = buffer.slice(i, i + windowSize);
+        
+        // Detectar pitch
+        const pitch = detectPitch(window, sampleRate);
+        
+        if (pitch > 0) {
+          // Encontrar nota mais próxima na escala
+          const targetPitch = closestNoteInScale(pitch, scale);
+          
+          // Calcular correção
+          const ratio = targetPitch / pitch;
+          const finalRatio = 1 + (ratio - 1) * strength;
+          
+          // Aplicar pitch shift simples com interpolação
+          const shifted = pitchShift(window, finalRatio);
+          
+          // Combinar com janela de Hann
+          for (let j = 0; j < shifted.length && i + j < output.length; j++) {
+            const hannWindow = 0.5 * (1 - Math.cos(2 * Math.PI * j / windowSize));
+            output[i + j] += shifted[j] * hannWindow;
+          }
+        } else {
+          // Sem pitch detectado, copiar original
+          for (let j = 0; j < windowSize && i + j < output.length; j++) {
+            output[i + j] += window[j];
+          }
+        }
+        
+        // Atualizar progresso
+        if (i % (hopSize * 100) === 0) {
+          updateProgress((i / buffer.length) * 100);
+        }
+      }
+      
+      // Normalizar
+      const max = Math.max(...output.map(Math.abs));
+      if (max > 0) {
+        for (let i = 0; i < output.length; i++) {
+          output[i] /= max;
+        }
+      }
+      
+      return output;
+    }
+
+    function detectPitch(buffer, sampleRate) {
+      const SIZE = buffer.length;
+      const MAX_SAMPLES = Math.floor(SIZE / 2);
+      let bestOffset = -1;
+      let bestCorrelation = 0;
+      let rms = 0;
+
+      // Calcular RMS
+      for (let i = 0; i < SIZE; i++) {
+        rms += buffer[i] * buffer[i];
+      }
+      rms = Math.sqrt(rms / SIZE);
+      
+      if (rms < 0.01) return -1; // Silêncio
+
+      // Autocorrelação
+      let lastCorrelation = 1;
+      for (let offset = 20; offset < MAX_SAMPLES; offset++) {
+        let correlation = 0;
+        for (let i = 0; i < MAX_SAMPLES; i++) {
+          correlation += Math.abs(buffer[i] - buffer[i + offset]);
+        }
+        correlation = 1 - (correlation / MAX_SAMPLES);
+        
+        if (correlation > 0.9 && correlation > lastCorrelation) {
+          const foundOffset = offset;
+          const estimate = sampleRate / foundOffset;
+          
+          if (estimate >= 80 && estimate <= 1000) { // Faixa de voz humana
+            return estimate;
+          }
+        }
+        lastCorrelation = correlation;
+      }
+      
+      return -1;
+    }
+
+    function closestNoteInScale(freq, scale) {
+      const A4 = 440;
+      const C0 = A4 * Math.pow(2, -4.75); // C0 frequency
+      
+      // Converter frequência para semitons de C0
+      const halfSteps = 12 * Math.log2(freq / C0);
+      const octave = Math.floor(halfSteps / 12);
+      const noteInOctave = Math.round(halfSteps % 12);
+      
+      // Encontrar nota mais próxima na escala
+      let closest = scale[0];
+      let minDist = Math.abs(noteInOctave - scale[0]);
+      
+      for (let note of scale) {
+        const dist = Math.abs(noteInOctave - note);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = note;
+        }
+      }
+      
+      // Converter de volta para frequência
+      const targetHalfSteps = octave * 12 + closest;
+      return C0 * Math.pow(2, targetHalfSteps / 12);
+    }
+
+    function pitchShift(buffer, ratio) {
+      const output = new Float32Array(buffer.length);
+      
+      for (let i = 0; i < output.length; i++) {
+        const sourceIndex = i / ratio;
+        const i1 = Math.floor(sourceIndex);
+        const i2 = Math.ceil(sourceIndex);
+        const frac = sourceIndex - i1;
+        
+        if (i2 < buffer.length) {
+          // Interpolação linear
+          output[i] = buffer[i1] * (1 - frac) + buffer[i2] * frac;
+        }
+      }
+      
+      return output;
+    }
+
+    function updateProgress(percent, text) {
+      progressFill.style.width = percent + '%';
+      if (text) progressText.textContent = text;
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      if (!processedBuffer) return;
+      
+      const wav = bufferToWave(processedBuffer);
+      const blob = new Blob([wav], { type: 'audio/wav' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'autotune_' + Date.now() + '.wav';
+      a.click();
+      
+      URL.revokeObjectURL(url);
+    });
+
+    function bufferToWave(buffer) {
+      const numChannels = buffer.numberOfChannels;
+      const sampleRate = buffer.sampleRate;
+      const format = 1; // PCM
+      const bitDepth = 16;
+      
+      const bytesPerSample = bitDepth / 8;
+      const blockAlign = numChannels * bytesPerSample;
+      
+      const data = [];
+      for (let i = 0; i < buffer.length; i++) {
+        for (let ch = 0; ch < numChannels; ch++) {
+          let sample = buffer.getChannelData(ch)[i];
+          sample = Math.max(-1, Math.min(1, sample));
+          sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+          data.push(sample);
+        }
+      }
+      
+      const dataSize = data.length * bytesPerSample;
+      const view = new DataView(new ArrayBuffer(44 + dataSize));
+      
+      // RIFF header
+      writeString(view, 0, 'RIFF');
+      view.setUint32(4, 36 + dataSize, true);
+      writeString(view, 8, 'WAVE');
+      
+      // fmt chunk
+      writeString(view, 12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, format, true);
+      view.setUint16(22, numChannels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * blockAlign, true);
+      view.setUint16(32, blockAlign, true);
+      view.setUint16(34, bitDepth, true);
+      
+      // data chunk
+      writeString(view, 36, 'data');
+      view.setUint32(40, dataSize, true);
+      
+      let offset = 44;
+      for (let i = 0; i < data.length; i++) {
+        view.setInt16(offset, data[i], true);
+        offset += 2;
+      }
+      
+      return view.buffer;
+    }
+
+    function writeString(view, offset, string) {
+      for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+      }
+    }
+  </script>
+</body>
+</html>
