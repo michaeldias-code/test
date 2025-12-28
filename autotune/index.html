@@ -259,6 +259,16 @@
     
     <div class="audio-info" id="audioInfo"></div>
     
+    <div class="audio-info" id="pitchInfo" style="background: #fff5e6; border-color: #f59e0b; display: none;">
+      <strong>🎵 Análise de Pitch:</strong><br>
+      <div style="margin-top: 8px;">
+        Frequência detectada: <strong id="detectedFreq">--</strong> Hz<br>
+        Nota mais próxima: <strong id="closestNote">--</strong><br>
+        Frequência alvo: <strong id="targetFreq">--</strong> Hz<br>
+        Correção: <strong id="correction">--</strong>
+      </div>
+    </div>
+    
     <div class="settings">
       <div class="setting-group">
         <label>
@@ -316,6 +326,11 @@
     const progressFill = document.getElementById('progressFill');
     const errorMessage = document.getElementById('errorMessage');
     const audioInfo = document.getElementById('audioInfo');
+    const pitchInfo = document.getElementById('pitchInfo');
+    const detectedFreq = document.getElementById('detectedFreq');
+    const closestNote = document.getElementById('closestNote');
+    const targetFreq = document.getElementById('targetFreq');
+    const correction = document.getElementById('correction');
 
     let audioBuffer = null;
     let processedBuffer = null;
@@ -433,6 +448,7 @@
 
       processBtn.disabled = true;
       progress.style.display = 'block';
+      pitchInfo.style.display = 'block';
       downloadBtn.style.display = 'none';
       hideError();
       
@@ -470,6 +486,7 @@
       } catch (error) {
         showError('Erro ao processar: ' + error.message);
         progress.style.display = 'none';
+        pitchInfo.style.display = 'none';
         processBtn.disabled = false;
       }
     }
@@ -479,6 +496,11 @@
       const hopSize = 1024;
       const output = new Float32Array(buffer.length);
       const overlapAdd = new Float32Array(buffer.length); // Para contagem de sobreposição
+      
+      // Para tracking de pitch médio
+      let pitchSum = 0;
+      let pitchCount = 0;
+      let lastDisplayedPitch = 0;
       
       // Processar em janelas com yield para não travar
       const totalWindows = Math.floor((buffer.length - windowSize) / hopSize);
@@ -495,8 +517,23 @@
         const pitch = detectPitch(window, sampleRate);
         
         if (pitch > 0) {
+          // Acumular para estatísticas
+          pitchSum += pitch;
+          pitchCount++;
+          
           // Encontrar nota mais próxima na escala
           const targetPitch = closestNoteInScale(pitch, scale);
+          const noteName = getNoteName(targetPitch);
+          
+          // Atualizar display periodicamente
+          if (Math.abs(pitch - lastDisplayedPitch) > 5 || windowCount % 50 === 0) {
+            detectedFreq.textContent = pitch.toFixed(2);
+            closestNote.textContent = noteName;
+            targetFreq.textContent = targetPitch.toFixed(2);
+            const cents = 1200 * Math.log2(pitch / targetPitch);
+            correction.textContent = cents > 0 ? `+${cents.toFixed(0)} cents` : `${cents.toFixed(0)} cents`;
+            lastDisplayedPitch = pitch;
+          }
           
           // Calcular correção - aplicar strength como fator de "velocidade"
           const ratio = targetPitch / pitch;
@@ -529,6 +566,16 @@
         }
       }
       
+      // Mostrar pitch médio final
+      if (pitchCount > 0) {
+        const avgPitch = pitchSum / pitchCount;
+        const avgTarget = closestNoteInScale(avgPitch, scale);
+        const avgNote = getNoteName(avgTarget);
+        detectedFreq.textContent = avgPitch.toFixed(2) + ' (média)';
+        closestNote.textContent = avgNote;
+        targetFreq.textContent = avgTarget.toFixed(2);
+      }
+      
       // Normalizar pela sobreposição
       for (let i = 0; i < output.length; i++) {
         if (overlapAdd[i] > 0) {
@@ -551,6 +598,18 @@
       }
       
       return output;
+    }
+    
+    function getNoteName(freq) {
+      const A4 = 440;
+      const C0 = A4 * Math.pow(2, -4.75);
+      const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+      
+      const halfSteps = 12 * Math.log2(freq / C0);
+      const octave = Math.floor(halfSteps / 12);
+      const note = Math.round(halfSteps % 12);
+      
+      return noteNames[note] + octave;
     }
     
     function phaseVocoder(buffer, ratio, fftSize) {
