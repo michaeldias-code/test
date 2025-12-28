@@ -62,6 +62,11 @@
       background: #f0fff4;
     }
     
+    .upload-area.error {
+      border-color: #f56565;
+      background: #fff5f5;
+    }
+    
     input[type="file"] {
       display: none;
     }
@@ -212,6 +217,30 @@
       color: #2c5282;
       line-height: 1.6;
     }
+    
+    .error-message {
+      background: #fff5f5;
+      border: 2px solid #f56565;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 20px;
+      color: #c53030;
+      display: none;
+    }
+    
+    .audio-info {
+      background: #f0fff4;
+      border: 2px solid #48bb78;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      display: none;
+    }
+    
+    .audio-info strong {
+      color: #2f855a;
+    }
   </style>
 </head>
 <body>
@@ -222,9 +251,13 @@
     <div class="upload-area" id="uploadArea">
       <div class="upload-icon">📁</div>
       <p><strong>Clique para selecionar</strong> ou arraste um arquivo de áudio</p>
-      <p style="font-size: 12px; color: #999; margin-top: 5px;">Formatos: MP3, WAV, OGG, M4A</p>
+      <p style="font-size: 12px; color: #999; margin-top: 5px;">Recomendado: WAV ou MP3 de alta qualidade</p>
       <input type="file" id="audioFile" accept="audio/*">
     </div>
+    
+    <div class="error-message" id="errorMessage"></div>
+    
+    <div class="audio-info" id="audioInfo"></div>
     
     <div class="settings">
       <div class="setting-group">
@@ -265,8 +298,8 @@
     </div>
     
     <div class="info">
-      <strong>💡 Dica:</strong> Para melhor resultado, use áudio com voz limpa e sem muito ruído de fundo. 
-      O processamento pode levar alguns segundos dependendo do tamanho do arquivo.
+      <strong>💡 Dica:</strong> Para melhor resultado, use áudio WAV ou MP3 com voz limpa e sem muito ruído de fundo. 
+      Se o M4A não funcionar, converta para WAV ou MP3 antes de enviar.
     </div>
   </div>
 
@@ -281,6 +314,8 @@
     const progress = document.getElementById('progress');
     const progressText = document.getElementById('progressText');
     const progressFill = document.getElementById('progressFill');
+    const errorMessage = document.getElementById('errorMessage');
+    const audioInfo = document.getElementById('audioInfo');
 
     let audioBuffer = null;
     let processedBuffer = null;
@@ -321,19 +356,70 @@
       const file = fileInput.files[0];
       if (!file) return;
 
-      uploadArea.classList.add('has-file');
-      uploadArea.querySelector('p').innerHTML = `<strong>✓ ${file.name}</strong><br><span style="font-size: 12px;">Pronto para processar</span>`;
-      processBtn.disabled = false;
+      hideError();
+      audioInfo.style.display = 'none';
+      uploadArea.classList.remove('has-file', 'error');
+      processBtn.disabled = true;
       downloadBtn.style.display = 'none';
 
-      // Carregar áudio
+      // Mostrar que está carregando
+      uploadArea.querySelector('p').innerHTML = `<strong>⏳ Carregando ${file.name}...</strong>`;
+
       try {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Tentar carregar o áudio
         const arrayBuffer = await file.arrayBuffer();
-        audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        
+        // Tentar decodificar
+        try {
+          audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          
+          // Sucesso!
+          uploadArea.classList.add('has-file');
+          uploadArea.querySelector('p').innerHTML = `<strong>✓ ${file.name}</strong><br><span style="font-size: 12px;">Pronto para processar</span>`;
+          processBtn.disabled = false;
+          
+          // Mostrar informações do áudio
+          showAudioInfo(audioBuffer, file);
+          
+        } catch (decodeError) {
+          // Erro ao decodificar - formato não suportado
+          throw new Error('Formato de áudio não suportado pelo navegador. Use WAV ou MP3 de alta qualidade.');
+        }
+        
       } catch (error) {
-        alert('Erro ao carregar áudio: ' + error.message);
+        uploadArea.classList.add('error');
+        uploadArea.querySelector('p').innerHTML = `<strong>❌ Erro ao carregar</strong>`;
+        showError(error.message);
       }
+    }
+
+    function showAudioInfo(buffer, file) {
+      const duration = buffer.duration.toFixed(1);
+      const sampleRate = buffer.sampleRate;
+      const channels = buffer.numberOfChannels;
+      const fileSize = (file.size / 1024 / 1024).toFixed(2);
+      
+      audioInfo.innerHTML = `
+        <strong>Informações do áudio:</strong><br>
+        Duração: ${duration}s | Taxa: ${sampleRate}Hz | Canais: ${channels} | Tamanho: ${fileSize}MB
+      `;
+      audioInfo.style.display = 'block';
+    }
+
+    function showError(message) {
+      errorMessage.textContent = '❌ ' + message;
+      errorMessage.style.display = 'block';
+      
+      // Sugestões baseadas no erro
+      if (message.includes('não suportado')) {
+        errorMessage.innerHTML += '<br><br><strong>Solução:</strong> Converta o arquivo para WAV ou MP3 usando um app como:<br>• <a href="https://online-audio-converter.com" target="_blank" style="color: #c53030;">Online Audio Converter</a><br>• Media Converter (Android)<br>• The Audio Converter (iOS)';
+      }
+    }
+
+    function hideError() {
+      errorMessage.style.display = 'none';
     }
 
     strengthSlider.addEventListener('input', (e) => {
@@ -348,6 +434,7 @@
       processBtn.disabled = true;
       progress.style.display = 'block';
       downloadBtn.style.display = 'none';
+      hideError();
       
       const strength = strengthSlider.value / 100;
       const selectedScale = scales[scaleSelect.value];
@@ -381,7 +468,7 @@
         }, 1000);
 
       } catch (error) {
-        alert('Erro ao processar: ' + error.message);
+        showError('Erro ao processar: ' + error.message);
         progress.style.display = 'none';
         processBtn.disabled = false;
       }
