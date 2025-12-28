@@ -13,9 +13,11 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #f5f5f5;
+            background: linear-gradient(135deg, #10b981 0%, #059669 10%, #047857 50%, #065f46 100%);
+            background-attachment: fixed;
             color: #333;
             line-height: 1.6;
+            min-height: 100vh;
         }
 
         .container {
@@ -27,10 +29,12 @@
         header {
             text-align: center;
             padding: 60px 20px 40px;
-            background: white;
-            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
             margin-bottom: 40px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         h1 {
@@ -54,16 +58,27 @@
         }
 
         .stat-item {
-            background: #f8f9fa;
-            padding: 15px 30px;
-            border-radius: 10px;
-            border: 2px solid #e0e0e0;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px 35px;
+            border-radius: 15px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+            border-color: rgba(16, 185, 129, 0.4);
         }
 
         .stat-number {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: bold;
-            color: #667eea;
+            background: linear-gradient(135deg, #10b981, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         /* HOME PAGE */
@@ -75,23 +90,42 @@
         }
 
         .category-card {
-            background: white;
-            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
             padding: 40px 30px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: all 0.4s ease;
             cursor: pointer;
             text-align: center;
-            border: 3px solid transparent;
+            border: 2px solid rgba(255, 255, 255, 0.2);
 			display: flex;
 			flex-direction: column;
 			justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.05), transparent);
+            transition: left 0.6s;
+            z-index: -1;
+        }
+
+        .category-card:hover::before {
+            left: 100%;
         }
 
         .category-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            border-color: #667eea;
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.2);
+            border-color: rgba(16, 185, 129, 0.3);
         }
 
         .category-icon {
@@ -114,7 +148,7 @@
 
         .category-count {
             display: inline-block;
-            background: #667eea;
+            background: #10b981;
             color: white;
             padding: 8px 20px;
             border-radius: 20px;
@@ -144,9 +178,69 @@
         }
 
         .back-button:hover {
-            background: #667eea;
+            background: #10b981;
             color: white;
             border-color: #667eea;
+        }
+
+        /* NAVIGATION BAR STYLES */
+        .main-nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-container {
+            padding: 0;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+        }
+
+        .nav-link {
+            display: inline-block;
+            padding: 18px 32px;
+            text-decoration: none;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
         .page-header {
@@ -197,7 +291,7 @@
         }
 
         thead {
-            background: #667eea;
+            background: #10b981;
             color: white;
         }
 
@@ -255,10 +349,199 @@
 
         footer {
             text-align: center;
-            padding: 40px 20px;
-            color: #666;
+            padding: 50px 20px;
+            color: rgba(255, 255, 255, 0.8);
             margin-top: 50px;
+            background: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
+		/* BLOG STYLES */
+		.blog-page {
+			display: none;
+		}
+		
+		.blog-header {
+			background: white;
+			padding: 40px 30px;
+			border-radius: 15px;
+			margin-bottom: 30px;
+			box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+			text-align: center;
+		}
+		
+		.blog-title {
+			font-size: 2.5rem;
+			color: #2c3e50;
+			margin-bottom: 15px;
+		}
+		
+		.blog-subtitle {
+			color: #666;
+			font-size: 1.1rem;
+		}
+		
+		.blog-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+			gap: 25px;
+			margin-bottom: 40px;
+		}
+		
+		.blog-card {
+			background: white;
+			border-radius: 15px;
+			padding: 25px;
+			box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+			transition: transform 0.3s, box-shadow 0.3s;
+			cursor: pointer;
+			border-left: 5px solid #667eea;
+		}
+		
+		.blog-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+		}
+		
+		.blog-card-title {
+			font-size: 1.3rem;
+			font-weight: 700;
+			color: #2c3e50;
+			margin-bottom: 10px;
+		}
+		
+		.blog-card-date {
+			color: #999;
+			font-size: 0.85rem;
+			margin-bottom: 15px;
+		}
+		
+		.blog-card-excerpt {
+			color: #555;
+			line-height: 1.6;
+		}
+		
+		/* ARTICLE PAGE */
+		.article-page {
+			display: none;
+		}
+		
+		.article-content {
+			background: white;
+			border-radius: 15px;
+			padding: 50px;
+			box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+			max-width: 900px;
+			margin: 0 auto;
+		}
+		
+		.article-title {
+			font-size: 2.8rem;
+			color: #2c3e50;
+			margin-bottom: 15px;
+			line-height: 1.2;
+		}
+		
+		.article-meta {
+			color: #999;
+			font-size: 0.95rem;
+			margin-bottom: 30px;
+			padding-bottom: 20px;
+			border-bottom: 2px solid #f0f0f0;
+		}
+		
+		.article-intro {
+			font-size: 1.2rem;
+			color: #555;
+			line-height: 1.8;
+			margin-bottom: 40px;
+			padding: 20px;
+			background: #f8f9fa;
+			border-left: 5px solid #667eea;
+			border-radius: 8px;
+		}
+		
+		.project-item {
+			margin-bottom: 50px;
+			padding-bottom: 40px;
+			border-bottom: 1px solid #e0e0e0;
+		}
+		
+		.project-item:last-child {
+			border-bottom: none;
+		}
+		
+		.project-number {
+			display: inline-block;
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			color: white;
+			font-size: 1.5rem;
+			font-weight: bold;
+			width: 50px;
+			height: 50px;
+			border-radius: 50%;
+			text-align: center;
+			line-height: 50px;
+			margin-bottom: 15px;
+		}
+		
+		.project-item h3 {
+			font-size: 1.8rem;
+			color: #2c3e50;
+			margin-bottom: 10px;
+		}
+		
+		.project-category {
+			display: inline-block;
+			background: #e8f5e9;
+			color: #2e7d32;
+			padding: 5px 15px;
+			border-radius: 20px;
+			font-size: 0.85rem;
+			font-weight: 600;
+			margin-bottom: 15px;
+		}
+		
+		.project-item p {
+			color: #555;
+			line-height: 1.8;
+			margin-bottom: 15px;
+		}
+		
+		.project-highlights {
+			background: #f8f9fa;
+			padding: 20px;
+			border-radius: 10px;
+			margin: 20px 0;
+		}
+		
+		.project-highlights ul {
+			margin: 10px 0 0 20px;
+			color: #555;
+		}
+		
+		.project-highlights li {
+			margin-bottom: 8px;
+			line-height: 1.6;
+		}
+		
+		.project-link {
+			display: inline-block;
+			padding: 10px 20px;
+			background: #667eea;
+			color: white;
+			text-decoration: none;
+			border-radius: 8px;
+			font-weight: 600;
+			transition: background 0.3s;
+			margin-top: 10px;
+		}
+		
+		.project-link:hover {
+			background: #5568d3;
+		}
+
 
         @media (max-width: 768px) {
             h1 {
@@ -276,10 +559,31 @@
             table {
                 min-width: 800px;
             }
+			.article-content {
+				padding: 30px 20px;
+			}
+			
+			.article-title {
+				font-size: 2rem;
+			}
+			
+			.blog-grid {
+				grid-template-columns: 1fr;
+			}
         }
     </style>
 </head>
 <body>
+    <!-- NAVIGATION BAR -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-links">
+                <a href="#" class="nav-link active" onclick="showHome()">🏠 Home</a>
+                <a href="#" class="nav-link" onclick="showBlog()">📝 Blog</a>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
         <header>
             <h1>🚀 GitGuide</h1>
@@ -299,34 +603,35 @@
                 </div>
             </div>
         </header>
+
 		<!-- SEÇÃO DE LICENÇAS -->
-		<div style="background: white; border-radius: 15px; padding: 30px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+		<div id="licensesSection" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; margin-bottom: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255, 255, 255, 0.2);">
 			<h2 style="font-size: 1.8rem; color: #2c3e50; margin-bottom: 20px; text-align: center;">📋 Guia de Licenças Open Source</h2>
 			<p style="text-align: center; color: #666; margin-bottom: 30px;">Entenda as principais licenças dos 1000 projetos do GitGuide</p>
 			
 			<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-				<div style="border-left: 4px solid #2ecc71; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-					<h3 style="color: #2ecc71; margin-bottom: 10px;">MIT</h3>
+				<div style="border-left: 4px solid #2ecc71; padding: 20px; background: rgba(46, 204, 113, 0.05); border-radius: 12px; transition: all 0.3s ease; border: 1px solid rgba(46, 204, 113, 0.1);">
+					<h3 style="color: #2ecc71; margin-bottom: 10px; font-weight: 700;">MIT</h3>
 					<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Licença permissiva que permite uso comercial, modificação e distribuição. Requer apenas manutenção do aviso de copyright.</p>
 				</div>
 				
-				<div style="border-left: 4px solid #3498db; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-					<h3 style="color: #3498db; margin-bottom: 10px;">Apache 2.0</h3>
+				<div style="border-left: 4px solid #3498db; padding: 20px; background: rgba(52, 152, 219, 0.05); border-radius: 12px; transition: all 0.3s ease; border: 1px solid rgba(52, 152, 219, 0.1);">
+					<h3 style="color: #3498db; margin-bottom: 10px; font-weight: 700;">Apache 2.0</h3>
 					<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Similar ao MIT, mas com proteção adicional de patentes e requer documentação de mudanças significativas.</p>
 				</div>
 				
-				<div style="border-left: 4px solid #9b59b6; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-					<h3 style="color: #9b59b6; margin-bottom: 10px;">GPL 2.0 / 3.0</h3>
+				<div style="border-left: 4px solid #9b59b6; padding: 20px; background: rgba(155, 89, 182, 0.05); border-radius: 12px; transition: all 0.3s ease; border: 1px solid rgba(155, 89, 182, 0.1);">
+					<h3 style="color: #9b59b6; margin-bottom: 10px; font-weight: 700;">GPL 2.0 / 3.0</h3>
 					<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Licença copyleft forte: modificações devem ser distribuídas com a mesma licença. Garante que o software permaneça livre.</p>
 				</div>
-				
-				<div style="border-left: 4px solid #e74c3c; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-					<h3 style="color: #e74c3c; margin-bottom: 10px;">AGPL 3.0</h3>
+
+				<div style="border-left: 4px solid #e74c3c; padding: 20px; background: rgba(231, 76, 60, 0.05); border-radius: 12px; transition: all 0.3s ease; border: 1px solid rgba(231, 76, 60, 0.1);">
+					<h3 style="color: #e74c3c; margin-bottom: 10px; font-weight: 700;">AGPL 3.0</h3>
 					<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Como GPL, mas também requer compartilhamento do código se usado em serviços de rede (SaaS).</p>
 				</div>
-				
-				<div style="border-left: 4px solid #f39c12; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-					<h3 style="color: #f39c12; margin-bottom: 10px;">BSD</h3>
+
+				<div style="border-left: 4px solid #f39c12; padding: 20px; background: rgba(243, 156, 18, 0.05); border-radius: 12px; transition: all 0.3s ease; border: 1px solid rgba(243, 156, 18, 0.1);">
+					<h3 style="color: #f39c12; margin-bottom: 10px; font-weight: 700;">BSD</h3>
 					<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Licença permissiva minimalista. Permite quase qualquer uso, incluindo criar software proprietário.</p>
 				</div>
 				
@@ -572,12 +877,48 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- BOTÃO VOLTAR DUPLICADO NO FINAL DA PÁGINA -->
+            <div style="text-align: center; margin-top: 40px; padding-bottom: 20px;">
+                <button class="back-button" onclick="showHome()">
+                    ↑ Voltar para o início
+                </button>
+            </div>
         </div>
+		<!-- BLOG PAGE -->
+		<div id="blogPage" class="blog-page">
+			<div class="blog-header">
+				<h2 class="blog-title">📝 Blog GitGuide</h2>
+				<p class="blog-subtitle">Artigos, análises e descobertas sobre projetos open source</p>
+			</div>
+		
+			<div class="blog-grid">
+				<div class="blog-card" onclick="showArticle('top20')">
+					<div class="blog-card-title">🌟 Os 20 Projetos Open Source Mais Incríveis da Nossa Coleção</div>
+					<div class="blog-card-date">28 de Dezembro de 2024 • 15 min de leitura</div>
+					<p class="blog-card-excerpt">
+						Selecionamos os 20 projetos mais impressionantes dos 1000+ da nossa base. De motores de jogo a IA, 
+						descubra software que mudou indústrias inteiras e continua moldando o futuro da tecnologia.
+					</p>
+				</div>
+			</div>
+		</div>
+		
+		<!-- ARTICLE PAGE -->
+		<div id="articlePage" class="article-page">
+			<button class="back-button" onclick="showBlog()">
+				← Voltar para o Blog
+			</button>
+		
+			<div class="article-content" id="articleContent">
+				<!-- Conteúdo do artigo será inserido aqui via JavaScript -->
+			</div>
+		</div>
     </div>
 
     <footer>
-        <p>💜 Feito com amor pela comunidade Open Source</p>
-        <p style="margin-top: 10px; opacity: 0.8; font-size: 0.9rem;">
+        <p style="color: white; font-weight: 600; font-size: 1.1rem;">💜 Feito com amor pela comunidade Open Source</p>
+        <p style="margin-top: 10px; opacity: 0.9; font-size: 0.95rem; color: rgba(255, 255, 255, 0.9);">
             Todos os projetos possuem licenças livres (MIT, Apache 2.0, BSD, etc.)
         </p>
     </footer>
@@ -2028,6 +2369,13 @@
         function showHome() {
             document.getElementById('homePage').style.display = 'block';
             document.getElementById('projectsPage').style.display = 'none';
+            document.getElementById('blogPage').style.display = 'none';
+            document.getElementById('articlePage').style.display = 'none';
+            document.getElementById('licensesSection').style.display = 'block';
+
+            // Update navbar active state
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector('.nav-link:nth-child(1)').classList.add('active');
         }
 
 		function showCategory(categoryKey) {
@@ -2132,8 +2480,472 @@
             renderProjects(filtered);
         });
 
-        // Inicializar mostrando a home
-        showHome();
-    </script>
+function showBlog() {
+    document.getElementById('homePage').style.display = 'none';
+    document.getElementById('projectsPage').style.display = 'none';
+    document.getElementById('articlePage').style.display = 'none';
+    document.getElementById('blogPage').style.display = 'block';
+    document.getElementById('licensesSection').style.display = 'none';
+
+    // Update navbar active state
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    document.querySelector('.nav-link:nth-child(2)').classList.add('active');
+}
+
+function showArticle(articleId) {
+    document.getElementById('homePage').style.display = 'none';
+    document.getElementById('projectsPage').style.display = 'none';
+    document.getElementById('blogPage').style.display = 'none';
+    document.getElementById('articlePage').style.display = 'block';
+    
+    loadArticle(articleId);
+}
+
+function loadArticle(articleId) {
+    const articles = {
+        top20: {
+            title: "Os 20 Projetos Open Source Mais Incríveis da Nossa Coleção",
+            date: "28 de Dezembro de 2024",
+            author: "Equipe GitGuide",
+            content: `
+                <p class="article-intro">
+                    Entre os 1000+ projetos open source que catalogamos, alguns se destacam não apenas pela 
+                    qualidade técnica, mas pelo impacto transformador que tiveram em suas áreas. Esta lista 
+                    celebra projetos que democratizaram tecnologia, mudaram indústrias inteiras e continuam 
+                    moldando o futuro do software. Prepare-se para conhecer verdadeiras obras-primas do 
+                    código aberto! 🚀
+                </p>
+
+                <div class="project-item">
+                    <div class="project-number">1</div>
+                    <h3>Blender</h3>
+                    <span class="project-category">Design & Criação 3D</span>
+                    <p>
+                        Suite de criação 3D completa que revolucionou a indústria de animação e efeitos visuais. 
+                        Usado na produção de filmes blockbuster como Spider-Man: Into the Spider-Verse, Blender 
+                        prova que open source pode competir (e vencer) software proprietário de milhares de dólares.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Completamente gratuito e sem limitações</li>
+                            <li>Usado profissionalmente pela indústria de cinema e games</li>
+                            <li>Comunidade massiva com milhares de tutoriais</li>
+                            <li>Atualizado constantemente com features cutting-edge</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/blender/blender" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">2</div>
+                    <h3>Godot Engine</h3>
+                    <span class="project-category">Design & Criação</span>
+                    <p>
+                        Motor de jogo 2D e 3D que está democratizando o desenvolvimento de jogos. Com interface 
+                        intuitiva e linguagem de script própria (GDScript), Godot tem crescimento explosivo e já 
+                        rivaliza com Unity em alguns aspectos.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>100% grátis, sem taxas ou royalties</li>
+                            <li>Editor leve que roda em qualquer máquina</li>
+                            <li>Crescimento exponencial após controvérsias da Unity</li>
+                            <li>Excelente para desenvolvimento 2D</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/godotengine/godot" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">3</div>
+                    <h3>Linux Kernel</h3>
+                    <span class="project-category">Sistemas Operacionais</span>
+                    <p>
+                        O kernel que alimenta bilhões de dispositivos: de supercomputadores a smartphones Android, 
+                        servidores web a carros Tesla. Criado por Linus Torvalds em 1991, é o maior projeto 
+                        colaborativo da história da computação.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Base de 90% dos servidores web do mundo</li>
+                            <li>Alimenta 100% dos 500 supercomputadores mais rápidos</li>
+                            <li>3+ bilhões de dispositivos Android</li>
+                            <li>Milhares de desenvolvedores contribuindo diariamente</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/torvalds/linux" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">4</div>
+                    <h3>Home Assistant</h3>
+                    <span class="project-category">IoT & Automação</span>
+                    <p>
+                        Transforma qualquer casa em smart home sem depender de empresas de tecnologia. Com mais 
+                        de 2000 integrações, você controla tudo localmente, mantendo privacidade total.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Privacidade total - dados ficam em casa</li>
+                            <li>Suporta milhares de dispositivos de diferentes marcas</li>
+                            <li>Automações poderosas sem limites artificiais</li>
+                            <li>Comunidade ativa com integrações novas semanalmente</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/home-assistant/core" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">5</div>
+                    <h3>Stable Diffusion</h3>
+                    <span class="project-category">Data Science & IA</span>
+                    <p>
+                        IA de geração de imagens que você pode rodar localmente. Democratizou arte generativa e 
+                        desafiou o monopólio de empresas como OpenAI. Mudou completamente a indústria criativa.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Roda no seu computador - sem censura ou taxas</li>
+                            <li>Modelos customizáveis para estilos específicos</li>
+                            <li>Comunidade massiva criando ferramentas e extensões</li>
+                            <li>Democratizou acesso a IA generativa</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/Stability-AI/stablediffusion" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">6</div>
+                    <h3>Kubernetes</h3>
+                    <span class="project-category">DevOps & Cloud</span>
+                    <p>
+                        Sistema de orquestração de containers que define a infraestrutura moderna. Todo o conceito 
+                        de "cloud-native" gira em torno do Kubernetes. Se você usa internet, você usa Kubernetes.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Padrão da indústria para orquestração</li>
+                            <li>Suportado por todos os grandes provedores cloud</li>
+                            <li>Ecossistema gigantesco de ferramentas</li>
+                            <li>Habilidade mais demandada em DevOps</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/kubernetes/kubernetes" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">7</div>
+                    <h3>VS Code</h3>
+                    <span class="project-category">Ferramentas para Desenvolvedores</span>
+                    <p>
+                        Editor de código que dominou o mercado sendo gratuito, rápido e extensível. Mudou a 
+                        indústria de IDEs e é usado por milhões de desenvolvedores diariamente.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Marketplace com 40.000+ extensões</li>
+                            <li>Performance excepcional mesmo em projetos grandes</li>
+                            <li>Git integrado e terminal embutido</li>
+                            <li>Suporte nativo para dezenas de linguagens</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/microsoft/vscode" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">8</div>
+                    <h3>React</h3>
+                    <span class="project-category">Desenvolvimento Web</span>
+                    <p>
+                        Biblioteca JavaScript que revolucionou o desenvolvimento web. O conceito de componentes 
+                        e Virtual DOM mudou como construímos interfaces, influenciando até frameworks concorrentes.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Usado por Facebook, Netflix, Airbnb e milhões de sites</li>
+                            <li>Ecossistema massivo de bibliotecas e ferramentas</li>
+                            <li>Comunidade com milhões de desenvolvedores</li>
+                            <li>Influenciou toda a indústria de front-end</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/facebook/react" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">9</div>
+                    <h3>Jellyfin</h3>
+                    <span class="project-category">Mídia & Entretenimento</span>
+                    <p>
+                        Servidor de mídia pessoal 100% livre, sem paywalls ou telemetria. A verdadeira alternativa 
+                        open source ao Plex, permitindo você criar seu próprio "Netflix" privado.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Zero taxas, zero telemetria, zero limitações</li>
+                            <li>Clientes para todas as plataformas (TV, mobile, web)</li>
+                            <li>Transcodificação e streaming remoto</li>
+                            <li>Fork do Emby que removeu todas as limitações proprietárias</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/jellyfin/jellyfin" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">10</div>
+                    <h3>Bitwarden</h3>
+                    <span class="project-category">Segurança & Privacidade</span>
+                    <p>
+                        Gerenciador de senhas open-source mais confiável do mercado. Após vazamentos do LastPass, 
+                        Bitwarden se tornou a escolha óbvia para quem leva segurança a sério.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Código auditável - segurança verificável</li>
+                            <li>Pode ser auto-hospedado para controle total</li>
+                            <li>Sincronização entre dispositivos ilimitada grátis</li>
+                            <li>Certificações de segurança e auditorias regulares</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/bitwarden/server" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">11</div>
+                    <h3>PostgreSQL</h3>
+                    <span class="project-category">Bancos de Dados</span>
+                    <p>
+                        Banco de dados relacional mais avançado do mundo open-source. Confiável, poderoso e com 
+                        features que competem (e superam) bancos proprietários caríssimos.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>ACID completo com performance excepcional</li>
+                            <li>Extensível - adicione tipos de dados e funções customizadas</li>
+                            <li>Usado por Apple, Spotify, Instagram, Reddit</li>
+                            <li>30+ anos de desenvolvimento ativo</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/postgres/postgres" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">12</div>
+                    <h3>Bitcoin Core</h3>
+                    <span class="project-category">Blockchain & Web3</span>
+                    <p>
+                        Implementação de referência da primeira criptomoeda descentralizada. Mudou o conceito de 
+                        dinheiro e inspirou todo o movimento blockchain e Web3.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Criou uma indústria trilionária do zero</li>
+                            <li>Sistema monetário verdadeiramente descentralizado</li>
+                            <li>Funciona há 15+ anos sem downtime</li>
+                            <li>Inspirou milhares de projetos blockchain</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/bitcoin/bitcoin" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">13</div>
+                    <h3>Mastodon</h3>
+                    <span class="project-category">Redes Sociais & Fediverse</span>
+                    <p>
+                        Rede social federada que representa o futuro descentralizado da internet. Após a compra 
+                        do Twitter por Elon Musk, milhões migraram para Mastodon.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Sem algoritmos manipulativos ou anúncios</li>
+                            <li>Federação - você escolhe seu servidor ou cria o seu</li>
+                            <li>Impossível de ser "comprado" por bilionários</li>
+                            <li>Interoperável com outras redes do Fediverse</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/mastodon/mastodon" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">14</div>
+                    <h3>Obsidian / Logseq</h3>
+                    <span class="project-category">Educação & Aprendizado</span>
+                    <p>
+                        Sistemas de "segundo cérebro" que mudaram como organizamos conhecimento. Markdown, links 
+                        bidirecionais e gráficos de conhecimento criam uma wiki pessoal poderosa.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Arquivos markdown locais - seus dados são seus</li>
+                            <li>Links bidirecionais criam rede de conhecimento</li>
+                            <li>Comunidade criando plugins incríveis</li>
+                            <li>Método Zettelkasten facilitado</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/logseq/logseq" target="_blank" class="project-link">Ver no GitHub (Logseq) →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">15</div>
+                    <h3>TensorFlow / PyTorch</h3>
+                    <span class="project-category">Data Science & IA</span>
+                    <p>
+                        Frameworks que democratizaram deep learning. Praticamente toda IA moderna foi treinada 
+                        usando um desses dois frameworks, do GPT ao reconhecimento facial.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Permitiu a revolução da IA nos últimos 10 anos</li>
+                            <li>Do pesquisador acadêmico ao cientista de dados</li>
+                            <li>Abstrações que tornam IA acessível</li>
+                            <li>Comunidade massiva e recursos de aprendizado</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/tensorflow/tensorflow" target="_blank" class="project-link">Ver TensorFlow →</a>
+                    <a href="https://github.com/pytorch/pytorch" target="_blank" class="project-link">Ver PyTorch →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">16</div>
+                    <h3>FFmpeg</h3>
+                    <span class="project-category">Mídia & Entretenimento</span>
+                    <p>
+                        Solução completa para gravar, converter e transmitir áudio e vídeo. Usado por 
+                        praticamente todo software de vídeo que você já usou, do YouTube ao VLC.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Base de milhares de aplicações de vídeo</li>
+                            <li>Suporta praticamente todo formato de mídia existente</li>
+                            <li>Usado pelo YouTube, Netflix, Facebook</li>
+                            <li>25+ anos de desenvolvimento ativo</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/FFmpeg/FFmpeg" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">17</div>
+                    <h3>Nextcloud</h3>
+                    <span class="project-category">Produtividade & Comunicação</span>
+                    <p>
+                        Suite de produtividade auto-hospedada completa. Seu próprio Google Drive, Docs, Calendar 
+                        e mais, com controle total sobre seus dados.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Alternativa completa ao Google Workspace</li>
+                            <li>Dados ficam no seu servidor - privacidade total</li>
+                            <li>Apps para todas as plataformas</li>
+                            <li>Extensível com centenas de apps</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/nextcloud/server" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">18</div>
+                    <h3>Ghidra</h3>
+                    <span class="project-category">Hacking & Pentesting</span>
+                    <p>
+                        Framework de engenharia reversa desenvolvido pela NSA e tornado open-source. Ferramenta 
+                        profissional que rivalizava com IDA Pro que custava milhares de dólares.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Desenvolvido pela NSA - qualidade militar</li>
+                            <li>Democratizou engenharia reversa profissional</li>
+                            <li>Suporta múltiplas arquiteturas e formatos</li>
+                            <li>Salvo milhares de dólares de pesquisadores de segurança</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/NationalSecurityAgency/ghidra" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">19</div>
+                    <h3>Rust</h3>
+                    <span class="project-category">Linguagens & Compiladores</span>
+                    <p>
+                        Linguagem de programação que está redefinindo performance e segurança. Adotada por 
+                        Microsoft, Google, Amazon e até no kernel Linux.
+                    </p>
+                    <div class="project-highlights">
+                        <strong>Por que é incrível:</strong>
+                        <ul>
+                            <li>Performance de C/C++ com segurança de memória garantida</li>
+                            <li>"Linguagem mais amada" por 7 anos consecutivos</li>
+                            <li>Sendo adotada em sistemas críticos (kernel Linux, Chrome)</li>
+                            <li>Resolvendo problemas de 50 anos de C/C++</li>
+                        </ul>
+                    </div>
+                    <a href="https://github.com/rust-lang/rust" target="_blank" class="project-link">Ver no GitHub →</a>
+                </div>
+
+                <div class="project-item">
+                    <div class="project-number">20</div>
+                    <h3>Metasploit</h3>
+                    <span class="project-category">Hacking & Pentesting</span>
+                    <p>
+                        Framework de testes de penetração mais usado do mundo. Tornou testes de segurança 
+                        acessíveis e é ferramenta essencial de todo profissional de cybersecurity.
+                    </p>
+                    <div class="project-highlights">
+						<strong>Por que é incrível:</strong>
+						<ul>
+						<li>Milhares de exploits e payloads prontos</li>
+						<li>Padrão da indústria em pentesting</li>
+						<li>Comunidade ativa desenvolvendo módulos</li>
+						<li>Educou gerações de hackers éticos</li>
+						</ul>
+						</div>
+						<a href="https://github.com/rapid7/metasploit-framework" target="_blank" class="project-link">Ver no GitHub →</a>
+					</div>
+					<hr style="margin: 50px 0; border: none; border-top: 2px solid #e0e0e0;">
+
+            <h2 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">✨ Conclusão</h2>
+            <p style="font-size: 1.1rem; color: #555; line-height: 1.8; text-align: center; max-width: 700px; margin: 0 auto;">
+                Estes 20 projetos representam o melhor do open source: inovação sem limites, colaboração 
+                global e acesso democratizado a tecnologia de ponta. Cada um deles mudou sua indústria e 
+                continua evoluindo graças a comunidades apaixonadas de desenvolvedores ao redor do mundo.
+            </p>
+            <p style="text-align: center; margin-top: 30px; color: #667eea; font-weight: bold; font-size: 1.2rem;">
+                Explore. Contribua. Transforme. 🚀
+            </p>
+        `
+    }
+};
+
+    const article = articles[articleId];
+    document.getElementById('articleContent').innerHTML = `
+        <h1 class="article-title">${article.title}</h1>
+        <div class="article-meta">
+            📅 ${article.date} • ✍️ ${article.author}
+        </div>
+        ${article.content}
+    `;
+}
+
+    // Inicializar mostrando a home
+    showHome();
+</script>
 </body>
 </html>
