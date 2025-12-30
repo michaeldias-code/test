@@ -252,7 +252,8 @@
             overflow: hidden;
             border: 1px solid #30363d;
             position: sticky;
-            top: 20px;
+            top: 0px;
+			padding: 30px;
             z-index: 100;
         }
 
@@ -830,3 +831,4 @@
 				grid-template-columns: 1fr;
 			}
         }
+
