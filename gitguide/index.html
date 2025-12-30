@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitGuide - 1000 Projetos Open Source</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- NAVIGATION BAR -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <img src="gitGuideLogo_black.png" alt="GitGuide Logo" style="border: none; height: 40px;">
+            </div>
+            <div class="nav-links">
+                <a href="#" class="nav-link active" onclick="showHome()">Home</a>
+                <a href="#" class="nav-link" onclick="showBlog()">Blog</a>
+                <a href="#" class="nav-link" onclick="showAboutModal()">Sobre</a>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <div class="container">
+        <header>
+            <h1>GitGuide</h1>
+            <p class="subtitle">Sua biblioteca com 1000+ projetos Open Source do GitHub</p>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">1310</div>
+                    <div>Projetos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">21</div>
+                    <div>Categorias</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">100%</div>
+                    <div>Licenças Livres</div>
+                </div>
+            </div>
+        </header>
+
+		<!-- SEÇÃO DE LICENÇAS -->
+		<div id="licensesSection">
+			<button class="licenses-toggle" onclick="toggleLicenses()">
+				☰ Guia de Licenças Open Source
+			</button>
+
+			<div class="licenses-content" id="licensesContent">
+				<div style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; margin-top: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255, 255, 255, 0.2);">
+					<p style="text-align: center; color: #666; margin-bottom: 30px;">Entenda as principais licenças dos 1000+ projetos do GitGuide</p>
+
+					<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px;">
+						<div style="border-left: 4px solid #2ecc71; padding: 20px; background: rgba(46, 204, 113, 0.05); border-radius: 12px; transition: all 0.3s ease; border: 1px solid rgba(46, 204, 113, 0.1);">
+							<h3 style="color: #2ecc71; margin-bottom: 10px; font-weight: 700;">MIT</h3>
+							<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Licença permissiva que permite uso comercial, modificação e distribuição. Requer apenas manutenção do aviso de copyright.</p>
+						</div>
+
+						<div style="border-left: 4px solid #3498db; padding: 20px; background: rgba(52, 152, 219, 0.05); border-radius: 12px; transition: all 0.3s ease; border: 1px solid rgba(52, 152, 219, 0.1);">
+							<h3 style="color: #3498db; margin-bottom: 10px; font-weight: 700;">Apache 2.0</h3>
+							<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Similar ao MIT, mas com proteção adicional de patentes e requer documentação de mudanças significativas.</p>
+						</div>
+
+						<div style="border-left: 4px solid #4a90e2; padding: 20px; background: rgba(74, 144, 226, 0.05); border-radius: 12px; transition: all 0.3s ease; border: 1px solid rgba(74, 144, 226, 0.1);">
+							<h3 style="color: #4a90e2; margin-bottom: 10px; font-weight: 700;">GPL 2.0 / 3.0</h3>
+							<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Licença copyleft forte: modificações devem ser distribuídas com a mesma licença. Garante que o software permaneça livre.</p>
+						</div>
+
+						<div style="border-left: 4px solid #e74c3c; padding: 20px; background: rgba(231, 76, 60, 0.05); border-radius: 12px; transition: all 0.3s ease; border: 1px solid rgba(231, 76, 60, 0.1);">
+							<h3 style="color: #e74c3c; margin-bottom: 10px; font-weight: 700;">AGPL 3.0</h3>
+							<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Como GPL, mas também requer compartilhamento do código se usado em serviços de rede (SaaS).</p>
+						</div>
+
+						<div style="border-left: 4px solid #f39c12; padding: 20px; background: rgba(243, 156, 18, 0.05); border-radius: 12px; transition: all 0.3s ease; border: 1px solid rgba(243, 156, 18, 0.1);">
+							<h3 style="color: #f39c12; margin-bottom: 10px; font-weight: 700;">BSD</h3>
+							<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Licença permissiva minimalista. Permite quase qualquer uso, incluindo criar software proprietário.</p>
+						</div>
+
+						<div style="border-left: 4px solid #16a085; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+							<h3 style="color: #16a085; margin-bottom: 10px;">MPL 2.0</h3>
+							<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Licença copyleft fraca: apenas arquivos modificados precisam manter a licença, não todo o projeto.</p>
+						</div>
+
+						<div style="border-left: 4px solid #95a5a6; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+							<h3 style="color: #95a5a6; margin-bottom: 10px;">LGPL</h3>
+							<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">GPL Lesser: permite linking com software proprietário, comum em bibliotecas.</p>
+						</div>
+
+						<div style="border-left: 4px solid #34495e; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+							<h3 style="color: #34495e; margin-bottom: 10px;">ISC</h3>
+							<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Licença funcionalmente equivalente ao MIT/BSD, mas com linguagem mais simples.</p>
+						</div>
+
+						<div style="border-left: 4px solid #1abc9c; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+							<h3 style="color: #1abc9c; margin-bottom: 10px;">Creative Commons</h3>
+							<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Família de licenças para conteúdo criativo. Variações incluem BY (atribuição), SA (share-alike), NC (não comercial) e ND (não derivados).</p>
+						</div>
+
+						<div style="border-left: 4px solid #2c3e50; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+							<h3 style="color: #2c3e50; margin-bottom: 10px;">Unlicense</h3>
+							<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Dedica o software ao domínio público. Sem restrições - use como quiser, sem necessidade de atribuição ou avisos.</p>
+						</div>
+
+						<div style="border-left: 4px solid #e74c3c; padding: 15px; background: #fff5f5; border-radius: 8px;">
+							<h3 style="color: #e74c3c; margin-bottom: 10px;">Proprietária</h3>
+							<p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Software com código fechado e direitos reservados. Uso comercial e modificação requerem permissão ou licença paga do proprietário.</p>
+						</div>
+					</div>
+
+					<div style="margin-top: 30px; padding: 20px; background: linear-gradient(135deg, #4a90e2 0%, #63a4ff 100%); border-radius: 10px; color: white; text-align: center;">
+						<h3 style="margin-bottom: 10px; font-size: 1.3rem;">Licenças Open Source permitem uso comercial!</h3>
+						<p style="opacity: 0.95; font-size: 0.95rem; margin-bottom: 15px;">Desde que você respeite os termos da licença (manter copyright, compartilhar modificações quando necessário), você pode usar projetos open source em produtos comerciais.</p>
+						<p style="opacity: 0.9; font-size: 0.9rem; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 8px; margin-top: 15px;">
+							⚠️ <strong>Nota:</strong> Projetos marcados como "Proprietária" têm suas próprias licenças comerciais. Consulte os termos específicos de cada projeto antes de usar comercialmente.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+        <!-- HOME PAGE -->
+        <div id="homePage">
+            <div class="categories-grid">
+                <div class="category-card" onclick="showCategory('web')">
+                    <div class="category-icon">🌐</div>
+                    <h2 class="category-title">Desenvolvimento Web</h2>
+                    <p class="category-description">Frameworks, bibliotecas e ferramentas essenciais para desenvolvimento web moderno</p>
+                    <span class="category-count">50 projetos</span>
+                </div>
+
+				<div class="category-card" onclick="showCategory('games')">
+					<div class="category-icon">🎮</div>
+					<h2 class="category-title">Jogos Open Source</h2>
+					<p class="category-description">Jogos completos para jogar, modificar e aprender - de FPS a estratégia, roguelikes e simuladores</p>
+					<span class="category-count">106 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('education')">
+					<div class="category-icon">📚</div>
+					<h2 class="category-title">Educação & Aprendizado</h2>
+					<p class="category-description">Ferramentas de estudo, anotações, gerenciamento de referências, escrita acadêmica e organização de conhecimento</p>
+					<span class="category-count">88 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('music')">
+					<div class="category-icon">🎵</div>
+					<h2 class="category-title">Produção Musical & Áudio</h2>
+					<p class="category-description">DAWs, sintetizadores, notação musical, efeitos de áudio, software de DJ e instrumentos virtuais</p>
+					<span class="category-count">22 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('security')">
+					<div class="category-icon">🔒</div>
+					<h2 class="category-title">Segurança & Privacidade</h2>
+					<p class="category-description">Gerenciadores de senha, ferramentas de pentesting, VPNs, firewalls e análise de vulnerabilidades</p>
+					<span class="category-count">47 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('cms')">
+					<div class="category-icon">🛒</div>
+					<h2 class="category-title">CMS & E-commerce</h2>
+					<p class="category-description">Sistemas de gerenciamento de conteúdo, geradores de sites estáticos e plataformas de e-commerce</p>
+					<span class="category-count">46 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('devtools')">
+					<div class="category-icon">🛠️</div>
+					<h2 class="category-title">Ferramentas para Desenvolvedores</h2>
+					<p class="category-description">Editores de código, IDEs, clientes Git, ferramentas de API e terminais</p>
+					<span class="category-count">41 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('design')">
+					<div class="category-icon">🎨</div>
+					<h2 class="category-title">Design & Criação</h2>
+					<p class="category-description">Ferramentas de design gráfico, modelagem 3D, edição de vídeo, áudio e desenvolvimento de jogos</p>
+					<span class="category-count">43 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('media')">
+					<div class="category-icon">🎬</div>
+					<h2 class="category-title">Mídia & Entretenimento</h2>
+					<p class="category-description">Servidores de mídia, reprodutores, gerenciadores de torrents, música, fotos e streaming</p>
+					<span class="category-count">47 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('social')">
+					<div class="category-icon">🌐</div>
+					<h2 class="category-title">Redes Sociais & Fediverse</h2>
+					<p class="category-description">Plataformas sociais federadas, alternativas descentralizadas e protocolos de comunicação P2P</p>
+					<span class="category-count">44 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('database')">
+					<div class="category-icon">🗄️</div>
+					<h2 class="category-title">Bancos de Dados</h2>
+					<p class="category-description">Bancos relacionais, NoSQL, grafos, séries temporais e vetoriais</p>
+					<span class="category-count">42 projetos</span>
+				</div>
+				<div class="category-card" onclick="showCategory('os')">
+					<div class="category-icon">🖥️</div>
+					<h2 class="category-title">Sistemas Operacionais & Desktop</h2>
+					<p class="category-description">Distribuições Linux, BSD, ambientes desktop, virtualização e componentes de sistema</p>
+					<span class="category-count">48 projetos</span>
+				</div>
+				<div class="category-card" onclick="showCategory('datascience')">
+					<div class="category-icon">🤖</div>
+					<h2 class="category-title">Data Science & IA</h2>
+					<p class="category-description">Machine learning, análise de dados e ferramentas de inteligência artificial</p>
+					<span class="category-count">191 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('devops')">
+					<div class="category-icon">☁️</div>
+					<h2 class="category-title">DevOps & Cloud</h2>
+					<p class="category-description">Ferramentas de containers, orquestração, CI/CD e infraestrutura como código</p>
+					<span class="category-count">48 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('productivity')">
+					<div class="category-icon">💬</div>
+					<h2 class="category-title">Produtividade & Comunicação</h2>
+					<p class="category-description">Armazenamento em nuvem, suítes de escritório, gerenciamento de documentos, email e mensageria</p>
+					<span class="category-count">42 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('blockchain')">
+					<div class="category-icon">⛓️</div>
+					<h2 class="category-title">Blockchain & Web3</h2>
+					<p class="category-description">Criptomoedas, DeFi, contratos inteligentes, armazenamento descentralizado e ferramentas blockchain</p>
+					<span class="category-count">50 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('iot')">
+					<div class="category-icon">🏠</div>
+					<h2 class="category-title">IoT & Automação</h2>
+					<p class="category-description">Automação residencial, assistentes de voz, firmware para dispositivos, monitoramento e impressão 3D</p>
+					<span class="category-count">46 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('languages')">
+					<div class="category-icon">💻</div>
+					<h2 class="category-title">Linguagens & Compiladores</h2>
+					<p class="category-description">Linguagens de programação, compiladores, sistemas de build e gerenciadores de pacotes</p>
+					<span class="category-count">45 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('hacking')">
+					<div class="category-icon">🎯</div>
+					<h2 class="category-title">Hacking & Pentesting</h2>
+					<p class="category-description">Ferramentas de testes de penetração, exploração, OSINT, network scanning e frameworks red team</p>
+					<span class="category-count">167 projetos</span>
+				</div>
+
+				<div class="category-card" onclick="showCategory('workflow')">
+					<div class="category-icon">🔄</div>
+					<h2 class="category-title">Workflows & Integração</h2>
+					<p class="category-description">Infraestrutura como código, workflows, pipelines de dados, mensageria e API gateways</p>
+					<span class="category-count">47 projetos</span>
+				</div>
+
+                <div class="category-card" onclick="showCategory('mobile')">
+                    <div class="category-icon">📱</div>
+                    <h2 class="category-title">Desenvolvimento Mobile</h2>
+                    <p class="category-description">Frameworks e ferramentas para criar aplicativos iOS, Android e multiplataforma</p>
+                    <span class="category-count">50 projetos</span>
+                </div>				
+
+            </div>
+        </div>
+
+        <!-- PROJECTS LIST PAGE -->
+        <div id="projectsPage" class="projects-page">
+            <button class="back-button" onclick="showHome()">
+                ← Voltar para categorias
+            </button>
+
+            <div class="page-header">
+                <h2 class="page-title" id="categoryTitle"></h2>
+                <p class="page-subtitle" id="categorySubtitle"></p>
+            </div>
+
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Buscar projetos...">
+
+			<div style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
+				<div style="flex: 1; min-width: 200px;">
+					<label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50;">Filtrar por Licença:</label>
+					<select id="licenseFilter" style="width: 100%; padding: 12px; border: 1px solid #30363d; border-radius: 8px; font-size: 1rem; background: #0d1117; color: #f0f6fc; cursor: pointer;">
+						<option value="all">Todas as Licenças</option>
+					</select>
+				</div>
+				
+				<div style="flex: 1; min-width: 200px;">
+					<label style="display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50;">Ordenar por:</label>
+					<select id="sortFilter" style="width: 100%; padding: 12px; border: 1px solid #30363d; border-radius: 8px; font-size: 1rem; background: #0d1117; color: #f0f6fc; cursor: pointer;">
+						<option value="default">Padrão</option>
+						<option value="name-asc">Nome (A-Z)</option>
+						<option value="name-desc">Nome (Z-A)</option>
+						<option value="license-asc">Licença (A-Z)</option>
+						<option value="license-desc">Licença (Z-A)</option>
+					</select>
+				</div>
+			</div>
+
+
+            <div class="projects-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 20%">Projeto</th>
+                            <th style="width: 10%">Licença</th>
+                            <th style="width: 50%">Descrição</th>
+                            <th style="width: 20%">GitHub</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- BOTÃO VOLTAR DUPLICADO NO FINAL DA PÁGINA -->
+            <div style="text-align: center; margin-top: 40px; padding-bottom: 20px;">
+                <button class="back-button" onclick="showHome()">
+                    ↑ Voltar para o início
+                </button>
+            </div>
+        </div>
+		<!-- BLOG PAGE -->
+		<div id="blogPage" class="blog-page">
+			<div class="blog-header">
+				<h2 class="blog-title">📝 Blog GitGuide</h2>
+				<p class="blog-subtitle">Artigos, análises e descobertas sobre projetos open source</p>
+			</div>
+		
+			<div class="blog-grid">
+				<div class="blog-card" onclick="showArticle('top20')">
+					<div class="blog-card-title">Os 20 Projetos Open Source Mais Incríveis da Nossa Coleção</div>
+					<div class="blog-card-date">28 de Dezembro de 2024 • 15 min de leitura</div>
+					<p class="blog-card-excerpt">
+						Selecionamos os 20 projetos mais impressionantes dos 1000+ da nossa base. De motores de jogo a IA, 
+						descubra software que mudou indústrias inteiras e continua moldando o futuro da tecnologia.
+					</p>
+				</div>
+
+				<div class="blog-card" onclick="showArticle('privacyStack')">
+					<div class="blog-card-title">Privacy Stack: Alternativas Open Source para TUDO que Você Usa</div>
+					<div class="blog-card-date">30 de Dezembro de 2024 • 20 min de leitura</div>
+					<p class="blog-card-excerpt">
+						Google sabe onde você está. Meta lê suas mensagens. Microsoft vê seus documentos. 
+						Retome controle total dos seus dados com alternativas open source que respeitam sua 
+						privacidade. Guia completo de migração do básico ao avançado.
+					</p>
+				</div>
+
+				<div class="blog-card" onclick="showArticle('historyOfLlama')">
+					<div class="blog-card-title">A Grande Ruptura: Como o Llama da Meta Mudou a História da Computação Para Sempre</div>
+					<div class="blog-card-date">30 de Dezembro de 2024 • 15 min de leitura</div>
+					<p class="blog-card-excerpt">
+						O lançamento do Llama marcou o início de uma nova era na inteligência artificial aberta.
+  						Entenda como a decisão da Meta quebrou paradigmas, acelerou a inovação global e redefiniu
+  						o equilíbrio de poder na computação moderna.
+					</p>
+				</div>
+				
+				<div class="blog-card" onclick="showArticle('trends2026')">
+    				<div class="blog-card-title">🔥 Os 10 Projetos Open Source que Vão Explodir em 2026</div>
+    				<div class="blog-card-date">29 de Dezembro de 2024 • 12 min de leitura</div>
+    				<p class="blog-card-excerpt">
+        				2026 será o ano da performance extrema e ferramentas que tornam desenvolvimento 10x mais rápido. 
+        				Descubra os projetos emergentes que vão dominar o mercado antes que vire mainstream.
+    				</p>
+				</div>
+			</div>
+		</div>
+		
+		<!-- ARTICLE PAGE -->
+		<div id="articlePage" class="article-page">
+			<button class="back-button" onclick="showBlog()">
+				← Voltar para o Blog
+			</button>
+		
+			<div class="article-content" id="articleContent">
+				<!-- Conteúdo do artigo será inserido aqui via JavaScript -->
+			</div>
+		</div>
+    </div>
+
+    <footer>
+        <p style="color: white; font-weight: 600; font-size: 1.1rem;">💜 Feito com amor pela comunidade Open Source</p>
+        <p style="margin-top: 10px; opacity: 0.9; font-size: 0.95rem; color: rgba(255, 255, 255, 0.9);">
+            Todos os projetos possuem licenças livres (MIT, Apache 2.0, BSD, etc.)
+        </p>
+    </footer>
+<script src="categories.js"></script>
+<script src="loadarticle.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
