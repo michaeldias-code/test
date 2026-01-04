@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo das Notas Musicais</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #fda4ba, #c48dcf, #8ab6d6);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #7c3aed;
+            font-size: 2em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .stats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .stat-box {
+            padding: 15px 25px;
+            border-radius: 20px;
+            min-width: 120px;
+        }
+
+        .stat-box.score { background: #fef3c7; color: #92400e; }
+        .stat-box.streak { background: #dcfce7; color: #166534; }
+        .stat-box.best { background: #dbeafe; color: #1e40af; }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+        }
+
+        .game-area {
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 40px 20px;
+            margin-bottom: 20px;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .start-screen h2 {
+            font-size: 2em;
+            color: #374151;
+            margin: 20px 0;
+        }
+
+        .start-screen p {
+            font-size: 1.2em;
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #a855f7, #ec4899);
+            color: white;
+            box-shadow: 0 5px 15px rgba(168, 85, 247, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            padding: 12px 30px;
+            font-size: 1em;
+        }
+
+        .question-area {
+            background: linear-gradient(to right, #f3e8ff, #fce7f3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .question-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 20px;
+        }
+
+        .staff-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+
+        .sound-btn {
+            background: #7c3aed;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.2s;
+        }
+
+        .sound-btn:hover {
+            background: #6d28d9;
+            transform: scale(1.05);
+        }
+
+        .feedback {
+            font-size: 1.5em;
+            font-weight: bold;
+            padding: 20px;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+
+        .feedback.correct {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .feedback.wrong {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .helper {
+            background: #dbeafe;
+            border: 2px solid #93c5fd;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .helper-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            color: #2563eb;
+            cursor: pointer;
+        }
+
+        .helper-title {
+            font-weight: bold;
+            color: #1e40af;
+            margin-bottom: 5px;
+        }
+
+        .helper-text {
+            color: #1e40af;
+            font-size: 0.95em;
+        }
+
+        .modes {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 12px 25px;
+            border: 3px solid #7c3aed;
+            background: white;
+            color: #7c3aed;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .note-btn {
+            padding: 30px 20px;
+            font-size: 1.8em;
+            font-weight: bold;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .note-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .note-btn:active {
+            transform: scale(0.95);
+        }
+
+        .note-do { background: #ef4444; }
+        .note-re { background: #f97316; }
+        .note-mi { background: #eab308; }
+        .note-fa { background: #22c55e; }
+        .note-sol { background: #3b82f6; }
+        .note-la { background: #6366f1; }
+        .note-si { background: #a855f7; }
+
+        .durations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .duration-btn {
+            padding: 25px 15px;
+            background: white;
+            border: 3px solid #7c3aed;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .duration-btn:hover {
+            transform: scale(1.05);
+            border-color: #6d28d9;
+            background: #f5f3ff;
+        }
+
+        .duration-btn:active {
+            transform: scale(0.95);
+        }
+
+        .duration-symbol {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .duration-name {
+            font-weight: bold;
+            color: #7c3aed;
+            font-size: 1.1em;
+        }
+
+        .duration-value {
+            color: #6b7280;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .instructions {
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+
+        .instructions h3 {
+            text-align: center;
+            color: #7c3aed;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .instructions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            text-align: center;
+        }
+
+        .instruction-item {
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .instruction-item.purple { background: #f3e8ff; }
+        .instruction-item.pink { background: #fce7f3; }
+        .instruction-item.blue { background: #dbeafe; }
+
+        .instruction-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .instruction-text {
+            color: #374151;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .notes-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .durations-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-value {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>&#127925; Aprenda Notas e Tempos Musicais</h1>
+            <div class="stats">
+                <div class="stat-box score">
+                    <div class="stat-value">&#11088; <span id="score">0</span></div>
+                    <div class="stat-label">Pontos</div>
+                </div>
+                <div class="stat-box streak">
+                    <div class="stat-value">&#128293; <span id="streak">0</span></div>
+                    <div class="stat-label">Sequência</div>
+                </div>
+                <div class="stat-box best">
+                    <div class="stat-value">&#127942; <span id="bestStreak">0</span></div>
+                    <div class="stat-label">Recorde</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div id="startScreen" class="start-screen">
+                <div style="font-size: 5em;">&#127932;</div>
+                <h2>Aprenda a Ler Partituras!</h2>
+                <p>Aprenda notas e tempos musicais de forma divertida!</p>
+                <button class="btn btn-primary" onclick="startGame()">&#127918; Começar a Jogar</button>
+            </div>
+
+            <div id="gameScreen" style="display: none;">
+                <div class="modes">
+                    <button class="mode-btn active" onclick="changeMode('notes')" id="modeNotes">
+                        &#127925; Notas Musicais
+                    </button>
+                    <button class="mode-btn" onclick="changeMode('durations')" id="modeDurations">
+                        &#9200; Tempos/Figuras
+                    </button>
+                </div>
+
+                <div id="notesMode">
+                    <div class="question-area">
+                        <div class="question-title">&#127925; Que nota é essa?</div>
+                        <div class="staff-container">
+                            <svg id="staffSvg" width="100%" height="250" viewBox="0 0 400 250"></svg>
+                        </div>
+                        <button class="sound-btn" onclick="playCurrentSound()">&#128266; Ouvir o som</button>
+                    </div>
+
+                    <div id="helper" class="helper">
+                        <button class="helper-close" onclick="closeHelper()">&#10005;</button>
+                        <div class="helper-title">&#128161; Dica:</div>
+                        <div class="helper-text">
+                            As notas vão de baixo para cima: Dó, Ré, Mi, Fá, Sol, Lá, Si. 
+                            Quanto mais alta a nota na pauta, mais agudo o som! &#127926;
+                        </div>
+                    </div>
+
+                    <div id="feedback" class="feedback" style="display: none;"></div>
+
+                    <div class="notes-grid">
+                        <button class="note-btn note-do" onclick="checkNote('Dó')">Dó</button>
+                        <button class="note-btn note-re" onclick="checkNote('Ré')">Ré</button>
+                        <button class="note-btn note-mi" onclick="checkNote('Mi')">Mi</button>
+                        <button class="note-btn note-fa" onclick="checkNote('Fá')">Fá</button>
+                        <button class="note-btn note-sol" onclick="checkNote('Sol')">Sol</button>
+                        <button class="note-btn note-la" onclick="checkNote('Lá')">Lá</button>
+                        <button class="note-btn note-si" onclick="checkNote('Si')">Si</button>
+                    </div>
+                </div>
+
+                <div id="durationsMode" style="display: none;">
+                    <div class="question-area">
+                        <div class="question-title">&#9200; Que figura é essa?</div>
+                        <div class="staff-container">
+                            <svg id="durationSvg" width="100%" height="250" viewBox="0 0 400 250"></svg>
+                        </div>
+                        <button class="sound-btn" onclick="playDurationSound()">&#128266; Ouvir o ritmo</button>
+                    </div>
+
+                    <div id="feedbackDuration" class="feedback" style="display: none;"></div>
+
+                    <div class="durations-grid">
+                        <button class="duration-btn" onclick="checkDuration('semibreve')">
+                            <div class="duration-symbol">&#119133;</div>
+                            <div class="duration-name">Semibreve</div>
+                            <div class="duration-value">4 tempos</div>
+                        </button>
+                        <button class="duration-btn" onclick="checkDuration('minima')">
+                            <div class="duration-symbol">&#119134;</div>
+                            <div class="duration-name">Mínima</div>
+                            <div class="duration-value">2 tempos</div>
+                        </button>
+                        <button class="duration-btn" onclick="checkDuration('seminima')">
+                            <div class="duration-symbol">&#119135;</div>
+                            <div class="duration-name">Semínima</div>
+                            <div class="duration-value">1 tempo</div>
+                        </button>
+                        <button class="duration-btn" onclick="checkDuration('colcheia')">
+                            <div class="duration-symbol">&#119136;</div>
+                            <div class="duration-name">Colcheia</div>
+                            <div class="duration-value">1/2 tempo</div>
+                        </button>
+                        <button class="duration-btn" onclick="checkDuration('semicolcheia')">
+                            <div class="duration-symbol">&#119137;</div>
+                            <div class="duration-name">Semicolcheia</div>
+                            <div class="duration-value">1/4 tempo</div>
+                        </button>
+                        <button class="duration-btn" onclick="checkDuration('pausa')">
+                            <div class="duration-symbol">&#119101;</div>
+                            <div class="duration-name">Pausa</div>
+                            <div class="duration-value">Silêncio</div>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="text-align: center;">
+                    <button class="btn btn-secondary" onclick="startGame()">&#128260; Reiniciar Jogo</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>&#128218; Como Jogar</h3>
+            <div class="instructions-grid">
+                <div class="instruction-item purple">
+                    <div class="instruction-icon">&#128064;</div>
+                    <div class="instruction-text">Veja a nota ou figura na pauta</div>
+                </div>
+                <div class="instruction-item pink">
+                    <div class="instruction-icon">&#127919;</div>
+                    <div class="instruction-text">Clique na resposta correta</div>
+                </div>
+                <div class="instruction-item blue">
+                    <div class="instruction-icon">&#128293;</div>
+                    <div class="instruction-text">Faça sequências para pontuar mais!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var notes = [
+            { name: 'Dó', position: 0, sound: 261.63 },
+            { name: 'Ré', position: 1, sound: 293.66 },
+            { name: 'Mi', position: 2, sound: 329.63 },
+            { name: 'Fá', position: 3, sound: 349.23 },
+            { name: 'Sol', position: 4, sound: 392.00 },
+            { name: 'Lá', position: 5, sound: 440.00 },
+            { name: 'Si', position: 6, sound: 493.88 }
+        ];
+
+        var durations = [
+            { name: 'semibreve', symbol: '♩', beats: 4, display: 'Semibreve' },
+            { name: 'minima', symbol: '♪', beats: 2, display: 'Mínima' },
+            { name: 'seminima', symbol: '♫', beats: 1, display: 'Semínima' },
+            { name: 'colcheia', symbol: '♬', beats: 0.5, display: 'Colcheia' },
+            { name: 'semicolcheia', symbol: '♭', beats: 0.25, display: 'Semicolcheia' },
+            { name: 'pausa', symbol: '♮', beats: 0, display: 'Pausa' }
+        ];
+
+        var currentNote = null;
+        var currentDuration = null;
+        var score = 0;
+        var streak = 0;
+        var bestStreak = 0;
+        var gameMode = 'notes';
+
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
+            score = 0;
+            streak = 0;
+            updateStats();
+            if (gameMode === 'notes') {
+                generateNewNote();
+            } else {
+                generateNewDuration();
+            }
+        }
+
+        function changeMode(mode) {
+            gameMode = mode;
+            document.getElementById('modeNotes').classList.toggle('active', mode === 'notes');
+            document.getElementById('modeDurations').classList.toggle('active', mode === 'durations');
+            document.getElementById('notesMode').style.display = mode === 'notes' ? 'block' : 'none';
+            document.getElementById('durationsMode').style.display = mode === 'durations' ? 'block' : 'none';
+            
+            if (mode === 'notes') {
+                generateNewNote();
+            } else {
+                generateNewDuration();
+            }
+        }
+
+        function generateNewNote() {
+            currentNote = notes[Math.floor(Math.random() * notes.length)];
+            drawStaff();
+        }
+
+        function generateNewDuration() {
+            currentDuration = durations[Math.floor(Math.random() * durations.length)];
+            drawDuration();
+        }
+
+        function drawStaff() {
+            var svg = document.getElementById('staffSvg');
+            svg.innerHTML = '';
+
+            var clef = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            clef.setAttribute('x', '20');
+            clef.setAttribute('y', '150');
+            clef.setAttribute('font-size', '100');
+            clef.setAttribute('fill', '#7c3aed');
+            clef.textContent = '𝄞';
+            svg.appendChild(clef);
+
+            var staffLines = [100, 120, 140, 160, 180];
+            staffLines.forEach(function(y) {
+                var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', '120');
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', '380');
+                line.setAttribute('y2', y);
+                line.setAttribute('stroke', '#666');
+                line.setAttribute('stroke-width', '2');
+                svg.appendChild(line);
+            });
+
+            if (currentNote.position === 0) {
+                var auxLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                auxLine.setAttribute('x1', '210');
+                auxLine.setAttribute('y1', '200');
+                auxLine.setAttribute('x2', '290');
+                auxLine.setAttribute('y2', '200');
+                auxLine.setAttribute('stroke', '#666');
+                auxLine.setAttribute('stroke-width', '2');
+                svg.appendChild(auxLine);
+            }
+
+            var noteY = 200 - (currentNote.position * 20);
+            
+            var noteHead = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+            noteHead.setAttribute('cx', '250');
+            noteHead.setAttribute('cy', noteY);
+            noteHead.setAttribute('rx', '20');
+            noteHead.setAttribute('ry', '15');
+            noteHead.setAttribute('fill', '#7c3aed');
+            noteHead.setAttribute('transform', 'rotate(-20 250 ' + noteY + ')');
+            svg.appendChild(noteHead);
+
+            var stem = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            if (currentNote.position >= 2) {
+                stem.setAttribute('x1', '270');
+                stem.setAttribute('y1', noteY);
+                stem.setAttribute('x2', '270');
+                stem.setAttribute('y2', noteY - 70);
+            } else {
+                stem.setAttribute('x1', '230');
+                stem.setAttribute('y1', noteY);
+                stem.setAttribute('x2', '230');
+                stem.setAttribute('y2', noteY + 70);
+            }
+            stem.setAttribute('stroke', '#7c3aed');
+            stem.setAttribute('stroke-width', '3');
+            svg.appendChild(stem);
+        }
+
+        function drawDuration() {
+            var svg = document.getElementById('durationSvg');
+            svg.innerHTML = '';
+
+            var clef = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            clef.setAttribute('x', '20');
+            clef.setAttribute('y', '150');
+            clef.setAttribute('font-size', '100');
+            clef.setAttribute('fill', '#7c3aed');
+            clef.textContent = '𝄞';
+            svg.appendChild(clef);
+
+            var staffLines = [100, 120, 140, 160, 180];
+            staffLines.forEach(function(y) {
+                var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', '120');
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', '380');
+                line.setAttribute('y2', y);
+                line.setAttribute('stroke', '#666');
+                line.setAttribute('stroke-width', '2');
+                svg.appendChild(line);
+            });
+
+            var symbol = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            symbol.setAttribute('x', '230');
+            symbol.setAttribute('y', '150');
+            symbol.setAttribute('font-size', '80');
+            symbol.setAttribute('fill', '#7c3aed');
+            symbol.setAttribute('text-anchor', 'middle');
+            symbol.textContent = currentDuration.symbol;
+            svg.appendChild(symbol);
+        }
+
+        function playSound(frequency, duration) {
+            duration = duration || 0.5;
+            var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            var oscillator = audioContext.createOscillator();
+            var gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playCurrentSound() {
+            if (currentNote) {
+                playSound(currentNote.sound);
+            }
+        }
+
+        function playDurationSound() {
+            if (!currentDuration) return;
+            
+            var baseFreq = 440;
+            var beatDuration = 0.5;
+            
+            if (currentDuration.name === 'pausa') {
+                return;
+            }
+            
+            var totalDuration = currentDuration.beats * beatDuration;
+            playSound(baseFreq, totalDuration);
+        }
+
+        function checkNote(noteName) {
+            if (!currentNote) return;
+
+            var feedback = document.getElementById('feedback');
+            feedback.style.display = 'block';
+
+            if (noteName === currentNote.name) {
+                score += 10;
+                streak++;
+                if (streak > bestStreak) bestStreak = streak;
+                
+                feedback.className = 'feedback correct';
+                feedback.textContent = '🎉 Isso! É ' + noteName + '!';
+                playSound(currentNote.sound);
+                
+                setTimeout(function() {
+                    feedback.style.display = 'none';
+                    generateNewNote();
+                }, 1200);
+            } else {
+                streak = 0;
+                
+                feedback.className = 'feedback wrong';
+                feedback.textContent = '❌ Não... Essa era ' + currentNote.name + '!';
+                
+                setTimeout(function() {
+                    feedback.style.display = 'none';
+                    generateNewNote();
+                }, 2000);
+            }
+            
+            updateStats();
+        }
+
+        function checkDuration(durationName) {
+            if (!currentDuration) return;
+
+            var feedback = document.getElementById('feedbackDuration');
+            feedback.style.display = 'block';
+
+            if (durationName === currentDuration.name) {
+                score += 10;
+                streak++;
+                if (streak > bestStreak) bestStreak = streak;
+                
+                feedback.className = 'feedback correct';
+                feedback.textContent = '🎉 Correto! É ' + currentDuration.display + '!';
+                
+                setTimeout(function() {
+                    feedback.style.display = 'none';
+                    generateNewDuration();
+                }, 1200);
+            } else {
+                streak = 0;
+                
+                feedback.className = 'feedback wrong';
+                feedback.textContent = '❌ Não... Era ' + currentDuration.display + '!';
+                
+                setTimeout(function() {
+                    feedback.style.display = 'none';
+                    generateNewDuration();
+                }, 2000);
+            }
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('streak').textContent = streak;
+            document.getElementById('bestStreak').textContent = bestStreak;
+        }
+
+        function closeHelper() {
+            document.getElementById('helper').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
