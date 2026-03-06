@@ -252,6 +252,17 @@
         <label><input type="checkbox" id="lang-toggle"> Inglês</label>
     </div>
 
+    <div class="control-group">
+        <label style="margin-bottom:8px">Seções visíveis:</label>
+        <label><input type="checkbox" class="sec-toggle" data-sec="summary"    checked> Resumo</label>
+        <label><input type="checkbox" class="sec-toggle" data-sec="experience" checked> Experiência</label>
+        <label><input type="checkbox" class="sec-toggle" data-sec="education"  checked> Formação</label>
+        <label><input type="checkbox" class="sec-toggle" data-sec="skills"     checked> Habilidades</label>
+        <label><input type="checkbox" class="sec-toggle" data-sec="certs"      checked> Certificações</label>
+        <label><input type="checkbox" class="sec-toggle" data-sec="projects"   checked> Projetos</label>
+        <label><input type="checkbox" class="sec-toggle" data-sec="volunteer"  checked> Voluntariado</label>
+    </div>
+
     <button class="btn-export" onclick="exportPDF()">📥 BAIXAR PDF</button>
 </div>
 
@@ -523,15 +534,15 @@ function render() {
                         ${d.personal.linkedin ? `<br>🔗 ${d.personal.linkedin}` : ''}
                         ${d.personal.website  ? `<br>🌐 ${d.personal.website}` : ''}
                     </div>
-                    ${skillsHTML(d, lang, lightSc, lightTag)}
-                    ${certsHTML(d, lang, lightSc)}
-                    ${educationHTML(d, lang, lightSc)}
-                    ${volunteerHTML(d, lang, lightSc)}
+                    ${sec('skills')    ? skillsHTML(d, lang, lightSc, lightTag) : ''}
+                    ${sec('certs')     ? certsHTML(d, lang, lightSc) : ''}
+                    ${sec('education') ? educationHTML(d, lang, lightSc) : ''}
+                    ${sec('volunteer') ? volunteerHTML(d, lang, lightSc) : ''}
                 </div>
                 <div class="col-main">
-                    ${summaryHTML(d, lang, sc)}
-                    ${experienceHTML(d, lang, sc)}
-                    ${projectsHTML(d, lang, sc)}
+                    ${sec('summary')    ? summaryHTML(d, lang, sc) : ''}
+                    ${sec('experience') ? experienceHTML(d, lang, sc) : ''}
+                    ${sec('projects')   ? projectsHTML(d, lang, sc) : ''}
                 </div>
             </div>
         </div>`;
@@ -546,15 +557,15 @@ function render() {
             </div>
             <div class="cv-body-cols">
                 <div class="col-left">
-                    ${summaryHTML(d, lang, sc)}
-                    ${experienceHTML(d, lang, sc)}
-                    ${projectsHTML(d, lang, sc)}
+                    ${sec('summary')    ? summaryHTML(d, lang, sc) : ''}
+                    ${sec('experience') ? experienceHTML(d, lang, sc) : ''}
+                    ${sec('projects')   ? projectsHTML(d, lang, sc) : ''}
                 </div>
                 <div class="col-right">
-                    ${educationHTML(d, lang, sc)}
-                    ${skillsHTML(d, lang, sc)}
-                    ${certsHTML(d, lang, sc)}
-                    ${volunteerHTML(d, lang, sc)}
+                    ${sec('education') ? educationHTML(d, lang, sc) : ''}
+                    ${sec('skills')    ? skillsHTML(d, lang, sc) : ''}
+                    ${sec('certs')     ? certsHTML(d, lang, sc) : ''}
+                    ${sec('volunteer') ? volunteerHTML(d, lang, sc) : ''}
                 </div>
             </div>
         </div>`;
@@ -567,13 +578,13 @@ function render() {
                 ${photoHTML(false)}
                 ${headerTextHTML(d.personal, lang, align === 'row-reverse')}
             </div>
-            ${summaryHTML(d, lang, sc)}
-            ${experienceHTML(d, lang, sc)}
-            ${educationHTML(d, lang, sc)}
-            ${skillsHTML(d, lang, sc)}
-            ${certsHTML(d, lang, sc)}
-            ${projectsHTML(d, lang, sc)}
-            ${volunteerHTML(d, lang, sc)}
+            ${sec('summary')    ? summaryHTML(d, lang, sc) : ''}
+            ${sec('experience') ? experienceHTML(d, lang, sc) : ''}
+            ${sec('education')  ? educationHTML(d, lang, sc) : ''}
+            ${sec('skills')     ? skillsHTML(d, lang, sc) : ''}
+            ${sec('certs')      ? certsHTML(d, lang, sc) : ''}
+            ${sec('projects')   ? projectsHTML(d, lang, sc) : ''}
+            ${sec('volunteer')  ? volunteerHTML(d, lang, sc) : ''}
         </div>`;
     }
 
@@ -698,6 +709,12 @@ async function exportPDF() {
 ['template-select','color-palette','font-select','include-cover','lang-toggle','photo-align'].forEach(id => {
     document.getElementById(id).onchange = render;
 });
+document.querySelectorAll('.sec-toggle').forEach(cb => cb.onchange = render);
+
+function sec(name) {
+    const el = document.querySelector(`.sec-toggle[data-sec="${name}"]`);
+    return el ? el.checked : true;
+}
 </script>
 </body>
 </html>
