@@ -3,638 +3,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV Designer Pro</title>
+    <title>CV Designer Pro - Ultimate Custom</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&family=Roboto+Mono:wght@400;600&family=Montserrat:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&family=Fraunces:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&family=Roboto+Mono&family=Montserrat:wght@400;700&family=Lora:ital@0;1&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #2563eb;
+            --primary-color: #2563eb;
             --font-main: 'Inter', sans-serif;
-            --page-w: 210mm;
-            --page-h: 297mm;
-            --page-pad: 40px;
         }
 
-        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #323639; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 360px; background: #ffffff; border-right: 1px solid #e2e8f0; padding: 20px; overflow-y: auto; height: 100%; box-sizing: border-box; }
+        .preview-area { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 0; }
+        
+        .control-group { margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+        label { display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin: 10px 0 5px; }
+        select, input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
 
-        body {
-            font-family: 'DM Sans', sans-serif;
-            background: #1a1a2e;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* ========== SIDEBAR ========== */
-        .sidebar {
-            width: 310px;
-            flex-shrink: 0;
-            background: #0f0f1a;
-            border-right: 1px solid rgba(255,255,255,0.08);
-            padding: 20px 16px;
-            overflow-y: auto;
-            height: 100vh;
-            color: #e2e8f0;
-        }
-        .sidebar h2 {
-            font-family: 'Fraunces', serif;
-            font-size: 1.3rem;
-            color: #fff;
-            margin: 0 0 20px;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .sidebar h2 span { font-size: 0.65rem; background: var(--primary); padding: 2px 6px; border-radius: 4px; font-family: 'Inter', sans-serif; font-weight: 600; vertical-align: middle; }
-
-        .section-block {
-            margin-bottom: 18px;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .section-block-header {
-            background: rgba(255,255,255,0.05);
-            padding: 8px 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #94a3b8;
-        }
-        .section-block-body { padding: 12px; }
-
-        label {
-            display: block;
-            font-size: 0.72rem;
-            font-weight: 500;
-            color: #94a3b8;
-            margin: 8px 0 4px;
-        }
-        label:first-child { margin-top: 0; }
-
-        select, input[type="file"] {
-            width: 100%;
-            padding: 7px 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 6px;
-            background: rgba(255,255,255,0.06);
-            color: #e2e8f0;
-            font-size: 0.8rem;
-            outline: none;
-            transition: border 0.2s;
-        }
-        select:focus, input:focus { border-color: var(--primary); }
-        select option { background: #1e1e2e; }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8rem;
-            color: #cbd5e1;
-            cursor: pointer;
-            padding: 5px 0;
-        }
-        .checkbox-label input { width: auto; }
-
-        .btn {
-            width: 100%;
-            padding: 11px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.82rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            letter-spacing: 0.3px;
-        }
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            margin-bottom: 8px;
-        }
-        .btn-primary:hover { filter: brightness(1.1); }
-        .btn-secondary {
-            background: rgba(255,255,255,0.08);
-            color: #94a3b8;
-        }
-        .btn-secondary:hover { background: rgba(255,255,255,0.12); color: #e2e8f0; }
-
-        /* ========== PREVIEW AREA ========== */
-        .preview-area {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        /* ========== PAGE CONTAINER ========== */
-        .page-wrap {
-            width: var(--page-w);
+        /* ── Wrapper do CV completo ── */
+        #cv-render {
+            width: 210mm;
             background: white;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.6);
-            border-radius: 2px;
-            overflow: hidden;
-            /* CRITICAL: página A4 exata */
-            page-break-after: always;
+            box-sizing: border-box;
+            color: #334155;
+            font-family: var(--font-main);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
 
-        /* ========== BASE DO CV (todos os templates herdam) ========== */
-        .cv-page {
-            width: 100%;
-            min-height: var(--page-h);
-            max-height: var(--page-h);
-            overflow: hidden;
-            font-family: var(--font-main);
-            color: #1e293b;
-            font-size: 9.5pt;
-            line-height: 1.45;
+        /* ── Cada folha A4 ── */
+        .cv-page-sheet {
+            width: 210mm;
+            min-height: 297mm;
+            max-height: 297mm;
+            overflow: hidden;           /* conteúdo que ultrapassa fica oculto */
+            box-sizing: border-box;
+            padding: 45px;
+            position: relative;
+            page-break-after: always;
+            break-after: page;
+        }
+
+        /* Linha tracejada entre folhas (só na preview, some no PDF) */
+        .page-divider {
+            width: 210mm;
+            height: 0;
+            border: none;
+            border-top: 2px dashed #94a3b8;
+            margin: 0;
             position: relative;
         }
-
-        /* Indicador de overflow */
-        .page-overflow-indicator {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #ef4444;
+        .page-divider::after {
+            content: attr(data-label);
+            position: absolute;
+            top: -9px;
+            right: 6px;
+            background: #94a3b8;
             color: white;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: none;
-            z-index: 1000;
-            animation: pulse 1s infinite;
+            font-size: 9px;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-family: sans-serif;
         }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+        @media print { .page-divider { display: none !important; } }
 
-        /* ============================================================
-           TEMPLATE: MODERN (1 coluna)
-        ============================================================ */
-        .tpl-modern {
-            padding: var(--page-pad);
-        }
-        .tpl-modern .cv-header {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            margin-bottom: 22px;
-            padding-bottom: 18px;
-            border-bottom: 2px solid var(--primary);
-        }
-        .tpl-modern .cv-header.flip { flex-direction: row-reverse; }
-        .tpl-modern .header-text h1 {
-            margin: 0 0 4px;
-            font-size: 22pt;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            line-height: 1.1;
-        }
-        .tpl-modern .section-title {
-            font-size: 8pt;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--primary);
-            border-bottom: 1.5px solid var(--primary);
-            padding-bottom: 4px;
-            margin: 0 0 10px;
-        }
+        /* --- ESTRUTURA DO HEADER DINÂMICO (1 coluna) --- */
+        .header-wrapper { display: flex; align-items: center; gap: 30px; margin-bottom: 30px; }
+        .header-wrapper.row-reverse { flex-direction: row-reverse; }
+        .header-text { flex: 1; }
 
-        /* ============================================================
-           TEMPLATE: EXECUTIVE (1 coluna, header colorido)
-        ============================================================ */
-        .tpl-executive .cv-header {
-            background: var(--primary);
-            color: white;
-            padding: var(--page-pad) var(--page-pad) 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            margin-bottom: 0;
+        .photo-container { width: 120px; height: 120px; flex-shrink: 0; }
+        .photo-circle {
+            width: 100%; height: 100%; border-radius: 12px;
+            border: 3px solid var(--primary-color); overflow: hidden;
         }
-        .tpl-executive .cv-header.flip { flex-direction: row-reverse; }
-        .tpl-executive .cv-header h1 { margin: 0 0 4px; font-size: 22pt; font-weight: 700; color: white; }
-        .tpl-executive .cv-body { padding: 24px var(--page-pad) var(--page-pad); }
-        .tpl-executive .section-title {
-            font-size: 8pt;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--primary);
-            border-left: 3px solid var(--primary);
-            padding-left: 8px;
-            margin: 0 0 10px;
-        }
+        .photo-circle img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* ============================================================
-           TEMPLATE: MINIMAL (1 coluna)
-        ============================================================ */
-        .tpl-minimal {
-            padding: var(--page-pad);
-        }
-        .tpl-minimal .cv-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 24px;
-            margin-bottom: 20px;
-        }
-        .tpl-minimal .cv-header.flip { flex-direction: row-reverse; text-align: right; }
-        .tpl-minimal .header-text h1 {
-            margin: 0 0 3px;
-            font-size: 26pt;
-            font-weight: 300;
-            letter-spacing: -1px;
-        }
-        .tpl-minimal .section-title {
-            font-size: 7.5pt;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #64748b;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 4px;
-            margin: 0 0 10px;
-        }
+        /* --- TEMPLATES 1 COLUNA (idênticos ao original) --- */
+        .template-modern .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; margin-bottom: 15px; }
 
-        /* ============================================================
-           TEMPLATE: CREATIVE (1 coluna, acento top)
-        ============================================================ */
-        .tpl-creative {
-            padding: var(--page-pad);
-            border-top: 12px solid var(--primary);
+        .template-executive .header-wrapper {
+            background: var(--primary-color);
+            color: white !important;
+            margin: -45px -45px 30px -45px;
+            padding: 45px;
         }
-        .tpl-creative .cv-header {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            margin-bottom: 20px;
-        }
-        .tpl-creative .cv-header.flip { flex-direction: row-reverse; }
-        .tpl-creative .header-text h1 {
-            margin: 0 0 4px;
-            font-size: 22pt;
-            font-weight: 700;
-        }
-        .tpl-creative .section-title {
-            font-family: 'Roboto Mono', monospace;
-            font-size: 7.5pt;
-            font-weight: 600;
-            background: var(--primary);
-            color: white;
-            display: inline-block;
-            padding: 2px 10px;
-            margin: 0 0 10px;
-            letter-spacing: 0.5px;
-        }
+        .template-executive .header-wrapper h1 { color: white; margin: 0; }
+        .template-executive .photo-circle { border-color: white !important; }
+        .template-executive .section-title { color: var(--primary-color); font-weight: 800; border-left: 4px solid var(--primary-color); padding-left: 10px; margin-bottom: 15px; }
+        .template-executive .desired-position { color: white !important; }
+        .template-executive .current-job-title { color: rgba(255,255,255,0.8) !important; }
+        .template-executive .contact-info { color: white !important; }
 
-        /* ============================================================
-           TEMPLATE: SIDEBAR-LEFT (2 colunas, barra lateral esquerda)
-        ============================================================ */
-        .tpl-sidebar-left {
+        .template-minimal .section-title { color: #1e293b; border-bottom: 1px solid var(--primary-color); margin-bottom: 10px; }
+
+        .template-creative { /* border-top aplicado no sheet */ }
+        .template-creative .cv-page-sheet { border-top: 15px solid var(--primary-color); }
+        .template-creative .section-title { font-family: 'Roboto Mono', monospace; background: var(--primary-color); color: white; padding: 2px 10px; }
+
+        /* --- TEMPLATES 2 COLUNAS --- */
+
+        /* Sidebar Esquerda */
+        .template-sidebar-left .cv-page-sheet { padding: 0; }
+        .template-sidebar-left .cv-cols {
             display: grid;
-            grid-template-columns: 200px 1fr;
-            min-height: var(--page-h);
+            grid-template-columns: 185px 1fr;
+            min-height: 297mm;
+            max-height: 297mm;
+            overflow: hidden;
         }
-        .tpl-sidebar-left .col-sidebar {
-            background: var(--primary);
+        .template-sidebar-left .col-side {
+            background: var(--primary-color);
             color: white;
-            padding: 30px 18px;
+            padding: 35px 18px;
+            overflow: hidden;
         }
-        .tpl-sidebar-left .col-sidebar h1 {
-            font-size: 15pt;
-            font-weight: 700;
-            margin: 0 0 4px;
-            line-height: 1.2;
-            color: white;
+        .template-sidebar-left .col-side h1 {
+            font-size: 13.5pt; font-weight: 700; color: white;
+            margin: 0 0 4px; line-height: 1.25;
         }
-        .tpl-sidebar-left .col-sidebar .section-title {
-            font-size: 7pt;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: rgba(255,255,255,0.6);
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding-bottom: 4px;
-            margin: 16px 0 8px;
+        .template-sidebar-left .col-side .desired-position {
+            font-size: 8pt; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.8px; color: rgba(255,255,255,0.75); margin-bottom: 14px;
         }
-        .tpl-sidebar-left .col-main {
-            padding: 30px 28px;
+        .template-sidebar-left .col-side .section-title {
+            font-size: 7.5pt; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.5px; color: rgba(255,255,255,0.6);
+            border-bottom: 1px solid rgba(255,255,255,0.25);
+            padding-bottom: 4px; margin: 16px 0 8px;
         }
-        .tpl-sidebar-left .col-main .section-title {
-            font-size: 8pt;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--primary);
-            border-bottom: 1.5px solid var(--primary);
-            padding-bottom: 3px;
-            margin: 0 0 10px;
+        .template-sidebar-left .col-side .contact-info {
+            font-size: 8pt; line-height: 1.75; color: rgba(255,255,255,0.85);
         }
+        .template-sidebar-left .col-main {
+            padding: 35px 28px;
+            overflow: hidden;
+        }
+        .template-sidebar-left .col-main .section-title {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            text-transform: uppercase; font-weight: 700; margin-bottom: 12px;
+        }
+        .photo-circle-side {
+            width: 100%; aspect-ratio: 1;
+            border-radius: 10px; overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.35);
+            margin-bottom: 14px;
+        }
+        .photo-circle-side img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* ============================================================
-           TEMPLATE: SIDEBAR-RIGHT (2 colunas, barra lateral direita)
-        ============================================================ */
-        .tpl-sidebar-right {
-            display: grid;
-            grid-template-columns: 1fr 190px;
-            min-height: var(--page-h);
-        }
-        .tpl-sidebar-right .col-main {
-            padding: 30px 28px;
-        }
-        .tpl-sidebar-right .col-main .section-title {
-            font-size: 8pt;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--primary);
-            border-bottom: 1.5px solid var(--primary);
-            padding-bottom: 3px;
-            margin: 0 0 10px;
-        }
-        .tpl-sidebar-right .col-sidebar {
-            background: #f8fafc;
-            border-left: 2px solid var(--primary);
-            padding: 30px 16px;
-        }
-        .tpl-sidebar-right .col-sidebar .section-title {
-            font-size: 7pt;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--primary);
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 4px;
-            margin: 16px 0 8px;
-        }
-        .tpl-sidebar-right .col-sidebar .section-title:first-child { margin-top: 0; }
-
-        /* ============================================================
-           TEMPLATE: TWO-COL (2 colunas simétricas, header full-width)
-        ============================================================ */
-        .tpl-twocol .cv-header-full {
-            background: var(--primary);
+        /* Duas Colunas Iguais */
+        .template-twocol .cv-header-full {
+            background: var(--primary-color);
             color: white;
-            padding: 28px var(--page-pad) 22px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
+            margin: -45px -45px 0 -45px;
+            padding: 35px 45px 28px;
+            display: flex; align-items: center; gap: 24px;
         }
-        .tpl-twocol .cv-header-full h1 {
-            margin: 0 0 3px;
-            font-size: 20pt;
-            font-weight: 700;
-            color: white;
-        }
-        .tpl-twocol .cv-body-cols {
+        .template-twocol .cv-header-full h1 { color: white; margin: 0 0 4px; font-size: 22pt; }
+        .template-twocol .cv-header-full .desired-position { color: rgba(255,255,255,0.85) !important; margin-bottom: 8px; }
+        .template-twocol .cv-header-full .contact-info { color: rgba(255,255,255,0.85) !important; }
+        .template-twocol .cv-header-full .photo-circle { border-color: white; }
+        .template-twocol .cv-body-cols {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 0;
-            padding: 0 var(--page-pad) var(--page-pad);
+            gap: 0 26px;
+            padding-top: 22px;
         }
-        .tpl-twocol .col-left {
-            padding: 20px 20px 0 0;
-            border-right: 1px solid #e2e8f0;
+        .template-twocol .col-right {
+            border-left: 1px solid #e2e8f0;
+            padding-left: 26px;
         }
-        .tpl-twocol .col-right {
-            padding: 20px 0 0 20px;
-        }
-        .tpl-twocol .section-title {
-            font-size: 7.5pt;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--primary);
-            border-bottom: 1.5px solid var(--primary);
-            padding-bottom: 3px;
-            margin: 0 0 10px;
+        .template-twocol .section-title {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            text-transform: uppercase; font-weight: 700; margin-bottom: 12px;
         }
 
-        /* ============================================================
-           COMPONENTES PARTILHADOS
-        ============================================================ */
-        .photo-wrap {
-            width: 90px; height: 90px;
-            flex-shrink: 0;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 2.5px solid rgba(255,255,255,0.4);
-        }
-        .photo-wrap.dark-border { border-color: var(--primary); }
-        .photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        /* ─── Componentes partilhados ─── */
+        .desired-position { color: var(--primary-color); font-size: 15pt; font-weight: 700; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .current-job-title { color: #64748b; }
+        .contact-info { font-size: 9pt; margin-top: 12px; opacity: 0.9; line-height: 1.5; }
 
-        .desired-pos {
-            font-size: 10.5pt;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--primary);
-            margin: 3px 0 8px;
-        }
-        /* Sobre fundo colorido, forced white */
-        .on-color .desired-pos { color: rgba(255,255,255,0.85) !important; }
-        .on-color { color: white; }
-        .on-color .contact-info { color: rgba(255,255,255,0.85); }
-
-        .contact-info {
-            font-size: 8pt;
-            line-height: 1.7;
-            color: #475569;
-        }
-        .contact-info a { color: inherit; text-decoration: none; }
-
-        .cv-section {
-            margin-bottom: 16px;
-        }
+        .cv-section { margin-bottom: 22px; }
         .cv-section:last-child { margin-bottom: 0; }
 
-        .exp-item { margin-bottom: 12px; }
-        .exp-item:last-child { margin-bottom: 0; }
-        .exp-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            gap: 8px;
-        }
-        .exp-title { font-weight: 600; font-size: 9.5pt; }
-        .exp-period { font-size: 8pt; color: #64748b; white-space: nowrap; }
-        .exp-company { color: var(--primary); font-weight: 600; font-size: 8.5pt; margin: 1px 0 4px; }
-        .exp-list {
-            margin: 3px 0 0 0;
-            padding-left: 14px;
-            font-size: 8.5pt;
-            color: #334155;
-        }
-        .exp-list li { margin-bottom: 2px; }
-
-        .skill-tag {
-            display: inline-block;
-            background: rgba(0,0,0,0.06);
-            border-radius: 4px;
-            padding: 2px 7px;
-            font-size: 8pt;
-            margin: 2px 2px 2px 0;
-        }
-        .skill-tag.light {
-            background: rgba(255,255,255,0.15);
-            color: white;
-        }
-
-        .edu-item { margin-bottom: 8px; }
-        .edu-degree { font-weight: 600; font-size: 9pt; }
-        .edu-institution { font-size: 8pt; color: #64748b; }
-
-        .cert-item { margin-bottom: 6px; font-size: 8.5pt; }
-        .cert-item strong { display: block; }
-        .cert-item span { color: #64748b; font-size: 8pt; }
-
-        .vol-item { margin-bottom: 8px; font-size: 8.5pt; }
-        .vol-item strong { display: block; font-size: 9pt; }
-        .vol-item .vol-org { color: #64748b; font-size: 8pt; margin-bottom: 2px; }
-
-        .proj-item { margin-bottom: 8px; font-size: 8.5pt; }
-        .proj-item strong { display: block; font-size: 9pt; }
-
-        .summary-text {
-            font-size: 9pt;
-            line-height: 1.55;
-            text-align: justify;
-            color: #334155;
-        }
-
-        /* ========== COVER LETTER PAGE ========== */
-        .cover-page {
-            width: var(--page-w);
-            min-height: var(--page-h);
-            background: white;
-            padding: var(--page-pad);
-            box-shadow: 0 8px 40px rgba(0,0,0,0.6);
-            font-family: var(--font-main);
-            font-size: 10.5pt;
-            line-height: 1.7;
-            color: #1e293b;
-        }
-        .cover-section-title {
-            font-size: 8pt;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--primary);
-            border-bottom: 1.5px solid var(--primary);
-            padding-bottom: 4px;
-            margin: 0 0 24px;
-        }
-
-        /* ========== PDF PRINT RULES ========== */
-        @media print {
-            body { background: white; }
-            .sidebar, .preview-area > :not(.page-wrap):not(.cover-page) { display: none; }
-        }
-
-        @page { size: A4 portrait; margin: 0; }
-
-        /* Scrollbar sidebar */
-        .sidebar::-webkit-scrollbar { width: 4px; }
-        .sidebar::-webkit-scrollbar-track { background: transparent; }
-        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        .html2pdf__page-break { display: block; height: 0; page-break-before: always; }
+        .btn-export { width: 100%; background: #000; color: white; border: none; padding: 18px; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<!-- ========== SIDEBAR ========== -->
 <div class="sidebar">
-    <h2>CV Designer Pro <span>v2</span></h2>
+    <h2>CV Designer Pro</h2>
 
-    <div class="section-block">
-        <div class="section-block-header">Arquivo</div>
-        <div class="section-block-body">
-            <label>Dados JSON:</label>
-            <input type="file" id="json-file" accept=".json">
-            <button class="btn btn-secondary" style="margin-top:8px" onclick="downloadModelJSON()">📄 Baixar Modelo JSON</button>
-        </div>
+    <div class="control-group">
+        <label>Foto (Opcional):</label>
+        <input type="file" id="photo-upload" accept="image/*">
+        <label>Posição da Foto:</label>
+        <select id="photo-align">
+            <option value="row">Esquerda</option>
+            <option value="row-reverse">Direita</option>
+        </select>
     </div>
 
-    <div class="section-block">
-        <div class="section-block-header">Foto</div>
-        <div class="section-block-body">
-            <label>Imagem (opcional):</label>
-            <input type="file" id="photo-upload" accept="image/*">
-            <label>Posição:</label>
-            <select id="photo-align">
-                <option value="row">Esquerda</option>
-                <option value="row-reverse">Direita</option>
-            </select>
-        </div>
+    <button onclick="downloadModelJSON()" style="background:#475569; margin-bottom: 20px;" class="btn-export">
+        📄 Baixar Modelo JSON
+    </button>
+
+    <div class="control-group">
+        <label>Dados JSON:</label>
+        <input type="file" id="json-file" accept=".json">
     </div>
 
-    <div class="section-block">
-        <div class="section-block-header">Layout</div>
-        <div class="section-block-body">
-            <label>Template:</label>
-            <select id="template-select">
-                <optgroup label="1 Coluna">
-                    <option value="modern">Moderno</option>
-                    <option value="executive">Executivo</option>
-                    <option value="minimal">Minimalista</option>
-                    <option value="creative">Criativo</option>
-                </optgroup>
-                <optgroup label="2 Colunas (mais conteúdo)">
-                    <option value="sidebar-left">Sidebar Esquerda</option>
-                    <option value="sidebar-right">Sidebar Direita</option>
-                    <option value="twocol">Duas Colunas Iguais</option>
-                </optgroup>
-            </select>
+    <div class="control-group">
+        <label>Modelo Base:</label>
+        <select id="template-select">
+            <optgroup label="1 Coluna">
+                <option value="modern">Moderno</option>
+                <option value="executive">Executivo</option>
+                <option value="minimal">Minimalista</option>
+                <option value="creative">Criativo</option>
+            </optgroup>
+            <optgroup label="2 Colunas">
+                <option value="sidebar-left">Sidebar Esquerda</option>
+                <option value="twocol">Duas Colunas</option>
+            </optgroup>
+        </select>
 
-            <label>Cor primária:</label>
-            <select id="color-palette">
-                <option value="#2563eb">Azul Royal</option>
-                <option value="#1e293b">Slate Dark</option>
-                <option value="#7c3aed">Roxo Moderno</option>
-                <option value="#059669">Verde Esmeralda</option>
-                <option value="#dc2626">Vermelho</option>
-                <option value="#0891b2">Ciano</option>
-                <option value="#000000">Preto Puro</option>
-            </select>
+        <label>Cor & Fonte:</label>
+        <select id="color-palette">
+            <option value="#2563eb">Azul Royal</option>
+            <option value="#1e293b">Slate Dark</option>
+            <option value="#7c3aed">Roxo Moderno</option>
+            <option value="#059669">Verde Esmeralda</option>
+            <option value="#000000">Preto Puro</option>
+        </select>
 
-            <label>Fonte:</label>
-            <select id="font-select">
-                <option value="'Inter', sans-serif">Inter</option>
-                <option value="'DM Sans', sans-serif">DM Sans</option>
-                <option value="'Montserrat', sans-serif">Montserrat</option>
-                <option value="'Lora', serif">Lora</option>
-            </select>
-        </div>
+        <select id="font-select" style="margin-top:10px">
+            <option value="'Inter', sans-serif">Inter</option>
+            <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value="'Lora', serif">Lora</option>
+        </select>
     </div>
 
-    <div class="section-block">
-        <div class="section-block-header">Opções</div>
-        <div class="section-block-body">
-            <label class="checkbox-label"><input type="checkbox" id="include-cover" checked> Cover Letter</label>
-            <label class="checkbox-label"><input type="checkbox" id="lang-toggle"> Inglês (EN)</label>
-            <label class="checkbox-label"><input type="checkbox" id="show-photo" checked> Mostrar foto</label>
-        </div>
+    <div class="control-group">
+        <label><input type="checkbox" id="include-cover" checked> Incluir Cover Letter</label>
+        <label><input type="checkbox" id="lang-toggle"> Inglês</label>
     </div>
 
-    <div id="overflow-alert" style="display:none; background:#ef444420; border:1px solid #ef4444; border-radius:8px; padding:10px 12px; margin-bottom:12px; font-size:0.75rem; color:#ef4444; line-height:1.4;">
-        ⚠️ <strong>Conteúdo excede a página!</strong><br>Reduza a quantidade de itens ou use um template de 2 colunas.
-    </div>
-
-    <button class="btn btn-primary" onclick="exportPDF()">📥 Baixar PDF</button>
+    <button class="btn-export" onclick="exportPDF()">📥 BAIXAR PDF</button>
 </div>
 
-<!-- ========== PREVIEW ========== -->
-<div class="preview-area" id="preview-area">
-    <div style="color:#475569; text-align:center; padding: 60px 20px;">
-        <div style="font-size:3rem; margin-bottom:12px">📄</div>
-        <div style="color:#94a3b8; font-size:0.9rem;">Importe um arquivo JSON para começar</div>
+<div class="preview-area">
+    <div id="cv-render" class="template-modern">
+        <div class="cv-page-sheet">
+            <p style="text-align: center; color: #94a3b8; margin-top: 100px;">Aguardando JSON...</p>
+        </div>
     </div>
 </div>
 
@@ -642,539 +266,347 @@
 let cvData = null;
 let userPhoto = null;
 
-// =============================================
-// EVENTOS
-// =============================================
-document.getElementById('photo-upload').onchange = e => {
-    const r = new FileReader();
-    r.onload = ev => { userPhoto = ev.target.result; render(); };
-    r.readAsDataURL(e.target.files[0]);
+document.getElementById('photo-upload').onchange = (e) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => { userPhoto = ev.target.result; render(); };
+    reader.readAsDataURL(e.target.files[0]);
 };
 
-document.getElementById('json-file').onchange = e => {
-    const r = new FileReader();
-    r.onload = ev => {
-        try { cvData = JSON.parse(ev.target.result); render(); }
-        catch(err) { alert('JSON inválido: ' + err.message); }
+document.getElementById('json-file').onchange = (e) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => { cvData = JSON.parse(ev.target.result); render(); };
+    reader.readAsText(e.target.files[0]);
+};
+
+function downloadModelJSON() {
+    const modelData = {
+        "personal": {
+            "fullname": "Nome Completo",
+            "jobtitle_pt": "Cargo Inicial → Cargo Intermediário → Cargo Atual",
+            "jobtitle_en": "Initial Role → Intermediate Role → Current Role",
+            "desired_position_pt": "Cargo Pretendido",
+            "desired_position_en": "Desired Position",
+            "email": "email@exemplo.com",
+            "phone": "+55119XXXXXXXX",
+            "linkedin": "linkedin.com/in/seuperfil",
+            "website": "www.seusite.com",
+            "location": "Cidade, Estado, País",
+            "summary_pt": "Profissional de tecnologia com experiência em desenvolvimento de software e liderança técnica...",
+            "summary_en": "Technology professional with experience in software development and technical leadership..."
+        },
+        "experience": [
+            {
+                "company": "Empresa Exemplo",
+                "position_pt": "Cargo Inicial → Cargo Intermediário → Cargo Atual",
+                "position_en": "Initial Role → Intermediate Role → Current Role",
+                "period": "Ano Início – Ano Fim / Atual",
+                "description_pt": ["Liderança ou participação em projetos...", "Implementação de boas práticas..."],
+                "description_en": ["Led or contributed to projects...", "Implemented development best practices..."]
+            }
+        ],
+        "education": [
+            {
+                "degree_pt": "Curso ou Graduação",
+                "degree_en": "Degree or Program",
+                "institution": "Instituição de Ensino",
+                "period": "Ano Início – Ano Fim"
+            }
+        ],
+        "skills": {
+            "technical": ["Software Development", "Cloud Computing"],
+            "languages": ["Portuguese: Native", "English: Advanced"],
+            "soft": ["Leadership", "Communication"]
+        },
+        "projects": [
+            {
+                "title_pt": "Projeto ou Sistema Relevante",
+                "title_en": "Relevant Project or System",
+                "description_pt": "Descrição breve do projeto...",
+                "description_en": "Brief project description..."
+            }
+        ],
+        "volunteer": [
+            {
+                "role_pt": "Atuação Voluntária",
+                "role_en": "Volunteer Role",
+                "organization": "Organização",
+                "period": "Ano Início – Ano Fim",
+                "description_pt": "Descrição da atividade...",
+                "description_en": "Description of activity..."
+            }
+        ],
+        "certifications": [
+            {
+                "title_pt": "Nome da Certificação",
+                "title_en": "Certification Name",
+                "issuer": "Instituição Certificadora",
+                "year": "2024"
+            }
+        ],
+        "coverletter": {
+            "pt": "Olá time recrutador,\n\nTenho interesse na oportunidade...",
+            "en": "Hello Hiring Team,\n\nI am interested in the opportunity..."
+        }
     };
-    r.readAsText(e.target.files[0]);
-};
-
-['template-select','color-palette','font-select','include-cover','lang-toggle','photo-align','show-photo']
-    .forEach(id => document.getElementById(id).onchange = render);
-
-// =============================================
-// HELPERS
-// =============================================
-const $ = id => document.getElementById(id);
-const getLang = () => $('lang-toggle').checked ? 'en' : 'pt';
-const pick = (obj, key) => {
-    const lang = getLang();
-    return obj[`${key}_${lang}`] || obj[key] || '';
-};
-const safe = v => v || '';
-
-function setVars() {
-    const color = $('color-palette').value;
-    const font  = $('font-select').value;
-    document.documentElement.style.setProperty('--primary', color);
-    document.documentElement.style.setProperty('--font-main', font);
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(modelData, null, 2));
+    const a = document.createElement('a');
+    a.setAttribute("href", dataStr);
+    a.setAttribute("download", "modelo_cv.json");
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 }
 
-// =============================================
-// CHECK OVERFLOW
-// =============================================
-function checkOverflow() {
-    const pages = document.querySelectorAll('.cv-page');
-    let overflow = false;
-    pages.forEach(p => {
-        if (p.scrollHeight > p.offsetHeight + 5) overflow = true;
-    });
-    $('overflow-alert').style.display = overflow ? 'block' : 'none';
+// ── Helpers de conteúdo ──────────────────────────────────────────
+
+function photoHTML(sideMode) {
+    if (!userPhoto) return '';
+    if (sideMode) return `<div class="photo-circle-side"><img src="${userPhoto}"></div>`;
+    return `<div class="photo-container"><div class="photo-circle"><img src="${userPhoto}"></div></div>`;
 }
 
-// =============================================
-// COMPONENTES REUTILIZÁVEIS
-// =============================================
-function photoHTML(dark = false) {
-    const show = $('show-photo').checked;
-    if (!userPhoto || !show) return '';
-    return `<div class="photo-wrap ${dark ? '' : 'dark-border'}">
-        <img src="${userPhoto}" alt="foto">
+function headerTextHTML(p, lang, alignRight) {
+    const desired  = lang === 'pt' ? p.desired_position_pt  : p.desired_position_en;
+    const jobTitle = lang === 'pt' ? p.jobtitle_pt           : p.jobtitle_en;
+    return `<div class="header-text" style="text-align:${alignRight ? 'right' : 'left'}">
+        <h1 style="margin:0; font-size:26pt;">${p.fullname}</h1>
+        <div class="desired-position">${desired || ''}</div>
+        <div class="contact-info">
+            <div>📍 ${p.location || ''} • 📞 ${p.phone || ''}</div>
+            <div>✉️ ${p.email || ''}</div>
+            <div style="margin-top:4px">
+                ${p.linkedin ? `<strong>LinkedIn:</strong> ${p.linkedin}` : ''}
+                ${p.website  ? ` | <strong>Web:</strong> ${p.website}` : ''}
+            </div>
+        </div>
     </div>`;
 }
 
-function contactHTML(d, dark = false) {
-    const colorCls = dark ? 'on-color' : '';
-    return `
-        <div class="desired-pos ${colorCls ? '' : ''}" style="${dark ? 'color:rgba(255,255,255,0.85)' : 'color:var(--primary)'}">
-            ${safe(pick(d, 'desired_position'))}
-        </div>
-        <div class="contact-info ${colorCls}">
-            📍 ${safe(d.location)} · 📞 ${safe(d.phone)}<br>
-            ✉️ ${safe(d.email)}
-            ${d.linkedin ? `<br>🔗 ${d.linkedin}` : ''}
-            ${d.website  ? `<br>🌐 ${d.website}` : ''}
-        </div>
-    `;
-}
-
-function summarySection(d, titleClass = 'section-title') {
-    const lang = getLang();
-    const text = lang === 'pt' ? d.summary_pt : d.summary_en;
+function summaryHTML(d, lang, sc) {
+    const text  = lang === 'pt' ? d.personal.summary_pt : d.personal.summary_en;
     if (!text) return '';
-    const labels = { pt: 'Resumo', en: 'Summary' };
+    const label = lang === 'pt' ? 'Resumo' : 'Summary';
     return `<div class="cv-section">
-        <div class="${titleClass}">${labels[lang]}</div>
-        <p class="summary-text">${text}</p>
+        <div class="${sc}">${label}</div>
+        <p style="text-align:justify; font-size:10pt; line-height:1.5; margin:0">${text}</p>
     </div>`;
 }
 
-function experienceSection(data, titleClass = 'section-title') {
-    if (!data.experience?.length) return '';
-    const lang = getLang();
-    const labels = { pt: 'Experiência Profissional', en: 'Experience' };
-    const items = data.experience.map(exp => `
-        <div class="exp-item">
-            <div class="exp-header">
-                <span class="exp-title">${safe(pick(exp, 'position'))}</span>
-                <span class="exp-period">${safe(exp.period)}</span>
+function experienceHTML(d, lang, sc) {
+    if (!d.experience || !d.experience.length) return '';
+    const label = lang === 'pt' ? 'Experiência Profissional' : 'Experience';
+    const items = d.experience.map(exp => {
+        const pos  = lang === 'pt' ? exp.position_pt    : exp.position_en;
+        const desc = lang === 'pt' ? exp.description_pt : exp.description_en;
+        return `<div style="margin-bottom:14px">
+            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:10pt">
+                <span>${pos || ''}</span>
+                <span style="white-space:nowrap; padding-left:8px">${exp.period || ''}</span>
             </div>
-            <div class="exp-company">${safe(exp.company)}</div>
-            <ul class="exp-list">
-                ${(lang === 'pt' ? exp.description_pt : exp.description_en || []).map(i => `<li>${i}</li>`).join('')}
+            <div style="color:var(--primary-color); font-weight:600; font-size:9pt">${exp.company || ''}</div>
+            <ul style="font-size:9.5pt; margin:4px 0 0; padding-left:18px">
+                ${(desc || []).map(i => `<li>${i}</li>`).join('')}
             </ul>
-        </div>
-    `).join('');
-    return `<div class="cv-section">
-        <div class="${titleClass}">${labels[lang]}</div>
-        ${items}
-    </div>`;
+        </div>`;
+    }).join('');
+    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
 }
 
-function educationSection(data, titleClass = 'section-title') {
-    if (!data.education?.length) return '';
-    const lang = getLang();
-    const labels = { pt: 'Formação', en: 'Education' };
-    const items = data.education.map(ed => `
-        <div class="edu-item">
-            <div class="edu-degree">${safe(pick(ed, 'degree'))}</div>
-            <div class="edu-institution">${safe(ed.institution)} · ${safe(ed.period)}</div>
+function educationHTML(d, lang, sc) {
+    if (!d.education || !d.education.length) return '';
+    const label = lang === 'pt' ? 'Formação' : 'Education';
+    const items = d.education.map(ed => `
+        <div style="display:flex; justify-content:space-between; font-size:10pt; margin-bottom:6px">
+            <span><strong>${lang === 'pt' ? ed.degree_pt : ed.degree_en}</strong></span>
+            <span style="white-space:nowrap; padding-left:8px">${ed.period || ''}</span>
         </div>
+        <div style="font-size:9pt; color:#64748b; margin-bottom:4px">${ed.institution || ''}</div>
     `).join('');
-    return `<div class="cv-section">
-        <div class="${titleClass}">${labels[lang]}</div>
-        ${items}
-    </div>`;
+    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
 }
 
-function skillsSection(data, titleClass = 'section-title', light = false) {
-    if (!data.skills) return '';
-    const lang = getLang();
-    const labels = { pt: 'Habilidades', en: 'Skills' };
-    const tagCls = light ? 'skill-tag light' : 'skill-tag';
-    const techLabels = { pt: 'Técnicas', en: 'Technical' };
-    const langLabels = { pt: 'Idiomas', en: 'Languages' };
-    const softLabels = { pt: 'Soft Skills', en: 'Soft Skills' };
-    let html = '';
-    if (data.skills.technical?.length) {
-        html += `<div style="margin-bottom:8px"><div style="font-size:7.5pt;font-weight:600;color:${light?'rgba(255,255,255,0.6)':'#64748b'};margin-bottom:3px;text-transform:uppercase;letter-spacing:0.8px">${techLabels[lang]}</div>
-            ${data.skills.technical.map(s => `<span class="${tagCls}">${s}</span>`).join('')}</div>`;
+function skillsHTML(d, lang, sc, tagStyle) {
+    if (!d.skills) return '';
+    const label = lang === 'pt' ? 'Habilidades' : 'Skills';
+    const ts = tagStyle || 'background:#f1f5f9; border-radius:4px; padding:2px 8px; font-size:8.5pt; display:inline-block; margin:2px 2px 2px 0;';
+    function group(title, arr) {
+        if (!arr || !arr.length) return '';
+        return `<div style="margin-bottom:8px">
+            <div style="font-size:8pt; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px">${title}</div>
+            <div>${arr.map(s => `<span style="${ts}">${s}</span>`).join('')}</div>
+        </div>`;
     }
-    if (data.skills.languages?.length) {
-        html += `<div style="margin-bottom:8px"><div style="font-size:7.5pt;font-weight:600;color:${light?'rgba(255,255,255,0.6)':'#64748b'};margin-bottom:3px;text-transform:uppercase;letter-spacing:0.8px">${langLabels[lang]}</div>
-            ${data.skills.languages.map(s => `<span class="${tagCls}">${s}</span>`).join('')}</div>`;
-    }
-    if (data.skills.soft?.length) {
-        html += `<div><div style="font-size:7.5pt;font-weight:600;color:${light?'rgba(255,255,255,0.6)':'#64748b'};margin-bottom:3px;text-transform:uppercase;letter-spacing:0.8px">${softLabels[lang]}</div>
-            ${data.skills.soft.map(s => `<span class="${tagCls}">${s}</span>`).join('')}</div>`;
-    }
-    return `<div class="cv-section">
-        <div class="${titleClass}">${labels[lang]}</div>
-        ${html}
+    const tl = lang === 'pt' ? 'Técnicas'        : 'Technical';
+    const ll = lang === 'pt' ? 'Idiomas'          : 'Languages';
+    const sl = lang === 'pt' ? 'Comportamentais'  : 'Soft Skills';
+    return `<div class="cv-section"><div class="${sc}">${label}</div>
+        ${group(tl, d.skills.technical)}
+        ${group(ll, d.skills.languages)}
+        ${group(sl, d.skills.soft)}
     </div>`;
 }
 
-function certsSection(data, titleClass = 'section-title', light = false) {
-    if (!data.certifications?.length) return '';
-    const lang = getLang();
-    const labels = { pt: 'Certificações', en: 'Certifications' };
-    const color = light ? 'rgba(255,255,255,0.7)' : '#64748b';
-    const items = data.certifications.map(c => `
-        <div class="cert-item" style="${light?'color:rgba(255,255,255,0.9)':''}">
-            <strong>${safe(pick(c, 'title'))}</strong>
-            <span style="color:${color}">${safe(c.issuer)} · ${safe(c.year)}</span>
-        </div>
-    `).join('');
-    return `<div class="cv-section">
-        <div class="${titleClass}">${labels[lang]}</div>
-        ${items}
-    </div>`;
+function certsHTML(d, lang, sc) {
+    if (!d.certifications || !d.certifications.length) return '';
+    const label = lang === 'pt' ? 'Certificações' : 'Certifications';
+    const items = d.certifications.map(c => `
+        <div style="margin-bottom:6px; font-size:9.5pt">
+            <strong>${lang === 'pt' ? c.title_pt : c.title_en}</strong>
+            <span style="color:#64748b; font-size:8.5pt"> · ${c.issuer || ''} ${c.year ? '(' + c.year + ')' : ''}</span>
+        </div>`).join('');
+    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
 }
 
-function volunteerSection(data, titleClass = 'section-title') {
-    if (!data.volunteer?.length) return '';
-    const lang = getLang();
-    const labels = { pt: 'Voluntariado', en: 'Volunteer' };
-    const items = data.volunteer.map(v => `
-        <div class="vol-item">
-            <strong>${safe(pick(v, 'role'))}</strong>
-            <div class="vol-org">${safe(v.organization)} · ${safe(v.period)}</div>
-            <div>${lang==='pt'?v.description_pt:v.description_en||''}</div>
-        </div>
-    `).join('');
-    return `<div class="cv-section">
-        <div class="${titleClass}">${labels[lang]}</div>
-        ${items}
-    </div>`;
+function projectsHTML(d, lang, sc) {
+    if (!d.projects || !d.projects.length) return '';
+    const label = lang === 'pt' ? 'Projetos' : 'Projects';
+    const items = d.projects.map(p => `
+        <div style="margin-bottom:8px; font-size:9.5pt">
+            <strong>${lang === 'pt' ? p.title_pt : p.title_en}</strong>
+            <div style="color:#475569">${lang === 'pt' ? p.description_pt : p.description_en}</div>
+        </div>`).join('');
+    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
 }
 
-function projectsSection(data, titleClass = 'section-title') {
-    if (!data.projects?.length) return '';
-    const lang = getLang();
-    const labels = { pt: 'Projetos', en: 'Projects' };
-    const items = data.projects.map(p => `
-        <div class="proj-item">
-            <strong>${safe(pick(p, 'title'))}</strong>
-            <div>${lang==='pt'?p.description_pt:p.description_en||''}</div>
-        </div>
-    `).join('');
-    return `<div class="cv-section">
-        <div class="${titleClass}">${labels[lang]}</div>
-        ${items}
-    </div>`;
+function volunteerHTML(d, lang, sc) {
+    if (!d.volunteer || !d.volunteer.length) return '';
+    const label = lang === 'pt' ? 'Voluntariado' : 'Volunteer';
+    const items = d.volunteer.map(v => `
+        <div style="margin-bottom:8px; font-size:9.5pt">
+            <div style="font-weight:bold">${lang === 'pt' ? v.role_pt : v.role_en}
+                <span style="font-weight:normal; color:#64748b"> · ${v.organization || ''} ${v.period ? '(' + v.period + ')' : ''}</span>
+            </div>
+            <div style="color:#475569">${lang === 'pt' ? v.description_pt : v.description_en}</div>
+        </div>`).join('');
+    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
 }
 
-// =============================================
-// TEMPLATES
-// =============================================
+// ── Render principal ─────────────────────────────────────────────
 
-function renderModern(d) {
-    const align = $('photo-align').value;
-    const flip = align === 'row-reverse' ? 'flip' : '';
-    const textAlign = align === 'row-reverse' ? 'right' : 'left';
-    return `<div class="page-wrap"><div class="cv-page tpl-modern" style="font-family:var(--font-main)">
-        <div class="cv-header ${flip}">
-            ${photoHTML(false)}
-            <div class="header-text" style="text-align:${textAlign};flex:1">
-                <h1>${safe(d.personal.fullname)}</h1>
-                ${contactHTML(d.personal, false)}
-            </div>
-        </div>
-        ${summarySection(d)}
-        ${experienceSection(d)}
-        ${educationSection(d)}
-        ${skillsSection(d)}
-        ${certsSection(d)}
-        ${projectsSection(d)}
-        ${volunteerSection(d)}
-    </div></div>`;
-}
-
-function renderExecutive(d) {
-    const align = $('photo-align').value;
-    const flip = align === 'row-reverse' ? 'flip' : '';
-    return `<div class="page-wrap"><div class="cv-page tpl-executive" style="font-family:var(--font-main)">
-        <div class="cv-header ${flip}">
-            ${photoHTML(true)}
-            <div class="header-text" style="flex:1">
-                <h1>${safe(d.personal.fullname)}</h1>
-                ${contactHTML(d.personal, true)}
-            </div>
-        </div>
-        <div class="cv-body">
-            ${summarySection(d, 'section-title')}
-            ${experienceSection(d, 'section-title')}
-            ${educationSection(d, 'section-title')}
-            ${skillsSection(d, 'section-title')}
-            ${certsSection(d, 'section-title')}
-            ${projectsSection(d, 'section-title')}
-            ${volunteerSection(d, 'section-title')}
-        </div>
-    </div></div>`;
-}
-
-function renderMinimal(d) {
-    const align = $('photo-align').value;
-    const flip = align === 'row-reverse' ? 'flip' : '';
-    const textAlign = align === 'row-reverse' ? 'right' : 'left';
-    return `<div class="page-wrap"><div class="cv-page tpl-minimal" style="font-family:var(--font-main)">
-        <div class="cv-header ${flip}">
-            ${photoHTML(false)}
-            <div class="header-text" style="text-align:${textAlign};flex:1">
-                <h1>${safe(d.personal.fullname)}</h1>
-                ${contactHTML(d.personal, false)}
-            </div>
-        </div>
-        ${summarySection(d, 'section-title')}
-        ${experienceSection(d, 'section-title')}
-        ${educationSection(d, 'section-title')}
-        ${skillsSection(d, 'section-title')}
-        ${certsSection(d, 'section-title')}
-        ${projectsSection(d, 'section-title')}
-        ${volunteerSection(d, 'section-title')}
-    </div></div>`;
-}
-
-function renderCreative(d) {
-    const align = $('photo-align').value;
-    const flip = align === 'row-reverse' ? 'flip' : '';
-    return `<div class="page-wrap"><div class="cv-page tpl-creative" style="font-family:var(--font-main)">
-        <div class="cv-header ${flip}">
-            ${photoHTML(false)}
-            <div class="header-text" style="flex:1">
-                <h1>${safe(d.personal.fullname)}</h1>
-                ${contactHTML(d.personal, false)}
-            </div>
-        </div>
-        ${summarySection(d, 'section-title')}
-        ${experienceSection(d, 'section-title')}
-        ${educationSection(d, 'section-title')}
-        ${skillsSection(d, 'section-title')}
-        ${certsSection(d, 'section-title')}
-        ${projectsSection(d, 'section-title')}
-        ${volunteerSection(d, 'section-title')}
-    </div></div>`;
-}
-
-function renderSidebarLeft(d) {
-    // Sidebar: foto + contato + habilidades + certs + formação
-    // Main: resumo + experiência + projetos + voluntariado
-    return `<div class="page-wrap"><div class="cv-page tpl-sidebar-left" style="font-family:var(--font-main)">
-        <div class="col-sidebar">
-            ${userPhoto && $('show-photo').checked ? `<div class="photo-wrap" style="width:100%;height:auto;aspect-ratio:1;border-color:rgba(255,255,255,0.4);border-radius:12px;margin-bottom:14px"><img src="${userPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:10px"></div>` : ''}
-            <div style="font-size:13pt;font-weight:700;color:white;line-height:1.2;margin-bottom:4px">${safe(d.personal.fullname)}</div>
-            <div style="font-size:8pt;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;color:rgba(255,255,255,0.7);margin-bottom:12px">
-                ${safe(pick(d.personal, 'desired_position'))}
-            </div>
-
-            <div class="section-title">Contato</div>
-            <div style="font-size:8pt;line-height:1.8;color:rgba(255,255,255,0.85)">
-                📍 ${safe(d.personal.location)}<br>
-                📞 ${safe(d.personal.phone)}<br>
-                ✉️ ${safe(d.personal.email)}
-                ${d.personal.linkedin ? `<br>🔗 ${d.personal.linkedin}` : ''}
-                ${d.personal.website  ? `<br>🌐 ${d.personal.website}` : ''}
-            </div>
-
-            ${skillsSection(d, 'section-title', true)}
-            ${certsSection(d, 'section-title', true)}
-            ${educationSection(d, 'section-title')}
-        </div>
-        <div class="col-main">
-            ${summarySection(d, 'section-title')}
-            ${experienceSection(d, 'section-title')}
-            ${projectsSection(d, 'section-title')}
-            ${volunteerSection(d, 'section-title')}
-        </div>
-    </div></div>`;
-}
-
-function renderSidebarRight(d) {
-    return `<div class="page-wrap"><div class="cv-page tpl-sidebar-right" style="font-family:var(--font-main)">
-        <div class="col-main">
-            <div style="margin-bottom:18px;padding-bottom:14px;border-bottom:2px solid var(--primary)">
-                <div style="font-size:22pt;font-weight:700;line-height:1.1;margin-bottom:4px">${safe(d.personal.fullname)}</div>
-                <div style="font-size:10pt;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary);margin-bottom:8px">
-                    ${safe(pick(d.personal, 'desired_position'))}
-                </div>
-                <div class="contact-info" style="display:flex;gap:16px;flex-wrap:wrap">
-                    <span>📞 ${safe(d.personal.phone)}</span>
-                    <span>✉️ ${safe(d.personal.email)}</span>
-                    ${d.personal.linkedin ? `<span>🔗 ${d.personal.linkedin}</span>` : ''}
-                </div>
-            </div>
-            ${summarySection(d, 'section-title')}
-            ${experienceSection(d, 'section-title')}
-            ${projectsSection(d, 'section-title')}
-        </div>
-        <div class="col-sidebar">
-            ${userPhoto && $('show-photo').checked ? `<div class="photo-wrap dark-border" style="width:100%;height:auto;aspect-ratio:1;border-radius:10px;margin-bottom:14px"><img src="${userPhoto}" style="width:100%;height:100%;object-fit:cover;border-radius:8px"></div>` : ''}
-            <div style="font-size:8pt;color:#64748b;margin-bottom:6px">📍 ${safe(d.personal.location)}</div>
-            ${skillsSection(d, 'section-title')}
-            ${educationSection(d, 'section-title')}
-            ${certsSection(d, 'section-title')}
-            ${volunteerSection(d, 'section-title')}
-        </div>
-    </div></div>`;
-}
-
-function renderTwoCol(d) {
-    const lang = getLang();
-    return `<div class="page-wrap"><div class="cv-page tpl-twocol" style="font-family:var(--font-main)">
-        <div class="cv-header-full">
-            ${userPhoto && $('show-photo').checked ? `<div class="photo-wrap" style="width:80px;height:80px"><img src="${userPhoto}"></div>` : ''}
-            <div style="flex:1">
-                <h1>${safe(d.personal.fullname)}</h1>
-                <div style="font-size:9pt;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.75);margin-bottom:6px">
-                    ${safe(pick(d.personal, 'desired_position'))}
-                </div>
-                <div style="font-size:8pt;color:rgba(255,255,255,0.8);display:flex;gap:14px;flex-wrap:wrap">
-                    <span>📍 ${safe(d.personal.location)}</span>
-                    <span>📞 ${safe(d.personal.phone)}</span>
-                    <span>✉️ ${safe(d.personal.email)}</span>
-                    ${d.personal.linkedin ? `<span>🔗 ${d.personal.linkedin}</span>` : ''}
-                </div>
-            </div>
-        </div>
-        <div class="cv-body-cols">
-            <div class="col-left">
-                ${summarySection(d, 'section-title')}
-                ${experienceSection(d, 'section-title')}
-            </div>
-            <div class="col-right">
-                ${educationSection(d, 'section-title')}
-                ${skillsSection(d, 'section-title')}
-                ${certsSection(d, 'section-title')}
-                ${projectsSection(d, 'section-title')}
-                ${volunteerSection(d, 'section-title')}
-            </div>
-        </div>
-    </div></div>`;
-}
-
-// =============================================
-// RENDER PRINCIPAL
-// =============================================
 function render() {
     if (!cvData) return;
-    setVars();
 
-    const template = $('template-select').value;
-    const lang = getLang();
+    const lang     = document.getElementById('lang-toggle').checked ? 'en' : 'pt';
+    const template = document.getElementById('template-select').value;
+    const align    = document.getElementById('photo-align').value;
+    const container = document.getElementById('cv-render');
     const d = cvData;
-    const preview = $('preview-area');
 
-    const renderers = {
-        'modern': renderModern,
-        'executive': renderExecutive,
-        'minimal': renderMinimal,
-        'creative': renderCreative,
-        'sidebar-left': renderSidebarLeft,
-        'sidebar-right': renderSidebarRight,
-        'twocol': renderTwoCol,
-    };
+    document.documentElement.style.setProperty('--primary-color', document.getElementById('color-palette').value);
+    document.documentElement.style.setProperty('--font-main',     document.getElementById('font-select').value);
 
-    let html = (renderers[template] || renderModern)(d);
+    container.className = `template-${template}`;
 
-    // Cover Letter
-    if ($('include-cover').checked && d.coverletter) {
-        const cl = lang === 'pt' ? d.coverletter.pt : d.coverletter.en;
-        html += `
-        <div class="cover-page" style="font-family:var(--font-main);margin-top:20px">
-            <div class="cover-section-title" style="color:var(--primary);border-color:var(--primary)">Cover Letter</div>
-            <p style="margin-top:0">Dear Hiring Manager,</p>
-            <div style="white-space:pre-line">${safe(cl)}</div>
-            <p style="margin-top:50px">Best regards,<br><strong>${safe(d.personal.fullname)}</strong></p>
+    const sc = 'section-title';
+    let pageContent = '';
+
+    if (template === 'sidebar-left') {
+        // ── Layout 2 colunas: sidebar colorida à esquerda ──
+        const desired  = lang === 'pt' ? d.personal.desired_position_pt : d.personal.desired_position_en;
+        const lightTag = 'background:rgba(255,255,255,0.18); color:white; border-radius:4px; padding:2px 7px; font-size:8pt; display:inline-block; margin:2px 2px 2px 0;';
+        const lightSc  = 'section-title';
+        pageContent = `<div class="cv-page-sheet">
+            <div class="cv-cols">
+                <div class="col-side">
+                    ${photoHTML(true)}
+                    <h1>${d.personal.fullname}</h1>
+                    <div class="desired-position">${desired || ''}</div>
+                    <div class="${lightSc}">Contato</div>
+                    <div class="contact-info">
+                        📍 ${d.personal.location || ''}<br>
+                        📞 ${d.personal.phone || ''}<br>
+                        ✉️ ${d.personal.email || ''}
+                        ${d.personal.linkedin ? `<br>🔗 ${d.personal.linkedin}` : ''}
+                        ${d.personal.website  ? `<br>🌐 ${d.personal.website}` : ''}
+                    </div>
+                    ${skillsHTML(d, lang, lightSc, lightTag)}
+                    ${certsHTML(d, lang, lightSc)}
+                    ${educationHTML(d, lang, lightSc)}
+                    ${volunteerHTML(d, lang, lightSc)}
+                </div>
+                <div class="col-main">
+                    ${summaryHTML(d, lang, sc)}
+                    ${experienceHTML(d, lang, sc)}
+                    ${projectsHTML(d, lang, sc)}
+                </div>
+            </div>
+        </div>`;
+
+    } else if (template === 'twocol') {
+        // ── Layout 2 colunas iguais com header colorido ──
+        const flip = align === 'row-reverse' ? 'row-reverse' : '';
+        pageContent = `<div class="cv-page-sheet">
+            <div class="cv-header-full header-wrapper ${flip}">
+                ${photoHTML(false)}
+                ${headerTextHTML(d.personal, lang, align === 'row-reverse')}
+            </div>
+            <div class="cv-body-cols">
+                <div class="col-left">
+                    ${summaryHTML(d, lang, sc)}
+                    ${experienceHTML(d, lang, sc)}
+                    ${projectsHTML(d, lang, sc)}
+                </div>
+                <div class="col-right">
+                    ${educationHTML(d, lang, sc)}
+                    ${skillsHTML(d, lang, sc)}
+                    ${certsHTML(d, lang, sc)}
+                    ${volunteerHTML(d, lang, sc)}
+                </div>
+            </div>
+        </div>`;
+
+    } else {
+        // ── Templates 1 coluna originais ──
+        const flip = align === 'row-reverse' ? 'row-reverse' : '';
+        pageContent = `<div class="cv-page-sheet">
+            <div class="header-wrapper ${flip}">
+                ${photoHTML(false)}
+                ${headerTextHTML(d.personal, lang, align === 'row-reverse')}
+            </div>
+            ${summaryHTML(d, lang, sc)}
+            ${experienceHTML(d, lang, sc)}
+            ${educationHTML(d, lang, sc)}
+            ${skillsHTML(d, lang, sc)}
+            ${certsHTML(d, lang, sc)}
+            ${projectsHTML(d, lang, sc)}
+            ${volunteerHTML(d, lang, sc)}
         </div>`;
     }
 
-    preview.innerHTML = html;
+    // ── Cover Letter (folha separada) ──
+    let coverContent = '';
+    if (document.getElementById('include-cover').checked && d.coverletter) {
+        const cl = lang === 'pt' ? d.coverletter.pt : d.coverletter.en;
+        coverContent = `
+            <hr class="page-divider" data-label="Cover Letter">
+            <div class="cv-page-sheet">
+                <div class="${sc}" style="margin-bottom:30px">Cover Letter</div>
+                <p>Dear Hiring Manager,</p>
+                <div style="line-height:1.7; text-align:justify; font-size:11pt; white-space:pre-line">${cl}</div>
+                <p style="margin-top:50px">Best regards,<br><strong>${d.personal.fullname}</strong></p>
+            </div>`;
+    }
 
-    // Checar overflow após render
-    setTimeout(checkOverflow, 100);
+    container.innerHTML = pageContent + coverContent;
 }
 
-// =============================================
-// EXPORT PDF
-// =============================================
+// ── Export PDF ───────────────────────────────────────────────────
 async function exportPDF() {
-    if (!cvData) { alert('Importe um JSON primeiro!'); return; }
-
-    const pages = document.querySelectorAll('.page-wrap, .cover-page');
-    if (!pages.length) return;
-
-    // Cria container temporário com todas as páginas
-    const container = document.createElement('div');
-    pages.forEach((p, i) => {
-        const clone = p.cloneNode(true);
-        clone.style.pageBreakAfter = 'always';
-        clone.style.pageBreakInside = 'avoid';
-        container.appendChild(clone);
-    });
-    document.body.appendChild(container);
-    container.style.position = 'fixed';
-    container.style.left = '-9999px';
-    container.style.top = '0';
-
+    document.querySelectorAll('.page-divider').forEach(el => el.style.display = 'none');
+    const element = document.getElementById('cv-render');
     await html2pdf().set({
         margin: 0,
-        filename: `CV_${cvData.personal?.fullname?.replace(/\s+/g,'_') || 'CV'}.pdf`,
-        html2canvas: { scale: 2, useCORS: true, logging: false },
+        filename: 'CV_CVBuilder.pdf',
+        html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css'] }
-    }).from(container).save();
-
-    document.body.removeChild(container);
+        pagebreak: { mode: ['css', 'legacy'] }
+    }).from(element).save();
+    document.querySelectorAll('.page-divider').forEach(el => el.style.display = '');
 }
 
-// =============================================
-// DOWNLOAD MODELO JSON
-// =============================================
-function downloadModelJSON() {
-    const model = {
-        personal: {
-            fullname: "Nome Completo",
-            jobtitle_pt: "Cargo Inicial → Cargo Atual",
-            jobtitle_en: "Initial Role → Current Role",
-            desired_position_pt: "Cargo Pretendido",
-            desired_position_en: "Desired Position",
-            email: "email@exemplo.com",
-            phone: "+55 11 9XXXX-XXXX",
-            linkedin: "linkedin.com/in/seuperfil",
-            website: "www.seusite.com",
-            location: "São Paulo, SP, Brasil",
-            summary_pt: "Profissional com sólida experiência em desenvolvimento de software e liderança técnica, com foco em soluções escaláveis e alta disponibilidade.",
-            summary_en: "Professional with solid experience in software development and technical leadership, focused on scalable and high-availability solutions."
-        },
-        experience: [
-            {
-                company: "Empresa Exemplo",
-                position_pt: "Cargo Inicial → Cargo Atual",
-                position_en: "Initial Role → Current Role",
-                period: "2020 – Atual",
-                description_pt: ["Liderou equipe de 8 engenheiros na entrega de produto crítico.", "Implementou arquitetura de microsserviços reduzindo latência em 40%."],
-                description_en: ["Led team of 8 engineers delivering critical product.", "Implemented microservices architecture reducing latency by 40%."]
-            },
-            {
-                company: "Outra Empresa",
-                position_pt: "Desenvolvedor Pleno",
-                position_en: "Mid-Level Developer",
-                period: "2017 – 2020",
-                description_pt: ["Desenvolveu APIs RESTful consumidas por 500k usuários.", "Participou do redesenho do pipeline de CI/CD."],
-                description_en: ["Built RESTful APIs consumed by 500k users.", "Participated in redesigning the CI/CD pipeline."]
-            }
-        ],
-        education: [
-            { degree_pt: "Bacharelado em Ciência da Computação", degree_en: "B.Sc. in Computer Science", institution: "Universidade de São Paulo", period: "2013 – 2017" }
-        ],
-        skills: {
-            technical: ["Python", "Node.js", "React", "AWS", "Docker", "PostgreSQL"],
-            languages: ["Português: Nativo", "Inglês: Avançado", "Espanhol: Intermediário"],
-            soft: ["Liderança", "Comunicação", "Resolução de Problemas"]
-        },
-        projects: [
-            { title_pt: "Sistema de Pagamentos", title_en: "Payment System", description_pt: "Plataforma de pagamentos processando R$10M/mês.", description_en: "Payment platform processing R$10M/month." }
-        ],
-        volunteer: [
-            { role_pt: "Mentor Técnico", role_en: "Technical Mentor", organization: "ONG Tech", period: "2021 – Atual", description_pt: "Mentoria de jovens em início de carreira em tecnologia.", description_en: "Mentoring young professionals entering tech careers." }
-        ],
-        certifications: [
-            { title_pt: "AWS Solutions Architect", title_en: "AWS Solutions Architect", issuer: "Amazon Web Services", year: "2023" },
-            { title_pt: "Google Cloud Professional", title_en: "Google Cloud Professional", issuer: "Google", year: "2022" }
-        ],
-        coverletter: {
-            pt: "Venho por meio desta manifestar meu interesse na posição anunciada.\n\nCom mais de X anos de experiência em tecnologia, desenvolvi expertise em [área], liderando projetos de alto impacto e entregando resultados consistentes.\n\nEstou confiante de que minha experiência e habilidades são um excelente alinhamento com as necessidades da sua organização.\n\nAgradecendo a atenção,",
-            en: "I am writing to express my interest in the advertised position.\n\nWith over X years of experience in technology, I have developed expertise in [area], leading high-impact projects and consistently delivering results.\n\nI am confident that my background and skills are an excellent match for your organization's needs.\n\nThank you for your consideration,"
-        }
-    };
-
-    const blob = new Blob([JSON.stringify(model, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'modelo_cv.json';
-    a.click();
-}
+['template-select','color-palette','font-select','include-cover','lang-toggle','photo-align'].forEach(id => {
+    document.getElementById(id).onchange = render;
+});
 </script>
 </body>
 </html>
