@@ -35,10 +35,13 @@
             width: 210mm;
             min-height: 297mm;
             max-height: 297mm;
-            overflow: hidden;           /* conteúdo que ultrapassa fica oculto */
+            overflow: hidden;
             box-sizing: border-box;
             padding: 45px;
             position: relative;
+        }
+        /* Só quebra entre folhas — não após a última */
+        .cv-page-sheet.break-after {
             page-break-after: always;
             break-after: page;
         }
@@ -103,7 +106,7 @@
         /* --- TEMPLATES 2 COLUNAS --- */
 
         /* Sidebar Esquerda */
-        .template-sidebar-left .cv-page-sheet { padding: 0; }
+        .template-sidebar-left .cv-page-sheet.no-pad { padding: 0; }
         .template-sidebar-left .cv-cols {
             display: grid;
             grid-template-columns: 185px 1fr;
@@ -500,12 +503,15 @@ function render() {
     const sc = 'section-title';
     let pageContent = '';
 
+    const hasCover = document.getElementById('include-cover').checked && d.coverletter;
+
     if (template === 'sidebar-left') {
         // ── Layout 2 colunas: sidebar colorida à esquerda ──
         const desired  = lang === 'pt' ? d.personal.desired_position_pt : d.personal.desired_position_en;
         const lightTag = 'background:rgba(255,255,255,0.18); color:white; border-radius:4px; padding:2px 7px; font-size:8pt; display:inline-block; margin:2px 2px 2px 0;';
         const lightSc  = 'section-title';
-        pageContent = `<div class="cv-page-sheet">
+        // no-pad remove o padding do sheet para o grid ocupar tudo; break-after só se houver cover
+        pageContent = `<div class="cv-page-sheet no-pad ${hasCover ? 'break-after' : ''}">
             <div class="cv-cols">
                 <div class="col-side">
                     ${photoHTML(true)}
@@ -535,7 +541,7 @@ function render() {
     } else if (template === 'twocol') {
         // ── Layout 2 colunas iguais com header colorido ──
         const flip = align === 'row-reverse' ? 'row-reverse' : '';
-        pageContent = `<div class="cv-page-sheet">
+        pageContent = `<div class="cv-page-sheet ${hasCover ? 'break-after' : ''}">
             <div class="cv-header-full header-wrapper ${flip}">
                 ${photoHTML(false)}
                 ${headerTextHTML(d.personal, lang, align === 'row-reverse')}
@@ -558,7 +564,7 @@ function render() {
     } else {
         // ── Templates 1 coluna originais ──
         const flip = align === 'row-reverse' ? 'row-reverse' : '';
-        pageContent = `<div class="cv-page-sheet">
+        pageContent = `<div class="cv-page-sheet ${hasCover ? 'break-after' : ''}">
             <div class="header-wrapper ${flip}">
                 ${photoHTML(false)}
                 ${headerTextHTML(d.personal, lang, align === 'row-reverse')}
@@ -573,13 +579,13 @@ function render() {
         </div>`;
     }
 
-    // ── Cover Letter (folha separada) ──
+    // ── Cover Letter (folha separada, sempre com padding padrão) ──
     let coverContent = '';
-    if (document.getElementById('include-cover').checked && d.coverletter) {
+    if (hasCover) {
         const cl = lang === 'pt' ? d.coverletter.pt : d.coverletter.en;
         coverContent = `
             <hr class="page-divider" data-label="Cover Letter">
-            <div class="cv-page-sheet">
+            <div class="cv-page-sheet" style="padding:45px">
                 <div class="${sc}" style="margin-bottom:30px">Cover Letter</div>
                 <p>Dear Hiring Manager,</p>
                 <div style="line-height:1.7; text-align:justify; font-size:11pt; white-space:pre-line">${cl}</div>
