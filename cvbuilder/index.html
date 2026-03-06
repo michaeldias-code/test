@@ -509,17 +509,45 @@ function render() {
 
     container.className = `template-${template}`;
 
+    // Mapa de chave-JSON → função de renderização
+    const secRenderers = {
+        summary:    (sc, ts) => summaryHTML(d, lang, sc),
+        experience: (sc, ts) => experienceHTML(d, lang, sc),
+        education:  (sc, ts) => educationHTML(d, lang, sc),
+        skills:     (sc, ts) => skillsHTML(d, lang, sc, ts),
+        certifications: (sc, ts) => certsHTML(d, lang, sc),
+        projects:   (sc, ts) => projectsHTML(d, lang, sc),
+        volunteer:  (sc, ts) => volunteerHTML(d, lang, sc),
+    };
+    // Alias para mapear chaves do JSON → id do checkbox
+    const secKey = { certifications: 'certs' };
+    const isOn = key => sec(secKey[key] || key);
+
+    // Ordem vem das chaves do JSON (JS preserva ordem de inserção)
+    const jsonOrder = Object.keys(d).filter(k => secRenderers[k]);
+
+    // Renderiza lista de chaves numa dada coluna/contexto
+    function renderSecs(keys, sc, tagStyle) {
+        return keys.filter(isOn).map(k => secRenderers[k](sc, tagStyle)).join('');
+    }
+
     const sc = 'section-title';
     let pageContent = '';
 
     const hasCover = document.getElementById('include-cover').checked && d.coverletter;
 
     if (template === 'sidebar-left') {
-        // ── Layout 2 colunas: sidebar colorida à esquerda ──
+        // Seções que ficam na sidebar vs coluna principal
+        const sideKeys = ['skills','certifications','education','volunteer'];
+        const mainKeys = ['summary','experience','projects'];
+        // Respeita ordem do JSON dentro de cada grupo
+        const sideOrdered = jsonOrder.filter(k => sideKeys.includes(k));
+        const mainOrdered = jsonOrder.filter(k => mainKeys.includes(k));
+
         const desired  = lang === 'pt' ? d.personal.desired_position_pt : d.personal.desired_position_en;
         const lightTag = 'background:rgba(255,255,255,0.18); color:white; border-radius:4px; padding:2px 7px; font-size:8pt; display:inline-block; margin:2px 2px 2px 0;';
         const lightSc  = 'section-title';
-        // no-pad remove o padding do sheet para o grid ocupar tudo; break-after só se houver cover
+
         pageContent = `<div class="cv-page-sheet no-pad ${hasCover ? 'break-after' : ''}">
             <div class="cv-cols">
                 <div class="col-side">
@@ -534,21 +562,20 @@ function render() {
                         ${d.personal.linkedin ? `<br>🔗 ${d.personal.linkedin}` : ''}
                         ${d.personal.website  ? `<br>🌐 ${d.personal.website}` : ''}
                     </div>
-                    ${sec('skills')    ? skillsHTML(d, lang, lightSc, lightTag) : ''}
-                    ${sec('certs')     ? certsHTML(d, lang, lightSc) : ''}
-                    ${sec('education') ? educationHTML(d, lang, lightSc) : ''}
-                    ${sec('volunteer') ? volunteerHTML(d, lang, lightSc) : ''}
+                    ${renderSecs(sideOrdered, lightSc, lightTag)}
                 </div>
                 <div class="col-main">
-                    ${sec('summary')    ? summaryHTML(d, lang, sc) : ''}
-                    ${sec('experience') ? experienceHTML(d, lang, sc) : ''}
-                    ${sec('projects')   ? projectsHTML(d, lang, sc) : ''}
+                    ${renderSecs(mainOrdered, sc)}
                 </div>
             </div>
         </div>`;
 
     } else if (template === 'twocol') {
-        // ── Layout 2 colunas iguais com header colorido ──
+        const leftKeys  = ['summary','experience','projects'];
+        const rightKeys = ['education','skills','certifications','volunteer'];
+        const leftOrdered  = jsonOrder.filter(k => leftKeys.includes(k));
+        const rightOrdered = jsonOrder.filter(k => rightKeys.includes(k));
+
         const flip = align === 'row-reverse' ? 'row-reverse' : '';
         pageContent = `<div class="cv-page-sheet ${hasCover ? 'break-after' : ''}">
             <div class="cv-header-full header-wrapper ${flip}">
@@ -556,35 +583,19 @@ function render() {
                 ${headerTextHTML(d.personal, lang, align === 'row-reverse')}
             </div>
             <div class="cv-body-cols">
-                <div class="col-left">
-                    ${sec('summary')    ? summaryHTML(d, lang, sc) : ''}
-                    ${sec('experience') ? experienceHTML(d, lang, sc) : ''}
-                    ${sec('projects')   ? projectsHTML(d, lang, sc) : ''}
-                </div>
-                <div class="col-right">
-                    ${sec('education') ? educationHTML(d, lang, sc) : ''}
-                    ${sec('skills')    ? skillsHTML(d, lang, sc) : ''}
-                    ${sec('certs')     ? certsHTML(d, lang, sc) : ''}
-                    ${sec('volunteer') ? volunteerHTML(d, lang, sc) : ''}
-                </div>
+                <div class="col-left">${renderSecs(leftOrdered, sc)}</div>
+                <div class="col-right">${renderSecs(rightOrdered, sc)}</div>
             </div>
         </div>`;
 
     } else {
-        // ── Templates 1 coluna originais ──
         const flip = align === 'row-reverse' ? 'row-reverse' : '';
         pageContent = `<div class="cv-page-sheet ${hasCover ? 'break-after' : ''}">
             <div class="header-wrapper ${flip}">
                 ${photoHTML(false)}
                 ${headerTextHTML(d.personal, lang, align === 'row-reverse')}
             </div>
-            ${sec('summary')    ? summaryHTML(d, lang, sc) : ''}
-            ${sec('experience') ? experienceHTML(d, lang, sc) : ''}
-            ${sec('education')  ? educationHTML(d, lang, sc) : ''}
-            ${sec('skills')     ? skillsHTML(d, lang, sc) : ''}
-            ${sec('certs')      ? certsHTML(d, lang, sc) : ''}
-            ${sec('projects')   ? projectsHTML(d, lang, sc) : ''}
-            ${sec('volunteer')  ? volunteerHTML(d, lang, sc) : ''}
+            ${renderSecs(jsonOrder, sc)}
         </div>`;
     }
 
