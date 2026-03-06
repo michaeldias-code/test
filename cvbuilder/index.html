@@ -524,7 +524,13 @@ function render() {
     const isOn = key => sec(secKey[key] || key);
 
     // Ordem vem das chaves do JSON (JS preserva ordem de inserção)
-    const jsonOrder = Object.keys(d).filter(k => secRenderers[k]);
+    // "summary" vive dentro de "personal", então injetamos logo após ele
+    const rawOrder = Object.keys(d);
+    const jsonOrder = [];
+    rawOrder.forEach(k => {
+        if (k === 'personal') { jsonOrder.push('summary'); return; }
+        if (secRenderers[k]) jsonOrder.push(k);
+    });
 
     // Renderiza lista de chaves numa dada coluna/contexto
     function renderSecs(keys, sc, tagStyle) {
