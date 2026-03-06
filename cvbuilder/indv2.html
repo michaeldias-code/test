@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Designer Pro - Ultimate Custom</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&family=Roboto+Mono&family=Montserrat:wght@400;700&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --font-main: 'Inter', sans-serif;
+        }
+
+        body { font-family: 'Inter', sans-serif; background: #323639; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 360px; background: #ffffff; border-right: 1px solid #e2e8f0; padding: 20px; overflow-y: auto; height: 100%; box-sizing: border-box; }
+        .preview-area { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 0; }
+        
+        .control-group { margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+        label { display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin: 10px 0 5px; }
+        select, input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+
+        /* ── Wrapper do CV completo ── */
+        #cv-render {
+            width: 210mm;
+            background: white;
+            box-sizing: border-box;
+            color: #334155;
+            font-family: var(--font-main);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        /* ── Cada folha A4 ── */
+        .cv-page-sheet {
+            width: 210mm;
+            min-height: 297mm;
+            max-height: 297mm;
+            overflow: hidden;
+            box-sizing: border-box;
+            padding: 45px;
+            position: relative;
+        }
+        /* Só quebra entre folhas — não após a última */
+        .cv-page-sheet.break-after {
+            page-break-after: always;
+            break-after: page;
+        }
+
+        /* Linha tracejada entre folhas (só na preview, some no PDF) */
+        .page-divider {
+            width: 210mm;
+            height: 0;
+            border: none;
+            border-top: 2px dashed #94a3b8;
+            margin: 0;
+            position: relative;
+        }
+        .page-divider::after {
+            content: attr(data-label);
+            position: absolute;
+            top: -9px;
+            right: 6px;
+            background: #94a3b8;
+            color: white;
+            font-size: 9px;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-family: sans-serif;
+        }
+        @media print { .page-divider { display: none !important; } }
+
+        /* --- ESTRUTURA DO HEADER DINÂMICO (1 coluna) --- */
+        .header-wrapper { display: flex; align-items: center; gap: 30px; margin-bottom: 30px; }
+        .header-wrapper.row-reverse { flex-direction: row-reverse; }
+        .header-text { flex: 1; }
+
+        .photo-container { width: 120px; height: 120px; flex-shrink: 0; }
+        .photo-circle {
+            width: 100%; height: 100%; border-radius: 12px;
+            border: 3px solid var(--primary-color); overflow: hidden;
+        }
+        .photo-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- TEMPLATES 1 COLUNA (idênticos ao original) --- */
+        .template-modern .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; margin-bottom: 15px; }
+
+        .template-executive .header-wrapper {
+            background: var(--primary-color);
+            color: white !important;
+            margin: -45px -45px 30px -45px;
+            padding: 45px;
+        }
+        .template-executive .header-wrapper h1 { color: white; margin: 0; }
+        .template-executive .photo-circle { border-color: white !important; }
+        .template-executive .section-title { color: var(--primary-color); font-weight: 800; border-left: 4px solid var(--primary-color); padding-left: 10px; margin-bottom: 15px; }
+        .template-executive .desired-position { color: white !important; }
+        .template-executive .current-job-title { color: rgba(255,255,255,0.8) !important; }
+        .template-executive .contact-info { color: white !important; }
+
+        .template-minimal .section-title { color: #1e293b; border-bottom: 1px solid var(--primary-color); margin-bottom: 10px; }
+
+        .template-creative { /* border-top aplicado no sheet */ }
+        .template-creative .cv-page-sheet { border-top: 15px solid var(--primary-color); }
+        .template-creative .section-title { font-family: 'Roboto Mono', monospace; background: var(--primary-color); color: white; padding: 2px 10px; }
+
+        /* --- TEMPLATES 2 COLUNAS --- */
+
+        /* Sidebar Esquerda */
+        .template-sidebar-left .cv-page-sheet.no-pad { padding: 0; }
+        .template-sidebar-left .cv-cols {
+            display: grid;
+            grid-template-columns: 185px 1fr;
+            min-height: 297mm;
+            max-height: 297mm;
+            overflow: hidden;
+        }
+        .template-sidebar-left .col-side {
+            background: var(--primary-color);
+            color: white;
+            padding: 35px 18px;
+            overflow: hidden;
+        }
+        .template-sidebar-left .col-side h1 {
+            font-size: 13.5pt; font-weight: 700; color: white;
+            margin: 0 0 4px; line-height: 1.25;
+        }
+        .template-sidebar-left .col-side .desired-position {
+            font-size: 8pt; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.8px; color: rgba(255,255,255,0.75); margin-bottom: 14px;
+        }
+        .template-sidebar-left .col-side .section-title {
+            font-size: 7.5pt; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.5px; color: rgba(255,255,255,0.6);
+            border-bottom: 1px solid rgba(255,255,255,0.25);
+            padding-bottom: 4px; margin: 16px 0 8px;
+        }
+        .template-sidebar-left .col-side .contact-info {
+            font-size: 8pt; line-height: 1.75; color: rgba(255,255,255,0.85);
+        }
+        .template-sidebar-left .col-main {
+            padding: 35px 28px;
+            overflow: hidden;
+        }
+        .template-sidebar-left .col-main .section-title {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            text-transform: uppercase; font-weight: 700; margin-bottom: 12px;
+        }
+        .photo-circle-side {
+            width: 100%; aspect-ratio: 1;
+            border-radius: 10px; overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.35);
+            margin-bottom: 14px;
+        }
+        .photo-circle-side img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Duas Colunas Iguais */
+        .template-twocol .cv-header-full {
+            background: var(--primary-color);
+            color: white;
+            margin: -45px -45px 0 -45px;
+            padding: 35px 45px 28px;
+            display: flex; align-items: center; gap: 24px;
+        }
+        .template-twocol .cv-header-full h1 { color: white; margin: 0 0 4px; font-size: 22pt; }
+        .template-twocol .cv-header-full .desired-position { color: rgba(255,255,255,0.85) !important; margin-bottom: 8px; }
+        .template-twocol .cv-header-full .contact-info { color: rgba(255,255,255,0.85) !important; }
+        .template-twocol .cv-header-full .photo-circle { border-color: white; }
+        .template-twocol .cv-body-cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 26px;
+            padding-top: 22px;
+        }
+        .template-twocol .col-right {
+            border-left: 1px solid #e2e8f0;
+            padding-left: 26px;
+        }
+        .template-twocol .section-title {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            text-transform: uppercase; font-weight: 700; margin-bottom: 12px;
+        }
+
+        /* ─── Componentes partilhados ─── */
+        .desired-position { color: var(--primary-color); font-size: 15pt; font-weight: 700; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .current-job-title { color: #64748b; }
+        .contact-info { font-size: 9pt; margin-top: 12px; opacity: 0.9; line-height: 1.5; }
+
+        .cv-section { margin-bottom: 22px; }
+        .cv-section:last-child { margin-bottom: 0; }
+
+        .html2pdf__page-break { display: block; height: 0; page-break-before: always; }
+        .btn-export { width: 100%; background: #000; color: white; border: none; padding: 18px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>CV Designer Pro</h2>
+
+    <div class="control-group">
+        <label>Foto (Opcional):</label>
+        <input type="file" id="photo-upload" accept="image/*">
+        <label>Posição da Foto:</label>
+        <select id="photo-align">
+            <option value="row">Esquerda</option>
+            <option value="row-reverse">Direita</option>
+        </select>
+    </div>
+
+    <button onclick="downloadModelJSON()" style="background:#475569; margin-bottom: 20px;" class="btn-export">
+        📄 Baixar Modelo JSON
+    </button>
+
+    <div class="control-group">
+        <label>Dados JSON:</label>
+        <input type="file" id="json-file" accept=".json">
+    </div>
+
+    <div class="control-group">
+        <label>Modelo Base:</label>
+        <select id="template-select">
+            <optgroup label="1 Coluna">
+                <option value="modern">Moderno</option>
+                <option value="executive">Executivo</option>
+                <option value="minimal">Minimalista</option>
+                <option value="creative">Criativo</option>
+            </optgroup>
+            <optgroup label="2 Colunas">
+                <option value="sidebar-left">Sidebar Esquerda</option>
+                <option value="twocol">Duas Colunas</option>
+            </optgroup>
+        </select>
+
+        <label>Cor & Fonte:</label>
+        <select id="color-palette">
+            <option value="#2563eb">Azul Royal</option>
+            <option value="#1e293b">Slate Dark</option>
+            <option value="#7c3aed">Roxo Moderno</option>
+            <option value="#059669">Verde Esmeralda</option>
+            <option value="#000000">Preto Puro</option>
+        </select>
+
+        <select id="font-select" style="margin-top:10px">
+            <option value="'Inter', sans-serif">Inter</option>
+            <option value="'Montserrat', sans-serif">Montserrat</option>
+            <option value="'Lora', serif">Lora</option>
+        </select>
+    </div>
+
+    <div class="control-group">
+        <label><input type="checkbox" id="include-cover" checked> Incluir Cover Letter</label>
+        <label><input type="checkbox" id="lang-toggle"> Inglês</label>
+    </div>
+
+    <button class="btn-export" onclick="exportPDF()">📥 BAIXAR PDF</button>
+</div>
+
+<div class="preview-area">
+    <div id="cv-render" class="template-modern">
+        <div class="cv-page-sheet">
+            <p style="text-align: center; color: #94a3b8; margin-top: 100px;">Aguardando JSON...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+let cvData = null;
+let userPhoto = null;
+
+document.getElementById('photo-upload').onchange = (e) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => { userPhoto = ev.target.result; render(); };
+    reader.readAsDataURL(e.target.files[0]);
+};
+
+document.getElementById('json-file').onchange = (e) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => { cvData = JSON.parse(ev.target.result); render(); };
+    reader.readAsText(e.target.files[0]);
+};
+
+function downloadModelJSON() {
+    const modelData = {
+        "personal": {
+            "fullname": "Nome Completo",
+            "jobtitle_pt": "Cargo Inicial → Cargo Intermediário → Cargo Atual",
+            "jobtitle_en": "Initial Role → Intermediate Role → Current Role",
+            "desired_position_pt": "Cargo Pretendido",
+            "desired_position_en": "Desired Position",
+            "email": "email@exemplo.com",
+            "phone": "+55119XXXXXXXX",
+            "linkedin": "linkedin.com/in/seuperfil",
+            "website": "www.seusite.com",
+            "location": "Cidade, Estado, País",
+            "summary_pt": "Profissional de tecnologia com experiência em desenvolvimento de software e liderança técnica...",
+            "summary_en": "Technology professional with experience in software development and technical leadership..."
+        },
+        "experience": [
+            {
+                "company": "Empresa Exemplo",
+                "position_pt": "Cargo Inicial → Cargo Intermediário → Cargo Atual",
+                "position_en": "Initial Role → Intermediate Role → Current Role",
+                "period": "Ano Início – Ano Fim / Atual",
+                "description_pt": ["Liderança ou participação em projetos...", "Implementação de boas práticas..."],
+                "description_en": ["Led or contributed to projects...", "Implemented development best practices..."]
+            }
+        ],
+        "education": [
+            {
+                "degree_pt": "Curso ou Graduação",
+                "degree_en": "Degree or Program",
+                "institution": "Instituição de Ensino",
+                "period": "Ano Início – Ano Fim"
+            }
+        ],
+        "skills": {
+            "technical": ["Software Development", "Cloud Computing"],
+            "languages": ["Portuguese: Native", "English: Advanced"],
+            "soft": ["Leadership", "Communication"]
+        },
+        "projects": [
+            {
+                "title_pt": "Projeto ou Sistema Relevante",
+                "title_en": "Relevant Project or System",
+                "description_pt": "Descrição breve do projeto...",
+                "description_en": "Brief project description..."
+            }
+        ],
+        "volunteer": [
+            {
+                "role_pt": "Atuação Voluntária",
+                "role_en": "Volunteer Role",
+                "organization": "Organização",
+                "period": "Ano Início – Ano Fim",
+                "description_pt": "Descrição da atividade...",
+                "description_en": "Description of activity..."
+            }
+        ],
+        "certifications": [
+            {
+                "title_pt": "Nome da Certificação",
+                "title_en": "Certification Name",
+                "issuer": "Instituição Certificadora",
+                "year": "2024"
+            }
+        ],
+        "coverletter": {
+            "pt": "Olá time recrutador,\n\nTenho interesse na oportunidade...",
+            "en": "Hello Hiring Team,\n\nI am interested in the opportunity..."
+        }
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(modelData, null, 2));
+    const a = document.createElement('a');
+    a.setAttribute("href", dataStr);
+    a.setAttribute("download", "modelo_cv.json");
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+}
+
+// ── Helpers de conteúdo ──────────────────────────────────────────
+
+function photoHTML(sideMode) {
+    if (!userPhoto) return '';
+    if (sideMode) return `<div class="photo-circle-side"><img src="${userPhoto}"></div>`;
+    return `<div class="photo-container"><div class="photo-circle"><img src="${userPhoto}"></div></div>`;
+}
+
+function headerTextHTML(p, lang, alignRight) {
+    const desired  = lang === 'pt' ? p.desired_position_pt  : p.desired_position_en;
+    const jobTitle = lang === 'pt' ? p.jobtitle_pt           : p.jobtitle_en;
+    return `<div class="header-text" style="text-align:${alignRight ? 'right' : 'left'}">
+        <h1 style="margin:0; font-size:26pt;">${p.fullname}</h1>
+        <div class="desired-position">${desired || ''}</div>
+        <div class="contact-info">
+            <div>📍 ${p.location || ''} • 📞 ${p.phone || ''}</div>
+            <div>✉️ ${p.email || ''}</div>
+            <div style="margin-top:4px">
+                ${p.linkedin ? `<strong>LinkedIn:</strong> ${p.linkedin}` : ''}
+                ${p.website  ? ` | <strong>Web:</strong> ${p.website}` : ''}
+            </div>
+        </div>
+    </div>`;
+}
+
+function summaryHTML(d, lang, sc) {
+    const text  = lang === 'pt' ? d.personal.summary_pt : d.personal.summary_en;
+    if (!text) return '';
+    const label = lang === 'pt' ? 'Resumo' : 'Summary';
+    return `<div class="cv-section">
+        <div class="${sc}">${label}</div>
+        <p style="text-align:justify; font-size:10pt; line-height:1.5; margin:0">${text}</p>
+    </div>`;
+}
+
+function experienceHTML(d, lang, sc) {
+    if (!d.experience || !d.experience.length) return '';
+    const label = lang === 'pt' ? 'Experiência Profissional' : 'Experience';
+    const items = d.experience.map(exp => {
+        const pos  = lang === 'pt' ? exp.position_pt    : exp.position_en;
+        const desc = lang === 'pt' ? exp.description_pt : exp.description_en;
+        return `<div style="margin-bottom:14px">
+            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:10pt">
+                <span>${pos || ''}</span>
+                <span style="white-space:nowrap; padding-left:8px">${exp.period || ''}</span>
+            </div>
+            <div style="color:var(--primary-color); font-weight:600; font-size:9pt">${exp.company || ''}</div>
+            <ul style="font-size:9.5pt; margin:4px 0 0; padding-left:18px">
+                ${(desc || []).map(i => `<li>${i}</li>`).join('')}
+            </ul>
+        </div>`;
+    }).join('');
+    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
+}
+
+function educationHTML(d, lang, sc) {
+    if (!d.education || !d.education.length) return '';
+    const label = lang === 'pt' ? 'Formação' : 'Education';
+    const items = d.education.map(ed => `
+        <div style="display:flex; justify-content:space-between; font-size:10pt; margin-bottom:6px">
+            <span><strong>${lang === 'pt' ? ed.degree_pt : ed.degree_en}</strong></span>
+            <span style="white-space:nowrap; padding-left:8px">${ed.period || ''}</span>
+        </div>
+        <div style="font-size:9pt; color:#64748b; margin-bottom:4px">${ed.institution || ''}</div>
+    `).join('');
+    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
+}
+
+function skillsHTML(d, lang, sc, tagStyle) {
+    if (!d.skills) return '';
+    const label = lang === 'pt' ? 'Habilidades' : 'Skills';
+    const ts = tagStyle || 'background:#f1f5f9; border-radius:4px; padding:2px 8px; font-size:8.5pt; display:inline-block; margin:2px 2px 2px 0;';
+    function group(title, arr) {
+        if (!arr || !arr.length) return '';
+        return `<div style="margin-bottom:8px">
+            <div style="font-size:8pt; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px">${title}</div>
+            <div>${arr.map(s => `<span style="${ts}">${s}</span>`).join('')}</div>
+        </div>`;
+    }
+    const tl = lang === 'pt' ? 'Técnicas'        : 'Technical';
+    const ll = lang === 'pt' ? 'Idiomas'          : 'Languages';
+    const sl = lang === 'pt' ? 'Comportamentais'  : 'Soft Skills';
+    return `<div class="cv-section"><div class="${sc}">${label}</div>
+        ${group(tl, d.skills.technical)}
+        ${group(ll, d.skills.languages)}
+        ${group(sl, d.skills.soft)}
+    </div>`;
+}
+
+function certsHTML(d, lang, sc) {
+    if (!d.certifications || !d.certifications.length) return '';
+    const label = lang === 'pt' ? 'Certificações' : 'Certifications';
+    const items = d.certifications.map(c => `
+        <div style="margin-bottom:6px; font-size:9.5pt">
+            <strong>${lang === 'pt' ? c.title_pt : c.title_en}</strong>
+            <span style="color:#64748b; font-size:8.5pt"> · ${c.issuer || ''} ${c.year ? '(' + c.year + ')' : ''}</span>
+        </div>`).join('');
+    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
+}
+
+function projectsHTML(d, lang, sc) {
+    if (!d.projects || !d.projects.length) return '';
+    const label = lang === 'pt' ? 'Projetos' : 'Projects';
+    const items = d.projects.map(p => `
+        <div style="margin-bottom:8px; font-size:9.5pt">
+            <strong>${lang === 'pt' ? p.title_pt : p.title_en}</strong>
+            <div style="color:#475569">${lang === 'pt' ? p.description_pt : p.description_en}</div>
+        </div>`).join('');
+    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
+}
+
+function volunteerHTML(d, lang, sc) {
+    if (!d.volunteer || !d.volunteer.length) return '';
+    const label = lang === 'pt' ? 'Voluntariado' : 'Volunteer';
+    const items = d.volunteer.map(v => `
+        <div style="margin-bottom:8px; font-size:9.5pt">
+            <div style="font-weight:bold">${lang === 'pt' ? v.role_pt : v.role_en}
+                <span style="font-weight:normal; color:#64748b"> · ${v.organization || ''} ${v.period ? '(' + v.period + ')' : ''}</span>
+            </div>
+            <div style="color:#475569">${lang === 'pt' ? v.description_pt : v.description_en}</div>
+        </div>`).join('');
+    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
+}
+
+// ── Render principal ─────────────────────────────────────────────
+
+function render() {
+    if (!cvData) return;
+
+    const lang     = document.getElementById('lang-toggle').checked ? 'en' : 'pt';
+    const template = document.getElementById('template-select').value;
+    const align    = document.getElementById('photo-align').value;
+    const container = document.getElementById('cv-render');
+    const d = cvData;
+
+    document.documentElement.style.setProperty('--primary-color', document.getElementById('color-palette').value);
+    document.documentElement.style.setProperty('--font-main',     document.getElementById('font-select').value);
+
+    container.className = `template-${template}`;
+
+    const sc = 'section-title';
+    let pageContent = '';
+
+    const hasCover = document.getElementById('include-cover').checked && d.coverletter;
+
+    if (template === 'sidebar-left') {
+        // ── Layout 2 colunas: sidebar colorida à esquerda ──
+        const desired  = lang === 'pt' ? d.personal.desired_position_pt : d.personal.desired_position_en;
+        const lightTag = 'background:rgba(255,255,255,0.18); color:white; border-radius:4px; padding:2px 7px; font-size:8pt; display:inline-block; margin:2px 2px 2px 0;';
+        const lightSc  = 'section-title';
+        // no-pad remove o padding do sheet para o grid ocupar tudo; break-after só se houver cover
+        pageContent = `<div class="cv-page-sheet no-pad ${hasCover ? 'break-after' : ''}">
+            <div class="cv-cols">
+                <div class="col-side">
+                    ${photoHTML(true)}
+                    <h1>${d.personal.fullname}</h1>
+                    <div class="desired-position">${desired || ''}</div>
+                    <div class="${lightSc}">Contato</div>
+                    <div class="contact-info">
+                        📍 ${d.personal.location || ''}<br>
+                        📞 ${d.personal.phone || ''}<br>
+                        ✉️ ${d.personal.email || ''}
+                        ${d.personal.linkedin ? `<br>🔗 ${d.personal.linkedin}` : ''}
+                        ${d.personal.website  ? `<br>🌐 ${d.personal.website}` : ''}
+                    </div>
+                    ${skillsHTML(d, lang, lightSc, lightTag)}
+                    ${certsHTML(d, lang, lightSc)}
+                    ${educationHTML(d, lang, lightSc)}
+                    ${volunteerHTML(d, lang, lightSc)}
+                </div>
+                <div class="col-main">
+                    ${summaryHTML(d, lang, sc)}
+                    ${experienceHTML(d, lang, sc)}
+                    ${projectsHTML(d, lang, sc)}
+                </div>
+            </div>
+        </div>`;
+
+    } else if (template === 'twocol') {
+        // ── Layout 2 colunas iguais com header colorido ──
+        const flip = align === 'row-reverse' ? 'row-reverse' : '';
+        pageContent = `<div class="cv-page-sheet ${hasCover ? 'break-after' : ''}">
+            <div class="cv-header-full header-wrapper ${flip}">
+                ${photoHTML(false)}
+                ${headerTextHTML(d.personal, lang, align === 'row-reverse')}
+            </div>
+            <div class="cv-body-cols">
+                <div class="col-left">
+                    ${summaryHTML(d, lang, sc)}
+                    ${experienceHTML(d, lang, sc)}
+                    ${projectsHTML(d, lang, sc)}
+                </div>
+                <div class="col-right">
+                    ${educationHTML(d, lang, sc)}
+                    ${skillsHTML(d, lang, sc)}
+                    ${certsHTML(d, lang, sc)}
+                    ${volunteerHTML(d, lang, sc)}
+                </div>
+            </div>
+        </div>`;
+
+    } else {
+        // ── Templates 1 coluna originais ──
+        const flip = align === 'row-reverse' ? 'row-reverse' : '';
+        pageContent = `<div class="cv-page-sheet ${hasCover ? 'break-after' : ''}">
+            <div class="header-wrapper ${flip}">
+                ${photoHTML(false)}
+                ${headerTextHTML(d.personal, lang, align === 'row-reverse')}
+            </div>
+            ${summaryHTML(d, lang, sc)}
+            ${experienceHTML(d, lang, sc)}
+            ${educationHTML(d, lang, sc)}
+            ${skillsHTML(d, lang, sc)}
+            ${certsHTML(d, lang, sc)}
+            ${projectsHTML(d, lang, sc)}
+            ${volunteerHTML(d, lang, sc)}
+        </div>`;
+    }
+
+    // ── Cover Letter (folha separada, sempre com padding padrão) ──
+    let coverContent = '';
+    if (hasCover) {
+        const cl = lang === 'pt' ? d.coverletter.pt : d.coverletter.en;
+        coverContent = `
+            <hr class="page-divider" data-label="Cover Letter">
+            <div class="cv-page-sheet" style="padding:45px">
+                <div class="${sc}" style="margin-bottom:30px">Cover Letter</div>
+                <p>Dear Hiring Manager,</p>
+                <div style="line-height:1.7; text-align:justify; font-size:11pt; white-space:pre-line">${cl}</div>
+                <p style="margin-top:50px">Best regards,<br><strong>${d.personal.fullname}</strong></p>
+            </div>`;
+    }
+
+    container.innerHTML = pageContent + coverContent;
+}
+
+// ── Export PDF ───────────────────────────────────────────────────
+async function exportPDF() {
+    document.querySelectorAll('.page-divider').forEach(el => el.style.display = 'none');
+    const element = document.getElementById('cv-render');
+    await html2pdf().set({
+        margin: 0,
+        filename: 'CV_CVBuilder.pdf',
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['css', 'legacy'] }
+    }).from(element).save();
+    document.querySelectorAll('.page-divider').forEach(el => el.style.display = '');
+}
+
+['template-select','color-palette','font-select','include-cover','lang-toggle','photo-align'].forEach(id => {
+    document.getElementById(id).onchange = render;
+});
+</script>
+</body>
+</html>
