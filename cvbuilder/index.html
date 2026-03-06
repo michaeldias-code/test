@@ -440,21 +440,43 @@ function educationHTML(d, lang, sc) {
 function skillsHTML(d, lang, sc, tagStyle) {
     if (!d.skills) return '';
     const label = lang === 'pt' ? 'Habilidades' : 'Skills';
-    const ts = tagStyle || 'background:#f1f5f9; border-radius:4px; padding:2px 8px; font-size:8.5pt; display:inline-block; margin:2px 2px 2px 0;';
-    function group(title, arr) {
-        if (!arr || !arr.length) return '';
-        return `<div style="margin-bottom:8px">
-            <div style="font-size:8pt; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px">${title}</div>
-            <div>${arr.map(s => `<span style="${ts}">${s}</span>`).join('')}</div>
+    const tl = lang === 'pt' ? 'Técnicas'       : 'Technical';
+    const ll = lang === 'pt' ? 'Idiomas'         : 'Languages';
+    const sl = lang === 'pt' ? 'Comportamentais' : 'Soft Skills';
+
+    // Modo sidebar/2col: tags compactas passadas por parâmetro
+    if (tagStyle) {
+        function groupTags(title, arr) {
+            if (!arr || !arr.length) return '';
+            return `<div style="margin-bottom:8px">
+                <div style="font-size:7.5pt; font-weight:700; color:rgba(255,255,255,0.55); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px">${title}</div>
+                <div>${arr.map(s => `<span style="${tagStyle}">${s}</span>`).join('')}</div>
+            </div>`;
+        }
+        return `<div class="cv-section"><div class="${sc}">${label}</div>
+            ${groupTags(tl, d.skills.technical)}
+            ${groupTags(ll, d.skills.languages)}
+            ${groupTags(sl, d.skills.soft)}
         </div>`;
     }
-    const tl = lang === 'pt' ? 'Técnicas'        : 'Technical';
-    const ll = lang === 'pt' ? 'Idiomas'          : 'Languages';
-    const sl = lang === 'pt' ? 'Comportamentais'  : 'Soft Skills';
+
+    // Modo 1 coluna: layout elegante em tabela com grupos em linhas
+    function groupRow(title, arr) {
+        if (!arr || !arr.length) return '';
+        return `<tr style="vertical-align:top; border-bottom:1px solid #f1f5f9;">
+            <td style="font-size:7.5pt; font-weight:700; color:#94a3b8; text-transform:uppercase;
+                       letter-spacing:0.8px; padding:6px 14px 6px 0; white-space:nowrap; width:1%">${title}</td>
+            <td style="padding:6px 0; font-size:9pt; color:#334155; line-height:1.6">
+                ${arr.join(' · ')}
+            </td>
+        </tr>`;
+    }
     return `<div class="cv-section"><div class="${sc}">${label}</div>
-        ${group(tl, d.skills.technical)}
-        ${group(ll, d.skills.languages)}
-        ${group(sl, d.skills.soft)}
+        <table style="width:100%; border-collapse:collapse;">
+            ${groupRow(tl, d.skills.technical)}
+            ${groupRow(ll, d.skills.languages)}
+            ${groupRow(sl, d.skills.soft)}
+        </table>
     </div>`;
 }
 
@@ -534,8 +556,10 @@ function render() {
 
     // Para 2 colunas: agrupamento fixo por relevância de CV
     // Grupos fixos para templates de 2 colunas (ordem curricular ideal)
-    const sideFixed = ['skills','certifications','education','volunteer'];
-    const mainFixed = ['summary','experience','projects'];
+    // Sidebar/direita: info compacta que cabe bem em coluna estreita
+    // Principal/esquerda: conteúdo narrativo/longo
+    const sideFixed = ['skills','certifications','volunteer'];
+    const mainFixed = ['summary','experience','education','projects'];
 
     // Renderiza lista de chaves numa dada coluna/contexto
     function renderSecs(keys, sc, tagStyle) {
@@ -645,10 +669,10 @@ function paginateSheets() {
 
             // Se a seção começa dentro da página mas termina além do limite
             if (sectionTop < currentLimit && sectionBottom > currentLimit) {
-                // Insere quebra ANTES desta seção
+                // Insere quebra ANTES desta seção com padding-top para a nova página
                 const br = document.createElement('div');
                 br.className = 'section-page-break';
-                br.style.cssText = 'height:0; page-break-before:always; break-before:page;';
+                br.style.cssText = 'height:45px; display:block;';
                 section.parentNode.insertBefore(br, section);
                 // Avança o limite para a próxima página
                 currentLimit += PAGE_H_PX + mmToPx(90);
