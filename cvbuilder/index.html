@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CV Designer Pro - Ultimate Custom</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&family=Roboto+Mono&family=Montserrat:wght@400;700&family=Lora:ital@0;1&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -599,14 +601,27 @@ function render() {
 // ── Export PDF ───────────────────────────────────────────────────
 async function exportPDF() {
     document.querySelectorAll('.page-divider').forEach(el => el.style.display = 'none');
-    const element = document.getElementById('cv-render');
-    await html2pdf().set({
-        margin: 0,
-        filename: 'CV_CVBuilder.pdf',
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['css', 'legacy'] }
-    }).from(element).save();
+
+    const sheets = Array.from(document.querySelectorAll('.cv-page-sheet'));
+
+    // Converte cada sheet para imagem e monta um PDF sem quebras fantasmas
+    const canvases = [];
+    for (const sheet of sheets) {
+        const c = await html2canvas(sheet, { scale: 2, useCORS: true, logging: false });
+        canvases.push(c);
+    }
+
+    // jsPDF está disponível dentro do bundle html2pdf via window.jspdf
+    const jsPDF = window.jspdf.jsPDF;
+    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+    canvases.forEach((canvas, i) => {
+        if (i > 0) doc.addPage();
+        doc.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 210, 297);
+    });
+
+    doc.save('CV_CVBuilder.pdf');
+
     document.querySelectorAll('.page-divider').forEach(el => el.style.display = '');
 }
 
