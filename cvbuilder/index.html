@@ -532,9 +532,14 @@ function render() {
         if (secRenderers[k]) jsonOrder.push(k);
     });
 
+    // Para 2 colunas: agrupamento fixo por relevância de CV
+    // Grupos fixos para templates de 2 colunas (ordem curricular ideal)
+    const sideFixed = ['skills','certifications','education','volunteer'];
+    const mainFixed = ['summary','experience','projects'];
+
     // Renderiza lista de chaves numa dada coluna/contexto
     function renderSecs(keys, sc, tagStyle) {
-        return keys.filter(isOn).map(k => secRenderers[k](sc, tagStyle)).join('');
+        return keys.filter(isOn).map(k => secRenderers[k] ? secRenderers[k](sc, tagStyle) : '').join('');
     }
 
     const sc = 'section-title';
@@ -543,13 +548,6 @@ function render() {
     const hasCover = document.getElementById('include-cover').checked && d.coverletter;
 
     if (template === 'sidebar-left') {
-        // Seções que ficam na sidebar vs coluna principal
-        const sideKeys = ['skills','certifications','education','volunteer'];
-        const mainKeys = ['summary','experience','projects'];
-        // Respeita ordem do JSON dentro de cada grupo
-        const sideOrdered = jsonOrder.filter(k => sideKeys.includes(k));
-        const mainOrdered = jsonOrder.filter(k => mainKeys.includes(k));
-
         const desired  = lang === 'pt' ? d.personal.desired_position_pt : d.personal.desired_position_en;
         const lightTag = 'background:rgba(255,255,255,0.18); color:white; border-radius:4px; padding:2px 7px; font-size:8pt; display:inline-block; margin:2px 2px 2px 0;';
         const lightSc  = 'section-title';
@@ -568,20 +566,15 @@ function render() {
                         ${d.personal.linkedin ? `<br>🔗 ${d.personal.linkedin}` : ''}
                         ${d.personal.website  ? `<br>🌐 ${d.personal.website}` : ''}
                     </div>
-                    ${renderSecs(sideOrdered, lightSc, lightTag)}
+                    ${renderSecs(sideFixed, lightSc, lightTag)}
                 </div>
                 <div class="col-main">
-                    ${renderSecs(mainOrdered, sc)}
+                    ${renderSecs(mainFixed, sc)}
                 </div>
             </div>
         </div>`;
 
     } else if (template === 'twocol') {
-        const leftKeys  = ['summary','experience','projects'];
-        const rightKeys = ['education','skills','certifications','volunteer'];
-        const leftOrdered  = jsonOrder.filter(k => leftKeys.includes(k));
-        const rightOrdered = jsonOrder.filter(k => rightKeys.includes(k));
-
         const flip = align === 'row-reverse' ? 'row-reverse' : '';
         pageContent = `<div class="cv-page-sheet ${hasCover ? 'break-after' : ''}">
             <div class="cv-header-full header-wrapper ${flip}">
@@ -589,8 +582,8 @@ function render() {
                 ${headerTextHTML(d.personal, lang, align === 'row-reverse')}
             </div>
             <div class="cv-body-cols">
-                <div class="col-left">${renderSecs(leftOrdered, sc)}</div>
-                <div class="col-right">${renderSecs(rightOrdered, sc)}</div>
+                <div class="col-left">${renderSecs(mainFixed, sc)}</div>
+                <div class="col-right">${renderSecs(sideFixed, sc)}</div>
             </div>
         </div>`;
 
