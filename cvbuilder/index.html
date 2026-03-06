@@ -36,11 +36,10 @@
         .cv-page-sheet {
             width: 210mm;
             min-height: 297mm;
-            max-height: 297mm;
-            overflow: hidden;
             box-sizing: border-box;
             padding: 45px;
             position: relative;
+            background: white;
         }
         /* Só quebra entre folhas — não após a última */
         .cv-page-sheet.break-after {
@@ -113,14 +112,11 @@
             display: grid;
             grid-template-columns: 185px 1fr;
             min-height: 297mm;
-            max-height: 297mm;
-            overflow: hidden;
         }
         .template-sidebar-left .col-side {
             background: var(--primary-color);
             color: white;
             padding: 35px 18px;
-            overflow: hidden;
         }
         .template-sidebar-left .col-side h1 {
             font-size: 13.5pt; font-weight: 700; color: white;
@@ -596,6 +592,55 @@ function render() {
     }
 
     container.innerHTML = pageContent + coverContent;
+
+    // ── Paginação inteligente: quebra entre seções, nunca no meio ──
+    requestAnimationFrame(() => paginateSheets());
+}
+
+// Após render, mede cada cv-section e insere quebras entre seções completas
+function paginateSheets() {
+    const PAGE_H_PX = mmToPx(297) - mmToPx(90); // altura útil (297mm - 2×45mm de padding)
+
+    document.querySelectorAll('.cv-page-sheet:not([data-paginated])').forEach(sheet => {
+        // Templates de 2 colunas: cada coluna é independente — não paginar por enquanto
+        if (sheet.closest('.cv-cols') || sheet.querySelector('.cv-cols')) return;
+
+        sheet.setAttribute('data-paginated', '1');
+
+        const sections = Array.from(sheet.querySelectorAll('.cv-section'));
+        if (!sections.length) return;
+
+        // Mede o topo do sheet
+        const sheetTop = sheet.getBoundingClientRect().top + window.scrollY;
+        const sheetPadTop = parseFloat(getComputedStyle(sheet).paddingTop);
+        const pageLimit = sheetTop + sheetPadTop + PAGE_H_PX;
+
+        let currentLimit = pageLimit;
+
+        sections.forEach(section => {
+            const rect = section.getBoundingClientRect();
+            const sectionTop    = rect.top  + window.scrollY;
+            const sectionBottom = rect.bottom + window.scrollY;
+
+            // Se a seção começa dentro da página mas termina além do limite
+            if (sectionTop < currentLimit && sectionBottom > currentLimit) {
+                // Insere quebra ANTES desta seção
+                const br = document.createElement('div');
+                br.className = 'section-page-break';
+                br.style.cssText = 'height:0; page-break-before:always; break-before:page;';
+                section.parentNode.insertBefore(br, section);
+                // Avança o limite para a próxima página
+                currentLimit += PAGE_H_PX + mmToPx(90);
+            } else if (sectionBottom > currentLimit) {
+                currentLimit += PAGE_H_PX + mmToPx(90);
+            }
+        });
+    });
+}
+
+function mmToPx(mm) {
+    // 1mm = 3.7795275591px a 96dpi
+    return mm * 3.7795275591;
 }
 
 // ── Export PDF ───────────────────────────────────────────────────
@@ -603,25 +648,50 @@ async function exportPDF() {
     document.querySelectorAll('.page-divider').forEach(el => el.style.display = 'none');
 
     const sheets = Array.from(document.querySelectorAll('.cv-page-sheet'));
+    const jsPDF  = window.jspdf.jsPDF;
+    const doc    = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+    const PW = 210, PH = 297;
+    let firstPage = true;
 
-    // Converte cada sheet para imagem e monta um PDF sem quebras fantasmas
-    const canvases = [];
     for (const sheet of sheets) {
-        const c = await html2canvas(sheet, { scale: 2, useCORS: true, logging: false });
-        canvases.push(c);
+        // Encontra pontos de quebra (posição relativa ao topo do sheet)
+        const sheetRect = sheet.getBoundingClientRect();
+        const breakPoints = [0];
+
+        sheet.querySelectorAll('.section-page-break').forEach(br => {
+            const brRect = br.getBoundingClientRect();
+            const relY = brRect.top - sheetRect.top;
+            if (relY > 0) breakPoints.push(relY);
+        });
+
+        // Renderiza o sheet completo em alta resolução
+        const scale  = 2;
+        const canvas = await html2canvas(sheet, { scale, useCORS: true, logging: false });
+        const pxPerMM = canvas.width / PW; // pixels por mm
+
+        // Para cada segmento entre breakPoints, gera uma página
+        for (let i = 0; i < breakPoints.length; i++) {
+            const startPx = Math.round(breakPoints[i] * scale);
+            const endPx   = i + 1 < breakPoints.length
+                ? Math.round(breakPoints[i + 1] * scale)
+                : canvas.height;
+            const segH = endPx - startPx;
+
+            const pageCanvas = document.createElement('canvas');
+            pageCanvas.width  = canvas.width;
+            pageCanvas.height = Math.round(PH * pxPerMM); // sempre A4 de altura
+            const ctx = pageCanvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+            ctx.drawImage(canvas, 0, startPx, canvas.width, segH, 0, 0, canvas.width, segH);
+
+            if (!firstPage) doc.addPage();
+            firstPage = false;
+            doc.addImage(pageCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, PW, PH);
+        }
     }
 
-    // jsPDF está disponível dentro do bundle html2pdf via window.jspdf
-    const jsPDF = window.jspdf.jsPDF;
-    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-
-    canvases.forEach((canvas, i) => {
-        if (i > 0) doc.addPage();
-        doc.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 210, 297);
-    });
-
     doc.save('CV_CVBuilder.pdf');
-
     document.querySelectorAll('.page-divider').forEach(el => el.style.display = '');
 }
 
