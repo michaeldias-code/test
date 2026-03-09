@@ -146,6 +146,11 @@
         .cv-section { margin-bottom: var(--cv-section-gap); }
         .cv-section:last-child { margin-bottom: 0; }
 
+        /* Reset margens default do browser dentro do CV */
+        #cv-render p { margin: 0; }
+        #cv-render h1, #cv-render h2, #cv-render h3 { margin: 0; }
+        #cv-render ul { margin: 0; }
+
         /* ── 2-col inline layout for sections ── */
         .inline-twocol {
             display: grid;
