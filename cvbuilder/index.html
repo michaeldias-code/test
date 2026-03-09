@@ -540,7 +540,48 @@ function render() {
   }
 
   container.innerHTML = html;
-  requestAnimationFrame(updateFit);
+  requestAnimationFrame(() => { paginateSections(); updateFit(); });
+}
+
+/* ── PAGINAÇÃO POR SEÇÃO INTEIRA ── */
+function paginateSections() {
+  const A4_H_PX = 297 * 3.7795275591;
+  const cvEl    = document.getElementById('cv-render');
+  const marginPx = parseFloat(cvEl.style.getPropertyValue('--cv-margin')) ||
+                   parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cv-margin')) ||
+                   45;
+  const USABLE  = A4_H_PX - marginPx * 2;
+
+  document.querySelectorAll('.cv-page-sheet').forEach(sheet => {
+    if (sheet.querySelector('.cv-cols,.cv-body-cols')) return;
+
+    const sections = Array.from(sheet.querySelectorAll('.cv-section'));
+    if (!sections.length) return;
+
+    const sheetRect = sheet.getBoundingClientRect();
+    const padTop    = parseFloat(getComputedStyle(sheet).paddingTop) || marginPx;
+
+    // Cursor: px usados desde o início da área útil da página atual
+    let cursor = 0;
+
+    sections.forEach(sec => {
+      const secTop    = sec.getBoundingClientRect().top - sheetRect.top - padTop;
+      const secHeight = sec.getBoundingClientRect().height;
+
+      // Posição dentro da página corrente
+      const posInPage = secTop - cursor;
+
+      if (posInPage + secHeight > USABLE && posInPage > 0) {
+        // Não cabe inteira → empurra para próxima página
+        const gap = USABLE - posInPage + marginPx; // pula até a margem da próxima página
+        const spacer = document.createElement('div');
+        spacer.style.cssText = `display:block;height:${gap}px;flex-shrink:0;`;
+        spacer.dataset.pageBreak = '1';
+        sec.parentNode.insertBefore(spacer, sec);
+        cursor += posInPage + gap; // avança cursor para início da nova área útil
+      }
+    });
+  });
 }
 
 /* ── PDF EXPORT ── */
@@ -551,23 +592,40 @@ async function exportPDF() {
   const doc = new jsPDF({orientation:'p',unit:'mm',format:'a4'});
   const PW=210, PH=297;
   let first=true;
+
   for (const sheet of sheets) {
-    const canvas = await html2canvas(sheet,{scale:2,useCORS:true,logging:false});
-    const pxPerMM = canvas.width/PW;
-    const pageH = Math.round(PH*pxPerMM);
-    let y=0;
-    while (y < canvas.height) {
-      const segH = Math.min(pageH, canvas.height-y);
-      const pc = document.createElement('canvas');
-      pc.width=canvas.width; pc.height=pageH;
-      const ctx=pc.getContext('2d');
-      ctx.fillStyle='#fff'; ctx.fillRect(0,0,pc.width,pc.height);
-      ctx.drawImage(canvas,0,y,canvas.width,segH,0,0,canvas.width,segH);
-      if (!first) doc.addPage(); first=false;
+    const sheetRect = sheet.getBoundingClientRect();
+    const scale = 2;
+    const canvas = await html2canvas(sheet,{scale,useCORS:true,logging:false});
+    const pxPerMM = canvas.width / PW;
+    const pageHpx = Math.round(PH * pxPerMM);
+
+    // Collect break points from spacers inserted by paginateSections
+    const breakYs = [0];
+    sheet.querySelectorAll('[data-page-break]').forEach(spacer => {
+      const relY = spacer.getBoundingClientRect().top - sheetRect.top;
+      if (relY > 1) breakYs.push(Math.round(relY * scale));
+    });
+
+    for (let i = 0; i < breakYs.length; i++) {
+      const startPx = breakYs[i];
+      const endPx   = i + 1 < breakYs.length ? breakYs[i+1] : canvas.height;
+      const segH    = endPx - startPx;
+
+      const pc  = document.createElement('canvas');
+      pc.width  = canvas.width;
+      pc.height = pageHpx;
+      const ctx = pc.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, pc.width, pc.height);
+      ctx.drawImage(canvas, 0, startPx, canvas.width, segH, 0, 0, canvas.width, segH);
+
+      if (!first) doc.addPage();
+      first = false;
       doc.addImage(pc.toDataURL('image/jpeg',0.95),'JPEG',0,0,PW,PH);
-      y+=pageH;
     }
   }
+
   doc.save('CV.pdf');
   document.querySelectorAll('.page-divider').forEach(el=>el.style.display='');
 }
