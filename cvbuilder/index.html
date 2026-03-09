@@ -545,41 +545,53 @@ function render() {
 
 /* ── PAGINAÇÃO POR SEÇÃO INTEIRA ── */
 function paginateSections() {
-  const A4_H_PX = 297 * 3.7795275591;
-  const cvEl    = document.getElementById('cv-render');
-  const marginPx = parseFloat(cvEl.style.getPropertyValue('--cv-margin')) ||
-                   parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cv-margin')) ||
-                   45;
-  const USABLE  = A4_H_PX - marginPx * 2;
+  // 1. Remove spacers de renders anteriores
+  document.querySelectorAll('[data-page-break]').forEach(el => el.remove());
+
+  const A4_H_PX  = 297 * 3.7795275591;
+  const cvEl     = document.getElementById('cv-render');
+  const marginPx = parseFloat(
+    cvEl.style.getPropertyValue('--cv-margin') ||
+    getComputedStyle(document.documentElement).getPropertyValue('--cv-margin') ||
+    '45'
+  ) || 45;
+  const USABLE = A4_H_PX - marginPx * 2;
 
   document.querySelectorAll('.cv-page-sheet').forEach(sheet => {
-    if (sheet.querySelector('.cv-cols,.cv-body-cols')) return;
+    if (sheet.querySelector('.cv-cols, .cv-body-cols')) return;
 
     const sections = Array.from(sheet.querySelectorAll('.cv-section'));
     if (!sections.length) return;
 
-    const sheetRect = sheet.getBoundingClientRect();
-    const padTop    = parseFloat(getComputedStyle(sheet).paddingTop) || marginPx;
+    const sheetTop = sheet.getBoundingClientRect().top;
+    const padTop   = parseFloat(getComputedStyle(sheet).paddingTop) || marginPx;
 
-    // Cursor: px usados desde o início da área útil da página atual
-    let cursor = 0;
+    // 2. Mede TODAS as seções antes de inserir qualquer spacer
+    const measured = sections.map(sec => ({
+      sec,
+      top:    sec.getBoundingClientRect().top - sheetTop - padTop,
+      height: sec.getBoundingClientRect().height,
+    }));
 
-    sections.forEach(sec => {
-      const secTop    = sec.getBoundingClientRect().top - sheetRect.top - padTop;
-      const secHeight = sec.getBoundingClientRect().height;
+    // 3. Decide onde quebrar
+    const toInsert = [];
+    let pageCursor = 0;
 
-      // Posição dentro da página corrente
-      const posInPage = secTop - cursor;
-
-      if (posInPage + secHeight > USABLE && posInPage > 0) {
-        // Não cabe inteira → empurra para próxima página
-        const gap = USABLE - posInPage + marginPx; // pula até a margem da próxima página
-        const spacer = document.createElement('div');
-        spacer.style.cssText = `display:block;height:${gap}px;flex-shrink:0;`;
-        spacer.dataset.pageBreak = '1';
-        sec.parentNode.insertBefore(spacer, sec);
-        cursor += posInPage + gap; // avança cursor para início da nova área útil
+    measured.forEach(({ sec, top, height }) => {
+      const posInPage = top - pageCursor;
+      if (posInPage + height > USABLE && posInPage > 0) {
+        const spacerH = USABLE - posInPage + marginPx;
+        toInsert.push({ sec, spacerH });
+        pageCursor += posInPage + spacerH;
       }
+    });
+
+    // 4. Insere spacers (medições já feitas, ordem não afeta)
+    toInsert.forEach(({ sec, spacerH }) => {
+      const sp = document.createElement('div');
+      sp.dataset.pageBreak = '1';
+      sp.style.cssText = `display:block;height:${spacerH}px;`;
+      sec.parentNode.insertBefore(sp, sec);
     });
   });
 }
