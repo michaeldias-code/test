@@ -12,6 +12,10 @@
         :root {
             --primary-color: #2563eb;
             --font-main: 'Inter', sans-serif;
+            --cv-margin: 45px;
+            --cv-font-size: 10pt;
+            --cv-section-gap: 22px;
+            --cv-line-height: 1.5;
         }
 
         body { font-family: 'Inter', sans-serif; background: #323639; margin: 0; display: flex; height: 100vh; overflow: hidden; }
@@ -19,8 +23,34 @@
         .preview-area { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 0; }
         
         .control-group { margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+        .control-group h3 { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px; }
         label { display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin: 10px 0 5px; }
-        select, input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }
+        select, input[type=file] { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; }
+
+        /* ── Slider controls ── */
+        .slider-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+        .slider-row label { margin: 0; flex: 1; font-size: 0.78rem; }
+        .slider-row span { font-size: 0.75rem; font-weight: 700; color: var(--primary-color); min-width: 32px; text-align: right; }
+        input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer; }
+
+        /* ── Page fit indicator ── */
+        #fit-indicator {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 12px; border-radius: 8px;
+            font-size: 0.78rem; font-weight: 700;
+            margin-bottom: 12px; transition: all 0.3s;
+        }
+        #fit-indicator.ok    { background: #dcfce7; color: #166534; }
+        #fit-indicator.warn  { background: #fef9c3; color: #854d0e; }
+        #fit-indicator.over  { background: #fee2e2; color: #991b1b; }
+        #fit-indicator .dot  { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        #fit-indicator.ok   .dot { background: #22c55e; }
+        #fit-indicator.warn .dot { background: #eab308; }
+        #fit-indicator.over .dot { background: #ef4444; }
+
+        /* ── 2-col section toggle ── */
+        .twocol-toggle { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+        .twocol-toggle label { margin: 0; flex: 1; font-size: 0.78rem; cursor: pointer; }
 
         /* ── Wrapper do CV completo ── */
         #cv-render {
@@ -30,6 +60,7 @@
             color: #334155;
             font-family: var(--font-main);
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            font-size: var(--cv-font-size);
         }
 
         /* ── Cada folha A4 ── */
@@ -37,59 +68,41 @@
             width: 210mm;
             min-height: 297mm;
             box-sizing: border-box;
-            padding: 45px;
+            padding: var(--cv-margin);
             position: relative;
             background: white;
         }
-        /* Só quebra entre folhas — não após a última */
         .cv-page-sheet.break-after {
             page-break-after: always;
             break-after: page;
         }
 
-        /* Linha tracejada entre folhas (só na preview, some no PDF) */
         .page-divider {
-            width: 210mm;
-            height: 0;
-            border: none;
-            border-top: 2px dashed #94a3b8;
-            margin: 0;
-            position: relative;
+            width: 210mm; height: 0; border: none;
+            border-top: 2px dashed #94a3b8; margin: 0; position: relative;
         }
         .page-divider::after {
-            content: attr(data-label);
-            position: absolute;
-            top: -9px;
-            right: 6px;
-            background: #94a3b8;
-            color: white;
-            font-size: 9px;
-            padding: 1px 6px;
-            border-radius: 3px;
-            font-family: sans-serif;
+            content: attr(data-label); position: absolute; top: -9px; right: 6px;
+            background: #94a3b8; color: white; font-size: 9px; padding: 1px 6px;
+            border-radius: 3px; font-family: sans-serif;
         }
         @media print { .page-divider { display: none !important; } }
 
-        /* --- ESTRUTURA DO HEADER DINÂMICO (1 coluna) --- */
+        /* --- HEADER --- */
         .header-wrapper { display: flex; align-items: center; gap: 30px; margin-bottom: 30px; }
         .header-wrapper.row-reverse { flex-direction: row-reverse; }
         .header-text { flex: 1; }
-
         .photo-container { width: 120px; height: 120px; flex-shrink: 0; }
-        .photo-circle {
-            width: 100%; height: 100%; border-radius: 12px;
-            border: 3px solid var(--primary-color); overflow: hidden;
-        }
+        .photo-circle { width: 100%; height: 100%; border-radius: 12px; border: 3px solid var(--primary-color); overflow: hidden; }
         .photo-circle img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* --- TEMPLATES 1 COLUNA (idênticos ao original) --- */
+        /* --- TEMPLATES 1 COLUNA --- */
         .template-modern .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; margin-bottom: 15px; }
 
         .template-executive .header-wrapper {
-            background: var(--primary-color);
-            color: white !important;
-            margin: -45px -45px 30px -45px;
-            padding: 45px;
+            background: var(--primary-color); color: white !important;
+            margin: calc(-1 * var(--cv-margin)) calc(-1 * var(--cv-margin)) 30px calc(-1 * var(--cv-margin));
+            padding: var(--cv-margin);
         }
         .template-executive .header-wrapper h1 { color: white; margin: 0; }
         .template-executive .photo-circle { border-color: white !important; }
@@ -100,105 +113,68 @@
 
         .template-minimal .section-title { color: #1e293b; border-bottom: 1px solid var(--primary-color); margin-bottom: 10px; }
 
-        .template-creative { /* border-top aplicado no sheet */ }
         .template-creative .cv-page-sheet { border-top: 15px solid var(--primary-color); }
         .template-creative .section-title { font-family: 'Roboto Mono', monospace; background: var(--primary-color); color: white; padding: 2px 10px; }
 
         /* --- TEMPLATES 2 COLUNAS --- */
-
-        /* Sidebar Esquerda */
         .template-sidebar-left .cv-page-sheet.no-pad { padding: 0; }
-        .template-sidebar-left .cv-cols {
-            display: grid;
-            grid-template-columns: 185px 1fr;
-            min-height: 297mm;
-        }
-        .template-sidebar-left .col-side {
-            background: var(--primary-color);
-            color: white;
-            padding: 35px 18px;
-        }
-        .template-sidebar-left .col-side h1 {
-            font-size: 13.5pt; font-weight: 700; color: white;
-            margin: 0 0 4px; line-height: 1.25;
-        }
-        .template-sidebar-left .col-side .desired-position {
-            font-size: 8pt; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.8px; color: rgba(255,255,255,0.75); margin-bottom: 14px;
-        }
-        .template-sidebar-left .col-side .section-title {
-            font-size: 7.5pt; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 1.5px; color: rgba(255,255,255,0.6);
-            border-bottom: 1px solid rgba(255,255,255,0.25);
-            padding-bottom: 4px; margin: 16px 0 8px;
-        }
-        .template-sidebar-left .col-side .contact-info {
-            font-size: 8pt; line-height: 1.75; color: rgba(255,255,255,0.85);
-        }
-        .template-sidebar-left .col-main {
-            padding: 35px 28px;
-            overflow: hidden;
-        }
-        .template-sidebar-left .col-main .section-title {
-            border-bottom: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            text-transform: uppercase; font-weight: 700; margin-bottom: 12px;
-        }
-        .photo-circle-side {
-            width: 100%; aspect-ratio: 1;
-            border-radius: 10px; overflow: hidden;
-            border: 2px solid rgba(255,255,255,0.35);
-            margin-bottom: 14px;
-        }
+        .template-sidebar-left .cv-cols { display: grid; grid-template-columns: 185px 1fr; min-height: 297mm; }
+        .template-sidebar-left .col-side { background: var(--primary-color); color: white; padding: 35px 18px; }
+        .template-sidebar-left .col-side h1 { font-size: 13.5pt; font-weight: 700; color: white; margin: 0 0 4px; line-height: 1.25; }
+        .template-sidebar-left .col-side .desired-position { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(255,255,255,0.75); margin-bottom: 14px; }
+        .template-sidebar-left .col-side .section-title { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.6); border-bottom: 1px solid rgba(255,255,255,0.25); padding-bottom: 4px; margin: 16px 0 8px; }
+        .template-sidebar-left .col-side .contact-info { font-size: 8pt; line-height: 1.75; color: rgba(255,255,255,0.85); }
+        .template-sidebar-left .col-main { padding: 35px 28px; overflow: hidden; }
+        .template-sidebar-left .col-main .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; margin-bottom: 12px; }
+        .photo-circle-side { width: 100%; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 2px solid rgba(255,255,255,0.35); margin-bottom: 14px; }
         .photo-circle-side img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Duas Colunas Iguais */
-        .template-twocol .cv-header-full {
-            background: var(--primary-color);
-            color: white;
-            margin: -45px -45px 0 -45px;
-            padding: 35px 45px 28px;
-            display: flex; align-items: center; gap: 24px;
-        }
+        .template-twocol .cv-header-full { background: var(--primary-color); color: white; margin: calc(-1 * var(--cv-margin)) calc(-1 * var(--cv-margin)) 0 calc(-1 * var(--cv-margin)); padding: 35px 45px 28px; display: flex; align-items: center; gap: 24px; }
         .template-twocol .cv-header-full h1 { color: white; margin: 0 0 4px; font-size: 22pt; }
         .template-twocol .cv-header-full .desired-position { color: rgba(255,255,255,0.85) !important; margin-bottom: 8px; }
         .template-twocol .cv-header-full .contact-info { color: rgba(255,255,255,0.85) !important; }
         .template-twocol .cv-header-full .photo-circle { border-color: white; }
-        .template-twocol .cv-body-cols {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0 26px;
-            padding-top: 22px;
-        }
-        .template-twocol .col-right {
-            border-left: 1px solid #e2e8f0;
-            padding-left: 26px;
-        }
-        .template-twocol .section-title {
-            border-bottom: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            text-transform: uppercase; font-weight: 700; margin-bottom: 12px;
-        }
+        .template-twocol .cv-body-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; padding-top: 22px; }
+        .template-twocol .col-right { border-left: 1px solid #e2e8f0; padding-left: 26px; }
+        .template-twocol .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; margin-bottom: 12px; }
 
         /* ─── Componentes partilhados ─── */
         .desired-position { color: var(--primary-color); font-size: 15pt; font-weight: 700; margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
         .current-job-title { color: #64748b; }
         .contact-info { font-size: 9pt; margin-top: 12px; opacity: 0.9; line-height: 1.5; }
 
-        .cv-section { margin-bottom: 22px; }
+        .cv-section { margin-bottom: var(--cv-section-gap); }
         .cv-section:last-child { margin-bottom: 0; }
 
+        /* ── 2-col inline layout for sections ── */
+        .inline-twocol {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 24px;
+        }
+        .inline-twocol .section-title {
+            grid-column: 1 / -1;
+        }
+
         .html2pdf__page-break { display: block; height: 0; page-break-before: always; }
-        .btn-export { width: 100%; background: #000; color: white; border: none; padding: 18px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-export { width: 100%; background: #000; color: white; border: none; padding: 18px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; }
+        .btn-secondary { width: 100%; background: #475569; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h2>CV Designer Pro</h2>
+    <h2 style="margin-top:0">CV Designer Pro</h2>
+
+    <!-- FIT INDICATOR -->
+    <div id="fit-indicator" class="ok">
+        <div class="dot"></div>
+        <span id="fit-text">Aguardando dados...</span>
+    </div>
 
     <div class="control-group">
-        <label>Foto (Opcional):</label>
+        <h3>Foto</h3>
+        <label>Upload (Opcional):</label>
         <input type="file" id="photo-upload" accept="image/*">
         <label>Posição da Foto:</label>
         <select id="photo-align">
@@ -207,16 +183,16 @@
         </select>
     </div>
 
-    <button onclick="downloadModelJSON()" style="background:#475569; margin-bottom: 20px;" class="btn-export">
-        📄 Baixar Modelo JSON
-    </button>
+    <button onclick="downloadModelJSON()" class="btn-secondary">📄 Baixar Modelo JSON</button>
 
     <div class="control-group">
-        <label>Dados JSON:</label>
+        <h3>Dados</h3>
+        <label>Arquivo JSON:</label>
         <input type="file" id="json-file" accept=".json">
     </div>
 
     <div class="control-group">
+        <h3>Layout & Estilo</h3>
         <label>Modelo Base:</label>
         <select id="template-select">
             <optgroup label="1 Coluna">
@@ -231,7 +207,7 @@
             </optgroup>
         </select>
 
-        <label>Cor & Fonte:</label>
+        <label>Cor Principal:</label>
         <select id="color-palette">
             <option value="#2563eb">Azul Royal</option>
             <option value="#1e293b">Slate Dark</option>
@@ -240,27 +216,71 @@
             <option value="#000000">Preto Puro</option>
         </select>
 
-        <select id="font-select" style="margin-top:10px">
+        <label>Fonte:</label>
+        <select id="font-select">
             <option value="'Inter', sans-serif">Inter</option>
             <option value="'Montserrat', sans-serif">Montserrat</option>
             <option value="'Lora', serif">Lora</option>
         </select>
     </div>
 
+    <!-- ── DENSITY CONTROLS (NEW) ── -->
     <div class="control-group">
-        <label><input type="checkbox" id="include-cover" checked> Incluir Cover Letter</label>
-        <label><input type="checkbox" id="lang-toggle"> Inglês</label>
+        <h3>🎛️ Ajuste de Densidade</h3>
+
+        <div class="slider-row">
+            <label>Margem</label>
+            <input type="range" id="ctrl-margin" min="15" max="60" value="45" step="1">
+            <span id="val-margin">45px</span>
+        </div>
+
+        <div class="slider-row">
+            <label>Tamanho de fonte</label>
+            <input type="range" id="ctrl-font" min="7" max="13" value="10" step="0.5">
+            <span id="val-font">10pt</span>
+        </div>
+
+        <div class="slider-row">
+            <label>Espaço entre seções</label>
+            <input type="range" id="ctrl-gap" min="4" max="36" value="22" step="1">
+            <span id="val-gap">22px</span>
+        </div>
+
+        <div class="slider-row">
+            <label>Entrelinhamento</label>
+            <input type="range" id="ctrl-lh" min="1.1" max="2.0" value="1.5" step="0.05">
+            <span id="val-lh">1.5</span>
+        </div>
+
+        <button onclick="resetDensity()" style="margin-top:10px; width:100%; padding:7px; border:1px solid #cbd5e1; background:white; border-radius:6px; cursor:pointer; font-size:0.8rem; color:#475569; font-weight:600;">↺ Restaurar padrão</button>
+    </div>
+
+    <!-- ── 2-COL SECTION SPLITS (NEW) ── -->
+    <div class="control-group">
+        <h3>📐 Seções em 2 colunas</h3>
+        <p style="font-size:0.75rem; color:#94a3b8; margin:0 0 10px;">Divide a seção em 2 colunas para economizar espaço vertical.</p>
+        <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="experience"> Experiência</label></div>
+        <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="education"> Formação</label></div>
+        <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="skills"> Habilidades</label></div>
+        <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="certifications"> Certificações</label></div>
+        <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="projects"> Projetos</label></div>
+        <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="volunteer"> Voluntariado</label></div>
     </div>
 
     <div class="control-group">
-        <label style="margin-bottom:8px">Seções visíveis:</label>
-        <label><input type="checkbox" class="sec-toggle" data-sec="summary"    checked> Resumo</label>
-        <label><input type="checkbox" class="sec-toggle" data-sec="experience" checked> Experiência</label>
-        <label><input type="checkbox" class="sec-toggle" data-sec="education"  checked> Formação</label>
-        <label><input type="checkbox" class="sec-toggle" data-sec="skills"     checked> Habilidades</label>
-        <label><input type="checkbox" class="sec-toggle" data-sec="certs"      checked> Certificações</label>
-        <label><input type="checkbox" class="sec-toggle" data-sec="projects"   checked> Projetos</label>
-        <label><input type="checkbox" class="sec-toggle" data-sec="volunteer"  checked> Voluntariado</label>
+        <h3>Conteúdo</h3>
+        <label><input type="checkbox" id="include-cover" checked> Incluir Cover Letter</label>
+        <label><input type="checkbox" id="lang-toggle"> Inglês</label>
+        <div style="margin-top:10px">
+            <label style="margin-bottom:4px">Seções visíveis:</label>
+            <label><input type="checkbox" class="sec-toggle" data-sec="summary"    checked> Resumo</label>
+            <label><input type="checkbox" class="sec-toggle" data-sec="experience" checked> Experiência</label>
+            <label><input type="checkbox" class="sec-toggle" data-sec="education"  checked> Formação</label>
+            <label><input type="checkbox" class="sec-toggle" data-sec="skills"     checked> Habilidades</label>
+            <label><input type="checkbox" class="sec-toggle" data-sec="certs"      checked> Certificações</label>
+            <label><input type="checkbox" class="sec-toggle" data-sec="projects"   checked> Projetos</label>
+            <label><input type="checkbox" class="sec-toggle" data-sec="volunteer"  checked> Voluntariado</label>
+        </div>
     </div>
 
     <button class="btn-export" onclick="exportPDF()">📥 BAIXAR PDF</button>
@@ -278,6 +298,93 @@
 let cvData = null;
 let userPhoto = null;
 
+// ── Density slider wiring ─────────────────────────────────────────
+const sliders = [
+    { id: 'ctrl-margin', val: 'val-margin', prop: '--cv-margin',      unit: 'px', label: v => v+'px' },
+    { id: 'ctrl-font',   val: 'val-font',   prop: '--cv-font-size',   unit: 'pt', label: v => v+'pt' },
+    { id: 'ctrl-gap',    val: 'val-gap',    prop: '--cv-section-gap', unit: 'px', label: v => v+'px' },
+    { id: 'ctrl-lh',     val: 'val-lh',     prop: '--cv-line-height', unit: '',   label: v => parseFloat(v).toFixed(2) },
+];
+
+sliders.forEach(s => {
+    const el = document.getElementById(s.id);
+    el.addEventListener('input', () => {
+        const v = el.value;
+        document.getElementById(s.val).textContent = s.label(v);
+        document.getElementById('cv-render').style.setProperty(s.prop, v + s.unit);
+        requestAnimationFrame(updateFitIndicator);
+    });
+});
+
+function resetDensity() {
+    const defaults = { 'ctrl-margin': 45, 'ctrl-font': 10, 'ctrl-gap': 22, 'ctrl-lh': 1.5 };
+    sliders.forEach(s => {
+        const el = document.getElementById(s.id);
+        el.value = defaults[s.id];
+        document.getElementById(s.val).textContent = s.label(defaults[s.id]);
+        document.getElementById('cv-render').style.removeProperty(s.prop);
+    });
+    requestAnimationFrame(updateFitIndicator);
+}
+
+// ── Fit indicator ─────────────────────────────────────────────────
+function updateFitIndicator() {
+    if (!cvData) return;
+    const render = document.getElementById('cv-render');
+    const sheets = render.querySelectorAll('.cv-page-sheet');
+    const A4_MM = 297;
+    const PX_PER_MM = 3.7795275591;
+    const A4_PX = A4_MM * PX_PER_MM;
+
+    const ind = document.getElementById('fit-indicator');
+    const txt = document.getElementById('fit-text');
+
+    // Count only CV sheets (not cover letter), measure how full they are
+    const cvSheets = Array.from(sheets).filter(s => !s.closest('.cover-sheet'));
+    if (!cvSheets.length) return;
+
+    const firstSheet = cvSheets[0];
+    const sheetH = firstSheet.scrollHeight;
+    const ratio = sheetH / A4_PX;
+    const pct = Math.round(ratio * 100);
+
+    if (ratio <= 1.0) {
+        ind.className = 'ok';
+        txt.textContent = `✓ Cabe em 1 página (${pct}% preenchido)`;
+    } else if (ratio <= 1.15) {
+        ind.className = 'warn';
+        txt.textContent = `⚠ Quase cabendo — ${pct}% de 1 página`;
+    } else {
+        const pages = Math.ceil(ratio);
+        ind.className = 'over';
+        txt.textContent = `✗ Conteúdo em ~${pages} páginas (${pct}%)`;
+    }
+}
+
+// ── Split toggle wiring ───────────────────────────────────────────
+document.querySelectorAll('.split-toggle').forEach(cb => cb.onchange = render);
+
+function isSplit(secKey) {
+    const el = document.querySelector(`.split-toggle[data-sec="${secKey}"]`);
+    return el ? el.checked : false;
+}
+
+function wrapSplit(html, secKey) {
+    if (!isSplit(secKey)) return html;
+    // Wrap the inner items (everything after section-title) in a 2-col grid
+    return html.replace(
+        /(<div class="cv-section[^"]*">)([\s\S]*)(<\/div>)$/,
+        (_, open, inner, close) => {
+            // Find section-title and split
+            const titleMatch = inner.match(/(<div class="section-title[^>]*>[\s\S]*?<\/div>)([\s\S]*)/);
+            if (!titleMatch) return open + inner + close;
+            const [, titlePart, restPart] = titleMatch;
+            return `${open}${titlePart}<div class="inline-twocol" style="display:grid;grid-template-columns:1fr 1fr;gap:0 20px;">${restPart}</div>${close}`;
+        }
+    );
+}
+
+// ── Photo + JSON handlers ─────────────────────────────────────────
 document.getElementById('photo-upload').onchange = (e) => {
     const reader = new FileReader();
     reader.onload = (ev) => { userPhoto = ev.target.result; render(); };
@@ -364,9 +471,7 @@ function downloadModelJSON() {
     const a = document.createElement('a');
     a.setAttribute("href", dataStr);
     a.setAttribute("download", "modelo_cv.json");
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    document.body.appendChild(a); a.click(); a.remove();
 }
 
 // ── Helpers de conteúdo ──────────────────────────────────────────
@@ -379,7 +484,6 @@ function photoHTML(sideMode) {
 
 function headerTextHTML(p, lang, alignRight) {
     const desired  = lang === 'pt' ? p.desired_position_pt  : p.desired_position_en;
-    const jobTitle = lang === 'pt' ? p.jobtitle_pt           : p.jobtitle_en;
     return `<div class="header-text" style="text-align:${alignRight ? 'right' : 'left'}">
         <h1 style="margin:0; font-size:26pt;">${p.fullname}</h1>
         <div class="desired-position">${desired || ''}</div>
@@ -400,7 +504,7 @@ function summaryHTML(d, lang, sc) {
     const label = lang === 'pt' ? 'Resumo' : 'Summary';
     return `<div class="cv-section">
         <div class="${sc}">${label}</div>
-        <p style="text-align:justify; font-size:10pt; line-height:1.5; margin:0">${text}</p>
+        <p style="text-align:justify; font-size:var(--cv-font-size); line-height:var(--cv-line-height); margin:0">${text}</p>
     </div>`;
 }
 
@@ -410,31 +514,33 @@ function experienceHTML(d, lang, sc) {
     const items = d.experience.map(exp => {
         const pos  = lang === 'pt' ? exp.position_pt    : exp.position_en;
         const desc = lang === 'pt' ? exp.description_pt : exp.description_en;
-        return `<div style="margin-bottom:14px">
-            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:10pt">
+        return `<div style="margin-bottom:10px">
+            <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:var(--cv-font-size)">
                 <span>${pos || ''}</span>
                 <span style="white-space:nowrap; padding-left:8px">${exp.period || ''}</span>
             </div>
             <div style="color:var(--primary-color); font-weight:600; font-size:9pt">${exp.company || ''}</div>
-            <ul style="font-size:9.5pt; margin:4px 0 0; padding-left:18px">
+            <ul style="font-size:var(--cv-font-size); margin:4px 0 0; padding-left:18px; line-height:var(--cv-line-height)">
                 ${(desc || []).map(i => `<li>${i}</li>`).join('')}
             </ul>
         </div>`;
     }).join('');
-    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
+    return wrapSplit(`<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`, 'experience');
 }
 
 function educationHTML(d, lang, sc) {
     if (!d.education || !d.education.length) return '';
     const label = lang === 'pt' ? 'Formação' : 'Education';
     const items = d.education.map(ed => `
-        <div style="display:flex; justify-content:space-between; font-size:10pt; margin-bottom:6px">
-            <span><strong>${lang === 'pt' ? ed.degree_pt : ed.degree_en}</strong></span>
-            <span style="white-space:nowrap; padding-left:8px">${ed.period || ''}</span>
+        <div style="margin-bottom:6px">
+            <div style="display:flex; justify-content:space-between; font-size:var(--cv-font-size)">
+                <span><strong>${lang === 'pt' ? ed.degree_pt : ed.degree_en}</strong></span>
+                <span style="white-space:nowrap; padding-left:8px">${ed.period || ''}</span>
+            </div>
+            <div style="font-size:9pt; color:#64748b">${ed.institution || ''}</div>
         </div>
-        <div style="font-size:9pt; color:#64748b; margin-bottom:4px">${ed.institution || ''}</div>
     `).join('');
-    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
+    return wrapSplit(`<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`, 'education');
 }
 
 function skillsHTML(d, lang, sc, tagStyle) {
@@ -444,7 +550,7 @@ function skillsHTML(d, lang, sc, tagStyle) {
     const ll = lang === 'pt' ? 'Idiomas'         : 'Languages';
     const sl = lang === 'pt' ? 'Comportamentais' : 'Soft Skills';
 
-    // Modo sidebar/2col: tags compactas passadas por parâmetro
+    let html;
     if (tagStyle) {
         function groupTags(title, arr) {
             if (!arr || !arr.length) return '';
@@ -453,66 +559,63 @@ function skillsHTML(d, lang, sc, tagStyle) {
                 <div>${arr.map(s => `<span style="${tagStyle}">${s}</span>`).join('')}</div>
             </div>`;
         }
-        return `<div class="cv-section"><div class="${sc}">${label}</div>
+        html = `<div class="cv-section"><div class="${sc}">${label}</div>
             ${groupTags(tl, d.skills.technical)}
             ${groupTags(ll, d.skills.languages)}
             ${groupTags(sl, d.skills.soft)}
         </div>`;
+    } else {
+        function groupRow(title, arr) {
+            if (!arr || !arr.length) return '';
+            return `<tr style="vertical-align:top; border-bottom:1px solid #f1f5f9;">
+                <td style="font-size:7.5pt; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; padding:6px 14px 6px 0; white-space:nowrap; width:1%">${title}</td>
+                <td style="padding:6px 0; font-size:var(--cv-font-size); color:#334155; line-height:var(--cv-line-height)">${arr.join(' · ')}</td>
+            </tr>`;
+        }
+        html = `<div class="cv-section"><div class="${sc}">${label}</div>
+            <table style="width:100%; border-collapse:collapse;">
+                ${groupRow(tl, d.skills.technical)}
+                ${groupRow(ll, d.skills.languages)}
+                ${groupRow(sl, d.skills.soft)}
+            </table>
+        </div>`;
     }
-
-    // Modo 1 coluna: layout elegante em tabela com grupos em linhas
-    function groupRow(title, arr) {
-        if (!arr || !arr.length) return '';
-        return `<tr style="vertical-align:top; border-bottom:1px solid #f1f5f9;">
-            <td style="font-size:7.5pt; font-weight:700; color:#94a3b8; text-transform:uppercase;
-                       letter-spacing:0.8px; padding:6px 14px 6px 0; white-space:nowrap; width:1%">${title}</td>
-            <td style="padding:6px 0; font-size:9pt; color:#334155; line-height:1.6">
-                ${arr.join(' · ')}
-            </td>
-        </tr>`;
-    }
-    return `<div class="cv-section"><div class="${sc}">${label}</div>
-        <table style="width:100%; border-collapse:collapse;">
-            ${groupRow(tl, d.skills.technical)}
-            ${groupRow(ll, d.skills.languages)}
-            ${groupRow(sl, d.skills.soft)}
-        </table>
-    </div>`;
+    return wrapSplit(html, 'skills');
 }
 
 function certsHTML(d, lang, sc) {
     if (!d.certifications || !d.certifications.length) return '';
     const label = lang === 'pt' ? 'Certificações' : 'Certifications';
     const items = d.certifications.map(c => `
-        <div style="margin-bottom:6px; font-size:9.5pt">
+        <div style="margin-bottom:6px; font-size:var(--cv-font-size)">
             <strong>${lang === 'pt' ? c.title_pt : c.title_en}</strong>
             <span style="color:#64748b; font-size:8.5pt"> · ${c.issuer || ''} ${c.year ? '(' + c.year + ')' : ''}</span>
         </div>`).join('');
-    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
+    return wrapSplit(`<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`, 'certifications');
 }
 
 function projectsHTML(d, lang, sc) {
     if (!d.projects || !d.projects.length) return '';
     const label = lang === 'pt' ? 'Projetos' : 'Projects';
     const items = d.projects.map(p => `
-        <div style="margin-bottom:8px; font-size:9.5pt">
+        <div style="margin-bottom:8px; font-size:var(--cv-font-size)">
             <strong>${lang === 'pt' ? p.title_pt : p.title_en}</strong>
-            <div style="color:#475569">${lang === 'pt' ? p.description_pt : p.description_en}</div>
+            <div style="color:#475569; line-height:var(--cv-line-height)">${lang === 'pt' ? p.description_pt : p.description_en}</div>
         </div>`).join('');
-    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
+    return wrapSplit(`<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`, 'projects');
 }
 
 function volunteerHTML(d, lang, sc) {
     if (!d.volunteer || !d.volunteer.length) return '';
     const label = lang === 'pt' ? 'Voluntariado' : 'Volunteer';
     const items = d.volunteer.map(v => `
-        <div style="margin-bottom:8px; font-size:9.5pt">
+        <div style="margin-bottom:8px; font-size:var(--cv-font-size)">
             <div style="font-weight:bold">${lang === 'pt' ? v.role_pt : v.role_en}
                 <span style="font-weight:normal; color:#64748b"> · ${v.organization || ''} ${v.period ? '(' + v.period + ')' : ''}</span>
             </div>
-            <div style="color:#475569">${lang === 'pt' ? v.description_pt : v.description_en}</div>
+            <div style="color:#475569; line-height:var(--cv-line-height)">${lang === 'pt' ? v.description_pt : v.description_en}</div>
         </div>`).join('');
-    return `<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`;
+    return wrapSplit(`<div class="cv-section"><div class="${sc}">${label}</div>${items}</div>`, 'volunteer');
 }
 
 // ── Render principal ─────────────────────────────────────────────
@@ -531,22 +634,18 @@ function render() {
 
     container.className = `template-${template}`;
 
-    // Mapa de chave-JSON → função de renderização
     const secRenderers = {
-        summary:    (sc, ts) => summaryHTML(d, lang, sc),
-        experience: (sc, ts) => experienceHTML(d, lang, sc),
-        education:  (sc, ts) => educationHTML(d, lang, sc),
-        skills:     (sc, ts) => skillsHTML(d, lang, sc, ts),
+        summary:        (sc, ts) => summaryHTML(d, lang, sc),
+        experience:     (sc, ts) => experienceHTML(d, lang, sc),
+        education:      (sc, ts) => educationHTML(d, lang, sc),
+        skills:         (sc, ts) => skillsHTML(d, lang, sc, ts),
         certifications: (sc, ts) => certsHTML(d, lang, sc),
-        projects:   (sc, ts) => projectsHTML(d, lang, sc),
-        volunteer:  (sc, ts) => volunteerHTML(d, lang, sc),
+        projects:       (sc, ts) => projectsHTML(d, lang, sc),
+        volunteer:      (sc, ts) => volunteerHTML(d, lang, sc),
     };
-    // Alias para mapear chaves do JSON → id do checkbox
     const secKey = { certifications: 'certs' };
     const isOn = key => sec(secKey[key] || key);
 
-    // Ordem vem das chaves do JSON (JS preserva ordem de inserção)
-    // "summary" vive dentro de "personal", então injetamos logo após ele
     const rawOrder = Object.keys(d);
     const jsonOrder = [];
     rawOrder.forEach(k => {
@@ -554,21 +653,15 @@ function render() {
         if (secRenderers[k]) jsonOrder.push(k);
     });
 
-    // Para 2 colunas: agrupamento fixo por relevância de CV
-    // Grupos fixos para templates de 2 colunas (ordem curricular ideal)
-    // Sidebar/direita: info compacta que cabe bem em coluna estreita
-    // Principal/esquerda: conteúdo narrativo/longo
     const sideFixed = ['skills','volunteer'];
     const mainFixed = ['summary','experience','education','projects','certifications'];
 
-    // Renderiza lista de chaves numa dada coluna/contexto
     function renderSecs(keys, sc, tagStyle) {
         return keys.filter(isOn).map(k => secRenderers[k] ? secRenderers[k](sc, tagStyle) : '').join('');
     }
 
     const sc = 'section-title';
     let pageContent = '';
-
     const hasCover = document.getElementById('include-cover').checked && d.coverletter;
 
     if (template === 'sidebar-left') {
@@ -622,13 +715,12 @@ function render() {
         </div>`;
     }
 
-    // ── Cover Letter (folha separada, sempre com padding padrão) ──
     let coverContent = '';
     if (hasCover) {
         const cl = lang === 'pt' ? d.coverletter.pt : d.coverletter.en;
         coverContent = `
             <hr class="page-divider" data-label="Cover Letter">
-            <div class="cv-page-sheet" style="padding:45px">
+            <div class="cv-page-sheet cover-sheet" style="padding:45px">
                 <div class="${sc}" style="margin-bottom:30px">Cover Letter</div>
                 <p>Dear Hiring Manager,</p>
                 <div style="line-height:1.7; text-align:justify; font-size:11pt; white-space:pre-line">${cl}</div>
@@ -638,43 +730,32 @@ function render() {
 
     container.innerHTML = pageContent + coverContent;
 
-    // ── Paginação inteligente: quebra entre seções, nunca no meio ──
-    requestAnimationFrame(() => paginateSheets());
+    requestAnimationFrame(() => {
+        paginateSheets();
+        updateFitIndicator();
+    });
 }
 
-// Após render, mede cada cv-section e insere quebras entre seções completas
+// ── Paginação ────────────────────────────────────────────────────
 function paginateSheets() {
-    const PAGE_H_PX = mmToPx(297) - mmToPx(90); // altura útil (297mm - 2×45mm de padding)
-
+    const PAGE_H_PX = mmToPx(297) - mmToPx(90);
     document.querySelectorAll('.cv-page-sheet:not([data-paginated])').forEach(sheet => {
-        // Templates de 2 colunas: cada coluna é independente — não paginar por enquanto
         if (sheet.closest('.cv-cols') || sheet.querySelector('.cv-cols')) return;
-
         sheet.setAttribute('data-paginated', '1');
-
         const sections = Array.from(sheet.querySelectorAll('.cv-section'));
         if (!sections.length) return;
-
-        // Mede o topo do sheet
         const sheetTop = sheet.getBoundingClientRect().top + window.scrollY;
         const sheetPadTop = parseFloat(getComputedStyle(sheet).paddingTop);
         const pageLimit = sheetTop + sheetPadTop + PAGE_H_PX;
-
         let currentLimit = pageLimit;
-
         sections.forEach(section => {
             const rect = section.getBoundingClientRect();
             const sectionTop    = rect.top  + window.scrollY;
             const sectionBottom = rect.bottom + window.scrollY;
-
-            // Se a seção começa dentro da página mas termina além do limite
             if (sectionTop < currentLimit && sectionBottom > currentLimit) {
-                // Insere quebra ANTES desta seção com padding-top para a nova página
                 const br = document.createElement('div');
-                br.className = 'section-page-break';
                 br.style.cssText = 'height:45px; display:block;';
                 section.parentNode.insertBefore(br, section);
-                // Avança o limite para a próxima página
                 currentLimit += PAGE_H_PX + mmToPx(90);
             } else if (sectionBottom > currentLimit) {
                 currentLimit += PAGE_H_PX + mmToPx(90);
@@ -683,63 +764,48 @@ function paginateSheets() {
     });
 }
 
-function mmToPx(mm) {
-    // 1mm = 3.7795275591px a 96dpi
-    return mm * 3.7795275591;
-}
+function mmToPx(mm) { return mm * 3.7795275591; }
 
 // ── Export PDF ───────────────────────────────────────────────────
 async function exportPDF() {
     document.querySelectorAll('.page-divider').forEach(el => el.style.display = 'none');
-
     const sheets = Array.from(document.querySelectorAll('.cv-page-sheet'));
     const jsPDF  = window.jspdf.jsPDF;
     const doc    = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
     const PW = 210, PH = 297;
     let firstPage = true;
-
     for (const sheet of sheets) {
-        // Encontra pontos de quebra (posição relativa ao topo do sheet)
         const sheetRect = sheet.getBoundingClientRect();
         const breakPoints = [0];
-
         sheet.querySelectorAll('.section-page-break').forEach(br => {
             const brRect = br.getBoundingClientRect();
             const relY = brRect.top - sheetRect.top;
             if (relY > 0) breakPoints.push(relY);
         });
-
-        // Renderiza o sheet completo em alta resolução
         const scale  = 2;
         const canvas = await html2canvas(sheet, { scale, useCORS: true, logging: false });
-        const pxPerMM = canvas.width / PW; // pixels por mm
-
-        // Para cada segmento entre breakPoints, gera uma página
+        const pxPerMM = canvas.width / PW;
         for (let i = 0; i < breakPoints.length; i++) {
             const startPx = Math.round(breakPoints[i] * scale);
-            const endPx   = i + 1 < breakPoints.length
-                ? Math.round(breakPoints[i + 1] * scale)
-                : canvas.height;
+            const endPx   = i + 1 < breakPoints.length ? Math.round(breakPoints[i + 1] * scale) : canvas.height;
             const segH = endPx - startPx;
-
             const pageCanvas = document.createElement('canvas');
             pageCanvas.width  = canvas.width;
-            pageCanvas.height = Math.round(PH * pxPerMM); // sempre A4 de altura
+            pageCanvas.height = Math.round(PH * pxPerMM);
             const ctx = pageCanvas.getContext('2d');
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
             ctx.drawImage(canvas, 0, startPx, canvas.width, segH, 0, 0, canvas.width, segH);
-
             if (!firstPage) doc.addPage();
             firstPage = false;
             doc.addImage(pageCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, PW, PH);
         }
     }
-
     doc.save('CV_CVBuilder.pdf');
     document.querySelectorAll('.page-divider').forEach(el => el.style.display = '');
 }
 
+// ── Event listeners ──────────────────────────────────────────────
 ['template-select','color-palette','font-select','include-cover','lang-toggle','photo-align'].forEach(id => {
     document.getElementById(id).onchange = render;
 });
