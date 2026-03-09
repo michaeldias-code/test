@@ -276,7 +276,8 @@ sliderCfg.forEach(s => {
   document.getElementById(s.id).addEventListener('input', function() {
     document.getElementById(s.val).textContent = s.fmt(this.value);
     document.getElementById('cv-render').style.setProperty(s.prop, this.value + s.unit);
-    requestAnimationFrame(updateFit);
+    // Re-paginate after layout reflows from CSS var change
+    requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); }));
   });
 });
 function resetDensity() {
@@ -286,7 +287,7 @@ function resetDensity() {
     document.getElementById(s.val).textContent = s.fmt(def[s.id]);
     document.getElementById('cv-render').style.removeProperty(s.prop);
   });
-  requestAnimationFrame(updateFit);
+  requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); }));
 }
 
 /* ── FIT INDICATOR ── */
@@ -540,7 +541,7 @@ function render() {
   }
 
   container.innerHTML = html;
-  requestAnimationFrame(() => { paginateSections(); updateFit(); });
+  requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); }));
 }
 
 /* ── PAGINAÇÃO POR SEÇÃO INTEIRA ── */
