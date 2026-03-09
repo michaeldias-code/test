@@ -565,18 +565,19 @@ function skillsHTML(d, lang, sc, tagStyle) {
             ${groupTags(sl, d.skills.soft)}
         </div>`;
     } else {
-        function groupRow(title, arr) {
+        function groupRow(title, arr, isFirst) {
             if (!arr || !arr.length) return '';
+            const topPad = isFirst ? '0' : '6px';
             return `<tr style="vertical-align:top; border-bottom:1px solid #f1f5f9;">
-                <td style="font-size:7.5pt; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; padding:6px 14px 6px 0; white-space:nowrap; width:1%">${title}</td>
-                <td style="padding:6px 0; font-size:var(--cv-font-size); color:#334155; line-height:var(--cv-line-height)">${arr.join(' · ')}</td>
+                <td style="font-size:7.5pt; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; padding:${topPad} 14px 6px 0; white-space:nowrap; width:1%">${title}</td>
+                <td style="padding:${topPad} 0 6px 0; font-size:var(--cv-font-size); color:#334155; line-height:var(--cv-line-height)">${arr.join(' · ')}</td>
             </tr>`;
         }
         html = `<div class="cv-section"><div class="${sc}">${label}</div>
-            <table style="width:100%; border-collapse:collapse;">
-                ${groupRow(tl, d.skills.technical)}
-                ${groupRow(ll, d.skills.languages)}
-                ${groupRow(sl, d.skills.soft)}
+            <table style="width:100%; border-collapse:collapse; margin:0; padding:0;">
+                ${groupRow(tl, d.skills.technical, true)}
+                ${groupRow(ll, d.skills.languages, false)}
+                ${groupRow(sl, d.skills.soft, false)}
             </table>
         </div>`;
     }
