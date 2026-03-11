@@ -830,12 +830,15 @@ function render() {
 
   if (hasCover) {
     const cl = lang==='pt' ? d.coverletter.pt : d.coverletter.en;
-    html += `<hr class="page-divider" data-label="Cover Letter">
+    const clTitle    = lang==='pt' ? 'Carta de Apresentação' : 'Cover Letter';
+    const clGreeting = lang==='pt' ? 'Prezado(a) time de recrutamento,' : 'Dear Hiring Manager,';
+    const clSign     = lang==='pt' ? 'Atenciosamente,' : 'Best regards,';
+    html += `<hr class="page-divider" data-label="${clTitle}">
       <div class="cv-page-sheet cover-sheet">
-        <div class="${sc}" style="margin-bottom:28px">Cover Letter</div>
-        <p style="margin-bottom:16px">Dear Hiring Manager,</p>
+        <div class="${sc}" style="margin-bottom:28px">${clTitle}</div>
+        <p style="margin-bottom:16px">${clGreeting}</p>
         <div style="line-height:1.7;text-align:justify;font-size:11pt;white-space:pre-line">${cl}</div>
-        <p style="margin-top:48px">Best regards,<br><strong>${d.personal.fullname}</strong></p>
+        <p style="margin-top:48px">${clSign}<br><strong>${d.personal.fullname}</strong></p>
       </div>`;
   }
 
@@ -939,7 +942,29 @@ async function exportPDF() {
     }
   }
 
-  doc.save('CV.pdf');
+  // ── Smart filename ──
+  const lang     = document.getElementById('lang-toggle').checked ? 'en' : 'pt';
+  const hasCL    = document.getElementById('include-cover').checked && cvData?.coverletter;
+  const rawName  = cvData?.personal?.fullname || 'Nome';
+  // Sanitize: keep only letters/numbers, replace spaces with underscores, strip accents
+  const safeName = rawName
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // strip accents
+    .replace(/[^a-zA-Z0-9 ]/g, '')                     // remove special chars
+    .trim().replace(/\s+/g, '_');
+  const year = new Date().getFullYear();
+
+  let filename;
+  if (lang === 'pt') {
+    filename = hasCL
+      ? `CV_${safeName}_${year}_CL_PT.pdf`
+      : `CV_${safeName}_${year}_PT.pdf`;
+  } else {
+    filename = hasCL
+      ? `Resume_${safeName}_${year}_EN_CL.pdf`
+      : `Resume_${safeName}_${year}_EN.pdf`;
+  }
+
+  doc.save(filename);
   document.querySelectorAll('.page-divider').forEach(el=>el.style.display='');
 }
 
