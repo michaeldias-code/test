@@ -404,6 +404,12 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
         <span class="sec-label-inline">🤝 Voluntariado</span>
         <span class="sec-eye" id="eye-volunteer" title="Visível">👁</span>
       </li>
+      <li draggable="true" data-key="salary">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-salary">
+        <span class="sec-label-inline">💰 Pretensão Salarial</span>
+        <span class="sec-eye" id="eye-salary" title="Oculto">👁</span>
+      </li>
     </ul>
 
     <!-- Objective style sub-option -->
@@ -580,7 +586,7 @@ document.getElementById('json-file').onchange = e => {
 
 /* ── MODEL JSON ── */
 function downloadModelJSON() {
-  const m = {"personal":{"fullname":"Nome Completo","jobtitle_pt":"Cargo Atual","jobtitle_en":"Current Role","desired_position_pt":"Cargo Pretendido","desired_position_en":"Desired Position","email":"email@exemplo.com","phone":"+55119XXXXXXXX","linkedin":"linkedin.com/in/seuperfil","website":"www.seusite.com","location":"Cidade, Estado, País","summary_pt":"Resumo profissional...","summary_en":"Professional summary..."},"experience":[{"company":"Empresa","position_pt":"Cargo","position_en":"Role","period":"2020 – Atual","description_pt":["Atividade 1","Atividade 2"],"description_en":["Activity 1","Activity 2"]}],"education":[{"degree_pt":"Graduação","degree_en":"Degree","institution":"Instituição","period":"2015 – 2019"}],"skills":{"technical":["JavaScript","Python"],"languages":["Português: Nativo","Inglês: Avançado"],"soft":["Liderança","Comunicação"]},"projects":[{"title_pt":"Projeto","title_en":"Project","description_pt":"Descrição.","description_en":"Description."}],"volunteer":[{"role_pt":"Voluntário","role_en":"Volunteer","organization":"ONG","period":"2021","description_pt":"Atividade.","description_en":"Activity."}],"certifications":[{"title_pt":"Certificação","title_en":"Certification","issuer":"Instituição","year":"2023"}],"coverletter":{"pt":"Olá time recrutador,\n\nTenho interesse na oportunidade...","en":"Hello Hiring Team,\n\nI am interested in the opportunity..."}};
+  const m = {"personal":{"fullname":"Nome Completo","jobtitle_pt":"Cargo Atual","jobtitle_en":"Current Role","desired_position_pt":"Cargo Pretendido","desired_position_en":"Desired Position","email":"email@exemplo.com","phone":"+55119XXXXXXXX","linkedin":"linkedin.com/in/seuperfil","website":"www.seusite.com","location":"Cidade, Estado, País","summary_pt":"Resumo profissional...","summary_en":"Professional summary..."},"experience":[{"company":"Empresa","position_pt":"Cargo","position_en":"Role","period":"2020 – Atual","description_pt":["Atividade 1","Atividade 2"],"description_en":["Activity 1","Activity 2"]}],"education":[{"degree_pt":"Graduação","degree_en":"Degree","institution":"Instituição","period":"2015 – 2019"}],"skills":{"technical":["JavaScript","Python"],"languages":["Português: Nativo","Inglês: Avançado"],"soft":["Liderança","Comunicação"]},"projects":[{"title_pt":"Projeto","title_en":"Project","description_pt":"Descrição.","description_en":"Description."}],"volunteer":[{"role_pt":"Voluntário","role_en":"Volunteer","organization":"ONG","period":"2021","description_pt":"Atividade.","description_en":"Activity."}],"certifications":[{"title_pt":"Certificação","title_en":"Certification","issuer":"Instituição","year":"2023"}],"salary_expectation":{"pt":"A combinar","en":"Negotiable"},"coverletter":{"pt":"Olá time de recrutamento,\n\nTenho interesse na oportunidade...","en":"Hello Hiring Team,\n\nI am interested in the opportunity..."}};
   const a=document.createElement('a');
   a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(m,null,2));
   a.download="modelo_cv.json";
@@ -722,6 +728,17 @@ function volunteerHTML(d, lang, sc) {
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Voluntariado':'Volunteer'}</div>${items}</div>`,'volunteer');
 }
 
+function salaryHTML(d, lang, sc) {
+  if (!d.salary_expectation) return '';
+  const value = lang==='pt' ? d.salary_expectation.pt : d.salary_expectation.en;
+  if (!value) return '';
+  const label = lang==='pt' ? 'Pretensão Salarial' : 'Salary Expectation';
+  return `<div class="cv-section">
+    <div class="${sc}">${label}</div>
+    <p style="font-size:var(--cv-font-size);line-height:var(--cv-line-height);font-weight:600;color:#334155">${value}</p>
+  </div>`;
+}
+
 /* ── DUOTONE MAP ── */
 const DUOTONE_MAP = {
   'duotone-wine':   { primary: '#5c1a1a', secondary: '#b8860b' },
@@ -771,6 +788,7 @@ function render() {
     certifications: () => certsHTML(d, lang, sc),
     projects:       () => projectsHTML(d, lang, sc),
     volunteer:      () => volunteerHTML(d, lang, sc),
+    salary:         () => salaryHTML(d, lang, sc),
   };
 
   // Ordered keys from drag list, filtered by visibility
