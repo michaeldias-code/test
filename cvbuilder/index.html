@@ -452,6 +452,7 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
     <div class="accordion-body">
       <label>Upload (Opcional):</label>
       <input type="file" id="photo-upload" accept="image/*">
+      <button id="btn-remove-photo" onclick="removePhoto()" class="btn-reset" style="display:none;margin-top:6px;color:#991b1b;border-color:#fca5a5">✕ Remover foto</button>
       <label>Posição:</label>
       <select id="photo-align">
         <option value="row">Esquerda</option>
@@ -474,15 +475,14 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
           <option value="minimal">Minimalista</option>
           <option value="creative">Criativo</option>
         </optgroup>
-        <optgroup label="2 Colunas">
+        <optgroup label="Sidebar">
           <option value="sidebar-left">Sidebar Esquerda</option>
-          <option value="twocol">Duas Colunas</option>
         </optgroup>
         <optgroup label="✦ Especial">
           <option value="duotone">Duotone</option>
         </optgroup>
       </select>
-      <label>Cor Principal:</label>
+      <label id="color-label">Cor Principal:</label>
       <select id="color-palette">
         <optgroup label="Escuros &amp; Elegantes">
           <option value="#1e293b">Grafite Executivo</option>
@@ -497,8 +497,9 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
           <option value="#92400e">Cobre Envelhecido</option>
           <option value="#1e3a5f">Azul Marinho</option>
           <option value="#4a1d96">Índigo Profundo</option>
+          <option value="#9d174d">Rosa Framboesa</option>
         </optgroup>
-        <optgroup label="✦ Duotone (2 cores)">
+        <optgroup label="✦ Duotone (2 cores)" id="duotone-optgroup" style="display:none">
           <option value="duotone-wine">Vinho + Dourado</option>
           <option value="duotone-navy">Marinho + Cobre</option>
           <option value="duotone-forest">Floresta + Terracota</option>
@@ -852,9 +853,20 @@ function closeValidation(e) {
 }
 
 /* ── PHOTO / JSON ── */
+function removePhoto() {
+  userPhoto = null;
+  document.getElementById('photo-upload').value = '';
+  document.getElementById('btn-remove-photo').style.display = 'none';
+  render();
+}
+
 document.getElementById('photo-upload').onchange = e => {
   const r = new FileReader();
-  r.onload = ev => { userPhoto=ev.target.result; render(); };
+  r.onload = ev => {
+    userPhoto = ev.target.result;
+    document.getElementById('btn-remove-photo').style.display = '';
+    render();
+  };
   r.readAsDataURL(e.target.files[0]);
 };
 document.getElementById('json-file').onchange = e => {
@@ -1433,54 +1445,67 @@ function render() {
 function paginateSections() {
   document.querySelectorAll('[data-page-break]').forEach(el => el.remove());
 
-  const A4_H_PX  = 297 * 3.7795275591;
-  const cvEl     = document.getElementById('cv-render');
+  const A4_H_PX = 297 * 3.7795275591;
+  const cvEl    = document.getElementById('cv-render');
   const marginPx = parseFloat(
     cvEl.style.getPropertyValue('--cv-margin') ||
-    getComputedStyle(document.documentElement).getPropertyValue('--cv-margin') ||
-    '45'
+    getComputedStyle(document.documentElement).getPropertyValue('--cv-margin') || '45'
   ) || 45;
   const USABLE = A4_H_PX - marginPx * 2;
 
   document.querySelectorAll('.cv-page-sheet').forEach(sheet => {
+    // Skip multi-column layouts
     if (sheet.querySelector('.cv-cols, .cv-body-cols')) return;
 
-    // For duotone, paginate inside cv-dt-body
-    const bodyScope = sheet.querySelector('.cv-dt-body') || sheet;
-    const sections = Array.from(bodyScope.querySelectorAll(
+    // For duotone, paginate inside cv-dt-body; otherwise paginate sheet directly
+    const dtBody   = sheet.querySelector('.cv-dt-body');
+    const bodyEl   = dtBody || sheet;
+
+    // Collect direct-child pageable units
+    const sections = Array.from(bodyEl.querySelectorAll(
       ':scope > .cv-section, :scope > .cv-objective-section, :scope > .cv-section-wrap, :scope > .inline-twocol'
     ));
     if (!sections.length) return;
 
-    const sheetTop = sheet.getBoundingClientRect().top;
-    const padTop   = sheet.querySelector('.cv-dt-body')
-      ? (sheet.querySelector('.cv-dt-header')?.getBoundingClientRect().height || 0) +
-        (sheet.querySelector('.cv-dt-stripe')?.getBoundingClientRect().height || 0) +
-        parseFloat(getComputedStyle(bodyScope).paddingTop || '32')
-      : parseFloat(getComputedStyle(sheet).paddingTop) || marginPx;
+    // offsetTop of each section relative to bodyEl
+    function offsetRelTo(el, ancestor) {
+      let top = 0;
+      while (el && el !== ancestor) {
+        top += el.offsetTop;
+        el   = el.offsetParent;
+      }
+      return top;
+    }
 
-    const measured = sections.map(sec => ({
-      sec,
-      top:    sec.getBoundingClientRect().top - sheetTop - padTop,
-      height: sec.getBoundingClientRect().height,
-    }));
+    // Content start: for duotone = header + stripe height; for normal = paddingTop of sheet
+    const contentStartInSheet = dtBody
+      ? (sheet.querySelector('.cv-dt-header')?.offsetHeight || 0) +
+        (sheet.querySelector('.cv-dt-stripe')?.offsetHeight || 0)
+      : 0;
+
+    // paddingTop of bodyEl itself
+    const bodyPadTop = parseFloat(getComputedStyle(bodyEl).paddingTop) || 0;
 
     const toInsert = [];
-    let pageCursor = 0;
+    let pageCursor = 0; // tracks how many px of content we've placed on current page
 
-    measured.forEach(({ sec, top, height }) => {
-      const posInPage = top - pageCursor;
-      if (posInPage + height > USABLE && posInPage > 0) {
+    sections.forEach(sec => {
+      const secTop    = offsetRelTo(sec, bodyEl) - bodyPadTop; // top relative to content area
+      const secHeight = sec.offsetHeight;
+      const posInPage = secTop - pageCursor;
+
+      if (posInPage > 0 && posInPage + secHeight > USABLE) {
+        // This section overflows — push it to next page
         const spacerH = USABLE - posInPage + marginPx;
         toInsert.push({ sec, spacerH });
-        pageCursor += posInPage + spacerH;
+        pageCursor = secTop + spacerH;
       }
     });
 
     toInsert.forEach(({ sec, spacerH }) => {
       const sp = document.createElement('div');
       sp.dataset.pageBreak = '1';
-      sp.style.cssText = `display:block;height:${spacerH}px;`;
+      sp.style.cssText = `display:block;height:${Math.max(0, spacerH)}px;`;
       sec.parentNode.insertBefore(sp, sec);
     });
   });
@@ -1556,12 +1581,46 @@ async function exportPDF() {
   document.querySelectorAll('.edit-btn').forEach(el=>el.style.display='');
 }
 
+/* ── DUOTONE PALETTE SWITCHING ── */
+const DUOTONE_ONLY_VALUES = ['duotone-wine','duotone-navy','duotone-forest','duotone-ink'];
+const NORMAL_OPTGROUPS    = ['Escuros & Elegantes','Cores Sofisticadas'];
+
+function syncPaletteToTemplate() {
+  const tpl         = document.getElementById('template-select').value;
+  const palette     = document.getElementById('color-palette');
+  const dtGroup     = document.getElementById('duotone-optgroup');
+  const normalGrps  = palette.querySelectorAll('optgroup:not(#duotone-optgroup)');
+  const isDuotone   = tpl === 'duotone';
+
+  if (isDuotone) {
+    // Show only duotone options
+    normalGrps.forEach(g => g.style.display = 'none');
+    dtGroup.style.display = '';
+    // If current selection is not a duotone value, switch to first duotone
+    if (!DUOTONE_ONLY_VALUES.includes(palette.value)) {
+      palette.value = 'duotone-ink'; // best default
+    }
+    document.getElementById('color-label').textContent = 'Combinação de Cores:';
+  } else {
+    // Show only normal options, hide duotone
+    normalGrps.forEach(g => g.style.display = '');
+    dtGroup.style.display = 'none';
+    // If current selection is a duotone value, switch to first normal
+    if (DUOTONE_ONLY_VALUES.includes(palette.value)) {
+      palette.value = '#1e293b';
+    }
+    document.getElementById('color-label').textContent = 'Cor Principal:';
+  }
+}
+
 /* ── LISTENERS ── */
-['template-select','color-palette','font-select','include-cover','cover-first','lang-toggle','photo-align']
+document.getElementById('template-select').onchange = () => { syncPaletteToTemplate(); render(); };
+['color-palette','font-select','include-cover','cover-first','lang-toggle','photo-align']
   .forEach(id => document.getElementById(id).onchange = render);
 document.querySelectorAll('.split-toggle').forEach(cb => cb.onchange = render);
 
 /* ── INIT ── */
+syncPaletteToTemplate();
 initDragDrop();
 </script>
 </body>
