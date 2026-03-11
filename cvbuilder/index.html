@@ -1329,7 +1329,9 @@ function render() {
     document.documentElement.style.setProperty('--secondary-color', colorVal);
     dtPreview.style.display = 'none';
   }
-  document.documentElement.style.setProperty('--font-main', document.getElementById('font-select').value);
+  const selectedFont = document.getElementById('font-select').value;
+  document.documentElement.style.setProperty('--font-main', selectedFont);
+  document.getElementById('cv-render').style.setProperty('--cv-font-body', selectedFont);
   container.className = `template-${template}`;
 
   const sc = 'section-title';
