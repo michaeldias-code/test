@@ -462,10 +462,10 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 
   <!-- LAYOUT -->
   <div class="control-group">
-    <div class="accordion-header open" onclick="toggleAccordion(this)">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
       <h3>🎨 Layout & Estilo</h3><span class="accordion-arrow">▼</span>
     </div>
-    <div class="accordion-body open">
+    <div class="accordion-body">
       <label>Modelo Base:</label>
       <select id="template-select">
         <optgroup label="1 Coluna">
@@ -569,10 +569,10 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 
   <!-- ORDEM DAS SEÇÕES -->
   <div class="control-group">
-    <div class="accordion-header open" onclick="toggleAccordion(this)">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
       <h3>📋 Ordem das Seções</h3><span class="accordion-arrow">▼</span>
     </div>
-    <div class="accordion-body open">
+    <div class="accordion-body">
       <p style="font-size:0.73rem;color:#94a3b8;margin:0 0 10px">Arraste para reordenar. Desmarque para ocultar.</p>
       <ul id="section-order-list">
         <li draggable="true" data-key="objective"><span class="drag-handle">⠿</span><input type="checkbox" class="sec-check-inline" id="chk-objective"><span class="sec-label-inline">🎯 Objetivo</span><span class="sec-eye" id="eye-objective">👁</span></li>
@@ -1408,11 +1408,11 @@ function render() {
     const clGreeting = lang==='pt' ? 'À equipe de recrutamento,' : 'Dear Hiring Manager,';
     const clSign     = lang==='pt' ? 'Atenciosamente,' : 'Best regards,';
     html += `<hr class="page-divider" data-label="${clTitle}">
-      <div class="cv-page-sheet cover-sheet">
+      <div class="cv-page-sheet cover-sheet" style="padding:var(--cv-margin)">
         <div class="${sc}" style="margin-bottom:28px">${clTitle}</div>
-        <p style="margin-bottom:16px">${clGreeting}</p>
-        <div style="line-height:1.7;text-align:justify;font-size:11pt;white-space:pre-line">${cl}</div>
-        <p style="margin-top:48px">${clSign}<br><strong>${d.personal.fullname}</strong></p>
+        <p style="margin-bottom:16px;font-size:var(--cv-font-size)">${clGreeting}</p>
+        <div style="line-height:1.8;text-align:justify;font-size:var(--cv-font-size);white-space:pre-line">${cl}</div>
+        <p style="margin-top:48px;font-size:var(--cv-font-size)">${clSign}<br><strong>${d.personal.fullname}</strong></p>
       </div>`;
   }
 
@@ -1438,7 +1438,9 @@ function paginateSections() {
 
     // For duotone, paginate inside cv-dt-body
     const bodyScope = sheet.querySelector('.cv-dt-body') || sheet;
-    const sections = Array.from(bodyScope.querySelectorAll('.cv-section, .cv-objective-section'));
+    const sections = Array.from(bodyScope.querySelectorAll(
+      ':scope > .cv-section, :scope > .cv-objective-section, :scope > .cv-section-wrap, :scope > .inline-twocol'
+    ));
     if (!sections.length) return;
 
     const sheetTop = sheet.getBoundingClientRect().top;
@@ -1478,6 +1480,8 @@ function paginateSections() {
 /* ── PDF EXPORT ── */
 async function exportPDF() {
   document.querySelectorAll('.page-divider').forEach(el=>el.style.display='none');
+  // Hide edit buttons so they don't appear in PDF
+  document.querySelectorAll('.edit-btn').forEach(el=>el.style.display='none');
   const sheets = Array.from(document.querySelectorAll('.cv-page-sheet'));
   const {jsPDF} = window.jspdf;
   const doc = new jsPDF({orientation:'p',unit:'mm',format:'a4'});
@@ -1540,6 +1544,7 @@ async function exportPDF() {
 
   doc.save(filename);
   document.querySelectorAll('.page-divider').forEach(el=>el.style.display='');
+  document.querySelectorAll('.edit-btn').forEach(el=>el.style.display='');
 }
 
 /* ── LISTENERS ── */
