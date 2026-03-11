@@ -6,7 +6,7 @@
 <title>CV Designer Pro</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@300;400;600;700;800&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Nunito:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Roboto+Mono:wght@400;500&family=Montserrat:wght@400;600;700;800&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@300;400;600;700;800&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Nunito:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Roboto+Mono:wght@400;500&family=Montserrat:wght@400;600;700;800&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <style>
 :root {
   --primary-color: #1e293b;
@@ -390,13 +390,87 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 .template-duotone .cv-dt-header .contact-info { font-size: 9pt; font-weight: 300; color: rgba(255,255,255,0.8) !important; }
 .template-duotone .cv-dt-header .photo-circle { border-color: rgba(255,255,255,0.25); border-radius: 4px !important; }
 .template-duotone .cv-dt-body { padding: calc(var(--cv-margin) * 0.7) var(--cv-margin); }
+.template-duotone .cv-dt-stripe { height: 5px; background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%); }
+/* Section titles — secondary color */
 .template-duotone .section-title { font-family: var(--cv-font-display) !important; font-size: 9pt !important; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--secondary-color) !important; border: none !important; border-bottom: 2px solid var(--secondary-color) !important; padding-bottom: 4px; margin-bottom: 10px; }
+/* Objective block */
 .template-duotone .cv-objective-section { border-left-color: var(--secondary-color); }
 .template-duotone .cv-objective-section .obj-value { color: var(--secondary-color); }
-.template-duotone .cv-dt-stripe { height: 4px; background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%); }
+/* Experience */
 .template-duotone .exp-position { font-size: 10pt; font-weight: 700; color: #0f172a; }
 .template-duotone .exp-company  { font-size: 8pt; font-weight: 700; color: var(--secondary-color); text-transform: uppercase; letter-spacing: 0.6px; }
-.template-duotone .exp-period   { font-size: 7.5pt; font-weight: 400; color: #94a3b8; }
+.template-duotone .exp-period   { font-size: 7.5pt; font-weight: 400; color: #64748b; }
+/* Bullet dots use secondary color */
+.template-duotone .exp-desc li::before { color: var(--secondary-color); }
+.template-duotone .exp-desc li { padding-left: 1.1em; }
+.template-duotone .exp-desc li::marker { color: var(--secondary-color); }
+/* Education */
+.template-duotone .edu-degree  { font-weight: 700; color: #0f172a; }
+.template-duotone .edu-inst    { font-size: 8pt; color: var(--secondary-color); font-weight: 600; }
+.template-duotone .edu-period  { font-size: 7.5pt; color: #64748b; }
+/* Skills chips — border uses secondary */
+.template-duotone .skill-chip  { border: 1.5px solid var(--secondary-color); color: var(--primary-color); border-radius: 3px; padding: 1px 7px; font-size: 7.5pt; display: inline-block; margin: 2px 3px 2px 0; }
+/* Certs & projects accent */
+.template-duotone .cert-title, .template-duotone .proj-title { color: var(--primary-color); font-weight: 700; }
+.template-duotone .cert-issuer, .template-duotone .proj-desc { color: #475569; }
+/* Subtle separator between exp entries */
+.template-duotone .exp-entry + .exp-entry { border-top: 1px solid color-mix(in srgb, var(--secondary-color) 20%, transparent); padding-top: 8px; margin-top: 4px; }
+
+/* ── TEMPLATE TI — Terminal / Dark Tech ── */
+.template-tech { --cv-font-body: 'DM Sans', sans-serif; --cv-font-display: 'JetBrains Mono', monospace; }
+.template-tech .cv-page-sheet { background: #ffffff; font-family: var(--cv-font-body); border-top: none; }
+/* Header: dark full-bleed with terminal aesthetic */
+.template-tech .header-wrapper { background: #0f172a; margin: calc(-1 * var(--cv-margin)) calc(-1 * var(--cv-margin)) 0 calc(-1 * var(--cv-margin)); padding: calc(var(--cv-margin) * 0.9) var(--cv-margin) calc(var(--cv-margin) * 0.7); display: flex; align-items: center; gap: 24px; position: relative; }
+.template-tech .header-wrapper::after { content: ''; display: block; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 40%, #00ff88) 100%); }
+.template-tech .cv-name { font-family: var(--cv-font-display); font-size: 20pt; font-weight: 700; color: #f8fafc; letter-spacing: -0.5px; line-height: 1.15; }
+.template-tech .cv-name::before { content: '> '; color: var(--primary-color); font-size: 14pt; }
+.template-tech .desired-position { font-family: var(--cv-font-display); font-size: 7.5pt; font-weight: 400; color: var(--primary-color); margin-top: 6px; letter-spacing: 0.5px; }
+.template-tech .contact-info { font-family: var(--cv-font-display); font-size: 7pt; font-weight: 400; color: rgba(255,255,255,0.5) !important; margin-top: 4px; letter-spacing: 0.3px; }
+.template-tech .photo-circle { border-color: var(--primary-color) !important; border-radius: 4px !important; border-width: 2px !important; }
+/* Section titles: mono, colored, slash prefix */
+.template-tech .section-title { font-family: var(--cv-font-display); font-size: 7.5pt; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--primary-color); background: color-mix(in srgb, var(--primary-color) 8%, transparent); border: none; border-left: 3px solid var(--primary-color); padding: 3px 8px; margin-bottom: 10px; }
+.template-tech .section-title::before { content: '// '; opacity: 0.6; }
+/* Experience */
+.template-tech .exp-position { font-size: 10pt; font-weight: 700; color: #0f172a; }
+.template-tech .exp-company  { font-family: var(--cv-font-display); font-size: 7pt; font-weight: 600; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; }
+.template-tech .exp-period   { font-family: var(--cv-font-display); font-size: 7pt; font-weight: 400; color: #94a3b8; }
+.template-tech .exp-desc li::marker { color: var(--primary-color); }
+/* Education */
+.template-tech .edu-degree { font-weight: 700; color: #0f172a; }
+.template-tech .edu-inst   { font-family: var(--cv-font-display); font-size: 7.5pt; color: var(--primary-color); }
+.template-tech .edu-period { font-family: var(--cv-font-display); font-size: 7pt; color: #94a3b8; }
+/* Skill chips: code-style */
+.template-tech .skill-chip { font-family: var(--cv-font-display); font-size: 7pt; background: color-mix(in srgb, var(--primary-color) 10%, transparent); color: var(--primary-color); border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent); border-radius: 3px; padding: 1px 6px; display: inline-block; margin: 2px 3px 2px 0; }
+/* Certs */
+.template-tech .cert-title { font-weight: 700; color: #0f172a; }
+.template-tech .cert-issuer { font-family: var(--cv-font-display); font-size: 7pt; color: #64748b; }
+
+/* ── TEMPLATE FINANÇAS — Corporate / Prestige ── */
+.template-finance { --cv-font-body: 'IBM Plex Sans', sans-serif; --cv-font-display: 'Playfair Display', serif; }
+.template-finance .cv-page-sheet { font-family: var(--cv-font-body); border-top: 5px solid var(--primary-color); }
+/* Header: clean, typographic prestige */
+.template-finance .header-wrapper { display: flex; align-items: center; gap: 24px; padding-bottom: calc(var(--cv-margin) * 0.5); border-bottom: 1px solid #e2e8f0; margin-bottom: calc(var(--cv-margin) * 0.5); }
+.template-finance .cv-name { font-family: var(--cv-font-display); font-size: 24pt; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; line-height: 1.1; }
+.template-finance .desired-position { font-size: 9pt; font-weight: 500; color: var(--primary-color); margin-top: 5px; letter-spacing: 0.3px; text-transform: none; }
+.template-finance .contact-info { font-size: 8.5pt; font-weight: 400; color: #475569; margin-top: 3px; }
+.template-finance .photo-circle { border-color: var(--primary-color); border-radius: 4px !important; }
+/* Section titles: serif display, subtle rule */
+.template-finance .section-title { font-family: var(--cv-font-display); font-size: 10.5pt; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--primary-color); border-bottom: 1px solid var(--primary-color); padding-bottom: 3px; margin-bottom: 10px; }
+/* Experience: timeline-ish — left border accent per entry */
+.template-finance .exp-entry { border-left: 2px solid #e2e8f0; padding-left: 12px; margin-left: 2px; margin-bottom: 10px; position: relative; }
+.template-finance .exp-entry::before { content: ''; position: absolute; left: -5px; top: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--primary-color); }
+.template-finance .exp-position { font-size: 10pt; font-weight: 700; color: #0f172a; }
+.template-finance .exp-company  { font-size: 8.5pt; font-weight: 600; color: var(--primary-color); }
+.template-finance .exp-period   { font-size: 7.5pt; font-weight: 400; color: #64748b; font-style: italic; }
+/* Education */
+.template-finance .edu-degree { font-weight: 700; color: #0f172a; }
+.template-finance .edu-inst   { font-size: 8.5pt; color: var(--primary-color); font-weight: 500; }
+.template-finance .edu-period { font-size: 7.5pt; color: #64748b; font-style: italic; }
+/* Skill chips: clean bordered */
+.template-finance .skill-chip { font-size: 7.5pt; border: 1px solid #cbd5e1; color: #334155; border-radius: 2px; padding: 1px 7px; display: inline-block; margin: 2px 3px 2px 0; }
+/* Certs */
+.template-finance .cert-title { font-weight: 700; color: #0f172a; }
+.template-finance .cert-issuer { font-size: 8pt; color: var(--primary-color); }
 
 /* ── 2 COLUNAS INLINE ── */
 .inline-twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
@@ -478,6 +552,8 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
         </optgroup>
         <optgroup label="Sidebar">
           <option value="sidebar-left">Sidebar Esquerda</option>
+          <option value="tech">TI / Tech</option>
+          <option value="finance">Finanças / Corp</option>
         </optgroup>
         <optgroup label="✦ Especial">
           <option value="duotone">Duotone</option>
@@ -501,10 +577,12 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
           <option value="#9d174d">Rosa Framboesa</option>
         </optgroup>
         <optgroup label="✦ Duotone (2 cores)" id="duotone-optgroup" style="display:none">
-          <option value="duotone-wine">Vinho + Dourado</option>
-          <option value="duotone-navy">Marinho + Cobre</option>
-          <option value="duotone-forest">Floresta + Terracota</option>
-          <option value="duotone-ink">Tinta + Sálvia</option>
+          <option value="duotone-wine">Borgonha + Terracota</option>
+          <option value="duotone-navy">Marinho + Azul Céu</option>
+          <option value="duotone-forest">Floresta + Sálvia</option>
+          <option value="duotone-ink">Tinta + Lavanda</option>
+          <option value="duotone-slate">Grafite + Âmbar</option>
+          <option value="duotone-rose">Vinho + Rosa Pálido</option>
         </optgroup>
       </select>
       <div id="duotone-preview" style="display:none;margin-top:8px;border-radius:8px;overflow:hidden;height:28px;">
@@ -1311,10 +1389,12 @@ function salaryHTML(d, lang, sc) {
 
 /* ── DUOTONE MAP ── */
 const DUOTONE_MAP = {
-  'duotone-wine':   { primary: '#5c1a1a', secondary: '#b8860b' },
-  'duotone-navy':   { primary: '#1e3a5f', secondary: '#b5651d' },
-  'duotone-forest': { primary: '#1a3d2b', secondary: '#c0694a' },
-  'duotone-ink':    { primary: '#1e1e2e', secondary: '#5a8a6e' },
+  'duotone-wine':   { primary: '#4a1522', secondary: '#c9956a' },   // Borgonha + Terracota suave
+  'duotone-navy':   { primary: '#1e3a5f', secondary: '#7eafc9' },   // Marinho + Azul céu
+  'duotone-forest': { primary: '#1d3d2f', secondary: '#8aaf8e' },   // Floresta + Sálvia
+  'duotone-ink':    { primary: '#1e1e2e', secondary: '#9b8ec4' },   // Tinta + Lavanda
+  'duotone-slate':  { primary: '#1e293b', secondary: '#e9a84c' },   // Grafite + Âmbar
+  'duotone-rose':   { primary: '#4a1535', secondary: '#d4a0b0' },   // Vinho rosa + Rosa pálido
 };
 
 /* ── RENDER ── */
@@ -1426,6 +1506,14 @@ function render() {
       <div class="cv-dt-header ${flip}">${photoHTML(false)}${headerTextHTML(d.personal,lang,align==='row-reverse')}</div>
       <div class="cv-dt-stripe"></div>
       <div class="cv-dt-body">${renderList(orderedKeys)}</div>
+    </div>`;
+    html = hasCover && coverFirst ? coverHTML(true) + cvSheet.replace('break-after','') : cvSheet + (hasCover ? coverHTML() : '');
+
+  } else if (template === 'tech' || template === 'finance') {
+    const flip = align==='row-reverse'?'row-reverse':'';
+    const cvSheet = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
+      <div class="header-wrapper ${flip}">${photoHTML(false)}${headerTextHTML(d.personal,lang,align==='row-reverse')}</div>
+      ${renderList(orderedKeys)}
     </div>`;
     html = hasCover && coverFirst ? coverHTML(true) + cvSheet.replace('break-after','') : cvSheet + (hasCover ? coverHTML() : '');
 
@@ -1583,7 +1671,7 @@ async function exportPDF() {
 }
 
 /* ── DUOTONE PALETTE SWITCHING ── */
-const DUOTONE_ONLY_VALUES = ['duotone-wine','duotone-navy','duotone-forest','duotone-ink'];
+const DUOTONE_ONLY_VALUES = ['duotone-wine','duotone-navy','duotone-forest','duotone-ink','duotone-slate','duotone-rose'];
 const NORMAL_OPTGROUPS    = ['Escuros & Elegantes','Cores Sofisticadas'];
 
 function syncPaletteToTemplate() {
