@@ -9,7 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Roboto+Mono&family=Montserrat:wght@400;700&family=Lora:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root {
-  --primary-color: #2563eb;
+  --primary-color: #1e293b;
+  --secondary-color: #92400e;
   --font-main: 'Inter', sans-serif;
   --cv-margin: 45px;
   --cv-font-size: 10pt;
@@ -46,6 +47,44 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 .btn-main { width: 100%; background: #000; color: white; border: none; padding: 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; font-size: 0.9rem; }
 .btn-sec  { width: 100%; background: #475569; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 0.82rem; }
 .btn-reset { width: 100%; padding: 7px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: #475569; font-weight: 600; margin-top: 8px; }
+
+/* ── DRAG & DROP ORDER ── */
+#section-order-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+#section-order-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: grab;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  user-select: none;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+#section-order-list li:hover { background: #f1f5f9; }
+#section-order-list li.dragging {
+  opacity: 0.5;
+  background: #e0e7ff;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.2);
+  cursor: grabbing;
+}
+#section-order-list li.drag-over {
+  border-color: var(--primary-color);
+  background: #eff6ff;
+}
+.drag-handle { color: #94a3b8; font-size: 0.9rem; flex-shrink: 0; }
+.sec-check-inline { margin: 0; cursor: pointer; flex-shrink: 0; }
+.sec-label-inline { flex: 1; }
+.sec-eye { font-size: 0.75rem; margin-left: auto; color: #94a3b8; flex-shrink: 0; }
 
 /* ── CV WRAPPER ── */
 #cv-render {
@@ -88,9 +127,30 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 /* ── SEÇÕES ── */
 .cv-section { margin-bottom: var(--cv-section-gap); }
 .cv-section:last-child { margin-bottom: 0; }
-
-/* Título de seção base — sem margem hardcoded */
 .section-title { margin-top: 0; margin-bottom: 7px; font-size: 9pt; }
+
+/* ── OBJETIVO SECTION ── */
+.cv-objective-section {
+  margin-bottom: var(--cv-section-gap);
+  padding: 10px 14px;
+  border-left: 4px solid var(--primary-color);
+  background: #f8fafc;
+}
+.cv-objective-section .obj-label {
+  font-size: 7.5pt;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 3px;
+}
+.cv-objective-section .obj-value {
+  font-size: 12pt;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
 /* ── TEMPLATES 1 COLUNA ── */
 .template-modern  .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; }
@@ -138,7 +198,39 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 /* ── 2 COLUNAS INLINE ── */
 .inline-twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
 
-/* ── BOTÃO EXPORTAR ── */
+/* ── DUOTONE TEMPLATE ── */
+.template-duotone .cv-page-sheet { padding: 0; }
+.template-duotone .cv-dt-header {
+  background: var(--primary-color);
+  padding: 36px 45px 28px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.template-duotone .cv-dt-header.row-reverse { flex-direction: row-reverse; }
+.template-duotone .cv-dt-header h1 { color: white; font-size: 22pt; font-weight: 700; }
+.template-duotone .cv-dt-header .desired-position { color: rgba(255,255,255,0.75) !important; font-size: 11pt; }
+.template-duotone .cv-dt-header .contact-info { color: rgba(255,255,255,0.8) !important; }
+.template-duotone .cv-dt-header .photo-circle { border-color: rgba(255,255,255,0.4); }
+.template-duotone .cv-dt-body { padding: 32px 45px; }
+.template-duotone .section-title {
+  color: var(--secondary-color) !important;
+  border-bottom: 2px solid var(--secondary-color) !important;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.template-duotone .cv-objective-section {
+  border-left-color: var(--secondary-color);
+}
+.template-duotone .cv-objective-section .obj-value {
+  color: var(--secondary-color);
+}
+/* accent stripe between header and body */
+.template-duotone .cv-dt-stripe {
+  height: 5px;
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
 .html2pdf__page-break { display: block; height: 0; page-break-before: always; }
 </style>
 </head>
@@ -182,15 +274,39 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
         <option value="sidebar-left">Sidebar Esquerda</option>
         <option value="twocol">Duas Colunas</option>
       </optgroup>
+      <optgroup label="✦ Especial">
+        <option value="duotone">Duotone</option>
+      </optgroup>
     </select>
     <label>Cor Principal:</label>
     <select id="color-palette">
-      <option value="#2563eb">Azul Royal</option>
-      <option value="#1e293b">Slate Dark</option>
-      <option value="#7c3aed">Roxo Moderno</option>
-      <option value="#059669">Verde Esmeralda</option>
-      <option value="#000000">Preto Puro</option>
+      <optgroup label="Escuros &amp; Elegantes">
+        <option value="#1e293b">Grafite Executivo</option>
+        <option value="#000000">Preto Puro</option>
+        <option value="#1a1a2e">Meia-Noite</option>
+        <option value="#2d2d2d">Carvão</option>
+      </optgroup>
+      <optgroup label="Cores Sofisticadas">
+        <option value="#059669">Verde Esmeralda</option>
+        <option value="#0f766e">Azul-Petróleo</option>
+        <option value="#7f1d1d">Borgonha</option>
+        <option value="#92400e">Cobre Envelhecido</option>
+        <option value="#1e3a5f">Azul Marinho</option>
+        <option value="#4a1d96">Índigo Profundo</option>
+      </optgroup>
+      <optgroup label="✦ Duotone (2 cores)">
+        <option value="duotone-wine">Vinho + Dourado</option>
+        <option value="duotone-navy">Marinho + Cobre</option>
+        <option value="duotone-forest">Floresta + Terracota</option>
+        <option value="duotone-ink">Tinta + Sálvia</option>
+      </optgroup>
     </select>
+
+    <!-- Duotone live preview badge -->
+    <div id="duotone-preview" style="display:none;margin-top:8px;border-radius:8px;overflow:hidden;height:28px;">
+      <div id="dt-swatch-a" style="flex:1;height:100%;display:inline-block;width:50%"></div>
+      <div id="dt-swatch-b" style="flex:1;height:100%;display:inline-block;width:50%"></div>
+    </div>
     <label>Fonte:</label>
     <select id="font-select">
       <option value="'Inter', sans-serif">Inter</option>
@@ -235,20 +351,80 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
     <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="volunteer"> Voluntariado</label></div>
   </div>
 
+  <!-- ══ NOVA ÁREA: ORDEM + VISIBILIDADE ══ -->
+  <div class="control-group">
+    <h3>📋 Ordem das Seções</h3>
+    <p style="font-size:0.73rem; color:#94a3b8; margin:0 0 10px">Arraste para reordenar. Desmarque para ocultar.</p>
+    <ul id="section-order-list">
+      <li draggable="true" data-key="objective">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-objective">
+        <span class="sec-label-inline">🎯 Objetivo</span>
+        <span class="sec-eye" id="eye-objective" title="Oculto">👁</span>
+      </li>
+      <li draggable="true" data-key="summary">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-summary" checked>
+        <span class="sec-label-inline">📝 Resumo</span>
+        <span class="sec-eye" id="eye-summary" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="experience">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-experience" checked>
+        <span class="sec-label-inline">💼 Experiência</span>
+        <span class="sec-eye" id="eye-experience" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="education">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-education" checked>
+        <span class="sec-label-inline">🎓 Formação</span>
+        <span class="sec-eye" id="eye-education" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="skills">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-skills" checked>
+        <span class="sec-label-inline">🛠 Habilidades</span>
+        <span class="sec-eye" id="eye-skills" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="certifications">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-certifications" checked>
+        <span class="sec-label-inline">📜 Certificações</span>
+        <span class="sec-eye" id="eye-certifications" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="projects">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-projects" checked>
+        <span class="sec-label-inline">🚀 Projetos</span>
+        <span class="sec-eye" id="eye-projects" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="volunteer">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-volunteer" checked>
+        <span class="sec-label-inline">🤝 Voluntariado</span>
+        <span class="sec-eye" id="eye-volunteer" title="Visível">👁</span>
+      </li>
+    </ul>
+
+    <!-- Objective style sub-option -->
+    <div id="objective-style-row" style="display:none; margin-top:10px; padding:10px; background:#f0f7ff; border-radius:8px; border:1px solid #bfdbfe;">
+      <p style="font-size:0.72rem; font-weight:700; color:#1e40af; margin:0 0 6px">🎯 Estilo do Objetivo:</p>
+      <label style="font-size:0.75rem; font-weight:600; display:flex; align-items:center; gap:6px; margin:3px 0; cursor:pointer;">
+        <input type="radio" name="obj-style" value="section" checked> Como seção destacada
+      </label>
+      <label style="font-size:0.75rem; font-weight:600; display:flex; align-items:center; gap:6px; margin:3px 0; cursor:pointer;">
+        <input type="radio" name="obj-style" value="header"> No cabeçalho (padrão atual)
+      </label>
+      <label style="font-size:0.75rem; font-weight:600; display:flex; align-items:center; gap:6px; margin:3px 0; cursor:pointer;">
+        <input type="radio" name="obj-style" value="both"> Ambos
+      </label>
+    </div>
+  </div>
+
   <div class="control-group">
     <h3>Conteúdo</h3>
     <label><input type="checkbox" id="include-cover" checked> Incluir Cover Letter</label>
     <label><input type="checkbox" id="lang-toggle"> Inglês</label>
-    <div style="margin-top:8px">
-      <p style="font-size:0.73rem; color:#94a3b8; margin:0 0 6px">Seções visíveis:</p>
-      <label><input type="checkbox" class="sec-toggle" data-sec="summary"    checked> Resumo</label>
-      <label><input type="checkbox" class="sec-toggle" data-sec="experience" checked> Experiência</label>
-      <label><input type="checkbox" class="sec-toggle" data-sec="education"  checked> Formação</label>
-      <label><input type="checkbox" class="sec-toggle" data-sec="skills"     checked> Habilidades</label>
-      <label><input type="checkbox" class="sec-toggle" data-sec="certs"      checked> Certificações</label>
-      <label><input type="checkbox" class="sec-toggle" data-sec="projects"   checked> Projetos</label>
-      <label><input type="checkbox" class="sec-toggle" data-sec="volunteer"  checked> Voluntariado</label>
-    </div>
   </div>
 
   <button class="btn-main" onclick="exportPDF()">📥 BAIXAR PDF</button>
@@ -264,6 +440,78 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 
 <script>
 let cvData = null, userPhoto = null;
+let dragSrc = null;
+
+/* ══ DRAG & DROP SECTION ORDER ══ */
+function initDragDrop() {
+  const list = document.getElementById('section-order-list');
+  const items = list.querySelectorAll('li');
+
+  items.forEach(item => {
+    item.addEventListener('dragstart', e => {
+      dragSrc = item;
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      list.querySelectorAll('li').forEach(i => i.classList.remove('drag-over'));
+      render();
+    });
+    item.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      list.querySelectorAll('li').forEach(i => i.classList.remove('drag-over'));
+      if (item !== dragSrc) item.classList.add('drag-over');
+    });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      if (item !== dragSrc) {
+        const allItems = [...list.querySelectorAll('li')];
+        const srcIdx  = allItems.indexOf(dragSrc);
+        const destIdx = allItems.indexOf(item);
+        if (srcIdx < destIdx) list.insertBefore(dragSrc, item.nextSibling);
+        else                  list.insertBefore(dragSrc, item);
+      }
+    });
+  });
+
+  // Checkbox visibility toggles
+  list.querySelectorAll('.sec-check-inline').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const key = cb.id.replace('chk-', '');
+      if (key === 'objective') {
+        document.getElementById('objective-style-row').style.display = cb.checked ? 'block' : 'none';
+      }
+      updateEyes();
+      render();
+    });
+  });
+
+  // Objective style radio change
+  document.querySelectorAll('input[name="obj-style"]').forEach(r => {
+    r.addEventListener('change', render);
+  });
+
+  updateEyes();
+}
+
+function updateEyes() {
+  document.querySelectorAll('.sec-check-inline').forEach(cb => {
+    const key = cb.id.replace('chk-', '');
+    const eye = document.getElementById('eye-' + key);
+    if (eye) eye.style.opacity = cb.checked ? '1' : '0.25';
+  });
+}
+
+function getSectionOrder() {
+  return [...document.querySelectorAll('#section-order-list li')].map(li => li.dataset.key);
+}
+
+function isSectionOn(key) {
+  const cb = document.getElementById('chk-' + key);
+  return cb ? cb.checked : true;
+}
 
 /* ── SLIDERS ── */
 const sliderCfg = [
@@ -276,7 +524,6 @@ sliderCfg.forEach(s => {
   document.getElementById(s.id).addEventListener('input', function() {
     document.getElementById(s.val).textContent = s.fmt(this.value);
     document.getElementById('cv-render').style.setProperty(s.prop, this.value + s.unit);
-    // Re-paginate after layout reflows from CSS var change
     requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); }));
   });
 });
@@ -347,16 +594,36 @@ function photoHTML(side) {
   return `<div class="photo-container"><div class="photo-circle"><img src="${userPhoto}"></div></div>`;
 }
 
+function getObjStyle() {
+  const r = document.querySelector('input[name="obj-style"]:checked');
+  return r ? r.value : 'section';
+}
+
 function headerTextHTML(p, lang, right) {
+  const objStyle = getObjStyle();
+  const showInHeader = !isSectionOn('objective') || objStyle === 'header' || objStyle === 'both';
   const desired = lang==='pt' ? p.desired_position_pt : p.desired_position_en;
   return `<div class="header-text" style="text-align:${right?'right':'left'}">
     <h1 style="font-size:24pt;font-weight:700">${p.fullname}</h1>
-    <div class="desired-position">${desired||''}</div>
+    ${showInHeader && desired ? `<div class="desired-position">${desired}</div>` : ''}
     <div class="contact-info">
       <div>📍 ${p.location||''} &nbsp;•&nbsp; 📞 ${p.phone||''}</div>
       <div>✉️ ${p.email||''}</div>
       <div style="margin-top:3px">${p.linkedin?`<strong>LinkedIn:</strong> ${p.linkedin}`:''}${p.website?` | <strong>Web:</strong> ${p.website}`:''}</div>
     </div>
+  </div>`;
+}
+
+function objectiveHTML(d, lang) {
+  const objStyle = getObjStyle();
+  if (!isSectionOn('objective')) return '';
+  if (objStyle === 'header') return ''; // only in header
+  const desired = lang==='pt' ? d.personal.desired_position_pt : d.personal.desired_position_en;
+  if (!desired) return '';
+  const label = lang==='pt' ? 'Objetivo' : 'Objective';
+  return `<div class="cv-objective-section">
+    <div class="obj-label">${label}</div>
+    <div class="obj-value">${desired}</div>
   </div>`;
 }
 
@@ -455,59 +722,83 @@ function volunteerHTML(d, lang, sc) {
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Voluntariado':'Volunteer'}</div>${items}</div>`,'volunteer');
 }
 
+/* ── DUOTONE MAP ── */
+const DUOTONE_MAP = {
+  'duotone-wine':   { primary: '#5c1a1a', secondary: '#b8860b' },
+  'duotone-navy':   { primary: '#1e3a5f', secondary: '#b5651d' },
+  'duotone-forest': { primary: '#1a3d2b', secondary: '#c0694a' },
+  'duotone-ink':    { primary: '#1e1e2e', secondary: '#5a8a6e' },
+};
+
 /* ── RENDER ── */
 function render() {
   if (!cvData) return;
-  const lang     = document.getElementById('lang-toggle').checked ? 'en' : 'pt';
-  const template = document.getElementById('template-select').value;
-  const align    = document.getElementById('photo-align').value;
+  const lang      = document.getElementById('lang-toggle').checked ? 'en' : 'pt';
+  const template  = document.getElementById('template-select').value;
+  const align     = document.getElementById('photo-align').value;
   const container = document.getElementById('cv-render');
   const d = cvData;
 
-  document.documentElement.style.setProperty('--primary-color', document.getElementById('color-palette').value);
-  document.documentElement.style.setProperty('--font-main',     document.getElementById('font-select').value);
+  // Apply colors
+  const colorVal = document.getElementById('color-palette').value;
+  const isDuotone = colorVal.startsWith('duotone-');
+  const dtPreview = document.getElementById('duotone-preview');
+  if (isDuotone && DUOTONE_MAP[colorVal]) {
+    const dt = DUOTONE_MAP[colorVal];
+    document.documentElement.style.setProperty('--primary-color', dt.primary);
+    document.documentElement.style.setProperty('--secondary-color', dt.secondary);
+    dtPreview.style.display = 'flex';
+    document.getElementById('dt-swatch-a').style.background = dt.primary;
+    document.getElementById('dt-swatch-b').style.background = dt.secondary;
+  } else {
+    document.documentElement.style.setProperty('--primary-color', colorVal);
+    document.documentElement.style.setProperty('--secondary-color', colorVal);
+    dtPreview.style.display = 'none';
+  }
+  document.documentElement.style.setProperty('--font-main', document.getElementById('font-select').value);
   container.className = `template-${template}`;
 
-  const renderers = {
-    summary:        sc => summaryHTML(d,lang,sc),
-    experience:     sc => experienceHTML(d,lang,sc),
-    education:      sc => educationHTML(d,lang,sc),
-    skills:         (sc,ts) => skillsHTML(d,lang,sc,ts),
-    certifications: sc => certsHTML(d,lang,sc),
-    projects:       sc => projectsHTML(d,lang,sc),
-    volunteer:      sc => volunteerHTML(d,lang,sc),
-  };
-  const alias = {certifications:'certs'};
-  const on = k => { const el=document.querySelector(`.sec-toggle[data-sec="${alias[k]||k}"]`); return el?el.checked:true; };
+  const sc = 'section-title';
+  const tag = 'background:rgba(255,255,255,0.18);color:white;border-radius:4px;padding:2px 7px;font-size:8pt;display:inline-block;margin:2px 2px 2px 0;';
 
-  const jsonOrder = [];
-  Object.keys(d).forEach(k => {
-    if (k==='personal') { jsonOrder.push('summary'); return; }
-    if (renderers[k]) jsonOrder.push(k);
-  });
+  // Map key → renderer
+  const renderers = {
+    objective:      () => objectiveHTML(d, lang),
+    summary:        () => summaryHTML(d, lang, sc),
+    experience:     () => experienceHTML(d, lang, sc),
+    education:      () => educationHTML(d, lang, sc),
+    skills:         (ts) => skillsHTML(d, lang, sc, ts),
+    certifications: () => certsHTML(d, lang, sc),
+    projects:       () => projectsHTML(d, lang, sc),
+    volunteer:      () => volunteerHTML(d, lang, sc),
+  };
+
+  // Ordered keys from drag list, filtered by visibility
+  const orderedKeys = getSectionOrder().filter(isSectionOn);
 
   const sideKeys = ['skills','volunteer'];
-  const mainKeys = ['summary','experience','education','projects','certifications'];
-  const sc = 'section-title';
+  const mainKeys = orderedKeys.filter(k => !sideKeys.includes(k));
+  const orderedSideKeys = orderedKeys.filter(k => sideKeys.includes(k));
 
   const renderList = (keys, tagStyle) =>
-    keys.filter(on).map(k => renderers[k] ? renderers[k](sc, tagStyle) : '').join('');
+    keys.map(k => renderers[k] ? renderers[k](tagStyle) : '').join('');
 
   const hasCover = document.getElementById('include-cover').checked && d.coverletter;
   let html = '';
 
   if (template === 'sidebar-left') {
     const desired = lang==='pt' ? d.personal.desired_position_pt : d.personal.desired_position_en;
-    const tag = 'background:rgba(255,255,255,0.18);color:white;border-radius:4px;padding:2px 7px;font-size:8pt;display:inline-block;margin:2px 2px 2px 0;';
+    const objStyle = getObjStyle();
+    const showDesiredInHeader = !isSectionOn('objective') || objStyle === 'header' || objStyle === 'both';
     html = `<div class="cv-page-sheet no-pad ${hasCover?'break-after':''}">
       <div class="cv-cols">
         <div class="col-side">
           ${photoHTML(true)}
           <h1>${d.personal.fullname}</h1>
-          <div class="desired-position">${desired||''}</div>
+          ${showDesiredInHeader && desired ? `<div class="desired-position">${desired}</div>` : ''}
           <div class="${sc}">Contato</div>
           <div class="contact-info">📍 ${d.personal.location||''}<br>📞 ${d.personal.phone||''}<br>✉️ ${d.personal.email||''}${d.personal.linkedin?`<br>🔗 ${d.personal.linkedin}`:''}${d.personal.website?`<br>🌐 ${d.personal.website}`:''}</div>
-          ${renderList(sideKeys, tag)}
+          ${renderList(orderedSideKeys, tag)}
         </div>
         <div class="col-main">${renderList(mainKeys)}</div>
       </div></div>`;
@@ -518,14 +809,22 @@ function render() {
       <div class="cv-header-full header-wrapper ${flip}">${photoHTML(false)}${headerTextHTML(d.personal,lang,align==='row-reverse')}</div>
       <div class="cv-body-cols">
         <div class="col-left">${renderList(mainKeys)}</div>
-        <div class="col-right">${renderList(sideKeys)}</div>
+        <div class="col-right">${renderList(orderedSideKeys)}</div>
       </div></div>`;
+
+  } else if (template === 'duotone') {
+    const flip = align==='row-reverse'?'row-reverse':'';
+    html = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
+      <div class="cv-dt-header ${flip}">${photoHTML(false)}${headerTextHTML(d.personal,lang,align==='row-reverse')}</div>
+      <div class="cv-dt-stripe"></div>
+      <div class="cv-dt-body">${renderList(orderedKeys)}</div>
+    </div>`;
 
   } else {
     const flip = align==='row-reverse'?'row-reverse':'';
     html = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
       <div class="header-wrapper ${flip}">${photoHTML(false)}${headerTextHTML(d.personal,lang,align==='row-reverse')}</div>
-      ${renderList(jsonOrder)}
+      ${renderList(orderedKeys)}
     </div>`;
   }
 
@@ -546,7 +845,6 @@ function render() {
 
 /* ── PAGINAÇÃO POR SEÇÃO INTEIRA ── */
 function paginateSections() {
-  // 1. Remove spacers de renders anteriores
   document.querySelectorAll('[data-page-break]').forEach(el => el.remove());
 
   const A4_H_PX  = 297 * 3.7795275591;
@@ -561,20 +859,24 @@ function paginateSections() {
   document.querySelectorAll('.cv-page-sheet').forEach(sheet => {
     if (sheet.querySelector('.cv-cols, .cv-body-cols')) return;
 
-    const sections = Array.from(sheet.querySelectorAll('.cv-section'));
+    // For duotone, paginate inside cv-dt-body
+    const bodyScope = sheet.querySelector('.cv-dt-body') || sheet;
+    const sections = Array.from(bodyScope.querySelectorAll('.cv-section, .cv-objective-section'));
     if (!sections.length) return;
 
     const sheetTop = sheet.getBoundingClientRect().top;
-    const padTop   = parseFloat(getComputedStyle(sheet).paddingTop) || marginPx;
+    const padTop   = sheet.querySelector('.cv-dt-body')
+      ? (sheet.querySelector('.cv-dt-header')?.getBoundingClientRect().height || 0) +
+        (sheet.querySelector('.cv-dt-stripe')?.getBoundingClientRect().height || 0) +
+        parseFloat(getComputedStyle(bodyScope).paddingTop || '32')
+      : parseFloat(getComputedStyle(sheet).paddingTop) || marginPx;
 
-    // 2. Mede TODAS as seções antes de inserir qualquer spacer
     const measured = sections.map(sec => ({
       sec,
       top:    sec.getBoundingClientRect().top - sheetTop - padTop,
       height: sec.getBoundingClientRect().height,
     }));
 
-    // 3. Decide onde quebrar
     const toInsert = [];
     let pageCursor = 0;
 
@@ -587,7 +889,6 @@ function paginateSections() {
       }
     });
 
-    // 4. Insere spacers (medições já feitas, ordem não afeta)
     toInsert.forEach(({ sec, spacerH }) => {
       const sp = document.createElement('div');
       sp.dataset.pageBreak = '1';
@@ -613,7 +914,6 @@ async function exportPDF() {
     const pxPerMM = canvas.width / PW;
     const pageHpx = Math.round(PH * pxPerMM);
 
-    // Collect break points from spacers inserted by paginateSections
     const breakYs = [0];
     sheet.querySelectorAll('[data-page-break]').forEach(spacer => {
       const relY = spacer.getBoundingClientRect().top - sheetRect.top;
@@ -646,7 +946,10 @@ async function exportPDF() {
 /* ── LISTENERS ── */
 ['template-select','color-palette','font-select','include-cover','lang-toggle','photo-align']
   .forEach(id => document.getElementById(id).onchange = render);
-document.querySelectorAll('.sec-toggle,.split-toggle').forEach(cb => cb.onchange = render);
+document.querySelectorAll('.split-toggle').forEach(cb => cb.onchange = render);
+
+/* ── INIT ── */
+initDragDrop();
 </script>
 </body>
 </html>
