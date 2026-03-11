@@ -6,7 +6,7 @@
 <title>CV Designer Pro</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Playfair+Display:wght@400;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&family=Roboto+Mono:wght@400;500&family=Montserrat:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@300;400;600;700;800&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Nunito:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Roboto+Mono:wght@400;500&family=Montserrat:wght@400;600;700;800&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --primary-color: #1e293b;
@@ -46,7 +46,103 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 
 .btn-main { width: 100%; background: #000; color: white; border: none; padding: 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; font-size: 0.9rem; }
 .btn-sec  { width: 100%; background: #475569; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 0.82rem; }
-/* ── TOOLTIP MODELO JSON ── */
+.btn-reset { width: 100%; padding: 7px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: #475569; font-weight: 600; margin-top: 8px; }
+
+/* ── ACCORDION SIDEBAR ── */
+.control-group { margin-bottom: 4px; border-bottom: none; padding-bottom: 0; }
+.accordion-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 10px; background: #f8fafc; border-radius: 7px;
+  cursor: pointer; user-select: none;
+  border: 1px solid #e2e8f0; transition: background 0.15s;
+}
+.accordion-header:hover { background: #f1f5f9; }
+.accordion-header h3 { font-size: 0.68rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin: 0; }
+.accordion-arrow { font-size: 0.65rem; color: #94a3b8; transition: transform 0.2s; }
+.accordion-body { display: none; padding: 12px 4px 8px; }
+.accordion-body.open { display: block; }
+.accordion-header.open .accordion-arrow { transform: rotate(180deg); }
+.accordion-header.open { background: #eff6ff; border-color: #bfdbfe; }
+.accordion-header.open h3 { color: #1e40af; }
+
+/* ── INLINE EDIT BUTTON ── */
+.cv-section-wrap { position: relative; }
+.cv-section-wrap:hover .edit-btn { opacity: 1; }
+.edit-btn {
+  opacity: 0; position: absolute; top: 0; right: -28px;
+  background: #1e293b; color: white; border: none;
+  width: 22px; height: 22px; border-radius: 5px;
+  font-size: 11px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: opacity 0.15s; z-index: 10;
+  line-height: 1;
+}
+.edit-btn:hover { background: var(--primary-color); }
+
+/* ── EDIT MODAL ── */
+#edit-modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+#edit-modal-overlay.open { display: flex; }
+#edit-modal {
+  background: white; border-radius: 12px; width: 720px; max-width: 95vw;
+  max-height: 88vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+}
+#edit-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; background: white; z-index: 1;
+}
+#edit-modal-header h2 { font-size: 0.9rem; font-weight: 800; color: #0f172a; margin: 0; }
+#edit-modal-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b; padding: 2px 6px; border-radius: 4px; }
+#edit-modal-close:hover { background: #f1f5f9; }
+#edit-modal-body { padding: 16px 20px; }
+#edit-modal-warning {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: #fef9c3; border: 1px solid #fde68a; border-radius: 8px;
+  padding: 10px 12px; margin-bottom: 16px; font-size: 0.75rem; color: #854d0e; line-height: 1.4;
+}
+.edit-lang-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+.edit-lang-col h4 { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin: 0 0 10px; display: flex; align-items: center; gap: 6px; }
+.edit-field { margin-bottom: 12px; }
+.edit-field label { font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; }
+.edit-field input, .edit-field textarea {
+  width: 100%; box-sizing: border-box; border: 1px solid #cbd5e1;
+  border-radius: 6px; padding: 7px 9px; font-size: 0.8rem;
+  font-family: inherit; resize: vertical; color: #0f172a;
+}
+.edit-field input:focus, .edit-field textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
+.edit-field-mono { margin-bottom: 12px; }
+.edit-field-mono label { font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; }
+.edit-field-mono input, .edit-field-mono textarea {
+  width: 100%; box-sizing: border-box; border: 1px solid #cbd5e1;
+  border-radius: 6px; padding: 7px 9px; font-size: 0.78rem;
+  font-family: inherit; resize: vertical; color: #0f172a;
+}
+.edit-save-btn { width: 100%; background: #0f172a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; margin-top: 14px; }
+.edit-save-btn:hover { background: #1e293b; }
+.edit-section-divider { border: none; border-top: 1px solid #f1f5f9; margin: 14px 0; }
+
+/* ── VALIDATION MODAL ── */
+#validation-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+#validation-overlay.open { display: flex; }
+#validation-box {
+  background: white; border-radius: 12px; width: 480px; max-width: 95vw;
+  padding: 24px; box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+}
+#validation-box h3 { font-size: 1rem; font-weight: 800; color: #991b1b; margin: 0 0 6px; }
+#validation-box p { font-size: 0.8rem; color: #475569; margin: 0 0 14px; }
+#validation-list { list-style: none; padding: 0; margin: 0 0 16px; }
+#validation-list li { font-size: 0.78rem; padding: 5px 10px; margin-bottom: 4px; background: #fef2f2; border-left: 3px solid #ef4444; border-radius: 0 5px 5px 0; color: #7f1d1d; }
+#validation-list li.warn { background: #fef9c3; border-left-color: #eab308; color: #854d0e; }
+.validation-actions { display: flex; gap: 8px; }
+.btn-validation-cancel { flex: 1; padding: 10px; border: 1px solid #cbd5e1; background: white; border-radius: 7px; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #475569; }
+.btn-validation-force { flex: 1; padding: 10px; background: #475569; color: white; border: none; border-radius: 7px; cursor: pointer; font-size: 0.82rem; font-weight: 700; }
 .tooltip-wrap { position: relative; }
 .tooltip-wrap .tooltip-box {
   display: none;
@@ -195,151 +291,105 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 
 /* ── TEMPLATES 1 COLUNA ── */
 
-/* MODERNO — Plus Jakarta Sans. Clean, contemporâneo, peso como hierarquia */
-.template-modern { --cv-font-body: 'Plus Jakarta Sans', sans-serif; --cv-font-display: 'Plus Jakarta Sans', sans-serif; }
-.template-modern #cv-render,
+/* MODERNO — Outfit. Clean, arredondado, peso excelente */
+.template-modern { --cv-font-body: 'Outfit', sans-serif; --cv-font-display: 'Outfit', sans-serif; }
 .template-modern .cv-page-sheet { font-family: var(--cv-font-body); }
 .template-modern .cv-name { font-family: var(--cv-font-display); font-size: 26pt; font-weight: 800; letter-spacing: -0.5px; color: #0f172a; }
-.template-modern .desired-position { font-size: 10pt; font-weight: 500; text-transform: uppercase; letter-spacing: 3px; color: var(--primary-color); margin-top: 5px; }
-.template-modern .section-title {
-  font-size: 7pt; font-weight: 700; letter-spacing: 2.5px;
-  text-transform: uppercase; color: var(--primary-color);
-  border-bottom: 1.5px solid var(--primary-color);
-  padding-bottom: 4px; margin-bottom: 10px;
-}
+.template-modern .desired-position { font-size: 9.5pt; font-weight: 500; text-transform: uppercase; letter-spacing: 2.5px; color: var(--primary-color); margin-top: 5px; }
+.template-modern .section-title { font-size: 7pt; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--primary-color); border-bottom: 1.5px solid var(--primary-color); padding-bottom: 4px; margin-bottom: 10px; }
 .template-modern .exp-position { font-size: 10pt; font-weight: 700; color: #0f172a; }
-.template-modern .exp-company  { font-size: 8.5pt; font-weight: 600; color: var(--primary-color); letter-spacing: 0.3px; }
-.template-modern .exp-period   { font-size: 7.5pt; font-weight: 500; color: #94a3b8; }
+.template-modern .exp-company  { font-size: 8.5pt; font-weight: 600; color: var(--primary-color); letter-spacing: 0.2px; }
+.template-modern .exp-period   { font-size: 8pt; font-weight: 400; color: #94a3b8; }
 
-/* EXECUTIVO — Playfair Display + Barlow. Autoridade editorial */
-.template-executive { --cv-font-body: 'Barlow', sans-serif; --cv-font-display: 'Playfair Display', serif; }
+/* EXECUTIVO — Sora. Geométrica, autoridade moderna, legibilidade máxima */
+.template-executive { --cv-font-body: 'Sora', sans-serif; --cv-font-display: 'Sora', sans-serif; }
 .template-executive .cv-page-sheet { font-family: var(--cv-font-body); }
-.template-executive .cv-name { font-family: var(--cv-font-display); font-size: 28pt; font-weight: 700; letter-spacing: 0; color: white; line-height: 1.1; }
-.template-executive .desired-position { font-family: var(--cv-font-body); font-size: 9pt; font-weight: 300; text-transform: uppercase; letter-spacing: 3.5px; color: rgba(255,255,255,0.7) !important; margin-top: 6px; }
+.template-executive .cv-name { font-size: 24pt; font-weight: 800; letter-spacing: -0.5px; color: white; line-height: 1.15; }
+.template-executive .desired-position { font-size: 8pt; font-weight: 300; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.7) !important; margin-top: 6px; }
 .template-executive .header-wrapper {
   background: var(--primary-color); color: white !important;
   margin: calc(-1 * var(--cv-margin)) calc(-1 * var(--cv-margin)) 28px calc(-1 * var(--cv-margin));
   padding: var(--cv-margin);
 }
-.template-executive .header-wrapper h1 { color: white; }
 .template-executive .photo-circle { border-color: rgba(255,255,255,0.3) !important; border-radius: 4px !important; }
-.template-executive .section-title {
-  font-family: var(--cv-font-display);
-  font-size: 11pt; font-weight: 700; font-style: italic;
-  color: var(--primary-color); border: none;
-  border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 5px; margin-bottom: 10px;
-}
-.template-executive .contact-info { color: rgba(255,255,255,0.8) !important; font-size: 8pt; font-weight: 300; letter-spacing: 0.2px; }
-.template-executive .exp-position { font-size: 10pt; font-weight: 600; color: #0f172a; }
-.template-executive .exp-company  { font-size: 8.5pt; font-weight: 700; color: var(--primary-color); text-transform: uppercase; letter-spacing: 0.8px; }
-.template-executive .exp-period   { font-size: 7.5pt; font-weight: 300; color: #94a3b8; }
+.template-executive .section-title { font-size: 7pt; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--primary-color); border-left: 3px solid var(--primary-color); padding-left: 8px; border-bottom: none; margin-bottom: 10px; }
+.template-executive .contact-info { color: rgba(255,255,255,0.8) !important; font-size: 8pt; font-weight: 300; }
+.template-executive .exp-position { font-size: 10pt; font-weight: 700; color: #0f172a; }
+.template-executive .exp-company  { font-size: 8.5pt; font-weight: 600; color: var(--primary-color); text-transform: uppercase; letter-spacing: 0.6px; }
+.template-executive .exp-period   { font-size: 8pt; font-weight: 300; color: #94a3b8; }
 
-/* MINIMALISTA — Cormorant Garamond + Barlow. Elegância editorial máxima */
-.template-minimal { --cv-font-body: 'Barlow', sans-serif; --cv-font-display: 'Cormorant Garamond', serif; }
+/* MINIMALISTA — IBM Plex Sans. Tipografia técnica e refinada */
+.template-minimal { --cv-font-body: 'IBM Plex Sans', sans-serif; --cv-font-display: 'IBM Plex Sans', sans-serif; }
 .template-minimal .cv-page-sheet { font-family: var(--cv-font-body); }
-.template-minimal .cv-name { font-family: var(--cv-font-display); font-size: 32pt; font-weight: 600; letter-spacing: -0.5px; color: #0f172a; line-height: 1; }
-.template-minimal .desired-position { font-family: var(--cv-font-display); font-size: 13pt; font-weight: 400; font-style: italic; color: var(--primary-color); margin-top: 4px; letter-spacing: 0; }
-.template-minimal .section-title {
-  font-family: var(--cv-font-body);
-  font-size: 6.5pt; font-weight: 700; letter-spacing: 3px;
-  text-transform: uppercase; color: #94a3b8;
-  border: none; border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 5px; margin-bottom: 10px;
-}
-.template-minimal .contact-info { font-size: 8pt; font-weight: 300; color: #64748b; letter-spacing: 0.2px; }
-.template-minimal .exp-position { font-family: var(--cv-font-display); font-size: 12pt; font-weight: 600; color: #0f172a; }
-.template-minimal .exp-company  { font-size: 8pt; font-weight: 700; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; }
-.template-minimal .exp-period   { font-size: 7.5pt; font-weight: 300; color: #94a3b8; }
+.template-minimal .cv-name { font-size: 28pt; font-weight: 700; letter-spacing: -1px; color: #0f172a; line-height: 1.05; }
+.template-minimal .desired-position { font-size: 10pt; font-weight: 400; font-style: italic; color: var(--primary-color); margin-top: 5px; }
+.template-minimal .section-title { font-size: 6.5pt; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: #94a3b8; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 10px; }
+.template-minimal .contact-info { font-size: 8pt; font-weight: 400; color: #64748b; }
+.template-minimal .exp-position { font-size: 10.5pt; font-weight: 600; color: #0f172a; }
+.template-minimal .exp-company  { font-size: 8.5pt; font-weight: 700; color: var(--primary-color); text-transform: uppercase; letter-spacing: 0.8px; }
+.template-minimal .exp-period   { font-size: 8pt; font-weight: 400; color: #94a3b8; }
 
 /* CRIATIVO — Barlow Condensed + Roboto Mono. Tech, bold, inconfundível */
-.template-creative { --cv-font-body: 'Barlow', sans-serif; --cv-font-display: 'Barlow Condensed', sans-serif; }
+.template-creative { --cv-font-body: 'DM Sans', sans-serif; --cv-font-display: 'Barlow Condensed', sans-serif; }
 .template-creative .cv-page-sheet { font-family: var(--cv-font-body); border-top: 6px solid var(--primary-color); }
 .template-creative .cv-name { font-family: var(--cv-font-display); font-size: 30pt; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #0f172a; line-height: 1; }
-.template-creative .desired-position { font-family: 'Roboto Mono', monospace; font-size: 8pt; font-weight: 400; color: var(--primary-color); margin-top: 6px; letter-spacing: 0; }
-.template-creative .section-title {
-  font-family: var(--cv-font-display);
-  font-size: 9pt; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; color: white;
-  background: var(--primary-color);
-  padding: 3px 10px; display: inline-block; margin-bottom: 10px;
-}
+.template-creative .desired-position { font-family: 'Roboto Mono', monospace; font-size: 8pt; font-weight: 500; color: var(--primary-color); margin-top: 6px; }
+.template-creative .section-title { font-family: var(--cv-font-display); font-size: 9pt; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: white; background: var(--primary-color); padding: 3px 10px; display: inline-block; margin-bottom: 10px; }
 .template-creative .contact-info { font-family: 'Roboto Mono', monospace; font-size: 7.5pt; color: #475569; }
-.template-creative .exp-position { font-family: var(--cv-font-display); font-size: 12pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #0f172a; }
-.template-creative .exp-company  { font-family: 'Roboto Mono', monospace; font-size: 7.5pt; color: var(--primary-color); }
+.template-creative .exp-position { font-family: var(--cv-font-display); font-size: 12pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #0f172a; }
+.template-creative .exp-company  { font-family: 'Roboto Mono', monospace; font-size: 7.5pt; font-weight: 500; color: var(--primary-color); }
 .template-creative .exp-period   { font-family: 'Roboto Mono', monospace; font-size: 7.5pt; color: #94a3b8; }
 
 /* ── TEMPLATES 2 COLUNAS ── */
 
-/* SIDEBAR ESQUERDA — Plus Jakarta Sans. Sidebar densa, main area limpa */
-.template-sidebar-left { --cv-font-body: 'Plus Jakarta Sans', sans-serif; --cv-font-display: 'Plus Jakarta Sans', sans-serif; }
+/* SIDEBAR ESQUERDA — Nunito. Amigável, excelente peso em sidebar */
+.template-sidebar-left { --cv-font-body: 'Nunito', sans-serif; --cv-font-display: 'Nunito', sans-serif; }
 .template-sidebar-left .cv-page-sheet.no-pad { padding: 0; }
 .template-sidebar-left .cv-cols { display: grid; grid-template-columns: 185px 1fr; min-height: 297mm; }
 .template-sidebar-left .col-side { background: var(--primary-color); color: white; padding: 30px 18px; font-family: var(--cv-font-body); }
-.template-sidebar-left .col-side h1 { font-size: 13pt; font-weight: 800; color: white; line-height: 1.2; letter-spacing: -0.3px; }
-.template-sidebar-left .col-side .desired-position { font-size: 7pt; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.6); margin-bottom: 14px; margin-top: 4px; }
+.template-sidebar-left .col-side .cv-name { font-size: 13pt; font-weight: 800; color: white; line-height: 1.2; letter-spacing: -0.2px; }
+.template-sidebar-left .col-side .desired-position { font-size: 7pt; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.6); margin-bottom: 14px; margin-top: 4px; }
 .template-sidebar-left .col-side .section-title { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.45); border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 4px; margin: 16px 0 8px; }
-.template-sidebar-left .col-side .contact-info { font-size: 7.5pt; line-height: 1.8; color: rgba(255,255,255,0.8); font-weight: 300; }
+.template-sidebar-left .col-side .contact-info { font-size: 7.5pt; line-height: 1.8; color: rgba(255,255,255,0.8); font-weight: 400; }
 .template-sidebar-left .col-main { padding: 30px 26px; font-family: var(--cv-font-body); }
-.template-sidebar-left .col-main .cv-name { font-size: 0; display: none; } /* name is in sidebar */
 .template-sidebar-left .col-main .section-title { font-size: 7pt; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--primary-color); border-bottom: 1.5px solid var(--primary-color); padding-bottom: 4px; margin-bottom: 10px; }
 .photo-circle-side { width: 100%; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); margin-bottom: 14px; }
 .photo-circle-side img { width: 100%; height: 100%; object-fit: cover; }
 .template-sidebar-left .exp-position { font-size: 10pt; font-weight: 700; color: #0f172a; }
-.template-sidebar-left .exp-company  { font-size: 8pt; font-weight: 600; color: var(--primary-color); letter-spacing: 0.3px; }
+.template-sidebar-left .exp-company  { font-size: 8pt; font-weight: 600; color: var(--primary-color); }
 .template-sidebar-left .exp-period   { font-size: 7.5pt; font-weight: 400; color: #94a3b8; }
 
-/* DUAS COLUNAS — Montserrat. Moderno e equilibrado */
+/* DUAS COLUNAS — Montserrat. Clássico, sólido, bom peso */
 .template-twocol { --cv-font-body: 'Montserrat', sans-serif; --cv-font-display: 'Montserrat', sans-serif; }
 .template-twocol .cv-header-full { background: var(--primary-color); color: white; margin: calc(-1 * var(--cv-margin)) calc(-1 * var(--cv-margin)) 0 calc(-1 * var(--cv-margin)); padding: 32px 45px 24px; display: flex; align-items: center; gap: 24px; font-family: var(--cv-font-body); }
 .template-twocol .cv-name { font-size: 22pt; font-weight: 800; letter-spacing: -0.5px; color: white; }
-.template-twocol .cv-header-full .desired-position { font-size: 8pt; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,0.7) !important; margin-bottom: 6px; margin-top: 5px; }
-.template-twocol .cv-header-full .contact-info { color: rgba(255,255,255,0.75) !important; font-size: 8pt; font-weight: 300; }
+.template-twocol .cv-header-full .desired-position { font-size: 7.5pt; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,0.7) !important; margin-bottom: 6px; margin-top: 5px; }
+.template-twocol .cv-header-full .contact-info { color: rgba(255,255,255,0.75) !important; font-size: 8pt; font-weight: 400; }
 .template-twocol .cv-header-full .photo-circle { border-color: rgba(255,255,255,0.25); border-radius: 6px !important; }
 .template-twocol .cv-body-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; padding-top: 20px; font-family: var(--cv-font-body); }
 .template-twocol .col-right { border-left: 1px solid #f1f5f9; padding-left: 26px; }
 .template-twocol .section-title { font-size: 6.5pt; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 4px; margin-bottom: 10px; }
 .template-twocol .exp-position { font-size: 9.5pt; font-weight: 700; color: #0f172a; }
 .template-twocol .exp-company  { font-size: 7.5pt; font-weight: 600; color: var(--primary-color); text-transform: uppercase; letter-spacing: 0.5px; }
-.template-twocol .exp-period   { font-size: 7pt; font-weight: 400; color: #94a3b8; }
+.template-twocol .exp-period   { font-size: 7pt; font-weight: 500; color: #94a3b8; }
 
-/* DUOTONE — DM Serif Display + Barlow. Dramático e sofisticado */
-.template-duotone { --cv-font-body: 'Barlow', sans-serif; --cv-font-display: 'DM Serif Display', serif; }
+/* DUOTONE — Outfit + DM Sans. Sofisticado com legibilidade real */
+.template-duotone { --cv-font-body: 'DM Sans', sans-serif; --cv-font-display: 'Outfit', sans-serif; }
 .template-duotone .cv-page-sheet { padding: 0; font-family: var(--cv-font-body); }
-.template-duotone .cv-dt-header {
-  background: var(--primary-color);
-  padding: 36px 45px 28px;
-  display: flex; align-items: center; gap: 28px;
-}
+.template-duotone .cv-dt-header { background: var(--primary-color); padding: 36px 45px 28px; display: flex; align-items: center; gap: 28px; }
 .template-duotone .cv-dt-header.row-reverse { flex-direction: row-reverse; }
-.template-duotone .cv-name { font-family: var(--cv-font-display); font-size: 28pt; font-weight: 400; color: white; line-height: 1.1; letter-spacing: 0; }
-.template-duotone .cv-dt-header .desired-position { font-family: var(--cv-font-body); font-size: 8.5pt; font-weight: 300; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.65) !important; margin-top: 6px; }
-.template-duotone .cv-dt-header .contact-info { font-size: 8pt; font-weight: 300; color: rgba(255,255,255,0.75) !important; letter-spacing: 0.2px; }
+.template-duotone .cv-name { font-family: var(--cv-font-display); font-size: 26pt; font-weight: 800; color: white; line-height: 1.1; letter-spacing: -0.5px; }
+.template-duotone .cv-dt-header .desired-position { font-size: 8.5pt; font-weight: 400; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,0.65) !important; margin-top: 6px; }
+.template-duotone .cv-dt-header .contact-info { font-size: 8pt; font-weight: 300; color: rgba(255,255,255,0.75) !important; }
 .template-duotone .cv-dt-header .photo-circle { border-color: rgba(255,255,255,0.25); border-radius: 4px !important; }
 .template-duotone .cv-dt-body { padding: 32px 45px; }
-.template-duotone .section-title {
-  font-family: var(--cv-font-display) !important;
-  font-size: 12pt !important; font-weight: 400; font-style: italic;
-  color: var(--secondary-color) !important;
-  border: none !important;
-  border-bottom: 1px solid rgba(0,0,0,0.08) !important;
-  padding-bottom: 5px; margin-bottom: 10px;
-  letter-spacing: 0;
-}
+.template-duotone .section-title { font-family: var(--cv-font-display) !important; font-size: 8pt !important; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--secondary-color) !important; border: none !important; border-bottom: 2px solid var(--secondary-color) !important; padding-bottom: 4px; margin-bottom: 10px; }
 .template-duotone .cv-objective-section { border-left-color: var(--secondary-color); }
 .template-duotone .cv-objective-section .obj-value { color: var(--secondary-color); }
-.template-duotone .cv-dt-stripe {
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-}
-.template-duotone .exp-position { font-family: var(--cv-font-display); font-size: 11.5pt; font-weight: 400; color: #0f172a; }
-.template-duotone .exp-company  { font-size: 8pt; font-weight: 700; color: var(--secondary-color); text-transform: uppercase; letter-spacing: 0.8px; }
-.template-duotone .exp-period   { font-size: 7.5pt; font-weight: 300; color: #94a3b8; }
-
-/* ── COMPONENTES PARTILHADOS (fallback) ── */
-.desired-position { color: var(--primary-color); font-size: 11pt; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-.contact-info { font-size: 8.5pt; margin-top: 10px; line-height: 1.6; }
-.cv-name { font-size: 24pt; font-weight: 700; color: #0f172a; }
+.template-duotone .cv-dt-stripe { height: 4px; background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%); }
+.template-duotone .exp-position { font-size: 10pt; font-weight: 700; color: #0f172a; }
+.template-duotone .exp-company  { font-size: 8pt; font-weight: 700; color: var(--secondary-color); text-transform: uppercase; letter-spacing: 0.6px; }
+.template-duotone .exp-period   { font-size: 7.5pt; font-weight: 400; color: #94a3b8; }
 
 /* ── 2 COLUNAS INLINE ── */
 .inline-twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
@@ -353,223 +403,200 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 <body>
 
 <div class="sidebar">
-  <h2 style="margin:0 0 14px">CV Designer Pro</h2>
+  <h2 style="margin:0 0 10px;font-size:1rem;font-weight:800;color:#0f172a">CV Designer Pro</h2>
 
   <div id="fit-indicator" class="ok"><div class="dot"></div><span id="fit-text">Aguardando dados...</span></div>
 
+  <!-- DADOS -->
   <div class="control-group">
-    <h3>Foto</h3>
-    <label>Upload (Opcional):</label>
-    <input type="file" id="photo-upload" accept="image/*">
-    <label>Posição:</label>
-    <select id="photo-align">
-      <option value="row">Esquerda</option>
-      <option value="row-reverse">Direita</option>
-    </select>
-  </div>
-
-  <div class="tooltip-wrap">
-    <button onclick="downloadModelJSON()" class="btn-sec">📄 Baixar Modelo JSON</button>
-    <div class="tooltip-box">
-      <strong>Como funciona:</strong>
-      <ol>
-        <li>Baixe este arquivo JSON modelo</li>
-        <li>Cole-o numa IA (ChatGPT, Claude…) e peça para preencher com seus dados</li>
-        <li>Salve o JSON devolvido pela IA e importe abaixo em <em>Arquivo JSON</em></li>
-      </ol>
+    <div class="accordion-header open" onclick="toggleAccordion(this)">
+      <h3>📂 Dados</h3><span class="accordion-arrow">▼</span>
     </div>
-  </div>
-
-  <div class="control-group">
-    <h3>Dados</h3>
-    <label>Arquivo JSON:</label>
-    <input type="file" id="json-file" accept=".json">
-    <label style="margin-top:10px">Ver exemplo:</label>
-    <div class="samples-row">
-      <button class="btn-sample" id="btn-sample-jr" onclick="loadSample('jr')">
-        👨‍💻 Júnior
-        <span class="sample-tag">Dev Front-end</span>
-      </button>
-      <button class="btn-sample" id="btn-sample-sr" onclick="loadSample('sr')">
-        👩‍💼 Executivo
-        <span class="sample-tag">CTO / Diretora</span>
-      </button>
+    <div class="accordion-body open">
+      <div class="tooltip-wrap" style="margin-bottom:8px">
+        <button onclick="downloadModelJSON()" class="btn-sec" style="margin-bottom:0">📄 Baixar Modelo JSON</button>
+        <div class="tooltip-box">
+          <strong>Como funciona:</strong>
+          <ol>
+            <li>Baixe este arquivo JSON modelo</li>
+            <li>Cole-o numa IA (ChatGPT, Claude…) e peça para preencher com seus dados</li>
+            <li>Salve o JSON devolvido pela IA e importe abaixo</li>
+          </ol>
+        </div>
+      </div>
+      <label>Importar JSON:</label>
+      <input type="file" id="json-file" accept=".json">
+      <label style="margin-top:10px">Ver exemplo:</label>
+      <div class="samples-row">
+        <button class="btn-sample" id="btn-sample-jr" onclick="loadSample('jr')">
+          👨‍💻 Júnior<span class="sample-tag">Dev Front-end</span>
+        </button>
+        <button class="btn-sample" id="btn-sample-sr" onclick="loadSample('sr')">
+          👩‍💼 Executivo<span class="sample-tag">CTO / Diretora</span>
+        </button>
+      </div>
     </div>
   </div>
 
+  <!-- FOTO -->
   <div class="control-group">
-    <h3>Layout & Estilo</h3>
-    <label>Modelo Base:</label>
-    <select id="template-select">
-      <optgroup label="1 Coluna">
-        <option value="modern">Moderno</option>
-        <option value="executive">Executivo</option>
-        <option value="minimal">Minimalista</option>
-        <option value="creative">Criativo</option>
-      </optgroup>
-      <optgroup label="2 Colunas">
-        <option value="sidebar-left">Sidebar Esquerda</option>
-        <option value="twocol">Duas Colunas</option>
-      </optgroup>
-      <optgroup label="✦ Especial">
-        <option value="duotone">Duotone</option>
-      </optgroup>
-    </select>
-    <label>Cor Principal:</label>
-    <select id="color-palette">
-      <optgroup label="Escuros &amp; Elegantes">
-        <option value="#1e293b">Grafite Executivo</option>
-        <option value="#000000">Preto Puro</option>
-        <option value="#1a1a2e">Meia-Noite</option>
-        <option value="#2d2d2d">Carvão</option>
-      </optgroup>
-      <optgroup label="Cores Sofisticadas">
-        <option value="#059669">Verde Esmeralda</option>
-        <option value="#0f766e">Azul-Petróleo</option>
-        <option value="#7f1d1d">Borgonha</option>
-        <option value="#92400e">Cobre Envelhecido</option>
-        <option value="#1e3a5f">Azul Marinho</option>
-        <option value="#4a1d96">Índigo Profundo</option>
-      </optgroup>
-      <optgroup label="✦ Duotone (2 cores)">
-        <option value="duotone-wine">Vinho + Dourado</option>
-        <option value="duotone-navy">Marinho + Cobre</option>
-        <option value="duotone-forest">Floresta + Terracota</option>
-        <option value="duotone-ink">Tinta + Sálvia</option>
-      </optgroup>
-    </select>
-
-    <!-- Duotone live preview badge -->
-    <div id="duotone-preview" style="display:none;margin-top:8px;border-radius:8px;overflow:hidden;height:28px;">
-      <div id="dt-swatch-a" style="flex:1;height:100%;display:inline-block;width:50%"></div>
-      <div id="dt-swatch-b" style="flex:1;height:100%;display:inline-block;width:50%"></div>
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h3>📷 Foto</h3><span class="accordion-arrow">▼</span>
     </div>
-    <label>Fonte:</label>
-    <select id="font-select">
-      <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans</option>
-      <option value="'Barlow', sans-serif">Barlow</option>
-      <option value="'Montserrat', sans-serif">Montserrat</option>
-      <option value="'Lora', serif">Lora</option>
-      <option value="'Cormorant Garamond', serif">Cormorant Garamond</option>
-    </select>
-  </div>
-
-  <div class="control-group">
-    <h3>🎛️ Ajuste de Densidade</h3>
-    <div class="slider-row">
-      <label>Margem</label>
-      <input type="range" id="ctrl-margin" min="15" max="60" value="45" step="1">
-      <span id="val-margin">45px</span>
-    </div>
-    <div class="slider-row">
-      <label>Tamanho de fonte</label>
-      <input type="range" id="ctrl-font" min="7" max="13" value="10" step="0.5">
-      <span id="val-font">10pt</span>
-    </div>
-    <div class="slider-row">
-      <label>Espaço entre seções</label>
-      <input type="range" id="ctrl-gap" min="4" max="36" value="22" step="1">
-      <span id="val-gap">22px</span>
-    </div>
-    <div class="slider-row">
-      <label>Entrelinhamento</label>
-      <input type="range" id="ctrl-lh" min="1.1" max="2.0" value="1.5" step="0.05">
-      <span id="val-lh">1.50</span>
-    </div>
-    <button onclick="resetDensity()" class="btn-reset">↺ Restaurar padrão</button>
-  </div>
-
-  <div class="control-group">
-    <h3>📐 Seções em 2 colunas</h3>
-    <p style="font-size:0.73rem; color:#94a3b8; margin:0 0 8px">Divide a seção para economizar espaço vertical.</p>
-    <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="experience"> Experiência</label></div>
-    <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="education"> Formação</label></div>
-    <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="skills"> Habilidades</label></div>
-    <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="certifications"> Certificações</label></div>
-    <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="projects"> Projetos</label></div>
-    <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="volunteer"> Voluntariado</label></div>
-  </div>
-
-  <!-- ══ NOVA ÁREA: ORDEM + VISIBILIDADE ══ -->
-  <div class="control-group">
-    <h3>📋 Ordem das Seções</h3>
-    <p style="font-size:0.73rem; color:#94a3b8; margin:0 0 10px">Arraste para reordenar. Desmarque para ocultar.</p>
-    <ul id="section-order-list">
-      <li draggable="true" data-key="objective">
-        <span class="drag-handle">⠿</span>
-        <input type="checkbox" class="sec-check-inline" id="chk-objective">
-        <span class="sec-label-inline">🎯 Objetivo</span>
-        <span class="sec-eye" id="eye-objective" title="Oculto">👁</span>
-      </li>
-      <li draggable="true" data-key="summary">
-        <span class="drag-handle">⠿</span>
-        <input type="checkbox" class="sec-check-inline" id="chk-summary" checked>
-        <span class="sec-label-inline">📝 Resumo</span>
-        <span class="sec-eye" id="eye-summary" title="Visível">👁</span>
-      </li>
-      <li draggable="true" data-key="experience">
-        <span class="drag-handle">⠿</span>
-        <input type="checkbox" class="sec-check-inline" id="chk-experience" checked>
-        <span class="sec-label-inline">💼 Experiência</span>
-        <span class="sec-eye" id="eye-experience" title="Visível">👁</span>
-      </li>
-      <li draggable="true" data-key="education">
-        <span class="drag-handle">⠿</span>
-        <input type="checkbox" class="sec-check-inline" id="chk-education" checked>
-        <span class="sec-label-inline">🎓 Formação</span>
-        <span class="sec-eye" id="eye-education" title="Visível">👁</span>
-      </li>
-      <li draggable="true" data-key="skills">
-        <span class="drag-handle">⠿</span>
-        <input type="checkbox" class="sec-check-inline" id="chk-skills" checked>
-        <span class="sec-label-inline">🛠 Habilidades</span>
-        <span class="sec-eye" id="eye-skills" title="Visível">👁</span>
-      </li>
-      <li draggable="true" data-key="certifications">
-        <span class="drag-handle">⠿</span>
-        <input type="checkbox" class="sec-check-inline" id="chk-certifications" checked>
-        <span class="sec-label-inline">📜 Certificações</span>
-        <span class="sec-eye" id="eye-certifications" title="Visível">👁</span>
-      </li>
-      <li draggable="true" data-key="projects">
-        <span class="drag-handle">⠿</span>
-        <input type="checkbox" class="sec-check-inline" id="chk-projects" checked>
-        <span class="sec-label-inline">🚀 Projetos</span>
-        <span class="sec-eye" id="eye-projects" title="Visível">👁</span>
-      </li>
-      <li draggable="true" data-key="volunteer">
-        <span class="drag-handle">⠿</span>
-        <input type="checkbox" class="sec-check-inline" id="chk-volunteer" checked>
-        <span class="sec-label-inline">🤝 Voluntariado</span>
-        <span class="sec-eye" id="eye-volunteer" title="Visível">👁</span>
-      </li>
-      <li draggable="true" data-key="salary">
-        <span class="drag-handle">⠿</span>
-        <input type="checkbox" class="sec-check-inline" id="chk-salary">
-        <span class="sec-label-inline">💰 Pretensão Salarial</span>
-        <span class="sec-eye" id="eye-salary" title="Oculto">👁</span>
-      </li>
-    </ul>
-
-    <!-- Objective style sub-option -->
-    <div id="objective-style-row" style="display:none; margin-top:10px; padding:10px; background:#f0f7ff; border-radius:8px; border:1px solid #bfdbfe;">
-      <p style="font-size:0.72rem; font-weight:700; color:#1e40af; margin:0 0 6px">🎯 Estilo do Objetivo:</p>
-      <label style="font-size:0.75rem; font-weight:600; display:flex; align-items:center; gap:6px; margin:3px 0; cursor:pointer;">
-        <input type="radio" name="obj-style" value="section" checked> Como seção destacada
-      </label>
-      <label style="font-size:0.75rem; font-weight:600; display:flex; align-items:center; gap:6px; margin:3px 0; cursor:pointer;">
-        <input type="radio" name="obj-style" value="header"> No cabeçalho (padrão atual)
-      </label>
-      <label style="font-size:0.75rem; font-weight:600; display:flex; align-items:center; gap:6px; margin:3px 0; cursor:pointer;">
-        <input type="radio" name="obj-style" value="both"> Ambos
-      </label>
+    <div class="accordion-body">
+      <label>Upload (Opcional):</label>
+      <input type="file" id="photo-upload" accept="image/*">
+      <label>Posição:</label>
+      <select id="photo-align">
+        <option value="row">Esquerda</option>
+        <option value="row-reverse">Direita</option>
+      </select>
     </div>
   </div>
 
+  <!-- LAYOUT -->
   <div class="control-group">
-    <h3>Conteúdo</h3>
-    <label><input type="checkbox" id="include-cover" checked> Incluir Cover Letter</label>
-    <label><input type="checkbox" id="lang-toggle"> Inglês</label>
+    <div class="accordion-header open" onclick="toggleAccordion(this)">
+      <h3>🎨 Layout & Estilo</h3><span class="accordion-arrow">▼</span>
+    </div>
+    <div class="accordion-body open">
+      <label>Modelo Base:</label>
+      <select id="template-select">
+        <optgroup label="1 Coluna">
+          <option value="modern">Moderno</option>
+          <option value="executive">Executivo</option>
+          <option value="minimal">Minimalista</option>
+          <option value="creative">Criativo</option>
+        </optgroup>
+        <optgroup label="2 Colunas">
+          <option value="sidebar-left">Sidebar Esquerda</option>
+          <option value="twocol">Duas Colunas</option>
+        </optgroup>
+        <optgroup label="✦ Especial">
+          <option value="duotone">Duotone</option>
+        </optgroup>
+      </select>
+      <label>Cor Principal:</label>
+      <select id="color-palette">
+        <optgroup label="Escuros &amp; Elegantes">
+          <option value="#1e293b">Grafite Executivo</option>
+          <option value="#000000">Preto Puro</option>
+          <option value="#1a1a2e">Meia-Noite</option>
+          <option value="#2d2d2d">Carvão</option>
+        </optgroup>
+        <optgroup label="Cores Sofisticadas">
+          <option value="#059669">Verde Esmeralda</option>
+          <option value="#0f766e">Azul-Petróleo</option>
+          <option value="#7f1d1d">Borgonha</option>
+          <option value="#92400e">Cobre Envelhecido</option>
+          <option value="#1e3a5f">Azul Marinho</option>
+          <option value="#4a1d96">Índigo Profundo</option>
+        </optgroup>
+        <optgroup label="✦ Duotone (2 cores)">
+          <option value="duotone-wine">Vinho + Dourado</option>
+          <option value="duotone-navy">Marinho + Cobre</option>
+          <option value="duotone-forest">Floresta + Terracota</option>
+          <option value="duotone-ink">Tinta + Sálvia</option>
+        </optgroup>
+      </select>
+      <div id="duotone-preview" style="display:none;margin-top:8px;border-radius:8px;overflow:hidden;height:28px;">
+        <div id="dt-swatch-a" style="height:100%;display:inline-block;width:50%"></div>
+        <div id="dt-swatch-b" style="height:100%;display:inline-block;width:50%"></div>
+      </div>
+      <label>Fonte:</label>
+      <select id="font-select">
+        <option value="'Outfit', sans-serif">Outfit</option>
+        <option value="'Sora', sans-serif">Sora</option>
+        <option value="'IBM Plex Sans', sans-serif">IBM Plex Sans</option>
+        <option value="'Nunito', sans-serif">Nunito</option>
+        <option value="'DM Sans', sans-serif">DM Sans</option>
+        <option value="'Montserrat', sans-serif">Montserrat</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- DENSIDADE -->
+  <div class="control-group">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h3>🎛️ Densidade</h3><span class="accordion-arrow">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="slider-row">
+        <label>Margem</label>
+        <input type="range" id="ctrl-margin" min="15" max="60" value="45" step="1">
+        <span id="val-margin">45px</span>
+      </div>
+      <div class="slider-row">
+        <label>Tamanho de fonte</label>
+        <input type="range" id="ctrl-font" min="7" max="13" value="10" step="0.5">
+        <span id="val-font">10pt</span>
+      </div>
+      <div class="slider-row">
+        <label>Espaço entre seções</label>
+        <input type="range" id="ctrl-gap" min="4" max="36" value="22" step="1">
+        <span id="val-gap">22px</span>
+      </div>
+      <div class="slider-row">
+        <label>Entrelinhamento</label>
+        <input type="range" id="ctrl-lh" min="1.1" max="2.0" value="1.5" step="0.05">
+        <span id="val-lh">1.50</span>
+      </div>
+      <button onclick="resetDensity()" class="btn-reset">↺ Restaurar padrão</button>
+    </div>
+  </div>
+
+  <!-- 2 COLUNAS INLINE -->
+  <div class="control-group">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h3>📐 Seções em 2 colunas</h3><span class="accordion-arrow">▼</span>
+    </div>
+    <div class="accordion-body">
+      <p style="font-size:0.73rem;color:#94a3b8;margin:0 0 8px">Divide a seção para economizar espaço vertical.</p>
+      <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="experience"> Experiência</label></div>
+      <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="education"> Formação</label></div>
+      <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="skills"> Habilidades</label></div>
+      <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="certifications"> Certificações</label></div>
+      <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="projects"> Projetos</label></div>
+      <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="volunteer"> Voluntariado</label></div>
+    </div>
+  </div>
+
+  <!-- ORDEM DAS SEÇÕES -->
+  <div class="control-group">
+    <div class="accordion-header open" onclick="toggleAccordion(this)">
+      <h3>📋 Ordem das Seções</h3><span class="accordion-arrow">▼</span>
+    </div>
+    <div class="accordion-body open">
+      <p style="font-size:0.73rem;color:#94a3b8;margin:0 0 10px">Arraste para reordenar. Desmarque para ocultar.</p>
+      <ul id="section-order-list">
+        <li draggable="true" data-key="objective"><span class="drag-handle">⠿</span><input type="checkbox" class="sec-check-inline" id="chk-objective"><span class="sec-label-inline">🎯 Objetivo</span><span class="sec-eye" id="eye-objective">👁</span></li>
+        <li draggable="true" data-key="summary"><span class="drag-handle">⠿</span><input type="checkbox" class="sec-check-inline" id="chk-summary" checked><span class="sec-label-inline">📝 Resumo</span><span class="sec-eye" id="eye-summary">👁</span></li>
+        <li draggable="true" data-key="experience"><span class="drag-handle">⠿</span><input type="checkbox" class="sec-check-inline" id="chk-experience" checked><span class="sec-label-inline">💼 Experiência</span><span class="sec-eye" id="eye-experience">👁</span></li>
+        <li draggable="true" data-key="education"><span class="drag-handle">⠿</span><input type="checkbox" class="sec-check-inline" id="chk-education" checked><span class="sec-label-inline">🎓 Formação</span><span class="sec-eye" id="eye-education">👁</span></li>
+        <li draggable="true" data-key="skills"><span class="drag-handle">⠿</span><input type="checkbox" class="sec-check-inline" id="chk-skills" checked><span class="sec-label-inline">🛠 Habilidades</span><span class="sec-eye" id="eye-skills">👁</span></li>
+        <li draggable="true" data-key="certifications"><span class="drag-handle">⠿</span><input type="checkbox" class="sec-check-inline" id="chk-certifications" checked><span class="sec-label-inline">📜 Certificações</span><span class="sec-eye" id="eye-certifications">👁</span></li>
+        <li draggable="true" data-key="projects"><span class="drag-handle">⠿</span><input type="checkbox" class="sec-check-inline" id="chk-projects" checked><span class="sec-label-inline">🚀 Projetos</span><span class="sec-eye" id="eye-projects">👁</span></li>
+        <li draggable="true" data-key="volunteer"><span class="drag-handle">⠿</span><input type="checkbox" class="sec-check-inline" id="chk-volunteer" checked><span class="sec-label-inline">🤝 Voluntariado</span><span class="sec-eye" id="eye-volunteer">👁</span></li>
+        <li draggable="true" data-key="salary"><span class="drag-handle">⠿</span><input type="checkbox" class="sec-check-inline" id="chk-salary"><span class="sec-label-inline">💰 Pretensão Salarial</span><span class="sec-eye" id="eye-salary">👁</span></li>
+      </ul>
+      <div id="objective-style-row" style="display:none;margin-top:10px;padding:10px;background:#f0f7ff;border-radius:8px;border:1px solid #bfdbfe;">
+        <p style="font-size:0.72rem;font-weight:700;color:#1e40af;margin:0 0 6px">🎯 Estilo do Objetivo:</p>
+        <label style="font-size:0.75rem;font-weight:600;display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;"><input type="radio" name="obj-style" value="section" checked> Como seção destacada</label>
+        <label style="font-size:0.75rem;font-weight:600;display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;"><input type="radio" name="obj-style" value="header"> No cabeçalho (padrão atual)</label>
+        <label style="font-size:0.75rem;font-weight:600;display:flex;align-items:center;gap:6px;margin:3px 0;cursor:pointer;"><input type="radio" name="obj-style" value="both"> Ambos</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div class="control-group">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h3>🌐 Conteúdo</h3><span class="accordion-arrow">▼</span>
+    </div>
+    <div class="accordion-body">
+      <label><input type="checkbox" id="include-cover" checked> Incluir Cover Letter</label>
+      <label><input type="checkbox" id="lang-toggle"> Inglês</label>
+    </div>
   </div>
 
   <button class="btn-main" onclick="exportPDF()">📥 BAIXAR PDF</button>
@@ -579,6 +606,36 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
   <div id="cv-render" class="template-modern">
     <div class="cv-page-sheet">
       <p style="text-align:center;color:#94a3b8;margin-top:100px;font-family:sans-serif">Aguardando JSON...</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EDIT MODAL ══ -->
+<div id="edit-modal-overlay" onclick="closeEditModal(event)">
+  <div id="edit-modal">
+    <div id="edit-modal-header">
+      <h2 id="edit-modal-title">✏️ Edição Rápida</h2>
+      <button id="edit-modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <div id="edit-modal-body">
+      <div id="edit-modal-warning">
+        ⚠️ <span>Edições aqui são <strong>temporárias</strong> — não alteram o arquivo JSON original. Para mudanças permanentes, edite o JSON com ajuda de IA e reimporte.</span>
+      </div>
+      <div id="edit-modal-fields"></div>
+      <button class="edit-save-btn" onclick="saveEditModal()">✓ Aplicar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ VALIDATION MODAL ══ -->
+<div id="validation-overlay" onclick="closeValidation(event)">
+  <div id="validation-box">
+    <h3>⚠️ Problemas no JSON</h3>
+    <p>Foram encontrados campos com problemas. Verifique antes de continuar:</p>
+    <ul id="validation-list"></ul>
+    <div class="validation-actions">
+      <button class="btn-validation-cancel" onclick="closeValidation()">Cancelar</button>
+      <button class="btn-validation-force" onclick="forceLoadJSON()">Carregar assim mesmo</button>
     </div>
   </div>
 </div>
@@ -711,6 +768,82 @@ function wrapSplit(html, k) {
   );
 }
 
+/* ── ACCORDION ── */
+function toggleAccordion(header) {
+  const body = header.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  header.classList.toggle('open', !isOpen);
+}
+
+/* ── JSON VALIDATION ── */
+let pendingJSON = null;
+const REQUIRED_FIELDS = [
+  { path: 'personal.fullname',           label: 'personal → fullname' },
+  { path: 'personal.email',              label: 'personal → email' },
+  { path: 'personal.jobtitle_pt',        label: 'personal → jobtitle_pt' },
+  { path: 'personal.jobtitle_en',        label: 'personal → jobtitle_en' },
+  { path: 'personal.desired_position_pt',label: 'personal → desired_position_pt' },
+  { path: 'personal.desired_position_en',label: 'personal → desired_position_en' },
+  { path: 'personal.summary_pt',         label: 'personal → summary_pt' },
+  { path: 'personal.summary_en',         label: 'personal → summary_en' },
+  { path: 'experience',                  label: 'experience (array)' },
+  { path: 'education',                   label: 'education (array)' },
+  { path: 'skills',                      label: 'skills' },
+];
+const WARN_FIELDS = [
+  { path: 'coverletter.pt',              label: 'coverletter → pt' },
+  { path: 'coverletter.en',              label: 'coverletter → en' },
+  { path: 'salary_expectation.pt',       label: 'salary_expectation → pt' },
+];
+
+function getNestedVal(obj, path) {
+  return path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj);
+}
+
+function validateJSON(data) {
+  const errors = [], warns = [];
+  REQUIRED_FIELDS.forEach(f => {
+    const v = getNestedVal(data, f.path);
+    if (v === undefined || v === null || v === '' || (Array.isArray(v) && v.length === 0))
+      errors.push({ text: `Campo ausente ou vazio: ${f.label}`, type: 'error' });
+  });
+  WARN_FIELDS.forEach(f => {
+    const v = getNestedVal(data, f.path);
+    if (v === undefined || v === null || v === '')
+      warns.push({ text: `Campo opcional ausente: ${f.label}`, type: 'warn' });
+  });
+  return [...errors, ...warns];
+}
+
+function tryLoadJSON(data) {
+  const issues = validateJSON(data);
+  const errors = issues.filter(i => i.type === 'error');
+  if (errors.length > 0) {
+    pendingJSON = data;
+    const list = document.getElementById('validation-list');
+    list.innerHTML = issues.map(i =>
+      `<li class="${i.type === 'warn' ? 'warn' : ''}">${i.text}</li>`
+    ).join('');
+    document.getElementById('validation-overlay').classList.add('open');
+  } else {
+    cvData = data;
+    render();
+  }
+}
+
+function forceLoadJSON() {
+  cvData = pendingJSON;
+  pendingJSON = null;
+  closeValidation();
+  render();
+}
+
+function closeValidation(e) {
+  if (e && e.target !== document.getElementById('validation-overlay')) return;
+  document.getElementById('validation-overlay').classList.remove('open');
+}
+
 /* ── PHOTO / JSON ── */
 document.getElementById('photo-upload').onchange = e => {
   const r = new FileReader();
@@ -719,9 +852,255 @@ document.getElementById('photo-upload').onchange = e => {
 };
 document.getElementById('json-file').onchange = e => {
   const r = new FileReader();
-  r.onload = ev => { cvData=JSON.parse(ev.target.result); render(); };
+  r.onload = ev => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      tryLoadJSON(parsed);
+    } catch(err) {
+      alert('JSON inválido: ' + err.message);
+    }
+  };
   r.readAsText(e.target.files[0]);
 };
+
+/* ── INLINE EDIT MODAL ── */
+let editContext = null; // { section, index? }
+
+function openEditModal(section, index) {
+  if (!cvData) return;
+  editContext = { section, index };
+  const lang = document.getElementById('lang-toggle').checked ? 'en' : 'pt';
+  const isEN = lang === 'en';
+  const modal = document.getElementById('edit-modal-overlay');
+  const fields = document.getElementById('edit-modal-fields');
+  const title = document.getElementById('edit-modal-title');
+
+  let html = '<div class="edit-lang-cols">';
+  html += '<div class="edit-lang-col"><h4>🇧🇷 Português</h4>';
+  const ptFields = buildEditFields(section, index, 'pt');
+  html += ptFields.map(f => `<div class="edit-field"><label>${f.label}</label>${f.el_pt}</div>`).join('');
+  html += '</div><div class="edit-lang-col"><h4>🇺🇸 English</h4>';
+  html += ptFields.map(f => `<div class="edit-field"><label>${f.label}</label>${f.el_en}</div>`).join('');
+  html += '</div></div>';
+
+  fields.innerHTML = html;
+  title.textContent = `✏️ Editar: ${sectionLabel(section)}${index !== undefined ? ` #${index+1}` : ''}`;
+  modal.classList.add('open');
+}
+
+function sectionLabel(s) {
+  const map = { personal:'Dados Pessoais', summary:'Resumo', experience:'Experiência', education:'Formação', skills:'Habilidades', certifications:'Certificações', projects:'Projetos', volunteer:'Voluntariado', salary:'Pretensão Salarial', coverletter:'Cover Letter' };
+  return map[s] || s;
+}
+
+function buildEditFields(section, index, lang) {
+  const d = cvData;
+  const fields = [];
+
+  if (section === 'personal') {
+    fields.push(
+      { key:'fullname',   label:'Nome Completo',
+        el_pt: input('personal-fullname', d.personal.fullname),
+        el_en: input('personal-fullname-en', d.personal.fullname) },
+      { key:'jobtitle',   label:'Cargo Atual',
+        el_pt: input('personal-jobtitle_pt', d.personal.jobtitle_pt),
+        el_en: input('personal-jobtitle_en', d.personal.jobtitle_en) },
+      { key:'desired',    label:'Cargo Pretendido',
+        el_pt: input('personal-desired_position_pt', d.personal.desired_position_pt),
+        el_en: input('personal-desired_position_en', d.personal.desired_position_en) },
+      { key:'location',   label:'Localização',
+        el_pt: input('personal-location', d.personal.location),
+        el_en: input('personal-location-en', d.personal.location) },
+      { key:'email',      label:'Email',
+        el_pt: input('personal-email', d.personal.email),
+        el_en: input('personal-email-en', d.personal.email) },
+      { key:'phone',      label:'Telefone',
+        el_pt: input('personal-phone', d.personal.phone),
+        el_en: input('personal-phone-en', d.personal.phone) },
+      { key:'linkedin',   label:'LinkedIn',
+        el_pt: input('personal-linkedin', d.personal.linkedin),
+        el_en: input('personal-linkedin-en', d.personal.linkedin) },
+    );
+  } else if (section === 'summary') {
+    fields.push({ key:'summary', label:'Resumo Profissional',
+      el_pt: textarea('summary_pt', d.personal.summary_pt, 6),
+      el_en: textarea('summary_en', d.personal.summary_en, 6) });
+  } else if (section === 'experience' && index !== undefined) {
+    const exp = d.experience[index];
+    fields.push(
+      { key:'position', label:'Cargo',
+        el_pt: input('exp-position_pt', exp.position_pt),
+        el_en: input('exp-position_en', exp.position_en) },
+      { key:'company', label:'Empresa',
+        el_pt: input('exp-company', exp.company),
+        el_en: input('exp-company-en', exp.company) },
+      { key:'period', label:'Período',
+        el_pt: input('exp-period', exp.period),
+        el_en: input('exp-period-en', exp.period) },
+      { key:'desc', label:'Descrição (uma por linha)',
+        el_pt: textarea('exp-desc_pt', (exp.description_pt||[]).join('\n'), 5),
+        el_en: textarea('exp-desc_en', (exp.description_en||[]).join('\n'), 5) },
+    );
+  } else if (section === 'education' && index !== undefined) {
+    const ed = d.education[index];
+    fields.push(
+      { key:'degree', label:'Curso/Grau',
+        el_pt: input('ed-degree_pt', ed.degree_pt),
+        el_en: input('ed-degree_en', ed.degree_en) },
+      { key:'institution', label:'Instituição',
+        el_pt: input('ed-institution', ed.institution),
+        el_en: input('ed-institution-en', ed.institution) },
+      { key:'period', label:'Período',
+        el_pt: input('ed-period', ed.period),
+        el_en: input('ed-period-en', ed.period) },
+    );
+  } else if (section === 'skills') {
+    const sk = d.skills || {};
+    fields.push(
+      { key:'technical', label:'Técnicas (uma por linha)',
+        el_pt: textarea('sk-technical', (sk.technical||[]).join('\n'), 5),
+        el_en: textarea('sk-technical-en', (sk.technical||[]).join('\n'), 5) },
+      { key:'languages', label:'Idiomas (uma por linha)',
+        el_pt: textarea('sk-languages', (sk.languages||[]).join('\n'), 3),
+        el_en: textarea('sk-languages-en', (sk.languages||[]).join('\n'), 3) },
+      { key:'soft', label:'Comportamentais (uma por linha)',
+        el_pt: textarea('sk-soft', (sk.soft||[]).join('\n'), 3),
+        el_en: textarea('sk-soft-en', (sk.soft||[]).join('\n'), 3) },
+    );
+  } else if (section === 'certifications' && index !== undefined) {
+    const cert = d.certifications[index];
+    fields.push(
+      { key:'title', label:'Certificação',
+        el_pt: input('cert-title_pt', cert.title_pt),
+        el_en: input('cert-title_en', cert.title_en) },
+      { key:'issuer', label:'Emissor',
+        el_pt: input('cert-issuer', cert.issuer),
+        el_en: input('cert-issuer-en', cert.issuer) },
+      { key:'year', label:'Ano',
+        el_pt: input('cert-year', cert.year),
+        el_en: input('cert-year-en', cert.year) },
+    );
+  } else if (section === 'projects' && index !== undefined) {
+    const proj = d.projects[index];
+    fields.push(
+      { key:'title', label:'Título',
+        el_pt: input('proj-title_pt', proj.title_pt),
+        el_en: input('proj-title_en', proj.title_en) },
+      { key:'desc', label:'Descrição',
+        el_pt: textarea('proj-desc_pt', proj.description_pt, 4),
+        el_en: textarea('proj-desc_en', proj.description_en, 4) },
+    );
+  } else if (section === 'volunteer' && index !== undefined) {
+    const vol = d.volunteer[index];
+    fields.push(
+      { key:'role', label:'Função',
+        el_pt: input('vol-role_pt', vol.role_pt),
+        el_en: input('vol-role_en', vol.role_en) },
+      { key:'org', label:'Organização',
+        el_pt: input('vol-org', vol.organization),
+        el_en: input('vol-org-en', vol.organization) },
+      { key:'period', label:'Período',
+        el_pt: input('vol-period', vol.period),
+        el_en: input('vol-period-en', vol.period) },
+      { key:'desc', label:'Descrição',
+        el_pt: textarea('vol-desc_pt', vol.description_pt, 3),
+        el_en: textarea('vol-desc_en', vol.description_en, 3) },
+    );
+  } else if (section === 'salary') {
+    fields.push({ key:'salary', label:'Pretensão',
+      el_pt: input('salary-pt', cvData.salary_expectation?.pt),
+      el_en: input('salary-en', cvData.salary_expectation?.en) });
+  } else if (section === 'coverletter') {
+    fields.push({ key:'cl', label:'Texto da Carta',
+      el_pt: textarea('cl-pt', cvData.coverletter?.pt, 8),
+      el_en: textarea('cl-en', cvData.coverletter?.en, 8) });
+  }
+  return fields;
+}
+
+function input(id, val) {
+  return `<input id="em-${id}" value="${escAttr(val||'')}">`;
+}
+function textarea(id, val, rows) {
+  return `<textarea id="em-${id}" rows="${rows}">${escHTML(val||'')}</textarea>`;
+}
+function escAttr(s) { return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function escHTML(s)  { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function gv(id) { const el=document.getElementById('em-'+id); return el ? el.value : ''; }
+
+function saveEditModal() {
+  const { section, index } = editContext;
+  if (section === 'personal') {
+    cvData.personal.fullname            = gv('personal-fullname');
+    cvData.personal.jobtitle_pt         = gv('personal-jobtitle_pt');
+    cvData.personal.jobtitle_en         = gv('personal-jobtitle_en');
+    cvData.personal.desired_position_pt = gv('personal-desired_position_pt');
+    cvData.personal.desired_position_en = gv('personal-desired_position_en');
+    cvData.personal.location            = gv('personal-location');
+    cvData.personal.email               = gv('personal-email');
+    cvData.personal.phone               = gv('personal-phone');
+    cvData.personal.linkedin            = gv('personal-linkedin');
+  } else if (section === 'summary') {
+    cvData.personal.summary_pt = gv('summary_pt');
+    cvData.personal.summary_en = gv('summary_en');
+  } else if (section === 'experience') {
+    const exp = cvData.experience[index];
+    exp.position_pt    = gv('exp-position_pt');
+    exp.position_en    = gv('exp-position_en');
+    exp.company        = gv('exp-company');
+    exp.period         = gv('exp-period');
+    exp.description_pt = gv('exp-desc_pt').split('\n').filter(Boolean);
+    exp.description_en = gv('exp-desc_en').split('\n').filter(Boolean);
+  } else if (section === 'education') {
+    const ed = cvData.education[index];
+    ed.degree_pt    = gv('ed-degree_pt');
+    ed.degree_en    = gv('ed-degree_en');
+    ed.institution  = gv('ed-institution');
+    ed.period       = gv('ed-period');
+  } else if (section === 'skills') {
+    cvData.skills.technical = gv('sk-technical').split('\n').filter(Boolean);
+    cvData.skills.languages = gv('sk-languages').split('\n').filter(Boolean);
+    cvData.skills.soft      = gv('sk-soft').split('\n').filter(Boolean);
+  } else if (section === 'certifications') {
+    const c = cvData.certifications[index];
+    c.title_pt = gv('cert-title_pt'); c.title_en = gv('cert-title_en');
+    c.issuer   = gv('cert-issuer');   c.year     = gv('cert-year');
+  } else if (section === 'projects') {
+    const p = cvData.projects[index];
+    p.title_pt       = gv('proj-title_pt'); p.title_en       = gv('proj-title_en');
+    p.description_pt = gv('proj-desc_pt');  p.description_en = gv('proj-desc_en');
+  } else if (section === 'volunteer') {
+    const v = cvData.volunteer[index];
+    v.role_pt       = gv('vol-role_pt');  v.role_en       = gv('vol-role_en');
+    v.organization  = gv('vol-org');
+    v.period        = gv('vol-period');
+    v.description_pt= gv('vol-desc_pt'); v.description_en= gv('vol-desc_en');
+  } else if (section === 'salary') {
+    if (!cvData.salary_expectation) cvData.salary_expectation = {};
+    cvData.salary_expectation.pt = gv('salary-pt');
+    cvData.salary_expectation.en = gv('salary-en');
+  } else if (section === 'coverletter') {
+    if (!cvData.coverletter) cvData.coverletter = {};
+    cvData.coverletter.pt = gv('cl-pt');
+    cvData.coverletter.en = gv('cl-en');
+  }
+  document.getElementById('edit-modal-overlay').classList.remove('open');
+  render();
+}
+
+function closeEditModal(e) {
+  if (e && e.target !== document.getElementById('edit-modal-overlay')) return;
+  document.getElementById('edit-modal-overlay').classList.remove('open');
+}
+
+/* ── SECTION WRAPPER WITH EDIT BUTTON ── */
+function wrapEditable(html, section, index) {
+  const idxAttr = index !== undefined ? `, ${index}` : '';
+  return `<div class="cv-section-wrap">
+    <button class="edit-btn" onclick="openEditModal('${section}'${idxAttr})" title="Editar">✏</button>
+    ${html}
+  </div>`;
+}
 
 /* ── LOAD SAMPLE ── */
 async function loadSample(type) {
@@ -732,8 +1111,8 @@ async function loadSample(type) {
     const path = `./samples/dummy${type}.json`;
     const res  = await fetch(path);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    cvData = await res.json();
-    render();
+    const data = await res.json();
+    tryLoadJSON(data);
   } catch(err) {
     alert(`Não foi possível carregar o exemplo.\n\nVerifique se o arquivo samples/dummy${type}.json existe no repositório.\n\nErro: ${err.message}`);
   } finally {
@@ -769,7 +1148,8 @@ function headerTextHTML(p, lang, right) {
   const objStyle = getObjStyle();
   const showInHeader = !isSectionOn('objective') || objStyle === 'header' || objStyle === 'both';
   const desired = lang==='pt' ? p.desired_position_pt : p.desired_position_en;
-  return `<div class="header-text" style="text-align:${right?'right':'left'}">
+  return `<div class="header-text" style="text-align:${right?'right':'left'};position:relative">
+    <button class="edit-btn" style="opacity:0.5;top:0;right:0;position:absolute" onclick="openEditModal('personal')" title="Editar dados pessoais">✏</button>
     <div class="cv-name">${p.fullname}</div>
     ${showInHeader && desired ? `<div class="desired-position">${desired}</div>` : ''}
     <div class="contact-info">
@@ -796,41 +1176,44 @@ function objectiveHTML(d, lang) {
 function summaryHTML(d, lang, sc) {
   const text = lang==='pt' ? d.personal.summary_pt : d.personal.summary_en;
   if (!text) return '';
-  return `<div class="cv-section">
+  return wrapEditable(`<div class="cv-section">
     <div class="${sc}">${lang==='pt'?'Resumo':'Summary'}</div>
     <p style="text-align:justify;font-size:var(--cv-font-size);line-height:var(--cv-line-height)">${text}</p>
-  </div>`;
+  </div>`, 'summary');
 }
 
 function experienceHTML(d, lang, sc) {
   if (!d.experience||!d.experience.length) return '';
-  const items = d.experience.map(exp => {
+  const items = d.experience.map((exp, i) => {
     const pos  = lang==='pt' ? exp.position_pt    : exp.position_en;
     const desc = lang==='pt' ? exp.description_pt : exp.description_en;
-    return `<div style="margin-bottom:11px">
+    const item = `<div style="margin-bottom:11px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <span class="exp-position" style="flex:1;overflow-wrap:break-word;word-break:break-word">${pos||''}</span>
         <span class="exp-period" style="flex-shrink:0">${exp.period||''}</span>
       </div>
       <div class="exp-company">${exp.company||''}</div>
       <ul style="font-size:var(--cv-font-size);margin-top:4px;line-height:var(--cv-line-height)">
-        ${(desc||[]).map(i=>`<li style="overflow-wrap:break-word">${i}</li>`).join('')}
+        ${(desc||[]).map(item=>`<li style="overflow-wrap:break-word">${item}</li>`).join('')}
       </ul>
     </div>`;
+    return wrapEditable(item, 'experience', i);
   }).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Experiência Profissional':'Experience'}</div>${items}</div>`,'experience');
 }
 
 function educationHTML(d, lang, sc) {
   if (!d.education||!d.education.length) return '';
-  const items = d.education.map(ed => `
-    <div style="margin-bottom:8px">
+  const items = d.education.map((ed, i) => {
+    const item = `<div style="margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <span class="exp-position" style="flex:1;overflow-wrap:break-word;word-break:break-word">${lang==='pt'?ed.degree_pt:ed.degree_en}</span>
         <span class="exp-period" style="flex-shrink:0">${ed.period||''}</span>
       </div>
       <div class="exp-company">${ed.institution||''}</div>
-    </div>`).join('');
+    </div>`;
+    return wrapEditable(item, 'education', i);
+  }).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Formação':'Education'}</div>${items}</div>`,'education');
 }
 
@@ -854,37 +1237,40 @@ function skillsHTML(d, lang, sc, tagStyle) {
         ${row(tl,d.skills.technical,true)}${row(ll,d.skills.languages,false)}${row(sl,d.skills.soft,false)}
       </table></div>`;
   }
-  return wrapSplit(html,'skills');
+  return wrapEditable(wrapSplit(html,'skills'), 'skills');
 }
 
 function certsHTML(d, lang, sc) {
   if (!d.certifications||!d.certifications.length) return '';
-  const items = d.certifications.map(c=>`
-    <div style="margin-bottom:5px;font-size:var(--cv-font-size);overflow-wrap:break-word">
+  const items = d.certifications.map((c,i)=>
+    wrapEditable(`<div style="margin-bottom:5px;font-size:var(--cv-font-size);overflow-wrap:break-word">
       <strong>${lang==='pt'?c.title_pt:c.title_en}</strong>
       <span style="color:#64748b;font-size:8pt"> · ${c.issuer||''} ${c.year?'('+c.year+')':''}</span>
-    </div>`).join('');
+    </div>`, 'certifications', i)
+  ).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Certificações':'Certifications'}</div>${items}</div>`,'certifications');
 }
 
 function projectsHTML(d, lang, sc) {
   if (!d.projects||!d.projects.length) return '';
-  const items = d.projects.map(p=>`
-    <div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word">
+  const items = d.projects.map((p,i)=>
+    wrapEditable(`<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word">
       <strong>${lang==='pt'?p.title_pt:p.title_en}</strong>
       <div style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?p.description_pt:p.description_en}</div>
-    </div>`).join('');
+    </div>`, 'projects', i)
+  ).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Projetos':'Projects'}</div>${items}</div>`,'projects');
 }
 
 function volunteerHTML(d, lang, sc) {
   if (!d.volunteer||!d.volunteer.length) return '';
-  const items = d.volunteer.map(v=>`
-    <div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word">
+  const items = d.volunteer.map((v,i)=>
+    wrapEditable(`<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word">
       <strong>${lang==='pt'?v.role_pt:v.role_en}</strong>
       <span style="font-weight:normal;color:#64748b"> · ${v.organization||''} ${v.period?'('+v.period+')':''}</span>
       <div style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?v.description_pt:v.description_en}</div>
-    </div>`).join('');
+    </div>`, 'volunteer', i)
+  ).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Voluntariado':'Volunteer'}</div>${items}</div>`,'volunteer');
 }
 
@@ -893,10 +1279,10 @@ function salaryHTML(d, lang, sc) {
   const value = lang==='pt' ? d.salary_expectation.pt : d.salary_expectation.en;
   if (!value) return '';
   const label = lang==='pt' ? 'Pretensão Salarial' : 'Salary Expectation';
-  return `<div class="cv-section">
+  return wrapEditable(`<div class="cv-section">
     <div class="${sc}">${label}</div>
     <p style="font-size:var(--cv-font-size);line-height:var(--cv-line-height);font-weight:600;color:#334155">${value}</p>
-  </div>`;
+  </div>`, 'salary');
 }
 
 /* ── DUOTONE MAP ── */
