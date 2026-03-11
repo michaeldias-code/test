@@ -68,6 +68,12 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 /* ── INLINE EDIT BUTTON ── */
 .cv-section-wrap { position: relative; }
 .cv-section-wrap:hover .edit-btn { opacity: 1; }
+/* Quando cv-section está dentro de cv-section-wrap, o gap vai no wrapper */
+.cv-section-wrap > .cv-section { margin-bottom: 0; }
+.cv-section-wrap:has(> .cv-section) { margin-bottom: var(--cv-section-gap); }
+/* Botões inline dentro de itens */
+[style*="position:relative"]:hover > .edit-btn { opacity: 1 !important; }
+.cv-section[style*="position:relative"]:hover > .edit-btn { opacity: 1 !important; }
 .edit-btn {
   opacity: 0; position: absolute; top: 0; right: -28px;
   background: #1e293b; color: white; border: none;
@@ -1187,7 +1193,8 @@ function experienceHTML(d, lang, sc) {
   const items = d.experience.map((exp, i) => {
     const pos  = lang==='pt' ? exp.position_pt    : exp.position_en;
     const desc = lang==='pt' ? exp.description_pt : exp.description_en;
-    const item = `<div style="margin-bottom:11px">
+    return `<div style="margin-bottom:11px;position:relative">
+      <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('experience',${i})" title="Editar">✏</button>
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <span class="exp-position" style="flex:1;overflow-wrap:break-word;word-break:break-word">${pos||''}</span>
         <span class="exp-period" style="flex-shrink:0">${exp.period||''}</span>
@@ -1197,22 +1204,21 @@ function experienceHTML(d, lang, sc) {
         ${(desc||[]).map(item=>`<li style="overflow-wrap:break-word">${item}</li>`).join('')}
       </ul>
     </div>`;
-    return wrapEditable(item, 'experience', i);
   }).join('');
-  return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Experiência Profissional':'Experience'}</div>${items}</div>`,'experience');
+  return wrapSplit(`<div class="cv-section-wrap"><div class="cv-section"><div class="${sc}">${lang==='pt'?'Experiência Profissional':'Experience'}</div>${items}</div></div>`,'experience');
 }
 
 function educationHTML(d, lang, sc) {
   if (!d.education||!d.education.length) return '';
   const items = d.education.map((ed, i) => {
-    const item = `<div style="margin-bottom:8px">
+    return `<div style="margin-bottom:8px;position:relative">
+      <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('education',${i})" title="Editar">✏</button>
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <span class="exp-position" style="flex:1;overflow-wrap:break-word;word-break:break-word">${lang==='pt'?ed.degree_pt:ed.degree_en}</span>
         <span class="exp-period" style="flex-shrink:0">${ed.period||''}</span>
       </div>
       <div class="exp-company">${ed.institution||''}</div>
     </div>`;
-    return wrapEditable(item, 'education', i);
   }).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Formação':'Education'}</div>${items}</div>`,'education');
 }
@@ -1222,31 +1228,33 @@ function skillsHTML(d, lang, sc, tagStyle) {
   const tl = lang==='pt'?'Técnicas':'Technical';
   const ll = lang==='pt'?'Idiomas':'Languages';
   const sl = lang==='pt'?'Comportamentais':'Soft Skills';
+  const editBtn = `<button class="edit-btn" style="top:0;right:-28px;position:absolute" onclick="openEditModal('skills')" title="Editar">✏</button>`;
   let html;
   if (tagStyle) {
     const grp = (title,arr) => !arr||!arr.length?'': `<div style="margin-bottom:7px">
       <div style="font-size:7pt;font-weight:700;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">${title}</div>
       <div>${arr.map(s=>`<span style="${tagStyle}">${s}</span>`).join('')}</div></div>`;
-    html = `<div class="cv-section"><div class="${sc}">${lang==='pt'?'Habilidades':'Skills'}</div>${grp(tl,d.skills.technical)}${grp(ll,d.skills.languages)}${grp(sl,d.skills.soft)}</div>`;
+    html = `<div class="cv-section" style="position:relative">${editBtn}<div class="${sc}">${lang==='pt'?'Habilidades':'Skills'}</div>${grp(tl,d.skills.technical)}${grp(ll,d.skills.languages)}${grp(sl,d.skills.soft)}</div>`;
   } else {
     const row = (title,arr,first) => !arr||!arr.length?'': `<tr style="vertical-align:top;border-bottom:1px solid #f1f5f9">
       <td style="font-size:7pt;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.8px;padding:${first?'0':'5px'} 12px 5px 0;white-space:nowrap;width:1%">${title}</td>
       <td style="padding:${first?'0':'5px'} 0 5px;font-size:var(--cv-font-size);color:#334155;line-height:var(--cv-line-height);overflow-wrap:break-word">${arr.join(' · ')}</td></tr>`;
-    html = `<div class="cv-section"><div class="${sc}">${lang==='pt'?'Habilidades':'Skills'}</div>
+    html = `<div class="cv-section" style="position:relative">${editBtn}<div class="${sc}">${lang==='pt'?'Habilidades':'Skills'}</div>
       <table style="width:100%;border-collapse:collapse;margin:0">
         ${row(tl,d.skills.technical,true)}${row(ll,d.skills.languages,false)}${row(sl,d.skills.soft,false)}
       </table></div>`;
   }
-  return wrapEditable(wrapSplit(html,'skills'), 'skills');
+  return wrapSplit(html,'skills');
 }
 
 function certsHTML(d, lang, sc) {
   if (!d.certifications||!d.certifications.length) return '';
   const items = d.certifications.map((c,i)=>
-    wrapEditable(`<div style="margin-bottom:5px;font-size:var(--cv-font-size);overflow-wrap:break-word">
+    `<div style="margin-bottom:5px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
+      <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('certifications',${i})" title="Editar">✏</button>
       <strong>${lang==='pt'?c.title_pt:c.title_en}</strong>
       <span style="color:#64748b;font-size:8pt"> · ${c.issuer||''} ${c.year?'('+c.year+')':''}</span>
-    </div>`, 'certifications', i)
+    </div>`
   ).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Certificações':'Certifications'}</div>${items}</div>`,'certifications');
 }
@@ -1254,10 +1262,11 @@ function certsHTML(d, lang, sc) {
 function projectsHTML(d, lang, sc) {
   if (!d.projects||!d.projects.length) return '';
   const items = d.projects.map((p,i)=>
-    wrapEditable(`<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word">
+    `<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
+      <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('projects',${i})" title="Editar">✏</button>
       <strong>${lang==='pt'?p.title_pt:p.title_en}</strong>
       <div style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?p.description_pt:p.description_en}</div>
-    </div>`, 'projects', i)
+    </div>`
   ).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Projetos':'Projects'}</div>${items}</div>`,'projects');
 }
@@ -1265,11 +1274,12 @@ function projectsHTML(d, lang, sc) {
 function volunteerHTML(d, lang, sc) {
   if (!d.volunteer||!d.volunteer.length) return '';
   const items = d.volunteer.map((v,i)=>
-    wrapEditable(`<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word">
+    `<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
+      <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('volunteer',${i})" title="Editar">✏</button>
       <strong>${lang==='pt'?v.role_pt:v.role_en}</strong>
       <span style="font-weight:normal;color:#64748b"> · ${v.organization||''} ${v.period?'('+v.period+')':''}</span>
       <div style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?v.description_pt:v.description_en}</div>
-    </div>`, 'volunteer', i)
+    </div>`
   ).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Voluntariado':'Volunteer'}</div>${items}</div>`,'volunteer');
 }
