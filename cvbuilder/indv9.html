@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Designer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Roboto+Mono&family=Montserrat:wght@400;700&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary-color: #1e293b;
+  --secondary-color: #92400e;
+  --font-main: 'Inter', sans-serif;
+  --cv-margin: 45px;
+  --cv-font-size: 10pt;
+  --cv-section-gap: 22px;
+  --cv-line-height: 1.5;
+}
+
+/* ── APP SHELL ── */
+body { font-family: 'Inter', sans-serif; background: #323639; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: 360px; background: #fff; border-right: 1px solid #e2e8f0; padding: 20px; overflow-y: auto; height: 100%; box-sizing: border-box; }
+.preview-area { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+
+.control-group { margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px; }
+.control-group h3 { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px; }
+label { display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin: 8px 0 4px; }
+select, input[type=file] { width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.82rem; }
+
+.slider-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.slider-row label { margin: 0; flex: 1; font-size: 0.78rem; }
+.slider-row span { font-size: 0.75rem; font-weight: 700; color: var(--primary-color); min-width: 36px; text-align: right; }
+input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer; }
+
+#fit-indicator { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; margin-bottom: 14px; transition: all 0.3s; }
+#fit-indicator.ok   { background: #dcfce7; color: #166534; }
+#fit-indicator.warn { background: #fef9c3; color: #854d0e; }
+#fit-indicator.over { background: #fee2e2; color: #991b1b; }
+#fit-indicator .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+#fit-indicator.ok   .dot { background: #22c55e; }
+#fit-indicator.warn .dot { background: #eab308; }
+#fit-indicator.over .dot { background: #ef4444; }
+
+.twocol-toggle label { margin: 0; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+
+.btn-main { width: 100%; background: #000; color: white; border: none; padding: 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; font-size: 0.9rem; }
+.btn-sec  { width: 100%; background: #475569; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 0.82rem; }
+.btn-reset { width: 100%; padding: 7px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: #475569; font-weight: 600; margin-top: 8px; }
+
+/* ── SAMPLES ── */
+.samples-row { display: flex; gap: 8px; margin-top: 6px; }
+.btn-sample {
+  flex: 1; padding: 9px 6px; border: 1.5px solid #e2e8f0; background: #f8fafc;
+  border-radius: 8px; cursor: pointer; font-size: 0.76rem; font-weight: 700;
+  color: #475569; text-align: center; transition: all 0.15s; line-height: 1.3;
+}
+.btn-sample:hover { border-color: var(--primary-color); color: var(--primary-color); background: #eff6ff; }
+.btn-sample .sample-tag { display: block; font-size: 0.65rem; font-weight: 600; color: #94a3b8; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+.btn-sample.loading { opacity: 0.5; cursor: wait; }
+
+/* ── DRAG & DROP ORDER ── */
+#section-order-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+#section-order-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  margin-bottom: 4px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: grab;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #475569;
+  user-select: none;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+#section-order-list li:hover { background: #f1f5f9; }
+#section-order-list li.dragging {
+  opacity: 0.5;
+  background: #e0e7ff;
+  box-shadow: 0 4px 12px rgba(37,99,235,0.2);
+  cursor: grabbing;
+}
+#section-order-list li.drag-over {
+  border-color: var(--primary-color);
+  background: #eff6ff;
+}
+.drag-handle { color: #94a3b8; font-size: 0.9rem; flex-shrink: 0; }
+.sec-check-inline { margin: 0; cursor: pointer; flex-shrink: 0; }
+.sec-label-inline { flex: 1; }
+.sec-eye { font-size: 0.75rem; margin-left: auto; color: #94a3b8; flex-shrink: 0; }
+
+/* ── CV WRAPPER ── */
+#cv-render {
+  width: 210mm;
+  background: white;
+  box-sizing: border-box;
+  color: #334155;
+  font-family: var(--font-main);
+  font-size: var(--cv-font-size);
+  box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+/* ── RESET MARGENS DEFAULT DO BROWSER ── */
+#cv-render p, #cv-render ul, #cv-render h1, #cv-render h2, #cv-render h3 { margin: 0; padding: 0; }
+#cv-render ul { padding-left: 18px; }
+
+/* ── FOLHA A4 ── */
+.cv-page-sheet {
+  width: 210mm;
+  min-height: 297mm;
+  box-sizing: border-box;
+  padding: var(--cv-margin);
+  background: white;
+}
+.cv-page-sheet.break-after { page-break-after: always; break-after: page; }
+
+/* ── DIVISOR DE PÁGINAS (preview only) ── */
+.page-divider { width: 210mm; border: none; border-top: 2px dashed #94a3b8; margin: 0; position: relative; }
+.page-divider::after { content: attr(data-label); position: absolute; top: -9px; right: 6px; background: #94a3b8; color: white; font-size: 9px; padding: 1px 6px; border-radius: 3px; font-family: sans-serif; }
+@media print { .page-divider { display: none !important; } }
+
+/* ── HEADER ── */
+.header-wrapper { display: flex; align-items: center; gap: 30px; margin-bottom: 24px; }
+.header-wrapper.row-reverse { flex-direction: row-reverse; }
+.header-text { flex: 1; }
+.photo-container { width: 110px; height: 110px; flex-shrink: 0; }
+.photo-circle { width: 100%; height: 100%; border-radius: 12px; border: 3px solid var(--primary-color); overflow: hidden; }
+.photo-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── SEÇÕES ── */
+.cv-section { margin-bottom: var(--cv-section-gap); }
+.cv-section:last-child { margin-bottom: 0; }
+.section-title { margin-top: 0; margin-bottom: 7px; font-size: 9pt; }
+
+/* ── OBJETIVO SECTION ── */
+.cv-objective-section {
+  margin-bottom: var(--cv-section-gap);
+  padding: 10px 14px;
+  border-left: 4px solid var(--primary-color);
+  background: #f8fafc;
+}
+.cv-objective-section .obj-label {
+  font-size: 7.5pt;
+  font-weight: 800;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  margin-bottom: 3px;
+}
+.cv-objective-section .obj-value {
+  font-size: 12pt;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── TEMPLATES 1 COLUNA ── */
+.template-modern  .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; }
+.template-minimal .section-title { color: #1e293b; border-bottom: 1px solid var(--primary-color); }
+.template-creative .cv-page-sheet { border-top: 15px solid var(--primary-color); }
+.template-creative .section-title { font-family: 'Roboto Mono', monospace; background: var(--primary-color); color: white; padding: 2px 10px; }
+
+.template-executive .header-wrapper {
+  background: var(--primary-color); color: white !important;
+  margin: calc(-1 * var(--cv-margin)) calc(-1 * var(--cv-margin)) 24px calc(-1 * var(--cv-margin));
+  padding: var(--cv-margin);
+}
+.template-executive .header-wrapper h1 { color: white; }
+.template-executive .photo-circle { border-color: white !important; }
+.template-executive .section-title { color: var(--primary-color); font-weight: 800; border-left: 4px solid var(--primary-color); padding-left: 10px; }
+.template-executive .desired-position { color: white !important; }
+.template-executive .contact-info { color: white !important; }
+
+/* ── TEMPLATES 2 COLUNAS ── */
+.template-sidebar-left .cv-page-sheet.no-pad { padding: 0; }
+.template-sidebar-left .cv-cols { display: grid; grid-template-columns: 185px 1fr; min-height: 297mm; }
+.template-sidebar-left .col-side { background: var(--primary-color); color: white; padding: 30px 18px; }
+.template-sidebar-left .col-side h1 { font-size: 13pt; font-weight: 700; color: white; line-height: 1.25; }
+.template-sidebar-left .col-side .desired-position { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(255,255,255,0.75); margin-bottom: 12px; }
+.template-sidebar-left .col-side .section-title { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.6); border-bottom: 1px solid rgba(255,255,255,0.25); padding-bottom: 4px; margin: 14px 0 7px; }
+.template-sidebar-left .col-side .contact-info { font-size: 8pt; line-height: 1.7; color: rgba(255,255,255,0.85); }
+.template-sidebar-left .col-main { padding: 30px 26px; }
+.template-sidebar-left .col-main .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; }
+.photo-circle-side { width: 100%; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 2px solid rgba(255,255,255,0.35); margin-bottom: 12px; }
+.photo-circle-side img { width: 100%; height: 100%; object-fit: cover; }
+
+.template-twocol .cv-header-full { background: var(--primary-color); color: white; margin: calc(-1 * var(--cv-margin)) calc(-1 * var(--cv-margin)) 0 calc(-1 * var(--cv-margin)); padding: 32px 45px 24px; display: flex; align-items: center; gap: 24px; }
+.template-twocol .cv-header-full h1 { color: white; font-size: 22pt; }
+.template-twocol .cv-header-full .desired-position { color: rgba(255,255,255,0.85) !important; margin-bottom: 6px; }
+.template-twocol .cv-header-full .contact-info { color: rgba(255,255,255,0.85) !important; }
+.template-twocol .cv-header-full .photo-circle { border-color: white; }
+.template-twocol .cv-body-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; padding-top: 20px; }
+.template-twocol .col-right { border-left: 1px solid #e2e8f0; padding-left: 26px; }
+.template-twocol .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; }
+
+/* ── COMPONENTES PARTILHADOS ── */
+.desired-position { color: var(--primary-color); font-size: 14pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.contact-info { font-size: 8.5pt; margin-top: 10px; line-height: 1.5; }
+
+/* ── 2 COLUNAS INLINE ── */
+.inline-twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+
+/* ── DUOTONE TEMPLATE ── */
+.template-duotone .cv-page-sheet { padding: 0; }
+.template-duotone .cv-dt-header {
+  background: var(--primary-color);
+  padding: 36px 45px 28px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.template-duotone .cv-dt-header.row-reverse { flex-direction: row-reverse; }
+.template-duotone .cv-dt-header h1 { color: white; font-size: 22pt; font-weight: 700; }
+.template-duotone .cv-dt-header .desired-position { color: rgba(255,255,255,0.75) !important; font-size: 11pt; }
+.template-duotone .cv-dt-header .contact-info { color: rgba(255,255,255,0.8) !important; }
+.template-duotone .cv-dt-header .photo-circle { border-color: rgba(255,255,255,0.4); }
+.template-duotone .cv-dt-body { padding: 32px 45px; }
+.template-duotone .section-title {
+  color: var(--secondary-color) !important;
+  border-bottom: 2px solid var(--secondary-color) !important;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.template-duotone .cv-objective-section {
+  border-left-color: var(--secondary-color);
+}
+.template-duotone .cv-objective-section .obj-value {
+  color: var(--secondary-color);
+}
+/* accent stripe between header and body */
+.template-duotone .cv-dt-stripe {
+  height: 5px;
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+.html2pdf__page-break { display: block; height: 0; page-break-before: always; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <h2 style="margin:0 0 14px">CV Designer Pro</h2>
+
+  <div id="fit-indicator" class="ok"><div class="dot"></div><span id="fit-text">Aguardando dados...</span></div>
+
+  <div class="control-group">
+    <h3>Foto</h3>
+    <label>Upload (Opcional):</label>
+    <input type="file" id="photo-upload" accept="image/*">
+    <label>Posição:</label>
+    <select id="photo-align">
+      <option value="row">Esquerda</option>
+      <option value="row-reverse">Direita</option>
+    </select>
+  </div>
+
+  <button onclick="downloadModelJSON()" class="btn-sec">📄 Baixar Modelo JSON</button>
+
+  <div class="control-group">
+    <h3>Dados</h3>
+    <label>Arquivo JSON:</label>
+    <input type="file" id="json-file" accept=".json">
+    <label style="margin-top:10px">Ver exemplo:</label>
+    <div class="samples-row">
+      <button class="btn-sample" id="btn-sample-jr" onclick="loadSample('jr')">
+        👨‍💻 Júnior
+        <span class="sample-tag">Dev Front-end</span>
+      </button>
+      <button class="btn-sample" id="btn-sample-sr" onclick="loadSample('sr')">
+        👩‍💼 Executivo
+        <span class="sample-tag">CTO / Diretora</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <h3>Layout & Estilo</h3>
+    <label>Modelo Base:</label>
+    <select id="template-select">
+      <optgroup label="1 Coluna">
+        <option value="modern">Moderno</option>
+        <option value="executive">Executivo</option>
+        <option value="minimal">Minimalista</option>
+        <option value="creative">Criativo</option>
+      </optgroup>
+      <optgroup label="2 Colunas">
+        <option value="sidebar-left">Sidebar Esquerda</option>
+        <option value="twocol">Duas Colunas</option>
+      </optgroup>
+      <optgroup label="✦ Especial">
+        <option value="duotone">Duotone</option>
+      </optgroup>
+    </select>
+    <label>Cor Principal:</label>
+    <select id="color-palette">
+      <optgroup label="Escuros &amp; Elegantes">
+        <option value="#1e293b">Grafite Executivo</option>
+        <option value="#000000">Preto Puro</option>
+        <option value="#1a1a2e">Meia-Noite</option>
+        <option value="#2d2d2d">Carvão</option>
+      </optgroup>
+      <optgroup label="Cores Sofisticadas">
+        <option value="#059669">Verde Esmeralda</option>
+        <option value="#0f766e">Azul-Petróleo</option>
+        <option value="#7f1d1d">Borgonha</option>
+        <option value="#92400e">Cobre Envelhecido</option>
+        <option value="#1e3a5f">Azul Marinho</option>
+        <option value="#4a1d96">Índigo Profundo</option>
+      </optgroup>
+      <optgroup label="✦ Duotone (2 cores)">
+        <option value="duotone-wine">Vinho + Dourado</option>
+        <option value="duotone-navy">Marinho + Cobre</option>
+        <option value="duotone-forest">Floresta + Terracota</option>
+        <option value="duotone-ink">Tinta + Sálvia</option>
+      </optgroup>
+    </select>
+
+    <!-- Duotone live preview badge -->
+    <div id="duotone-preview" style="display:none;margin-top:8px;border-radius:8px;overflow:hidden;height:28px;">
+      <div id="dt-swatch-a" style="flex:1;height:100%;display:inline-block;width:50%"></div>
+      <div id="dt-swatch-b" style="flex:1;height:100%;display:inline-block;width:50%"></div>
+    </div>
+    <label>Fonte:</label>
+    <select id="font-select">
+      <option value="'Inter', sans-serif">Inter</option>
+      <option value="'Montserrat', sans-serif">Montserrat</option>
+      <option value="'Lora', serif">Lora</option>
+    </select>
+  </div>
+
+  <div class="control-group">
+    <h3>🎛️ Ajuste de Densidade</h3>
+    <div class="slider-row">
+      <label>Margem</label>
+      <input type="range" id="ctrl-margin" min="15" max="60" value="45" step="1">
+      <span id="val-margin">45px</span>
+    </div>
+    <div class="slider-row">
+      <label>Tamanho de fonte</label>
+      <input type="range" id="ctrl-font" min="7" max="13" value="10" step="0.5">
+      <span id="val-font">10pt</span>
+    </div>
+    <div class="slider-row">
+      <label>Espaço entre seções</label>
+      <input type="range" id="ctrl-gap" min="4" max="36" value="22" step="1">
+      <span id="val-gap">22px</span>
+    </div>
+    <div class="slider-row">
+      <label>Entrelinhamento</label>
+      <input type="range" id="ctrl-lh" min="1.1" max="2.0" value="1.5" step="0.05">
+      <span id="val-lh">1.50</span>
+    </div>
+    <button onclick="resetDensity()" class="btn-reset">↺ Restaurar padrão</button>
+  </div>
+
+  <div class="control-group">
+    <h3>📐 Seções em 2 colunas</h3>
+    <p style="font-size:0.73rem; color:#94a3b8; margin:0 0 8px">Divide a seção para economizar espaço vertical.</p>
+    <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="experience"> Experiência</label></div>
+    <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="education"> Formação</label></div>
+    <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="skills"> Habilidades</label></div>
+    <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="certifications"> Certificações</label></div>
+    <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="projects"> Projetos</label></div>
+    <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="volunteer"> Voluntariado</label></div>
+  </div>
+
+  <!-- ══ NOVA ÁREA: ORDEM + VISIBILIDADE ══ -->
+  <div class="control-group">
+    <h3>📋 Ordem das Seções</h3>
+    <p style="font-size:0.73rem; color:#94a3b8; margin:0 0 10px">Arraste para reordenar. Desmarque para ocultar.</p>
+    <ul id="section-order-list">
+      <li draggable="true" data-key="objective">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-objective">
+        <span class="sec-label-inline">🎯 Objetivo</span>
+        <span class="sec-eye" id="eye-objective" title="Oculto">👁</span>
+      </li>
+      <li draggable="true" data-key="summary">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-summary" checked>
+        <span class="sec-label-inline">📝 Resumo</span>
+        <span class="sec-eye" id="eye-summary" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="experience">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-experience" checked>
+        <span class="sec-label-inline">💼 Experiência</span>
+        <span class="sec-eye" id="eye-experience" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="education">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-education" checked>
+        <span class="sec-label-inline">🎓 Formação</span>
+        <span class="sec-eye" id="eye-education" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="skills">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-skills" checked>
+        <span class="sec-label-inline">🛠 Habilidades</span>
+        <span class="sec-eye" id="eye-skills" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="certifications">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-certifications" checked>
+        <span class="sec-label-inline">📜 Certificações</span>
+        <span class="sec-eye" id="eye-certifications" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="projects">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-projects" checked>
+        <span class="sec-label-inline">🚀 Projetos</span>
+        <span class="sec-eye" id="eye-projects" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="volunteer">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-volunteer" checked>
+        <span class="sec-label-inline">🤝 Voluntariado</span>
+        <span class="sec-eye" id="eye-volunteer" title="Visível">👁</span>
+      </li>
+      <li draggable="true" data-key="salary">
+        <span class="drag-handle">⠿</span>
+        <input type="checkbox" class="sec-check-inline" id="chk-salary">
+        <span class="sec-label-inline">💰 Pretensão Salarial</span>
+        <span class="sec-eye" id="eye-salary" title="Oculto">👁</span>
+      </li>
+    </ul>
+
+    <!-- Objective style sub-option -->
+    <div id="objective-style-row" style="display:none; margin-top:10px; padding:10px; background:#f0f7ff; border-radius:8px; border:1px solid #bfdbfe;">
+      <p style="font-size:0.72rem; font-weight:700; color:#1e40af; margin:0 0 6px">🎯 Estilo do Objetivo:</p>
+      <label style="font-size:0.75rem; font-weight:600; display:flex; align-items:center; gap:6px; margin:3px 0; cursor:pointer;">
+        <input type="radio" name="obj-style" value="section" checked> Como seção destacada
+      </label>
+      <label style="font-size:0.75rem; font-weight:600; display:flex; align-items:center; gap:6px; margin:3px 0; cursor:pointer;">
+        <input type="radio" name="obj-style" value="header"> No cabeçalho (padrão atual)
+      </label>
+      <label style="font-size:0.75rem; font-weight:600; display:flex; align-items:center; gap:6px; margin:3px 0; cursor:pointer;">
+        <input type="radio" name="obj-style" value="both"> Ambos
+      </label>
+    </div>
+  </div>
+
+  <div class="control-group">
+    <h3>Conteúdo</h3>
+    <label><input type="checkbox" id="include-cover" checked> Incluir Cover Letter</label>
+    <label><input type="checkbox" id="lang-toggle"> Inglês</label>
+  </div>
+
+  <button class="btn-main" onclick="exportPDF()">📥 BAIXAR PDF</button>
+</div>
+
+<div class="preview-area">
+  <div id="cv-render" class="template-modern">
+    <div class="cv-page-sheet">
+      <p style="text-align:center;color:#94a3b8;margin-top:100px;font-family:sans-serif">Aguardando JSON...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+let cvData = null, userPhoto = null;
+let dragSrc = null;
+
+/* ══ DRAG & DROP SECTION ORDER ══ */
+function initDragDrop() {
+  const list = document.getElementById('section-order-list');
+  const items = list.querySelectorAll('li');
+
+  items.forEach(item => {
+    item.addEventListener('dragstart', e => {
+      dragSrc = item;
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      list.querySelectorAll('li').forEach(i => i.classList.remove('drag-over'));
+      render();
+    });
+    item.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      list.querySelectorAll('li').forEach(i => i.classList.remove('drag-over'));
+      if (item !== dragSrc) item.classList.add('drag-over');
+    });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      if (item !== dragSrc) {
+        const allItems = [...list.querySelectorAll('li')];
+        const srcIdx  = allItems.indexOf(dragSrc);
+        const destIdx = allItems.indexOf(item);
+        if (srcIdx < destIdx) list.insertBefore(dragSrc, item.nextSibling);
+        else                  list.insertBefore(dragSrc, item);
+      }
+    });
+  });
+
+  // Checkbox visibility toggles
+  list.querySelectorAll('.sec-check-inline').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const key = cb.id.replace('chk-', '');
+      if (key === 'objective') {
+        document.getElementById('objective-style-row').style.display = cb.checked ? 'block' : 'none';
+      }
+      updateEyes();
+      render();
+    });
+  });
+
+  // Objective style radio change
+  document.querySelectorAll('input[name="obj-style"]').forEach(r => {
+    r.addEventListener('change', render);
+  });
+
+  updateEyes();
+}
+
+function updateEyes() {
+  document.querySelectorAll('.sec-check-inline').forEach(cb => {
+    const key = cb.id.replace('chk-', '');
+    const eye = document.getElementById('eye-' + key);
+    if (eye) eye.style.opacity = cb.checked ? '1' : '0.25';
+  });
+}
+
+function getSectionOrder() {
+  return [...document.querySelectorAll('#section-order-list li')].map(li => li.dataset.key);
+}
+
+function isSectionOn(key) {
+  const cb = document.getElementById('chk-' + key);
+  return cb ? cb.checked : true;
+}
+
+/* ── SLIDERS ── */
+const sliderCfg = [
+  { id:'ctrl-margin', val:'val-margin', prop:'--cv-margin',      unit:'px', fmt: v => v+'px'  },
+  { id:'ctrl-font',   val:'val-font',   prop:'--cv-font-size',   unit:'pt', fmt: v => v+'pt'  },
+  { id:'ctrl-gap',    val:'val-gap',    prop:'--cv-section-gap', unit:'px', fmt: v => v+'px'  },
+  { id:'ctrl-lh',     val:'val-lh',     prop:'--cv-line-height', unit:'',   fmt: v => parseFloat(v).toFixed(2) },
+];
+sliderCfg.forEach(s => {
+  document.getElementById(s.id).addEventListener('input', function() {
+    document.getElementById(s.val).textContent = s.fmt(this.value);
+    document.getElementById('cv-render').style.setProperty(s.prop, this.value + s.unit);
+    requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); }));
+  });
+});
+function resetDensity() {
+  const def = {'ctrl-margin':45,'ctrl-font':10,'ctrl-gap':22,'ctrl-lh':1.5};
+  sliderCfg.forEach(s => {
+    document.getElementById(s.id).value = def[s.id];
+    document.getElementById(s.val).textContent = s.fmt(def[s.id]);
+    document.getElementById('cv-render').style.removeProperty(s.prop);
+  });
+  requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); }));
+}
+
+/* ── FIT INDICATOR ── */
+function updateFit() {
+  if (!cvData) return;
+  const sheet = document.querySelector('#cv-render .cv-page-sheet:not(.cover-sheet)');
+  if (!sheet) return;
+  const A4px = 297 * 3.7795275591;
+  const ratio = sheet.scrollHeight / A4px;
+  const pct = Math.round(ratio * 100);
+  const ind = document.getElementById('fit-indicator');
+  const txt = document.getElementById('fit-text');
+  if (ratio <= 1.0)       { ind.className='ok';   txt.textContent=`✓ Cabe em 1 página (${pct}% preenchido)`; }
+  else if (ratio <= 1.15) { ind.className='warn'; txt.textContent=`⚠ Quase cabendo — ${pct}% de 1 página`; }
+  else                    { ind.className='over'; txt.textContent=`✗ Conteúdo em ~${Math.ceil(ratio)} páginas (${pct}%)`; }
+}
+
+/* ── SPLIT 2-COL ── */
+function isSplit(k) { const el=document.querySelector(`.split-toggle[data-sec="${k}"]`); return el&&el.checked; }
+function wrapSplit(html, k) {
+  if (!isSplit(k)) return html;
+  return html.replace(
+    /(<div class="cv-section">)([\s\S]*)(<\/div>)$/,
+    (_, open, inner, close) => {
+      const m = inner.match(/(<div class="section-title[^>]*>[\s\S]*?<\/div>)([\s\S]*)/);
+      if (!m) return open+inner+close;
+      return `${open}${m[1]}<div class="inline-twocol">${m[2]}</div>${close}`;
+    }
+  );
+}
+
+/* ── PHOTO / JSON ── */
+document.getElementById('photo-upload').onchange = e => {
+  const r = new FileReader();
+  r.onload = ev => { userPhoto=ev.target.result; render(); };
+  r.readAsDataURL(e.target.files[0]);
+};
+document.getElementById('json-file').onchange = e => {
+  const r = new FileReader();
+  r.onload = ev => { cvData=JSON.parse(ev.target.result); render(); };
+  r.readAsText(e.target.files[0]);
+};
+
+/* ── LOAD SAMPLE ── */
+async function loadSample(type) {
+  const btn = document.getElementById(`btn-sample-${type}`);
+  btn.classList.add('loading');
+  btn.textContent = 'Carregando...';
+  try {
+    const path = `./samples/dummy${type}.json`;
+    const res  = await fetch(path);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    cvData = await res.json();
+    render();
+  } catch(err) {
+    alert(`Não foi possível carregar o exemplo.\n\nVerifique se o arquivo samples/dummy${type}.json existe no repositório.\n\nErro: ${err.message}`);
+  } finally {
+    btn.classList.remove('loading');
+    // Restore button content
+    const labels = { jr: ['👨‍💻 Júnior','Dev Front-end'], sr: ['👩‍💼 Executivo','CTO / Diretora'] };
+    btn.innerHTML = `${labels[type][0]}<span class="sample-tag">${labels[type][1]}</span>`;
+  }
+}
+
+/* ── MODEL JSON ── */
+function downloadModelJSON() {
+  const m = {"personal":{"fullname":"Nome Completo","jobtitle_pt":"Cargo Atual","jobtitle_en":"Current Role","desired_position_pt":"Cargo Pretendido","desired_position_en":"Desired Position","email":"email@exemplo.com","phone":"+55119XXXXXXXX","linkedin":"linkedin.com/in/seuperfil","website":"www.seusite.com","location":"Cidade, Estado, País","summary_pt":"Resumo profissional...","summary_en":"Professional summary..."},"experience":[{"company":"Empresa","position_pt":"Cargo","position_en":"Role","period":"2020 – Atual","description_pt":["Atividade 1","Atividade 2"],"description_en":["Activity 1","Activity 2"]}],"education":[{"degree_pt":"Graduação","degree_en":"Degree","institution":"Instituição","period":"2015 – 2019"}],"skills":{"technical":["JavaScript","Python"],"languages":["Português: Nativo","Inglês: Avançado"],"soft":["Liderança","Comunicação"]},"projects":[{"title_pt":"Projeto","title_en":"Project","description_pt":"Descrição.","description_en":"Description."}],"volunteer":[{"role_pt":"Voluntário","role_en":"Volunteer","organization":"ONG","period":"2021","description_pt":"Atividade.","description_en":"Activity."}],"certifications":[{"title_pt":"Certificação","title_en":"Certification","issuer":"Instituição","year":"2023"}],"salary_expectation":{"pt":"A combinar","en":"Negotiable"},"coverletter":{"pt":"Olá time de recrutamento,\n\nTenho interesse na oportunidade...","en":"Hello Hiring Team,\n\nI am interested in the opportunity..."}};
+  const a=document.createElement('a');
+  a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(m,null,2));
+  a.download="modelo_cv.json";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+/* ── HTML BUILDERS ── */
+function photoHTML(side) {
+  if (!userPhoto) return '';
+  if (side) return `<div class="photo-circle-side"><img src="${userPhoto}"></div>`;
+  return `<div class="photo-container"><div class="photo-circle"><img src="${userPhoto}"></div></div>`;
+}
+
+function getObjStyle() {
+  const r = document.querySelector('input[name="obj-style"]:checked');
+  return r ? r.value : 'section';
+}
+
+function headerTextHTML(p, lang, right) {
+  const objStyle = getObjStyle();
+  const showInHeader = !isSectionOn('objective') || objStyle === 'header' || objStyle === 'both';
+  const desired = lang==='pt' ? p.desired_position_pt : p.desired_position_en;
+  return `<div class="header-text" style="text-align:${right?'right':'left'}">
+    <h1 style="font-size:24pt;font-weight:700">${p.fullname}</h1>
+    ${showInHeader && desired ? `<div class="desired-position">${desired}</div>` : ''}
+    <div class="contact-info">
+      <div>📍 ${p.location||''} &nbsp;•&nbsp; 📞 ${p.phone||''}</div>
+      <div>✉️ ${p.email||''}</div>
+      <div style="margin-top:3px">${p.linkedin?`<strong>LinkedIn:</strong> ${p.linkedin}`:''}${p.website?` | <strong>Web:</strong> ${p.website}`:''}</div>
+    </div>
+  </div>`;
+}
+
+function objectiveHTML(d, lang) {
+  const objStyle = getObjStyle();
+  if (!isSectionOn('objective')) return '';
+  if (objStyle === 'header') return ''; // only in header
+  const desired = lang==='pt' ? d.personal.desired_position_pt : d.personal.desired_position_en;
+  if (!desired) return '';
+  const label = lang==='pt' ? 'Objetivo' : 'Objective';
+  return `<div class="cv-objective-section">
+    <div class="obj-label">${label}</div>
+    <div class="obj-value">${desired}</div>
+  </div>`;
+}
+
+function summaryHTML(d, lang, sc) {
+  const text = lang==='pt' ? d.personal.summary_pt : d.personal.summary_en;
+  if (!text) return '';
+  return `<div class="cv-section">
+    <div class="${sc}">${lang==='pt'?'Resumo':'Summary'}</div>
+    <p style="text-align:justify;font-size:var(--cv-font-size);line-height:var(--cv-line-height)">${text}</p>
+  </div>`;
+}
+
+function experienceHTML(d, lang, sc) {
+  if (!d.experience||!d.experience.length) return '';
+  const items = d.experience.map(exp => {
+    const pos  = lang==='pt' ? exp.position_pt    : exp.position_en;
+    const desc = lang==='pt' ? exp.description_pt : exp.description_en;
+    return `<div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;font-weight:bold;font-size:var(--cv-font-size);gap:8px">
+        <span style="flex:1;overflow-wrap:break-word;word-break:break-word">${pos||''}</span>
+        <span style="flex-shrink:0;color:#64748b;font-weight:400;font-size:8.5pt">${exp.period||''}</span>
+      </div>
+      <div style="color:var(--primary-color);font-weight:600;font-size:8.5pt">${exp.company||''}</div>
+      <ul style="font-size:var(--cv-font-size);margin-top:3px;line-height:var(--cv-line-height)">
+        ${(desc||[]).map(i=>`<li style="overflow-wrap:break-word">${i}</li>`).join('')}
+      </ul>
+    </div>`;
+  }).join('');
+  return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Experiência Profissional':'Experience'}</div>${items}</div>`,'experience');
+}
+
+function educationHTML(d, lang, sc) {
+  if (!d.education||!d.education.length) return '';
+  const items = d.education.map(ed => `
+    <div style="margin-bottom:6px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:var(--cv-font-size);gap:8px">
+        <span style="flex:1;overflow-wrap:break-word;word-break:break-word"><strong>${lang==='pt'?ed.degree_pt:ed.degree_en}</strong></span>
+        <span style="flex-shrink:0;color:#64748b;font-size:8.5pt">${ed.period||''}</span>
+      </div>
+      <div style="font-size:8.5pt;color:#64748b">${ed.institution||''}</div>
+    </div>`).join('');
+  return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Formação':'Education'}</div>${items}</div>`,'education');
+}
+
+function skillsHTML(d, lang, sc, tagStyle) {
+  if (!d.skills) return '';
+  const tl = lang==='pt'?'Técnicas':'Technical';
+  const ll = lang==='pt'?'Idiomas':'Languages';
+  const sl = lang==='pt'?'Comportamentais':'Soft Skills';
+  let html;
+  if (tagStyle) {
+    const grp = (title,arr) => !arr||!arr.length?'': `<div style="margin-bottom:7px">
+      <div style="font-size:7pt;font-weight:700;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">${title}</div>
+      <div>${arr.map(s=>`<span style="${tagStyle}">${s}</span>`).join('')}</div></div>`;
+    html = `<div class="cv-section"><div class="${sc}">${lang==='pt'?'Habilidades':'Skills'}</div>${grp(tl,d.skills.technical)}${grp(ll,d.skills.languages)}${grp(sl,d.skills.soft)}</div>`;
+  } else {
+    const row = (title,arr,first) => !arr||!arr.length?'': `<tr style="vertical-align:top;border-bottom:1px solid #f1f5f9">
+      <td style="font-size:7pt;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.8px;padding:${first?'0':'5px'} 12px 5px 0;white-space:nowrap;width:1%">${title}</td>
+      <td style="padding:${first?'0':'5px'} 0 5px;font-size:var(--cv-font-size);color:#334155;line-height:var(--cv-line-height);overflow-wrap:break-word">${arr.join(' · ')}</td></tr>`;
+    html = `<div class="cv-section"><div class="${sc}">${lang==='pt'?'Habilidades':'Skills'}</div>
+      <table style="width:100%;border-collapse:collapse;margin:0">
+        ${row(tl,d.skills.technical,true)}${row(ll,d.skills.languages,false)}${row(sl,d.skills.soft,false)}
+      </table></div>`;
+  }
+  return wrapSplit(html,'skills');
+}
+
+function certsHTML(d, lang, sc) {
+  if (!d.certifications||!d.certifications.length) return '';
+  const items = d.certifications.map(c=>`
+    <div style="margin-bottom:5px;font-size:var(--cv-font-size);overflow-wrap:break-word">
+      <strong>${lang==='pt'?c.title_pt:c.title_en}</strong>
+      <span style="color:#64748b;font-size:8pt"> · ${c.issuer||''} ${c.year?'('+c.year+')':''}</span>
+    </div>`).join('');
+  return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Certificações':'Certifications'}</div>${items}</div>`,'certifications');
+}
+
+function projectsHTML(d, lang, sc) {
+  if (!d.projects||!d.projects.length) return '';
+  const items = d.projects.map(p=>`
+    <div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word">
+      <strong>${lang==='pt'?p.title_pt:p.title_en}</strong>
+      <div style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?p.description_pt:p.description_en}</div>
+    </div>`).join('');
+  return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Projetos':'Projects'}</div>${items}</div>`,'projects');
+}
+
+function volunteerHTML(d, lang, sc) {
+  if (!d.volunteer||!d.volunteer.length) return '';
+  const items = d.volunteer.map(v=>`
+    <div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word">
+      <strong>${lang==='pt'?v.role_pt:v.role_en}</strong>
+      <span style="font-weight:normal;color:#64748b"> · ${v.organization||''} ${v.period?'('+v.period+')':''}</span>
+      <div style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?v.description_pt:v.description_en}</div>
+    </div>`).join('');
+  return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Voluntariado':'Volunteer'}</div>${items}</div>`,'volunteer');
+}
+
+function salaryHTML(d, lang, sc) {
+  if (!d.salary_expectation) return '';
+  const value = lang==='pt' ? d.salary_expectation.pt : d.salary_expectation.en;
+  if (!value) return '';
+  const label = lang==='pt' ? 'Pretensão Salarial' : 'Salary Expectation';
+  return `<div class="cv-section">
+    <div class="${sc}">${label}</div>
+    <p style="font-size:var(--cv-font-size);line-height:var(--cv-line-height);font-weight:600;color:#334155">${value}</p>
+  </div>`;
+}
+
+/* ── DUOTONE MAP ── */
+const DUOTONE_MAP = {
+  'duotone-wine':   { primary: '#5c1a1a', secondary: '#b8860b' },
+  'duotone-navy':   { primary: '#1e3a5f', secondary: '#b5651d' },
+  'duotone-forest': { primary: '#1a3d2b', secondary: '#c0694a' },
+  'duotone-ink':    { primary: '#1e1e2e', secondary: '#5a8a6e' },
+};
+
+/* ── RENDER ── */
+function render() {
+  if (!cvData) return;
+  const lang      = document.getElementById('lang-toggle').checked ? 'en' : 'pt';
+  const template  = document.getElementById('template-select').value;
+  const align     = document.getElementById('photo-align').value;
+  const container = document.getElementById('cv-render');
+  const d = cvData;
+
+  // Apply colors
+  const colorVal = document.getElementById('color-palette').value;
+  const isDuotone = colorVal.startsWith('duotone-');
+  const dtPreview = document.getElementById('duotone-preview');
+  if (isDuotone && DUOTONE_MAP[colorVal]) {
+    const dt = DUOTONE_MAP[colorVal];
+    document.documentElement.style.setProperty('--primary-color', dt.primary);
+    document.documentElement.style.setProperty('--secondary-color', dt.secondary);
+    dtPreview.style.display = 'flex';
+    document.getElementById('dt-swatch-a').style.background = dt.primary;
+    document.getElementById('dt-swatch-b').style.background = dt.secondary;
+  } else {
+    document.documentElement.style.setProperty('--primary-color', colorVal);
+    document.documentElement.style.setProperty('--secondary-color', colorVal);
+    dtPreview.style.display = 'none';
+  }
+  document.documentElement.style.setProperty('--font-main', document.getElementById('font-select').value);
+  container.className = `template-${template}`;
+
+  const sc = 'section-title';
+  const tag = 'background:rgba(255,255,255,0.18);color:white;border-radius:4px;padding:2px 7px;font-size:8pt;display:inline-block;margin:2px 2px 2px 0;';
+
+  // Map key → renderer
+  const renderers = {
+    objective:      () => objectiveHTML(d, lang),
+    summary:        () => summaryHTML(d, lang, sc),
+    experience:     () => experienceHTML(d, lang, sc),
+    education:      () => educationHTML(d, lang, sc),
+    skills:         (ts) => skillsHTML(d, lang, sc, ts),
+    certifications: () => certsHTML(d, lang, sc),
+    projects:       () => projectsHTML(d, lang, sc),
+    volunteer:      () => volunteerHTML(d, lang, sc),
+    salary:         () => salaryHTML(d, lang, sc),
+  };
+
+  // Ordered keys from drag list, filtered by visibility
+  const orderedKeys = getSectionOrder().filter(isSectionOn);
+
+  const sideKeys = ['skills','volunteer'];
+  const mainKeys = orderedKeys.filter(k => !sideKeys.includes(k));
+  const orderedSideKeys = orderedKeys.filter(k => sideKeys.includes(k));
+
+  const renderList = (keys, tagStyle) =>
+    keys.map(k => renderers[k] ? renderers[k](tagStyle) : '').join('');
+
+  const hasCover = document.getElementById('include-cover').checked && d.coverletter;
+  let html = '';
+
+  if (template === 'sidebar-left') {
+    const desired = lang==='pt' ? d.personal.desired_position_pt : d.personal.desired_position_en;
+    const objStyle = getObjStyle();
+    const showDesiredInHeader = !isSectionOn('objective') || objStyle === 'header' || objStyle === 'both';
+    html = `<div class="cv-page-sheet no-pad ${hasCover?'break-after':''}">
+      <div class="cv-cols">
+        <div class="col-side">
+          ${photoHTML(true)}
+          <h1>${d.personal.fullname}</h1>
+          ${showDesiredInHeader && desired ? `<div class="desired-position">${desired}</div>` : ''}
+          <div class="${sc}">Contato</div>
+          <div class="contact-info">📍 ${d.personal.location||''}<br>📞 ${d.personal.phone||''}<br>✉️ ${d.personal.email||''}${d.personal.linkedin?`<br>🔗 ${d.personal.linkedin}`:''}${d.personal.website?`<br>🌐 ${d.personal.website}`:''}</div>
+          ${renderList(orderedSideKeys, tag)}
+        </div>
+        <div class="col-main">${renderList(mainKeys)}</div>
+      </div></div>`;
+
+  } else if (template === 'twocol') {
+    const flip = align==='row-reverse'?'row-reverse':'';
+    html = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
+      <div class="cv-header-full header-wrapper ${flip}">${photoHTML(false)}${headerTextHTML(d.personal,lang,align==='row-reverse')}</div>
+      <div class="cv-body-cols">
+        <div class="col-left">${renderList(mainKeys)}</div>
+        <div class="col-right">${renderList(orderedSideKeys)}</div>
+      </div></div>`;
+
+  } else if (template === 'duotone') {
+    const flip = align==='row-reverse'?'row-reverse':'';
+    html = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
+      <div class="cv-dt-header ${flip}">${photoHTML(false)}${headerTextHTML(d.personal,lang,align==='row-reverse')}</div>
+      <div class="cv-dt-stripe"></div>
+      <div class="cv-dt-body">${renderList(orderedKeys)}</div>
+    </div>`;
+
+  } else {
+    const flip = align==='row-reverse'?'row-reverse':'';
+    html = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
+      <div class="header-wrapper ${flip}">${photoHTML(false)}${headerTextHTML(d.personal,lang,align==='row-reverse')}</div>
+      ${renderList(orderedKeys)}
+    </div>`;
+  }
+
+  if (hasCover) {
+    const cl = lang==='pt' ? d.coverletter.pt : d.coverletter.en;
+    const clTitle    = lang==='pt' ? 'Carta de Apresentação' : 'Cover Letter';
+    const clGreeting = lang==='pt' ? 'À equipe de recrutamento,' : 'Dear Hiring Manager,';
+    const clSign     = lang==='pt' ? 'Atenciosamente,' : 'Best regards,';
+    html += `<hr class="page-divider" data-label="${clTitle}">
+      <div class="cv-page-sheet cover-sheet">
+        <div class="${sc}" style="margin-bottom:28px">${clTitle}</div>
+        <p style="margin-bottom:16px">${clGreeting}</p>
+        <div style="line-height:1.7;text-align:justify;font-size:11pt;white-space:pre-line">${cl}</div>
+        <p style="margin-top:48px">${clSign}<br><strong>${d.personal.fullname}</strong></p>
+      </div>`;
+  }
+
+  container.innerHTML = html;
+  requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); }));
+}
+
+/* ── PAGINAÇÃO POR SEÇÃO INTEIRA ── */
+function paginateSections() {
+  document.querySelectorAll('[data-page-break]').forEach(el => el.remove());
+
+  const A4_H_PX  = 297 * 3.7795275591;
+  const cvEl     = document.getElementById('cv-render');
+  const marginPx = parseFloat(
+    cvEl.style.getPropertyValue('--cv-margin') ||
+    getComputedStyle(document.documentElement).getPropertyValue('--cv-margin') ||
+    '45'
+  ) || 45;
+  const USABLE = A4_H_PX - marginPx * 2;
+
+  document.querySelectorAll('.cv-page-sheet').forEach(sheet => {
+    if (sheet.querySelector('.cv-cols, .cv-body-cols')) return;
+
+    // For duotone, paginate inside cv-dt-body
+    const bodyScope = sheet.querySelector('.cv-dt-body') || sheet;
+    const sections = Array.from(bodyScope.querySelectorAll('.cv-section, .cv-objective-section'));
+    if (!sections.length) return;
+
+    const sheetTop = sheet.getBoundingClientRect().top;
+    const padTop   = sheet.querySelector('.cv-dt-body')
+      ? (sheet.querySelector('.cv-dt-header')?.getBoundingClientRect().height || 0) +
+        (sheet.querySelector('.cv-dt-stripe')?.getBoundingClientRect().height || 0) +
+        parseFloat(getComputedStyle(bodyScope).paddingTop || '32')
+      : parseFloat(getComputedStyle(sheet).paddingTop) || marginPx;
+
+    const measured = sections.map(sec => ({
+      sec,
+      top:    sec.getBoundingClientRect().top - sheetTop - padTop,
+      height: sec.getBoundingClientRect().height,
+    }));
+
+    const toInsert = [];
+    let pageCursor = 0;
+
+    measured.forEach(({ sec, top, height }) => {
+      const posInPage = top - pageCursor;
+      if (posInPage + height > USABLE && posInPage > 0) {
+        const spacerH = USABLE - posInPage + marginPx;
+        toInsert.push({ sec, spacerH });
+        pageCursor += posInPage + spacerH;
+      }
+    });
+
+    toInsert.forEach(({ sec, spacerH }) => {
+      const sp = document.createElement('div');
+      sp.dataset.pageBreak = '1';
+      sp.style.cssText = `display:block;height:${spacerH}px;`;
+      sec.parentNode.insertBefore(sp, sec);
+    });
+  });
+}
+
+/* ── PDF EXPORT ── */
+async function exportPDF() {
+  document.querySelectorAll('.page-divider').forEach(el=>el.style.display='none');
+  const sheets = Array.from(document.querySelectorAll('.cv-page-sheet'));
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+  const PW=210, PH=297;
+  let first=true;
+
+  for (const sheet of sheets) {
+    const sheetRect = sheet.getBoundingClientRect();
+    const scale = 2;
+    const canvas = await html2canvas(sheet,{scale,useCORS:true,logging:false});
+    const pxPerMM = canvas.width / PW;
+    const pageHpx = Math.round(PH * pxPerMM);
+
+    const breakYs = [0];
+    sheet.querySelectorAll('[data-page-break]').forEach(spacer => {
+      const relY = spacer.getBoundingClientRect().top - sheetRect.top;
+      if (relY > 1) breakYs.push(Math.round(relY * scale));
+    });
+
+    for (let i = 0; i < breakYs.length; i++) {
+      const startPx = breakYs[i];
+      const endPx   = i + 1 < breakYs.length ? breakYs[i+1] : canvas.height;
+      const segH    = endPx - startPx;
+
+      const pc  = document.createElement('canvas');
+      pc.width  = canvas.width;
+      pc.height = pageHpx;
+      const ctx = pc.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, pc.width, pc.height);
+      ctx.drawImage(canvas, 0, startPx, canvas.width, segH, 0, 0, canvas.width, segH);
+
+      if (!first) doc.addPage();
+      first = false;
+      doc.addImage(pc.toDataURL('image/jpeg',0.95),'JPEG',0,0,PW,PH);
+    }
+  }
+
+  // ── Smart filename ──
+  const lang     = document.getElementById('lang-toggle').checked ? 'en' : 'pt';
+  const hasCL    = document.getElementById('include-cover').checked && cvData?.coverletter;
+  const rawName  = cvData?.personal?.fullname || 'Nome';
+  // Sanitize: keep only letters/numbers, replace spaces with underscores, strip accents
+  const safeName = rawName
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // strip accents
+    .replace(/[^a-zA-Z0-9 ]/g, '')                     // remove special chars
+    .trim().replace(/\s+/g, '_');
+  const year = new Date().getFullYear();
+
+  let filename;
+  if (lang === 'pt') {
+    filename = hasCL
+      ? `CV_${safeName}_${year}_CL_PT.pdf`
+      : `CV_${safeName}_${year}_PT.pdf`;
+  } else {
+    filename = hasCL
+      ? `Resume_${safeName}_${year}_EN_CL.pdf`
+      : `Resume_${safeName}_${year}_EN.pdf`;
+  }
+
+  doc.save(filename);
+  document.querySelectorAll('.page-divider').forEach(el=>el.style.display='');
+}
+
+/* ── LISTENERS ── */
+['template-select','color-palette','font-select','include-cover','lang-toggle','photo-align']
+  .forEach(id => document.getElementById(id).onchange = render);
+document.querySelectorAll('.split-toggle').forEach(cb => cb.onchange = render);
+
+/* ── INIT ── */
+initDragDrop();
+</script>
+</body>
+</html>
