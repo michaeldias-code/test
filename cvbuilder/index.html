@@ -416,61 +416,26 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 /* Subtle separator between exp entries */
 .template-duotone .exp-entry + .exp-entry { border-top: 1px solid color-mix(in srgb, var(--secondary-color) 20%, transparent); padding-top: 8px; margin-top: 4px; }
 
-/* ── TEMPLATE TI — Terminal / Dark Tech ── */
-.template-tech { --cv-font-body: 'DM Sans', sans-serif; --cv-font-display: 'JetBrains Mono', monospace; }
-.template-tech .cv-page-sheet { background: #ffffff; font-family: var(--cv-font-body); border-top: none; }
-/* Header: dark full-bleed with terminal aesthetic */
-.template-tech .header-wrapper { background: #0f172a; margin: calc(-1 * var(--cv-margin)) calc(-1 * var(--cv-margin)) 0 calc(-1 * var(--cv-margin)); padding: calc(var(--cv-margin) * 0.9) var(--cv-margin) calc(var(--cv-margin) * 0.7); display: flex; align-items: center; gap: 24px; position: relative; }
-.template-tech .header-wrapper::after { content: ''; display: block; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--primary-color) 0%, color-mix(in srgb, var(--primary-color) 40%, #00ff88) 100%); }
-.template-tech .cv-name { font-family: var(--cv-font-display); font-size: 20pt; font-weight: 700; color: #f8fafc; letter-spacing: -0.5px; line-height: 1.15; }
-.template-tech .cv-name::before { content: '> '; color: var(--primary-color); font-size: 14pt; }
-.template-tech .desired-position { font-family: var(--cv-font-display); font-size: 7.5pt; font-weight: 400; color: var(--primary-color); margin-top: 6px; letter-spacing: 0.5px; }
-.template-tech .contact-info { font-family: var(--cv-font-display); font-size: 7pt; font-weight: 400; color: rgba(255,255,255,0.5) !important; margin-top: 4px; letter-spacing: 0.3px; }
-.template-tech .photo-circle { border-color: var(--primary-color) !important; border-radius: 4px !important; border-width: 2px !important; }
-/* Section titles: mono, colored, slash prefix */
-.template-tech .section-title { font-family: var(--cv-font-display); font-size: 7.5pt; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--primary-color); background: color-mix(in srgb, var(--primary-color) 8%, transparent); border: none; border-left: 3px solid var(--primary-color); padding: 3px 8px; margin-bottom: 10px; }
-.template-tech .section-title::before { content: '// '; opacity: 0.6; }
-/* Experience */
-.template-tech .exp-position { font-size: 10pt; font-weight: 700; color: #0f172a; }
-.template-tech .exp-company  { font-family: var(--cv-font-display); font-size: 7pt; font-weight: 600; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; }
-.template-tech .exp-period   { font-family: var(--cv-font-display); font-size: 7pt; font-weight: 400; color: #94a3b8; }
-.template-tech .exp-desc li::marker { color: var(--primary-color); }
-/* Education */
-.template-tech .edu-degree { font-weight: 700; color: #0f172a; }
-.template-tech .edu-inst   { font-family: var(--cv-font-display); font-size: 7.5pt; color: var(--primary-color); }
-.template-tech .edu-period { font-family: var(--cv-font-display); font-size: 7pt; color: #94a3b8; }
-/* Skill chips: code-style */
-.template-tech .skill-chip { font-family: var(--cv-font-display); font-size: 7pt; background: color-mix(in srgb, var(--primary-color) 10%, transparent); color: var(--primary-color); border: 1px solid color-mix(in srgb, var(--primary-color) 30%, transparent); border-radius: 3px; padding: 1px 6px; display: inline-block; margin: 2px 3px 2px 0; }
-/* Certs */
-.template-tech .cert-title { font-weight: 700; color: #0f172a; }
-.template-tech .cert-issuer { font-family: var(--cv-font-display); font-size: 7pt; color: #64748b; }
-
-/* ── TEMPLATE FINANÇAS — Corporate / Prestige ── */
-.template-finance { --cv-font-body: 'IBM Plex Sans', sans-serif; --cv-font-display: 'Playfair Display', serif; }
-.template-finance .cv-page-sheet { font-family: var(--cv-font-body); border-top: 5px solid var(--primary-color); }
-/* Header: clean, typographic prestige */
-.template-finance .header-wrapper { display: flex; align-items: center; gap: 24px; padding-bottom: calc(var(--cv-margin) * 0.5); border-bottom: 1px solid #e2e8f0; margin-bottom: calc(var(--cv-margin) * 0.5); }
-.template-finance .cv-name { font-family: var(--cv-font-display); font-size: 24pt; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; line-height: 1.1; }
-.template-finance .desired-position { font-size: 9pt; font-weight: 500; color: var(--primary-color); margin-top: 5px; letter-spacing: 0.3px; text-transform: none; }
-.template-finance .contact-info { font-size: 8.5pt; font-weight: 400; color: #475569; margin-top: 3px; }
-.template-finance .photo-circle { border-color: var(--primary-color); border-radius: 4px !important; }
-/* Section titles: serif display, subtle rule */
-.template-finance .section-title { font-family: var(--cv-font-display); font-size: 10.5pt; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--primary-color); border-bottom: 1px solid var(--primary-color); padding-bottom: 3px; margin-bottom: 10px; }
-/* Experience: timeline-ish — left border accent per entry */
-.template-finance .exp-entry { border-left: 2px solid #e2e8f0; padding-left: 12px; margin-left: 2px; margin-bottom: 10px; position: relative; }
-.template-finance .exp-entry::before { content: ''; position: absolute; left: -5px; top: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--primary-color); }
-.template-finance .exp-position { font-size: 10pt; font-weight: 700; color: #0f172a; }
-.template-finance .exp-company  { font-size: 8.5pt; font-weight: 600; color: var(--primary-color); }
-.template-finance .exp-period   { font-size: 7.5pt; font-weight: 400; color: #64748b; font-style: italic; }
-/* Education */
-.template-finance .edu-degree { font-weight: 700; color: #0f172a; }
-.template-finance .edu-inst   { font-size: 8.5pt; color: var(--primary-color); font-weight: 500; }
-.template-finance .edu-period { font-size: 7.5pt; color: #64748b; font-style: italic; }
-/* Skill chips: clean bordered */
-.template-finance .skill-chip { font-size: 7.5pt; border: 1px solid #cbd5e1; color: #334155; border-radius: 2px; padding: 1px 7px; display: inline-block; margin: 2px 3px 2px 0; }
-/* Certs */
-.template-finance .cert-title { font-weight: 700; color: #0f172a; }
-.template-finance .cert-issuer { font-size: 8pt; color: var(--primary-color); }
+/* ── TEMPLATE FORMAL — Corporate / Prestige ── */
+.template-formal { --cv-font-body: 'IBM Plex Sans', sans-serif; --cv-font-display: 'Playfair Display', serif; }
+.template-formal .cv-page-sheet { font-family: var(--cv-font-body); border-top: 5px solid var(--primary-color); }
+.template-formal .header-wrapper { display: flex; align-items: center; gap: 24px; padding-bottom: calc(var(--cv-margin) * 0.5); border-bottom: 1px solid #e2e8f0; margin-bottom: calc(var(--cv-margin) * 0.5); }
+.template-formal .cv-name { font-family: var(--cv-font-display); font-size: 24pt; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; line-height: 1.1; }
+.template-formal .desired-position { font-size: 9pt; font-weight: 500; color: var(--primary-color); margin-top: 5px; letter-spacing: 0.3px; text-transform: none; }
+.template-formal .contact-info { font-size: 8.5pt; font-weight: 400; color: #475569; margin-top: 3px; }
+.template-formal .photo-circle { border-color: var(--primary-color); border-radius: 4px !important; }
+.template-formal .section-title { font-family: var(--cv-font-display); font-size: 10.5pt; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--primary-color); border-bottom: 1px solid var(--primary-color); padding-bottom: 3px; margin-bottom: 10px; }
+.template-formal .exp-entry { border-left: 2px solid #e2e8f0; padding-left: 12px; margin-left: 2px; margin-bottom: 10px; position: relative; }
+.template-formal .exp-entry::before { content: ''; position: absolute; left: -5px; top: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--primary-color); }
+.template-formal .exp-position { font-size: 10pt; font-weight: 700; color: #0f172a; }
+.template-formal .exp-company  { font-size: 8.5pt; font-weight: 600; color: var(--primary-color); }
+.template-formal .exp-period   { font-size: 7.5pt; font-weight: 400; color: #64748b; font-style: italic; }
+.template-formal .edu-degree { font-weight: 700; color: #0f172a; }
+.template-formal .edu-inst   { font-size: 8.5pt; color: var(--primary-color); font-weight: 500; }
+.template-formal .edu-period { font-size: 7.5pt; color: #64748b; font-style: italic; }
+.template-formal .skill-chip { font-size: 7.5pt; border: 1px solid #cbd5e1; color: #334155; border-radius: 2px; padding: 1px 7px; display: inline-block; margin: 2px 3px 2px 0; }
+.template-formal .cert-title { font-weight: 700; color: #0f172a; }
+.template-formal .cert-issuer { font-size: 8pt; color: var(--primary-color); }
 
 /* ── 2 COLUNAS INLINE ── */
 .inline-twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
@@ -549,11 +514,10 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
           <option value="executive">Executivo</option>
           <option value="minimal">Minimalista</option>
           <option value="creative">Criativo</option>
+          <option value="formal">Formal</option>
         </optgroup>
         <optgroup label="Sidebar">
           <option value="sidebar-left">Sidebar Esquerda</option>
-          <option value="tech">TI / Tech</option>
-          <option value="finance">Finanças / Corp</option>
         </optgroup>
         <optgroup label="✦ Especial">
           <option value="duotone">Duotone</option>
@@ -1509,7 +1473,7 @@ function render() {
     </div>`;
     html = hasCover && coverFirst ? coverHTML(true) + cvSheet.replace('break-after','') : cvSheet + (hasCover ? coverHTML() : '');
 
-  } else if (template === 'tech' || template === 'finance') {
+  } else if (template === 'formal') {
     const flip = align==='row-reverse'?'row-reverse':'';
     const cvSheet = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
       <div class="header-wrapper ${flip}">${photoHTML(false)}${headerTextHTML(d.personal,lang,align==='row-reverse')}</div>
