@@ -601,6 +601,7 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
     </div>
     <div class="accordion-body">
       <label><input type="checkbox" id="include-cover" checked> Incluir Cover Letter</label>
+      <label><input type="checkbox" id="cover-first"> Cover Letter primeiro</label>
       <label><input type="checkbox" id="lang-toggle"> Inglês</label>
     </div>
   </div>
@@ -1357,14 +1358,30 @@ function render() {
   const renderList = (keys, tagStyle) =>
     keys.map(k => renderers[k] ? renderers[k](tagStyle) : '').join('');
 
-  const hasCover = document.getElementById('include-cover').checked && d.coverletter;
+  const hasCover   = document.getElementById('include-cover').checked && d.coverletter;
+  const coverFirst = document.getElementById('cover-first').checked;
   let html = '';
+
+  const coverHTML = (breakAfter = false) => {
+    const cl = lang==='pt' ? d.coverletter.pt : d.coverletter.en;
+    const clTitle    = lang==='pt' ? 'Carta de Apresentação' : 'Cover Letter';
+    const clGreeting = lang==='pt' ? 'À equipe de recrutamento,' : 'Dear Hiring Manager,';
+    const clSign     = lang==='pt' ? 'Atenciosamente,' : 'Best regards,';
+    return `<hr class="page-divider" data-label="${clTitle}">
+      <div class="cv-page-sheet cover-sheet${breakAfter?' break-after':''}" style="padding:var(--cv-margin);position:relative">
+        <button class="edit-btn" style="top:12px;right:12px;opacity:0.6" onclick="openEditModal('coverletter')" title="Editar Cover Letter">✏</button>
+        <div class="${sc}" style="margin-bottom:28px">${clTitle}</div>
+        <p style="margin-bottom:16px;font-size:var(--cv-font-size)">${clGreeting}</p>
+        <div style="line-height:1.8;text-align:justify;font-size:var(--cv-font-size);white-space:pre-line">${cl}</div>
+        <p style="margin-top:48px;font-size:var(--cv-font-size)">${clSign}<br><strong>${d.personal.fullname}</strong></p>
+      </div>`;
+  };
 
   if (template === 'sidebar-left') {
     const desired = lang==='pt' ? d.personal.desired_position_pt : d.personal.desired_position_en;
     const objStyle = getObjStyle();
     const showDesiredInHeader = !isSectionOn('objective') || objStyle === 'header' || objStyle === 'both';
-    html = `<div class="cv-page-sheet no-pad ${hasCover?'break-after':''}">
+    const cvSheet = `<div class="cv-page-sheet no-pad ${hasCover?'break-after':''}">
       <div class="cv-cols">
         <div class="col-side">
           ${photoHTML(true)}
@@ -1376,44 +1393,34 @@ function render() {
         </div>
         <div class="col-main">${renderList(mainKeys)}</div>
       </div></div>`;
+    html = hasCover && coverFirst ? coverHTML(true) + cvSheet.replace('break-after','') : cvSheet + (hasCover ? coverHTML() : '');
 
   } else if (template === 'twocol') {
     const flip = align==='row-reverse'?'row-reverse':'';
-    html = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
+    const cvSheet = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
       <div class="cv-header-full header-wrapper ${flip}">${photoHTML(false)}${headerTextHTML(d.personal,lang,align==='row-reverse')}</div>
       <div class="cv-body-cols">
         <div class="col-left">${renderList(mainKeys)}</div>
         <div class="col-right">${renderList(orderedSideKeys)}</div>
       </div></div>`;
+    html = hasCover && coverFirst ? coverHTML(true) + cvSheet.replace('break-after','') : cvSheet + (hasCover ? coverHTML() : '');
 
   } else if (template === 'duotone') {
     const flip = align==='row-reverse'?'row-reverse':'';
-    html = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
+    const cvSheet = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
       <div class="cv-dt-header ${flip}">${photoHTML(false)}${headerTextHTML(d.personal,lang,align==='row-reverse')}</div>
       <div class="cv-dt-stripe"></div>
       <div class="cv-dt-body">${renderList(orderedKeys)}</div>
     </div>`;
+    html = hasCover && coverFirst ? coverHTML(true) + cvSheet.replace('break-after','') : cvSheet + (hasCover ? coverHTML() : '');
 
   } else {
     const flip = align==='row-reverse'?'row-reverse':'';
-    html = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
+    const cvSheet = `<div class="cv-page-sheet ${hasCover?'break-after':''}">
       <div class="header-wrapper ${flip}">${photoHTML(false)}${headerTextHTML(d.personal,lang,align==='row-reverse')}</div>
       ${renderList(orderedKeys)}
     </div>`;
-  }
-
-  if (hasCover) {
-    const cl = lang==='pt' ? d.coverletter.pt : d.coverletter.en;
-    const clTitle    = lang==='pt' ? 'Carta de Apresentação' : 'Cover Letter';
-    const clGreeting = lang==='pt' ? 'À equipe de recrutamento,' : 'Dear Hiring Manager,';
-    const clSign     = lang==='pt' ? 'Atenciosamente,' : 'Best regards,';
-    html += `<hr class="page-divider" data-label="${clTitle}">
-      <div class="cv-page-sheet cover-sheet" style="padding:var(--cv-margin)">
-        <div class="${sc}" style="margin-bottom:28px">${clTitle}</div>
-        <p style="margin-bottom:16px;font-size:var(--cv-font-size)">${clGreeting}</p>
-        <div style="line-height:1.8;text-align:justify;font-size:var(--cv-font-size);white-space:pre-line">${cl}</div>
-        <p style="margin-top:48px;font-size:var(--cv-font-size)">${clSign}<br><strong>${d.personal.fullname}</strong></p>
-      </div>`;
+    html = hasCover && coverFirst ? coverHTML(true) + cvSheet.replace('break-after','') : cvSheet + (hasCover ? coverHTML() : '');
   }
 
   container.innerHTML = html;
@@ -1548,7 +1555,7 @@ async function exportPDF() {
 }
 
 /* ── LISTENERS ── */
-['template-select','color-palette','font-select','include-cover','lang-toggle','photo-align']
+['template-select','color-palette','font-select','include-cover','cover-first','lang-toggle','photo-align']
   .forEach(id => document.getElementById(id).onchange = render);
 document.querySelectorAll('.split-toggle').forEach(cb => cb.onchange = render);
 
