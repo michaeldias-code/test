@@ -48,6 +48,17 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 .btn-sec  { width: 100%; background: #475569; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 0.82rem; }
 .btn-reset { width: 100%; padding: 7px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: #475569; font-weight: 600; margin-top: 8px; }
 
+/* ── SAMPLES ── */
+.samples-row { display: flex; gap: 8px; margin-top: 6px; }
+.btn-sample {
+  flex: 1; padding: 9px 6px; border: 1.5px solid #e2e8f0; background: #f8fafc;
+  border-radius: 8px; cursor: pointer; font-size: 0.76rem; font-weight: 700;
+  color: #475569; text-align: center; transition: all 0.15s; line-height: 1.3;
+}
+.btn-sample:hover { border-color: var(--primary-color); color: var(--primary-color); background: #eff6ff; }
+.btn-sample .sample-tag { display: block; font-size: 0.65rem; font-weight: 600; color: #94a3b8; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+.btn-sample.loading { opacity: 0.5; cursor: wait; }
+
 /* ── DRAG & DROP ORDER ── */
 #section-order-list {
   list-style: none;
@@ -258,6 +269,17 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
     <h3>Dados</h3>
     <label>Arquivo JSON:</label>
     <input type="file" id="json-file" accept=".json">
+    <label style="margin-top:10px">Ver exemplo:</label>
+    <div class="samples-row">
+      <button class="btn-sample" id="btn-sample-jr" onclick="loadSample('jr')">
+        👨‍💻 Júnior
+        <span class="sample-tag">Dev Front-end</span>
+      </button>
+      <button class="btn-sample" id="btn-sample-sr" onclick="loadSample('sr')">
+        👩‍💼 Executivo
+        <span class="sample-tag">CTO / Diretora</span>
+      </button>
+    </div>
   </div>
 
   <div class="control-group">
@@ -583,6 +605,27 @@ document.getElementById('json-file').onchange = e => {
   r.onload = ev => { cvData=JSON.parse(ev.target.result); render(); };
   r.readAsText(e.target.files[0]);
 };
+
+/* ── LOAD SAMPLE ── */
+async function loadSample(type) {
+  const btn = document.getElementById(`btn-sample-${type}`);
+  btn.classList.add('loading');
+  btn.textContent = 'Carregando...';
+  try {
+    const path = `./samples/dummy${type}.json`;
+    const res  = await fetch(path);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    cvData = await res.json();
+    render();
+  } catch(err) {
+    alert(`Não foi possível carregar o exemplo.\n\nVerifique se o arquivo samples/dummy${type}.json existe no repositório.\n\nErro: ${err.message}`);
+  } finally {
+    btn.classList.remove('loading');
+    // Restore button content
+    const labels = { jr: ['👨‍💻 Júnior','Dev Front-end'], sr: ['👩‍💼 Executivo','CTO / Diretora'] };
+    btn.innerHTML = `${labels[type][0]}<span class="sample-tag">${labels[type][1]}</span>`;
+  }
+}
 
 /* ── MODEL JSON ── */
 function downloadModelJSON() {
