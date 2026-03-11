@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CV Designer</title>
+<title>CV Designer Pro</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Roboto+Mono&family=Montserrat:wght@400;700&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Playfair+Display:wght@400;600;700;800&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&family=Roboto+Mono:wght@400;500&family=Montserrat:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --primary-color: #1e293b;
@@ -46,7 +46,37 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 
 .btn-main { width: 100%; background: #000; color: white; border: none; padding: 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; font-size: 0.9rem; }
 .btn-sec  { width: 100%; background: #475569; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 0.82rem; }
-.btn-reset { width: 100%; padding: 7px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: #475569; font-weight: 600; margin-top: 8px; }
+/* ── TOOLTIP MODELO JSON ── */
+.tooltip-wrap { position: relative; }
+.tooltip-wrap .tooltip-box {
+  display: none;
+  position: absolute;
+  left: 0; top: calc(100% + 8px);
+  width: 100%;
+  background: #1e293b;
+  color: #e2e8f0;
+  border-radius: 8px;
+  padding: 11px 13px;
+  font-size: 0.72rem;
+  line-height: 1.55;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  z-index: 99;
+  box-sizing: border-box;
+}
+.tooltip-wrap .tooltip-box::before {
+  content: '';
+  position: absolute;
+  top: -6px; left: 18px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid #1e293b;
+}
+.tooltip-wrap .tooltip-box ol {
+  margin: 6px 0 0; padding-left: 16px;
+}
+.tooltip-wrap .tooltip-box ol li { margin-bottom: 3px; }
+.tooltip-wrap .tooltip-box strong { color: #fff; }
+.tooltip-wrap:hover .tooltip-box { display: block; }
 
 /* ── SAMPLES ── */
 .samples-row { display: flex; gap: 8px; margin-top: 6px; }
@@ -164,83 +194,158 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 }
 
 /* ── TEMPLATES 1 COLUNA ── */
-.template-modern  .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; }
-.template-minimal .section-title { color: #1e293b; border-bottom: 1px solid var(--primary-color); }
-.template-creative .cv-page-sheet { border-top: 15px solid var(--primary-color); }
-.template-creative .section-title { font-family: 'Roboto Mono', monospace; background: var(--primary-color); color: white; padding: 2px 10px; }
 
+/* MODERNO — Plus Jakarta Sans. Clean, contemporâneo, peso como hierarquia */
+.template-modern { --cv-font-body: 'Plus Jakarta Sans', sans-serif; --cv-font-display: 'Plus Jakarta Sans', sans-serif; }
+.template-modern #cv-render,
+.template-modern .cv-page-sheet { font-family: var(--cv-font-body); }
+.template-modern .cv-name { font-family: var(--cv-font-display); font-size: 26pt; font-weight: 800; letter-spacing: -0.5px; color: #0f172a; }
+.template-modern .desired-position { font-size: 10pt; font-weight: 500; text-transform: uppercase; letter-spacing: 3px; color: var(--primary-color); margin-top: 5px; }
+.template-modern .section-title {
+  font-size: 7pt; font-weight: 700; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--primary-color);
+  border-bottom: 1.5px solid var(--primary-color);
+  padding-bottom: 4px; margin-bottom: 10px;
+}
+.template-modern .exp-position { font-size: 10pt; font-weight: 700; color: #0f172a; }
+.template-modern .exp-company  { font-size: 8.5pt; font-weight: 600; color: var(--primary-color); letter-spacing: 0.3px; }
+.template-modern .exp-period   { font-size: 7.5pt; font-weight: 500; color: #94a3b8; }
+
+/* EXECUTIVO — Playfair Display + Barlow. Autoridade editorial */
+.template-executive { --cv-font-body: 'Barlow', sans-serif; --cv-font-display: 'Playfair Display', serif; }
+.template-executive .cv-page-sheet { font-family: var(--cv-font-body); }
+.template-executive .cv-name { font-family: var(--cv-font-display); font-size: 28pt; font-weight: 700; letter-spacing: 0; color: white; line-height: 1.1; }
+.template-executive .desired-position { font-family: var(--cv-font-body); font-size: 9pt; font-weight: 300; text-transform: uppercase; letter-spacing: 3.5px; color: rgba(255,255,255,0.7) !important; margin-top: 6px; }
 .template-executive .header-wrapper {
   background: var(--primary-color); color: white !important;
-  margin: calc(-1 * var(--cv-margin)) calc(-1 * var(--cv-margin)) 24px calc(-1 * var(--cv-margin));
+  margin: calc(-1 * var(--cv-margin)) calc(-1 * var(--cv-margin)) 28px calc(-1 * var(--cv-margin));
   padding: var(--cv-margin);
 }
 .template-executive .header-wrapper h1 { color: white; }
-.template-executive .photo-circle { border-color: white !important; }
-.template-executive .section-title { color: var(--primary-color); font-weight: 800; border-left: 4px solid var(--primary-color); padding-left: 10px; }
-.template-executive .desired-position { color: white !important; }
-.template-executive .contact-info { color: white !important; }
+.template-executive .photo-circle { border-color: rgba(255,255,255,0.3) !important; border-radius: 4px !important; }
+.template-executive .section-title {
+  font-family: var(--cv-font-display);
+  font-size: 11pt; font-weight: 700; font-style: italic;
+  color: var(--primary-color); border: none;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 5px; margin-bottom: 10px;
+}
+.template-executive .contact-info { color: rgba(255,255,255,0.8) !important; font-size: 8pt; font-weight: 300; letter-spacing: 0.2px; }
+.template-executive .exp-position { font-size: 10pt; font-weight: 600; color: #0f172a; }
+.template-executive .exp-company  { font-size: 8.5pt; font-weight: 700; color: var(--primary-color); text-transform: uppercase; letter-spacing: 0.8px; }
+.template-executive .exp-period   { font-size: 7.5pt; font-weight: 300; color: #94a3b8; }
+
+/* MINIMALISTA — Cormorant Garamond + Barlow. Elegância editorial máxima */
+.template-minimal { --cv-font-body: 'Barlow', sans-serif; --cv-font-display: 'Cormorant Garamond', serif; }
+.template-minimal .cv-page-sheet { font-family: var(--cv-font-body); }
+.template-minimal .cv-name { font-family: var(--cv-font-display); font-size: 32pt; font-weight: 600; letter-spacing: -0.5px; color: #0f172a; line-height: 1; }
+.template-minimal .desired-position { font-family: var(--cv-font-display); font-size: 13pt; font-weight: 400; font-style: italic; color: var(--primary-color); margin-top: 4px; letter-spacing: 0; }
+.template-minimal .section-title {
+  font-family: var(--cv-font-body);
+  font-size: 6.5pt; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; color: #94a3b8;
+  border: none; border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 5px; margin-bottom: 10px;
+}
+.template-minimal .contact-info { font-size: 8pt; font-weight: 300; color: #64748b; letter-spacing: 0.2px; }
+.template-minimal .exp-position { font-family: var(--cv-font-display); font-size: 12pt; font-weight: 600; color: #0f172a; }
+.template-minimal .exp-company  { font-size: 8pt; font-weight: 700; color: var(--primary-color); text-transform: uppercase; letter-spacing: 1px; }
+.template-minimal .exp-period   { font-size: 7.5pt; font-weight: 300; color: #94a3b8; }
+
+/* CRIATIVO — Barlow Condensed + Roboto Mono. Tech, bold, inconfundível */
+.template-creative { --cv-font-body: 'Barlow', sans-serif; --cv-font-display: 'Barlow Condensed', sans-serif; }
+.template-creative .cv-page-sheet { font-family: var(--cv-font-body); border-top: 6px solid var(--primary-color); }
+.template-creative .cv-name { font-family: var(--cv-font-display); font-size: 30pt; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #0f172a; line-height: 1; }
+.template-creative .desired-position { font-family: 'Roboto Mono', monospace; font-size: 8pt; font-weight: 400; color: var(--primary-color); margin-top: 6px; letter-spacing: 0; }
+.template-creative .section-title {
+  font-family: var(--cv-font-display);
+  font-size: 9pt; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: white;
+  background: var(--primary-color);
+  padding: 3px 10px; display: inline-block; margin-bottom: 10px;
+}
+.template-creative .contact-info { font-family: 'Roboto Mono', monospace; font-size: 7.5pt; color: #475569; }
+.template-creative .exp-position { font-family: var(--cv-font-display); font-size: 12pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #0f172a; }
+.template-creative .exp-company  { font-family: 'Roboto Mono', monospace; font-size: 7.5pt; color: var(--primary-color); }
+.template-creative .exp-period   { font-family: 'Roboto Mono', monospace; font-size: 7.5pt; color: #94a3b8; }
 
 /* ── TEMPLATES 2 COLUNAS ── */
+
+/* SIDEBAR ESQUERDA — Plus Jakarta Sans. Sidebar densa, main area limpa */
+.template-sidebar-left { --cv-font-body: 'Plus Jakarta Sans', sans-serif; --cv-font-display: 'Plus Jakarta Sans', sans-serif; }
 .template-sidebar-left .cv-page-sheet.no-pad { padding: 0; }
 .template-sidebar-left .cv-cols { display: grid; grid-template-columns: 185px 1fr; min-height: 297mm; }
-.template-sidebar-left .col-side { background: var(--primary-color); color: white; padding: 30px 18px; }
-.template-sidebar-left .col-side h1 { font-size: 13pt; font-weight: 700; color: white; line-height: 1.25; }
-.template-sidebar-left .col-side .desired-position { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: rgba(255,255,255,0.75); margin-bottom: 12px; }
-.template-sidebar-left .col-side .section-title { font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.6); border-bottom: 1px solid rgba(255,255,255,0.25); padding-bottom: 4px; margin: 14px 0 7px; }
-.template-sidebar-left .col-side .contact-info { font-size: 8pt; line-height: 1.7; color: rgba(255,255,255,0.85); }
-.template-sidebar-left .col-main { padding: 30px 26px; }
-.template-sidebar-left .col-main .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; }
-.photo-circle-side { width: 100%; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 2px solid rgba(255,255,255,0.35); margin-bottom: 12px; }
+.template-sidebar-left .col-side { background: var(--primary-color); color: white; padding: 30px 18px; font-family: var(--cv-font-body); }
+.template-sidebar-left .col-side h1 { font-size: 13pt; font-weight: 800; color: white; line-height: 1.2; letter-spacing: -0.3px; }
+.template-sidebar-left .col-side .desired-position { font-size: 7pt; font-weight: 500; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.6); margin-bottom: 14px; margin-top: 4px; }
+.template-sidebar-left .col-side .section-title { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.45); border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 4px; margin: 16px 0 8px; }
+.template-sidebar-left .col-side .contact-info { font-size: 7.5pt; line-height: 1.8; color: rgba(255,255,255,0.8); font-weight: 300; }
+.template-sidebar-left .col-main { padding: 30px 26px; font-family: var(--cv-font-body); }
+.template-sidebar-left .col-main .cv-name { font-size: 0; display: none; } /* name is in sidebar */
+.template-sidebar-left .col-main .section-title { font-size: 7pt; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--primary-color); border-bottom: 1.5px solid var(--primary-color); padding-bottom: 4px; margin-bottom: 10px; }
+.photo-circle-side { width: 100%; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); margin-bottom: 14px; }
 .photo-circle-side img { width: 100%; height: 100%; object-fit: cover; }
+.template-sidebar-left .exp-position { font-size: 10pt; font-weight: 700; color: #0f172a; }
+.template-sidebar-left .exp-company  { font-size: 8pt; font-weight: 600; color: var(--primary-color); letter-spacing: 0.3px; }
+.template-sidebar-left .exp-period   { font-size: 7.5pt; font-weight: 400; color: #94a3b8; }
 
-.template-twocol .cv-header-full { background: var(--primary-color); color: white; margin: calc(-1 * var(--cv-margin)) calc(-1 * var(--cv-margin)) 0 calc(-1 * var(--cv-margin)); padding: 32px 45px 24px; display: flex; align-items: center; gap: 24px; }
-.template-twocol .cv-header-full h1 { color: white; font-size: 22pt; }
-.template-twocol .cv-header-full .desired-position { color: rgba(255,255,255,0.85) !important; margin-bottom: 6px; }
-.template-twocol .cv-header-full .contact-info { color: rgba(255,255,255,0.85) !important; }
-.template-twocol .cv-header-full .photo-circle { border-color: white; }
-.template-twocol .cv-body-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; padding-top: 20px; }
-.template-twocol .col-right { border-left: 1px solid #e2e8f0; padding-left: 26px; }
-.template-twocol .section-title { border-bottom: 2px solid var(--primary-color); color: var(--primary-color); text-transform: uppercase; font-weight: 700; }
+/* DUAS COLUNAS — Montserrat. Moderno e equilibrado */
+.template-twocol { --cv-font-body: 'Montserrat', sans-serif; --cv-font-display: 'Montserrat', sans-serif; }
+.template-twocol .cv-header-full { background: var(--primary-color); color: white; margin: calc(-1 * var(--cv-margin)) calc(-1 * var(--cv-margin)) 0 calc(-1 * var(--cv-margin)); padding: 32px 45px 24px; display: flex; align-items: center; gap: 24px; font-family: var(--cv-font-body); }
+.template-twocol .cv-name { font-size: 22pt; font-weight: 800; letter-spacing: -0.5px; color: white; }
+.template-twocol .cv-header-full .desired-position { font-size: 8pt; font-weight: 500; letter-spacing: 2.5px; text-transform: uppercase; color: rgba(255,255,255,0.7) !important; margin-bottom: 6px; margin-top: 5px; }
+.template-twocol .cv-header-full .contact-info { color: rgba(255,255,255,0.75) !important; font-size: 8pt; font-weight: 300; }
+.template-twocol .cv-header-full .photo-circle { border-color: rgba(255,255,255,0.25); border-radius: 6px !important; }
+.template-twocol .cv-body-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; padding-top: 20px; font-family: var(--cv-font-body); }
+.template-twocol .col-right { border-left: 1px solid #f1f5f9; padding-left: 26px; }
+.template-twocol .section-title { font-size: 6.5pt; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 4px; margin-bottom: 10px; }
+.template-twocol .exp-position { font-size: 9.5pt; font-weight: 700; color: #0f172a; }
+.template-twocol .exp-company  { font-size: 7.5pt; font-weight: 600; color: var(--primary-color); text-transform: uppercase; letter-spacing: 0.5px; }
+.template-twocol .exp-period   { font-size: 7pt; font-weight: 400; color: #94a3b8; }
 
-/* ── COMPONENTES PARTILHADOS ── */
-.desired-position { color: var(--primary-color); font-size: 14pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
-.contact-info { font-size: 8.5pt; margin-top: 10px; line-height: 1.5; }
+/* DUOTONE — DM Serif Display + Barlow. Dramático e sofisticado */
+.template-duotone { --cv-font-body: 'Barlow', sans-serif; --cv-font-display: 'DM Serif Display', serif; }
+.template-duotone .cv-page-sheet { padding: 0; font-family: var(--cv-font-body); }
+.template-duotone .cv-dt-header {
+  background: var(--primary-color);
+  padding: 36px 45px 28px;
+  display: flex; align-items: center; gap: 28px;
+}
+.template-duotone .cv-dt-header.row-reverse { flex-direction: row-reverse; }
+.template-duotone .cv-name { font-family: var(--cv-font-display); font-size: 28pt; font-weight: 400; color: white; line-height: 1.1; letter-spacing: 0; }
+.template-duotone .cv-dt-header .desired-position { font-family: var(--cv-font-body); font-size: 8.5pt; font-weight: 300; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.65) !important; margin-top: 6px; }
+.template-duotone .cv-dt-header .contact-info { font-size: 8pt; font-weight: 300; color: rgba(255,255,255,0.75) !important; letter-spacing: 0.2px; }
+.template-duotone .cv-dt-header .photo-circle { border-color: rgba(255,255,255,0.25); border-radius: 4px !important; }
+.template-duotone .cv-dt-body { padding: 32px 45px; }
+.template-duotone .section-title {
+  font-family: var(--cv-font-display) !important;
+  font-size: 12pt !important; font-weight: 400; font-style: italic;
+  color: var(--secondary-color) !important;
+  border: none !important;
+  border-bottom: 1px solid rgba(0,0,0,0.08) !important;
+  padding-bottom: 5px; margin-bottom: 10px;
+  letter-spacing: 0;
+}
+.template-duotone .cv-objective-section { border-left-color: var(--secondary-color); }
+.template-duotone .cv-objective-section .obj-value { color: var(--secondary-color); }
+.template-duotone .cv-dt-stripe {
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+.template-duotone .exp-position { font-family: var(--cv-font-display); font-size: 11.5pt; font-weight: 400; color: #0f172a; }
+.template-duotone .exp-company  { font-size: 8pt; font-weight: 700; color: var(--secondary-color); text-transform: uppercase; letter-spacing: 0.8px; }
+.template-duotone .exp-period   { font-size: 7.5pt; font-weight: 300; color: #94a3b8; }
+
+/* ── COMPONENTES PARTILHADOS (fallback) ── */
+.desired-position { color: var(--primary-color); font-size: 11pt; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.contact-info { font-size: 8.5pt; margin-top: 10px; line-height: 1.6; }
+.cv-name { font-size: 24pt; font-weight: 700; color: #0f172a; }
 
 /* ── 2 COLUNAS INLINE ── */
 .inline-twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
 
-/* ── DUOTONE TEMPLATE ── */
-.template-duotone .cv-page-sheet { padding: 0; }
-.template-duotone .cv-dt-header {
-  background: var(--primary-color);
-  padding: 36px 45px 28px;
-  display: flex;
-  align-items: center;
-  gap: 28px;
-}
-.template-duotone .cv-dt-header.row-reverse { flex-direction: row-reverse; }
-.template-duotone .cv-dt-header h1 { color: white; font-size: 22pt; font-weight: 700; }
-.template-duotone .cv-dt-header .desired-position { color: rgba(255,255,255,0.75) !important; font-size: 11pt; }
-.template-duotone .cv-dt-header .contact-info { color: rgba(255,255,255,0.8) !important; }
-.template-duotone .cv-dt-header .photo-circle { border-color: rgba(255,255,255,0.4); }
-.template-duotone .cv-dt-body { padding: 32px 45px; }
-.template-duotone .section-title {
-  color: var(--secondary-color) !important;
-  border-bottom: 2px solid var(--secondary-color) !important;
-  text-transform: uppercase;
-  font-weight: 700;
-}
-.template-duotone .cv-objective-section {
-  border-left-color: var(--secondary-color);
-}
-.template-duotone .cv-objective-section .obj-value {
-  color: var(--secondary-color);
-}
-/* accent stripe between header and body */
-.template-duotone .cv-dt-stripe {
-  height: 5px;
-  background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-}
+/* Apply per-template body font to cv-render */
+#cv-render { font-family: var(--cv-font-body, var(--font-main)); }
 
 .html2pdf__page-break { display: block; height: 0; page-break-before: always; }
 </style>
@@ -263,7 +368,17 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
     </select>
   </div>
 
-  <button onclick="downloadModelJSON()" class="btn-sec">📄 Baixar Modelo JSON</button>
+  <div class="tooltip-wrap">
+    <button onclick="downloadModelJSON()" class="btn-sec">📄 Baixar Modelo JSON</button>
+    <div class="tooltip-box">
+      <strong>Como funciona:</strong>
+      <ol>
+        <li>Baixe este arquivo JSON modelo</li>
+        <li>Cole-o numa IA (ChatGPT, Claude…) e peça para preencher com seus dados</li>
+        <li>Salve o JSON devolvido pela IA e importe abaixo em <em>Arquivo JSON</em></li>
+      </ol>
+    </div>
+  </div>
 
   <div class="control-group">
     <h3>Dados</h3>
@@ -331,9 +446,11 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
     </div>
     <label>Fonte:</label>
     <select id="font-select">
-      <option value="'Inter', sans-serif">Inter</option>
+      <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans</option>
+      <option value="'Barlow', sans-serif">Barlow</option>
       <option value="'Montserrat', sans-serif">Montserrat</option>
       <option value="'Lora', serif">Lora</option>
+      <option value="'Cormorant Garamond', serif">Cormorant Garamond</option>
     </select>
   </div>
 
@@ -653,7 +770,7 @@ function headerTextHTML(p, lang, right) {
   const showInHeader = !isSectionOn('objective') || objStyle === 'header' || objStyle === 'both';
   const desired = lang==='pt' ? p.desired_position_pt : p.desired_position_en;
   return `<div class="header-text" style="text-align:${right?'right':'left'}">
-    <h1 style="font-size:24pt;font-weight:700">${p.fullname}</h1>
+    <div class="cv-name">${p.fullname}</div>
     ${showInHeader && desired ? `<div class="desired-position">${desired}</div>` : ''}
     <div class="contact-info">
       <div>📍 ${p.location||''} &nbsp;•&nbsp; 📞 ${p.phone||''}</div>
@@ -690,13 +807,13 @@ function experienceHTML(d, lang, sc) {
   const items = d.experience.map(exp => {
     const pos  = lang==='pt' ? exp.position_pt    : exp.position_en;
     const desc = lang==='pt' ? exp.description_pt : exp.description_en;
-    return `<div style="margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;font-weight:bold;font-size:var(--cv-font-size);gap:8px">
-        <span style="flex:1;overflow-wrap:break-word;word-break:break-word">${pos||''}</span>
-        <span style="flex-shrink:0;color:#64748b;font-weight:400;font-size:8.5pt">${exp.period||''}</span>
+    return `<div style="margin-bottom:11px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <span class="exp-position" style="flex:1;overflow-wrap:break-word;word-break:break-word">${pos||''}</span>
+        <span class="exp-period" style="flex-shrink:0">${exp.period||''}</span>
       </div>
-      <div style="color:var(--primary-color);font-weight:600;font-size:8.5pt">${exp.company||''}</div>
-      <ul style="font-size:var(--cv-font-size);margin-top:3px;line-height:var(--cv-line-height)">
+      <div class="exp-company">${exp.company||''}</div>
+      <ul style="font-size:var(--cv-font-size);margin-top:4px;line-height:var(--cv-line-height)">
         ${(desc||[]).map(i=>`<li style="overflow-wrap:break-word">${i}</li>`).join('')}
       </ul>
     </div>`;
@@ -707,12 +824,12 @@ function experienceHTML(d, lang, sc) {
 function educationHTML(d, lang, sc) {
   if (!d.education||!d.education.length) return '';
   const items = d.education.map(ed => `
-    <div style="margin-bottom:6px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:var(--cv-font-size);gap:8px">
-        <span style="flex:1;overflow-wrap:break-word;word-break:break-word"><strong>${lang==='pt'?ed.degree_pt:ed.degree_en}</strong></span>
-        <span style="flex-shrink:0;color:#64748b;font-size:8.5pt">${ed.period||''}</span>
+    <div style="margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <span class="exp-position" style="flex:1;overflow-wrap:break-word;word-break:break-word">${lang==='pt'?ed.degree_pt:ed.degree_en}</span>
+        <span class="exp-period" style="flex-shrink:0">${ed.period||''}</span>
       </div>
-      <div style="font-size:8.5pt;color:#64748b">${ed.institution||''}</div>
+      <div class="exp-company">${ed.institution||''}</div>
     </div>`).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Formação':'Education'}</div>${items}</div>`,'education');
 }
@@ -855,7 +972,7 @@ function render() {
       <div class="cv-cols">
         <div class="col-side">
           ${photoHTML(true)}
-          <h1>${d.personal.fullname}</h1>
+          <div class="cv-name" style="font-size:13pt">${d.personal.fullname}</div>
           ${showDesiredInHeader && desired ? `<div class="desired-position">${desired}</div>` : ''}
           <div class="${sc}">Contato</div>
           <div class="contact-info">📍 ${d.personal.location||''}<br>📞 ${d.personal.phone||''}<br>✉️ ${d.personal.email||''}${d.personal.linkedin?`<br>🔗 ${d.personal.linkedin}`:''}${d.personal.website?`<br>🌐 ${d.personal.website}`:''}</div>
