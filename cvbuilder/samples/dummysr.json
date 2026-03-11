@@ -1,0 +1,181 @@
+{
+  "personal": {
+    "fullname": "Renata Castilho Braga",
+    "jobtitle_pt": "Diretora de Tecnologia",
+    "jobtitle_en": "Chief Technology Officer",
+    "desired_position_pt": "CTO / Diretora de Tecnologia",
+    "desired_position_en": "CTO / VP of Engineering",
+    "email": "renata.braga@email.com",
+    "phone": "+55 11 99123-7890",
+    "linkedin": "linkedin.com/in/renatacastilhobraga",
+    "website": "renatabraga.tech",
+    "location": "São Paulo, SP, Brasil",
+    "summary_pt": "Executiva de tecnologia com 18 anos de experiência liderando transformações digitais em empresas de médio e grande porte nos setores financeiro, varejo e saúde. Especialista em construção e escalonamento de times de engenharia, arquitetura de sistemas distribuídos e alinhamento estratégico entre tecnologia e negócio. Liderou programas de migração para nuvem com redução de custos acima de 40% e entregas de produto que resultaram em crescimento de receita superior a R$ 200 milhões.",
+    "summary_en": "Technology executive with 18 years of experience leading digital transformations at mid-to-large companies across financial services, retail, and healthcare. Expert in building and scaling engineering teams, distributed systems architecture, and aligning technology strategy with business goals. Led cloud migration programs achieving 40%+ cost reduction and product deliveries resulting in over BRL 200M in revenue growth."
+  },
+  "experience": [
+    {
+      "company": "Grupo Financeiro Ágilis",
+      "position_pt": "Diretora de Tecnologia (CTO)",
+      "position_en": "Chief Technology Officer",
+      "period": "Jan 2020 – Atual",
+      "description_pt": [
+        "Liderança de time de 120 profissionais distribuídos em 8 squads multidisciplinares",
+        "Condução da migração completa de infraestrutura on-premise para AWS, com redução de 43% nos custos operacionais de TI",
+        "Implantação de cultura de engenharia com práticas de DevOps, CI/CD e SRE, reduzindo incidentes críticos em 67%",
+        "Parceria com C-suite para desenvolvimento do roadmap tecnológico alinhado à estratégia de crescimento 2023–2027",
+        "Lançamento de plataforma de crédito digital que gerou R$ 180M em novos contratos no primeiro ano"
+      ],
+      "description_en": [
+        "Led a 120-person team distributed across 8 multidisciplinary squads",
+        "Drove full migration from on-premise infrastructure to AWS, reducing IT operational costs by 43%",
+        "Implemented engineering culture with DevOps, CI/CD, and SRE practices, cutting critical incidents by 67%",
+        "Partnered with C-suite to develop the technology roadmap aligned with 2023–2027 growth strategy",
+        "Launched a digital credit platform generating BRL 180M in new contracts in its first year"
+      ]
+    },
+    {
+      "company": "Varejo360 S.A.",
+      "position_pt": "Head de Engenharia de Produto",
+      "position_en": "Head of Product Engineering",
+      "period": "Mar 2016 – Dez 2019",
+      "description_pt": [
+        "Estruturação do departamento de engenharia do zero, chegando a 60 pessoas em 3 anos",
+        "Arquitetura e entrega de plataforma e-commerce omnichannel com 12M de usuários ativos",
+        "Redução do time-to-market de novas features de 6 semanas para 8 dias através de restruturação de processos ágeis",
+        "Negociação e gestão de contratos com fornecedores estratégicos (SAP, Salesforce, AWS)"
+      ],
+      "description_en": [
+        "Built the engineering department from scratch, scaling to 60 people in 3 years",
+        "Architected and delivered an omnichannel e-commerce platform with 12M active users",
+        "Reduced feature time-to-market from 6 weeks to 8 days through agile process restructuring",
+        "Negotiated and managed contracts with strategic vendors (SAP, Salesforce, AWS)"
+      ]
+    },
+    {
+      "company": "SaúdeTech Sistemas",
+      "position_pt": "Gerente Sênior de Desenvolvimento",
+      "position_en": "Senior Development Manager",
+      "period": "Ago 2011 – Fev 2016",
+      "description_pt": [
+        "Gerenciamento de 3 equipes de desenvolvimento de software para sistemas hospitalares",
+        "Entrega de módulo de prontuário eletrônico certificado pelo CFM, adotado por 40 hospitais",
+        "Mentoria de líderes técnicos e implementação de programa de carreira para engenheiros"
+      ],
+      "description_en": [
+        "Managed 3 software development teams for hospital management systems",
+        "Delivered an electronic medical records module certified by the Federal Medical Council, adopted by 40 hospitals",
+        "Mentored technical leads and implemented an engineering career development program"
+      ]
+    },
+    {
+      "company": "Stefanini Group",
+      "position_pt": "Analista de Sistemas Sênior",
+      "position_en": "Senior Systems Analyst",
+      "period": "Jan 2007 – Jul 2011",
+      "description_pt": [
+        "Análise e desenvolvimento de sistemas ERP para clientes do setor bancário",
+        "Participação em projetos de integração com SWIFT e sistemas legados de câmbio"
+      ],
+      "description_en": [
+        "Analyzed and developed ERP systems for banking sector clients",
+        "Contributed to SWIFT integration and legacy foreign exchange system projects"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree_pt": "MBA em Gestão Estratégica de Tecnologia",
+      "degree_en": "MBA in Strategic Technology Management",
+      "institution": "FGV — Fundação Getulio Vargas",
+      "period": "2014 – 2016"
+    },
+    {
+      "degree_pt": "Bacharelado em Ciência da Computação",
+      "degree_en": "Bachelor's Degree in Computer Science",
+      "institution": "Universidade de São Paulo (USP)",
+      "period": "2002 – 2006"
+    }
+  ],
+  "skills": {
+    "technical": [
+      "Arquitetura de Sistemas Distribuídos",
+      "Cloud AWS / GCP / Azure",
+      "DevOps & SRE",
+      "Microsserviços & APIs REST",
+      "Data & Analytics (Databricks, Snowflake)",
+      "Segurança da Informação (ISO 27001)",
+      "SAP, Salesforce"
+    ],
+    "languages": [
+      "Português: Nativo",
+      "Inglês: Fluente (C1)",
+      "Espanhol: Intermediário (B2)"
+    ],
+    "soft": [
+      "Liderança estratégica",
+      "Gestão de mudança",
+      "Comunicação executiva",
+      "Formação de times de alta performance",
+      "Negociação"
+    ]
+  },
+  "projects": [
+    {
+      "title_pt": "Palestra: Mulheres na Liderança Tech — TDC São Paulo 2023",
+      "title_en": "Talk: Women in Tech Leadership — TDC São Paulo 2023",
+      "description_pt": "Palestrante convidada no The Developer's Conference, abordando desafios e estratégias para mulheres em cargos de liderança tecnológica no Brasil.",
+      "description_en": "Invited speaker at The Developer's Conference, addressing challenges and strategies for women in tech leadership roles in Brazil."
+    },
+    {
+      "title_pt": "Conselheira Independente — Startup de HealthTech",
+      "title_en": "Independent Board Advisor — HealthTech Startup",
+      "description_pt": "Atuação como conselheira de tecnologia para startup de telemedicina em fase de crescimento (Série A), orientando decisões de arquitetura e captação técnica.",
+      "description_en": "Served as technology advisor for a growth-stage telemedicine startup (Series A), guiding architecture decisions and technical recruiting."
+    }
+  ],
+  "volunteer": [
+    {
+      "role_pt": "Mentora de Carreira",
+      "role_en": "Career Mentor",
+      "organization": "PrograMaria",
+      "period": "2021 – Atual",
+      "description_pt": "Mentoria mensal para mulheres em transição de carreira para tecnologia, com foco em desenvolvimento de liderança e posicionamento de mercado.",
+      "description_en": "Monthly mentoring sessions for women transitioning into tech careers, focused on leadership development and market positioning."
+    }
+  ],
+  "certifications": [
+    {
+      "title_pt": "AWS Certified Solutions Architect — Professional",
+      "title_en": "AWS Certified Solutions Architect — Professional",
+      "issuer": "Amazon Web Services",
+      "year": "2022"
+    },
+    {
+      "title_pt": "Google Cloud Professional Data Engineer",
+      "title_en": "Google Cloud Professional Data Engineer",
+      "issuer": "Google Cloud",
+      "year": "2021"
+    },
+    {
+      "title_pt": "Certified Kubernetes Administrator (CKA)",
+      "title_en": "Certified Kubernetes Administrator (CKA)",
+      "issuer": "CNCF",
+      "year": "2020"
+    },
+    {
+      "title_pt": "ITIL 4 Foundation",
+      "title_en": "ITIL 4 Foundation",
+      "issuer": "PeopleCert",
+      "year": "2019"
+    }
+  ],
+  "salary_expectation": {
+    "pt": "A partir de R$ 45.000 / mês (PJ) ou pacote de remuneração executiva a combinar",
+    "en": "From BRL 45,000 / month or executive compensation package (negotiable)"
+  },
+  "coverletter": {
+    "pt": "À equipe de recrutamento,\n\nMeu nome é Renata Castilho Braga e tenho 18 anos de trajetória construindo e liderando times de tecnologia em empresas que passaram por crescimento acelerado e transformação digital profunda.\n\nAo longo dessa jornada, aprendi que tecnologia de alto impacto só acontece quando há clareza estratégica, pessoas certas nos lugares certos e uma cultura de engenharia que equilibra velocidade com confiabilidade. É esse o tipo de ambiente que busco — e que sei construir.\n\nMinha experiência recente como CTO do Grupo Ágilis me deu uma visão ampla sobre como alinhar investimentos em tecnologia com metas de negócio, escalar times sem perder qualidade e entregar resultados mensuráveis para o board.\n\nEstou disponível para uma conversa e adoraria entender mais sobre os desafios e ambições da sua organização.",
+    "en": "Dear Hiring Team,\n\nMy name is Renata Castilho Braga, and I bring 18 years of experience building and leading technology organizations through rapid growth and deep digital transformation.\n\nThroughout this journey, I have learned that high-impact technology only happens when there is strategic clarity, the right people in the right roles, and an engineering culture that balances speed with reliability. That is the kind of environment I seek — and know how to build.\n\nMy recent experience as CTO at Grupo Ágilis gave me a comprehensive view of how to align technology investments with business goals, scale teams without sacrificing quality, and deliver measurable results to the board.\n\nI am available for a conversation and would love to learn more about your organization's challenges and ambitions."
+  }
+}
