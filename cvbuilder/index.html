@@ -1743,38 +1743,27 @@ function paginateSections() {
     ));
     if (!sections.length) return;
 
-    // How much of page 1 is already consumed before the sections start
-    const headerWrapper = sheet.querySelector('.header-wrapper');
-    const headerH = dtBody
-      ? (sheet.querySelector('.cv-dt-header')?.offsetHeight || 0) +
-        (sheet.querySelector('.cv-dt-stripe')?.offsetHeight || 0)
-      : (headerWrapper?.offsetHeight || 0);
-
-    // border-top of the sheet itself eats into usable space
-    const borderTop = parseFloat(getComputedStyle(sheet).borderTopWidth) || 0;
-
     const bodyRect = bodyEl.getBoundingClientRect();
     const padTop   = parseFloat(getComputedStyle(bodyEl).paddingTop) || 0;
 
     const toInsert = [];
-    const page1Used = headerH + borderTop;
-    // nextPageStart: the absolute content-position where the next page begins
-    // For page 1: it ends at PAGE_H - page1Used (content space available)
-    // After a break: it resets to full PAGE_H
-    let pageEnd = PAGE_H - page1Used; // how much content fits on page 1
+
+    // Measure where first section actually starts (in content coordinates)
+    // This implicitly accounts for header, border, padding — no double-counting
+    const firstSecTop = sections[0].getBoundingClientRect().top - bodyRect.top - padTop;
+    // Remaining space on page 1 = full page minus whatever the header consumed
+    let pageEnd = PAGE_H - firstSecTop;
 
     sections.forEach(sec => {
       const secTop = sec.getBoundingClientRect().top - bodyRect.top - padTop;
       const secH   = sec.offsetHeight;
 
       if (secTop + secH > pageEnd) {
-        // Section overflows current page - insert spacer before it
         const spacerH = pageEnd - secTop;
         if (spacerH > 0) {
           toInsert.push({ sec, spacerH });
           pageEnd = secTop + spacerH + PAGE_H;
         } else {
-          // Section starts exactly at or past page boundary, just set next pageEnd
           pageEnd = secTop + PAGE_H;
         }
       }
