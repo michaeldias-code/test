@@ -712,7 +712,7 @@ body.ats-visible .ats-node.missing {
   <div class="hsp-row">
     <label>Fonte</label>
     <select id="hsp-font" onchange="hspApply()">
-      <option value="">— padrão —</option>
+      <option value="">— padrão do template —</option>
       <option value="'Outfit', sans-serif">Outfit</option>
       <option value="'Sora', sans-serif">Sora</option>
       <option value="'IBM Plex Sans', sans-serif">IBM Plex Sans</option>
@@ -725,7 +725,7 @@ body.ats-visible .ats-node.missing {
   </div>
   <div class="hsp-row">
     <label>Tamanho</label>
-    <input type="number" id="hsp-size" min="6" max="48" step="0.5" placeholder="auto" onchange="hspApply()">
+    <input type="number" id="hsp-size" min="6" max="48" step="0.5" onchange="hspApply()">
     <span style="font-size:0.7rem;color:#94a3b8">pt</span>
   </div>
   <div class="hsp-row">
@@ -1664,12 +1664,36 @@ function paginateSections() {
 
 /* ── PDF EXPORT ── */
 /* ── HEADER STYLE ── */
-const headerStyle = {
-  name:     { font:'', size:'', bold:false, italic:false, underline:false },
-  position: { font:'', size:'', bold:false, italic:false, underline:false },
-  contact:  { font:'', size:'', bold:false, italic:false, underline:false },
+const HEADER_DEFAULTS = {
+  'modern':      { name:{size:'26'}, position:{size:'9.5'}, contact:{size:'9'} },
+  'executive':   { name:{size:'24'}, position:{size:'8'},   contact:{size:'9'} },
+  'minimal':     { name:{size:'28'}, position:{size:'12',italic:true}, contact:{size:'9'} },
+  'creative':    { name:{size:'30'}, position:{size:'10'}, contact:{size:'8.5'} },
+  'sidebar-left':{ name:{size:'13'}, position:{size:'7'},  contact:{size:'8.5'} },
+  'duotone':     { name:{size:'26'}, position:{size:'8.5'}, contact:{size:'9'} },
+  'formal':      { name:{size:'24'}, position:{size:'11'}, contact:{size:'8.5'} },
 };
+
+function makeHeaderStyle(tpl) {
+  const defaults = HEADER_DEFAULTS[tpl] || {};
+  const make = (block) => Object.assign(
+    {font:'', size:'', bold:false, italic:false, underline:false},
+    defaults[block] || {}
+  );
+  return { name: make('name'), position: make('position'), contact: make('contact') };
+}
+
+let headerStyle = makeHeaderStyle(document.getElementById('template-select')?.value || 'modern');
 let hspCurrentBlock = 'name';
+
+function resetHeaderStyle() {
+  const tpl = document.getElementById('template-select').value;
+  headerStyle = makeHeaderStyle(tpl);
+  // Refresh panel if open
+  if (document.getElementById('header-style-panel').classList.contains('visible')) {
+    hspLoadBlock(hspCurrentBlock);
+  }
+}
 
 function openHeaderPanel(e) {
   e.stopPropagation();
@@ -1699,9 +1723,9 @@ function hspLoadBlock(block) {
   const s = headerStyle[block];
   document.getElementById('hsp-font').value  = s.font || '';
   document.getElementById('hsp-size').value  = s.size || '';
-  document.getElementById('hsp-bold').classList.toggle('on', s.bold);
-  document.getElementById('hsp-italic').classList.toggle('on', s.italic);
-  document.getElementById('hsp-underline').classList.toggle('on', s.underline);
+  document.getElementById('hsp-bold').classList.toggle('on', !!s.bold);
+  document.getElementById('hsp-italic').classList.toggle('on', !!s.italic);
+  document.getElementById('hsp-underline').classList.toggle('on', !!s.underline);
 }
 
 function hspToggle(prop) {
@@ -1919,7 +1943,7 @@ function syncPaletteToTemplate() {
 }
 
 /* ── LISTENERS ── */
-document.getElementById('template-select').onchange = () => { syncPaletteToTemplate(); render(); };
+document.getElementById('template-select').onchange = () => { resetHeaderStyle(); syncPaletteToTemplate(); render(); };
 ['color-palette','font-select','include-cover','cover-first','lang-toggle','photo-align','photo-border']
   .forEach(id => document.getElementById(id).onchange = render);
 document.querySelectorAll('.split-toggle').forEach(cb => cb.onchange = render);
