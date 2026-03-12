@@ -21,7 +21,7 @@
 /* ── APP SHELL ── */
 body { font-family: 'Inter', sans-serif; background: #323639; margin: 0; display: flex; height: 100vh; overflow: hidden; }
 .sidebar { width: 360px; background: #fff; border-right: 1px solid #e2e8f0; padding: 20px; overflow-y: auto; height: 100%; box-sizing: border-box; }
-.preview-area { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+.preview-area { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; position: relative; }
 
 .control-group { margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px; }
 .control-group h3 { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px; }
@@ -462,6 +462,27 @@ body.ats-visible .ats-node.missing {
 #cv-render { font-family: var(--cv-font-body, var(--font-main)); }
 
 .html2pdf__page-break { display: block; height: 0; page-break-before: always; }
+
+/* ── HEADER STYLE PANEL ── */
+#header-style-panel {
+  position: absolute; z-index: 200; background: white;
+  border: 1px solid #e2e8f0; border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 14px 14px 10px; width: 260px; font-family: sans-serif; display: none;
+}
+#header-style-panel.visible { display: block; }
+#header-style-panel h4 { margin: 0 0 10px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #64748b; }
+.hsp-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+.hsp-tab { flex: 1; padding: 5px 4px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 0.7rem; font-weight: 700; cursor: pointer; background: white; color: #475569; text-align: center; }
+.hsp-tab.active { background: #0f172a; color: white; border-color: #0f172a; }
+.hsp-row { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; }
+.hsp-row label { font-size: 0.7rem; color: #64748b; font-weight: 600; min-width: 44px; }
+.hsp-row select { flex: 1; font-size: 0.75rem; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 5px; }
+.hsp-row input[type=number] { width: 52px; padding: 4px 6px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 0.75rem; }
+.hsp-toggles { display: flex; gap: 5px; }
+.hsp-toggle { width: 30px; height: 26px; border: 1px solid #cbd5e1; border-radius: 5px; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.hsp-toggle.on { background: #0f172a; color: white; border-color: #0f172a; }
+.hsp-close { position: absolute; top: 8px; right: 10px; background: none; border: none; font-size: 1rem; cursor: pointer; color: #94a3b8; line-height: 1; }
 </style>
 </head>
 <body>
@@ -678,6 +699,43 @@ body.ats-visible .ats-node.missing {
 
   <button class="btn-ats" id="btn-ats-toggle" onclick="toggleATSMode()" style="display:none">🔍 Visualizar Camada ATS</button>
   <button class="btn-main" onclick="exportPDF()">📥 BAIXAR PDF</button>
+</div>
+
+<div id="header-style-panel">
+  <button class="hsp-close" onclick="closeHeaderPanel()">✕</button>
+  <h4>✒ Estilo do Header</h4>
+  <div class="hsp-tabs">
+    <button class="hsp-tab active" onclick="hspSetBlock('name',this)">Nome</button>
+    <button class="hsp-tab" onclick="hspSetBlock('position',this)">Cargo</button>
+    <button class="hsp-tab" onclick="hspSetBlock('contact',this)">Contato</button>
+  </div>
+  <div class="hsp-row">
+    <label>Fonte</label>
+    <select id="hsp-font" onchange="hspApply()">
+      <option value="">— padrão —</option>
+      <option value="'Outfit', sans-serif">Outfit</option>
+      <option value="'Sora', sans-serif">Sora</option>
+      <option value="'IBM Plex Sans', sans-serif">IBM Plex Sans</option>
+      <option value="'Playfair Display', serif">Playfair Display</option>
+      <option value="'DM Sans', sans-serif">DM Sans</option>
+      <option value="'Nunito', sans-serif">Nunito</option>
+      <option value="'Barlow Condensed', sans-serif">Barlow Condensed</option>
+      <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+    </select>
+  </div>
+  <div class="hsp-row">
+    <label>Tamanho</label>
+    <input type="number" id="hsp-size" min="6" max="48" step="0.5" placeholder="auto" onchange="hspApply()">
+    <span style="font-size:0.7rem;color:#94a3b8">pt</span>
+  </div>
+  <div class="hsp-row">
+    <label>Estilo</label>
+    <div class="hsp-toggles">
+      <button class="hsp-toggle" id="hsp-bold" onclick="hspToggle('bold')" title="Negrito"><b>B</b></button>
+      <button class="hsp-toggle" id="hsp-italic" onclick="hspToggle('italic')" title="Itálico"><i>I</i></button>
+      <button class="hsp-toggle" id="hsp-underline" onclick="hspToggle('underline')" title="Sublinhado"><u>U</u></button>
+    </div>
+  </div>
 </div>
 
 <div class="preview-area">
@@ -1238,11 +1296,23 @@ function headerTextHTML(p, lang, right) {
   const objStyle = getObjStyle();
   const showInHeader = !isSectionOn('objective') || objStyle === 'header' || objStyle === 'both';
   const desired = lang==='pt' ? p.desired_position_pt : p.desired_position_en;
+  const hs = headerStyle;
+  const styleStr = (block) => {
+    const s = hs[block];
+    let css = '';
+    if (s.font) css += `font-family:${s.font};`;
+    if (s.size) css += `font-size:${s.size}pt;`;
+    if (s.bold) css += `font-weight:700;`;
+    if (s.italic) css += `font-style:italic;`;
+    if (s.underline) css += `text-decoration:underline;`;
+    return css;
+  };
   return `<div class="header-text" style="text-align:${right?'right':'left'};position:relative">
     <button class="edit-btn" style="opacity:0.5;top:0;right:0;position:absolute" onclick="openEditModal('personal')" title="Editar dados pessoais">✏</button>
-    <div class="cv-name">${p.fullname}</div>
-    ${showInHeader && desired ? `<div class="desired-position">${desired}</div>` : ''}
-    <div class="contact-info">
+    <button class="edit-btn" style="opacity:0.5;top:0;right:26px;position:absolute;transform:rotate(-45deg)" onclick="openHeaderPanel(event)" title="Estilo do header">✒</button>
+    <div class="cv-name" style="${styleStr('name')}">${p.fullname}</div>
+    ${showInHeader && desired ? `<div class="desired-position" style="${styleStr('position')}">${desired}</div>` : ''}
+    <div class="contact-info" style="${styleStr('contact')}">
       <div>📍 ${p.location||''} &nbsp;•&nbsp; 📞 ${p.phone||''}</div>
       <div>✉️ ${p.email||''}</div>
       <div style="margin-top:3px">${p.linkedin?`<strong>LinkedIn:</strong> ${p.linkedin}`:''}${p.website?` | <strong>Web:</strong> ${p.website}`:''}</div>
@@ -1593,6 +1663,67 @@ function paginateSections() {
 }
 
 /* ── PDF EXPORT ── */
+/* ── HEADER STYLE ── */
+const headerStyle = {
+  name:     { font:'', size:'', bold:false, italic:false, underline:false },
+  position: { font:'', size:'', bold:false, italic:false, underline:false },
+  contact:  { font:'', size:'', bold:false, italic:false, underline:false },
+};
+let hspCurrentBlock = 'name';
+
+function openHeaderPanel(e) {
+  e.stopPropagation();
+  const panel = document.getElementById('header-style-panel');
+  // Position near the header in the preview
+  const btn = e.currentTarget;
+  const previewRect = document.querySelector('.preview-area').getBoundingClientRect();
+  const btnRect = btn.getBoundingClientRect();
+  panel.style.top  = (btnRect.bottom - previewRect.top + 8) + 'px';
+  panel.style.left = Math.min(btnRect.left - previewRect.left, previewRect.width - 280) + 'px';
+  panel.classList.add('visible');
+  hspLoadBlock(hspCurrentBlock);
+}
+
+function closeHeaderPanel() {
+  document.getElementById('header-style-panel').classList.remove('visible');
+}
+
+function hspSetBlock(block, tabEl) {
+  hspCurrentBlock = block;
+  document.querySelectorAll('.hsp-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  hspLoadBlock(block);
+}
+
+function hspLoadBlock(block) {
+  const s = headerStyle[block];
+  document.getElementById('hsp-font').value  = s.font || '';
+  document.getElementById('hsp-size').value  = s.size || '';
+  document.getElementById('hsp-bold').classList.toggle('on', s.bold);
+  document.getElementById('hsp-italic').classList.toggle('on', s.italic);
+  document.getElementById('hsp-underline').classList.toggle('on', s.underline);
+}
+
+function hspToggle(prop) {
+  const s = headerStyle[hspCurrentBlock];
+  s[prop] = !s[prop];
+  document.getElementById('hsp-' + prop).classList.toggle('on', s[prop]);
+  render();
+}
+
+function hspApply() {
+  const s = headerStyle[hspCurrentBlock];
+  s.font = document.getElementById('hsp-font').value;
+  s.size = document.getElementById('hsp-size').value;
+  render();
+}
+
+// Close panel when clicking outside
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('header-style-panel');
+  if (panel?.classList.contains('visible') && !panel.contains(e.target)) closeHeaderPanel();
+});
+
 /* ── ATS MODE ── */
 const ATS_SELECTORS = [
   // Header
