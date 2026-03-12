@@ -1703,6 +1703,18 @@ function paginateSections() {
     beforeEl.parentNode.insertBefore(sp, beforeEl);
   }
 
+  function insertPageBreak(beforeEl, posInPage, usable, margin) {
+    // Page 1 fills up with (usable - posInPage) blank px, then page 2 starts with margin px
+    const fillH  = usable - posInPage;   // white space to end of page 1
+    const totalH = fillH + margin;        // total spacer height
+    if (totalH <= 0) return;
+    const sp = document.createElement('div');
+    sp.dataset.pageBreak = '1';
+    sp.dataset.page1end  = fillH;         // px from spacer top where page 1 ends
+    sp.style.cssText = `display:block;height:${totalH}px;`;
+    beforeEl.parentNode.insertBefore(sp, beforeEl);
+  }
+
   document.querySelectorAll('.cv-page-sheet').forEach(sheet => {
 
     /* ── SIDEBAR: paginate col-main ── */
@@ -1723,15 +1735,17 @@ function paginateSections() {
         height: sec.offsetHeight,
       }));
 
+      const toInsert = [];
       let pageCursor = 0;
       measured.forEach(({ sec, top, height }) => {
         const posInPage = top - pageCursor;
         if (posInPage + height > USABLE && posInPage > 0) {
           const spacerH = USABLE - posInPage + marginPx;
-          insertSpacer(sec, spacerH);
-          pageCursor += posInPage + spacerH;
+          toInsert.push({ sec, spacerH });
+          pageCursor += spacerH;
         }
       });
+      toInsert.forEach(({ sec, spacerH }) => insertSpacer(sec, spacerH));
       return;
     }
 
@@ -1760,15 +1774,17 @@ function paginateSections() {
       height: sec.offsetHeight,
     }));
 
+    const toInsert = [];
     let pageCursor = 0;
     measured.forEach(({ sec, top, height }) => {
       const posInPage = top - pageCursor;
       if (posInPage + height > USABLE && posInPage > 0) {
         const spacerH = USABLE - posInPage + marginPx;
-        insertSpacer(sec, spacerH);
-        pageCursor += posInPage + spacerH;
+        toInsert.push({ sec, spacerH });
+        pageCursor += spacerH;
       }
     });
+    toInsert.forEach(({ sec, spacerH }) => insertSpacer(sec, spacerH));
   });
 }
 
@@ -2038,7 +2054,7 @@ async function exportPDF() {
     const breakYs = [0];
     sheet.querySelectorAll('[data-page-break]').forEach(spacer => {
       const r = spacer.getBoundingClientRect();
-      const bottomY = r.bottom - sheetRect.top;  // end of spacer = start of next page content
+      const bottomY = r.bottom - sheetRect.top;
       if (bottomY > 1) breakYs.push(Math.round(bottomY * scale));
     });
 
