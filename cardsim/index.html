@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Cartão ID-1</title>
+    <style>
+        :root {
+            --card-width: 400px;
+            --card-height: 252px; /* Proporção padrão 1.586 */
+            --bg-color: #f0f2f5;
+            --sidebar-width: 350px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-color);
+        }
+
+        /* Sidebar de Configurações */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 10;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 { color: #333; font-size: 1.2rem; margin-bottom: 20px; }
+
+        .input-group { margin-bottom: 15px; }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        /* Área do Preview */
+        .preview-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        /* O Cartão */
+        .card {
+            width: var(--card-width);
+            height: var(--card-height);
+            position: relative;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card.flipped { transform: rotateY(180deg); }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            background: #fff;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border: 1px solid #d1d1d1;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            box-sizing: border-box;
+            color: #333;
+        }
+
+        /* Frente do Cartão */
+        .card-front { z-index: 2; }
+
+        .chip {
+            width: 50px;
+            height: 40px;
+            background: linear-gradient(135deg, #f0d078 0%, #cf9e2b 100%);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .card-number {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.6rem;
+            letter-spacing: 2px;
+            margin-top: 20px;
+            min-height: 30px;
+        }
+
+        .card-info {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            text-transform: uppercase;
+        }
+
+        .label-small { font-size: 0.6rem; color: #888; display: block; }
+        .data-text { font-size: 0.9rem; font-weight: bold; }
+
+        /* Verso do Cartão */
+        .card-back {
+            transform: rotateY(180deg);
+            padding: 0;
+            background: #fdfdfd;
+        }
+
+        .magnetic-stripe {
+            width: 100%;
+            height: 45px;
+            background: #333;
+            margin-top: 30px;
+        }
+
+        .signature-area {
+            width: 80%;
+            height: 35px;
+            background: #eee;
+            margin: 20px auto 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+        }
+
+        .cvv-display { font-style: italic; font-weight: bold; }
+
+        .controls-hint {
+            margin-top: 30px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <h2>Personalização</h2>
+        
+        <div class="input-group">
+            <label>Cor do Cartão</label>
+            <input type="color" id="cardColor" value="#ffffff" oninput="updateCard()">
+        </div>
+
+        <div class="input-group">
+            <label>Número do Cartão (PAN)</label>
+            <input type="text" id="panInput" placeholder="0000 0000 0000 0000" maxlength="19" oninput="updateCard()">
+        </div>
+
+        <div class="input-group">
+            <label>Nome do Titular</label>
+            <input type="text" id="nameInput" placeholder="NOME DO TITULAR" oninput="updateCard()">
+        </div>
+
+        <div class="input-group">
+            <label>Validade (MM/AA)</label>
+            <input type="text" id="expiryInput" placeholder="12/30" maxlength="5" oninput="updateCard()">
+        </div>
+
+        <div class="input-group">
+            <label>CVV (Verso)</label>
+            <input type="text" id="cvvInput" placeholder="123" maxlength="3" oninput="updateCard()">
+        </div>
+
+        <button onclick="toggleFlip()" style="width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">
+            Girar Cartão
+        </button>
+    </aside>
+
+    <main class="preview-container">
+        <div class="card" id="cardElement" onclick="toggleFlip()">
+            <div class="card-face card-front" id="frontFace">
+                <div class="chip"></div>
+                <div class="card-number" id="previewPan">0000 0000 0000 0000</div>
+                <div class="card-info">
+                    <div>
+                        <span class="label-small">NOME DO TITULAR</span>
+                        <span class="data-text" id="previewName">NOME DO TITULAR</span>
+                    </div>
+                    <div>
+                        <span class="label-small">VALIDADE</span>
+                        <span class="data-text" id="previewExpiry">00/00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-face card-back" id="backFace">
+                <div class="magnetic-stripe"></div>
+                <div class="signature-area">
+                    <span class="cvv-display" id="previewCvv">123</span>
+                </div>
+            </div>
+        </div>
+        <p class="controls-hint">Clique no cartão para girar</p>
+    </main>
+
+    <script>
+        function updateCard() {
+            // Atualiza textos
+            document.getElementById('previewPan').innerText = document.getElementById('panInput').value || '0000 0000 0000 0000';
+            document.getElementById('previewName').innerText = document.getElementById('nameInput').value || 'NOME DO TITULAR';
+            document.getElementById('previewExpiry').innerText = document.getElementById('expiryInput').value || '00/00';
+            document.getElementById('previewCvv').innerText = document.getElementById('cvvInput').value || '123';
+
+            // Atualiza cor
+            const color = document.getElementById('cardColor').value;
+            document.getElementById('frontFace').style.backgroundColor = color;
+            document.getElementById('backFace').style.backgroundColor = color;
+
+            // Lógica simples para contraste de cor
+            const r = parseInt(color.substr(1,2), 16);
+            const g = parseInt(color.substr(3,2), 16);
+            const b = parseInt(color.substr(5,2), 16);
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            document.getElementById('cardElement').style.color = brightness > 125 ? '#333' : '#fff';
+        }
+
+        function toggleFlip() {
+            document.getElementById('cardElement').classList.toggle('flipped');
+        }
+    </script>
+</body>
+</html>
+
