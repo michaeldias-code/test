@@ -2,27 +2,24 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Simulador de Cartão Full Custom - Front & Back</title>
+    <title>Simulador de Cartão Braille Pro</title>
     <style>
         :root {
             --card-w: 430px;
             --card-h: 270px;
             --primary: #2563eb;
             --danger: #ef4444;
-            --success: #10b981;
         }
 
         body { font-family: 'Segoe UI', system-ui, sans-serif; display: flex; margin: 0; background: #f3f4f6; height: 100vh; overflow: hidden; }
 
         /* Sidebar */
         .sidebar { width: 420px; background: white; padding: 20px; overflow-y: auto; border-right: 1px solid #d1d5db; box-shadow: 4px 0 15px rgba(0,0,0,0.05); }
-        .sidebar h2 { font-size: 1.4rem; margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         
-        .control-block { background: #ffffff; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e5e7eb; transition: all 0.2s; }
-        .control-block:hover { border-color: var(--primary); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .control-block { background: #ffffff; padding: 15px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #e5e7eb; position: relative; }
         
         .header-block { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .header-block input.field-label { border:none; background:transparent; font-weight:bold; width: 60%; font-size: 0.85rem; text-transform: uppercase; color: #374151; }
+        .header-block input.field-label { border:none; background:transparent; font-weight:bold; width: 60%; color: #374151; }
 
         .grid-inputs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
         label { font-size: 0.7rem; color: #9ca3af; font-weight: bold; display: block; }
@@ -31,60 +28,37 @@
         .btn-add { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin-bottom: 20px; }
         .btn-remove { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 0.75rem; font-weight: bold; }
         
-        .face-toggle { 
-            display: inline-flex; background: #eee; border-radius: 20px; padding: 2px; margin-top: 10px; cursor: pointer; 
-        }
-        .face-toggle span { 
-            padding: 4px 12px; border-radius: 15px; font-size: 0.7rem; font-weight: bold; transition: 0.2s;
-        }
+        .face-toggle { display: inline-flex; background: #eee; border-radius: 20px; padding: 2px; cursor: pointer; }
+        .face-toggle span { padding: 4px 12px; border-radius: 15px; font-size: 0.7rem; font-weight: bold; }
         .face-toggle span.active { background: var(--primary); color: white; }
 
         /* Preview Area */
         .preview { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #e5e7eb; }
-        
         .card-wrapper { perspective: 1000px; width: var(--card-w); height: var(--card-h); }
         .card { width: 100%; height: 100%; position: relative; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
         .card.flipped { transform: rotateY(180deg); }
 
-        .face { 
-            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
-            border-radius: 18px; background: #fff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3);
-            overflow: hidden; border: 1px solid #bbb;
-        }
-
-        /* ISO Chip */
-        .iso-chip {
-            position: absolute; width: 54px; height: 42px;
-            background: linear-gradient(135deg, #f3d07a 0%, #c19434 100%);
-            border-radius: 7px; left: 38px; top: 78px; z-index: 10;
-        }
-
+        .face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 18px; background: #fff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); overflow: hidden; border: 1px solid #bbb; }
+        .iso-chip { position: absolute; width: 54px; height: 42px; background: linear-gradient(135deg, #f3d07a 0%, #c19434 100%); border-radius: 7px; left: 38px; top: 78px; z-index: 10; }
         .back { transform: rotateY(180deg); }
-        .mag-stripe { width: 100%; height: 50px; background: #222; margin-top: 35px; position: relative; }
+        .mag-stripe { width: 100%; height: 50px; background: #222; margin-top: 35px; }
 
-        /* Dynamic Text */
-        .dynamic-field {
-            position: absolute; font-family: 'Courier New', monospace;
-            white-space: nowrap; pointer-events: none; color: inherit;
-        }
-        .braille-mode { 
-            font-family: sans-serif !important; letter-spacing: 3px; font-size: 1.4rem !important;
-            text-shadow: 1px 1px 1px rgba(0,0,0,0.3);
-        }
+        .dynamic-field { position: absolute; font-family: 'Courier New', monospace; white-space: nowrap; pointer-events: none; color: inherit; }
+        .braille-mode { font-family: sans-serif !important; letter-spacing: 3px; font-size: 1.4rem !important; text-shadow: 1px 1px 1px rgba(0,0,0,0.3); }
+        
+        .opt-braille { font-size: 0.7rem; display: flex; align-items: center; gap: 4px; color: #4b5563; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <aside class="sidebar">
-        <h2>Personalização</h2>
-        
+        <h2>Configurações</h2>
         <div class="control-block">
             <div class="grid-inputs" style="grid-template-columns: 1fr 1fr;">
-                <div><label>Fundo do Cartão</label><input type="color" id="bgColor" value="#ffffff" oninput="sync()"></div>
-                <div><label>Cor do Texto</label><input type="color" id="textColor" value="#333333" oninput="sync()"></div>
+                <div><label>Fundo</label><input type="color" id="bgColor" value="#ffffff" oninput="sync()"></div>
+                <div><label>Texto</label><input type="color" id="textColor" value="#333333" oninput="sync()"></div>
             </div>
         </div>
-
         <button class="btn-add" onclick="addField()">+ Adicionar Campo</button>
         <div id="fieldControls"></div>
     </aside>
@@ -92,49 +66,36 @@
     <main class="preview">
         <div class="card-wrapper">
             <div class="card" id="card">
-                <div class="face front" id="cardFront">
-                    <div class="iso-chip"></div>
-                    </div>
-                
-                <div class="face back" id="cardBack">
-                    <div class="mag-stripe"></div>
-                    </div>
+                <div class="face front" id="cardFront"><div class="iso-chip"></div></div>
+                <div class="face back" id="cardBack"><div class="mag-stripe"></div></div>
             </div>
         </div>
-        <div style="margin-top: 40px;">
-            <button onclick="document.getElementById('card').classList.toggle('flipped')" style="padding: 12px 30px; cursor:pointer; border-radius: 30px; border: 2px solid #333; font-weight: bold; background: white;">Girar Cartão</button>
-        </div>
+        <button onclick="document.getElementById('card').classList.toggle('flipped')" style="margin-top: 40px; padding: 12px 30px; cursor:pointer; border-radius: 30px; border: 2px solid #333; font-weight: bold; background: white;">Girar Cartão</button>
     </main>
 
 <script>
     let fields = [
-        { id: 1, label: 'Número PAN', val: '5555 4444 3333 2222', x: 38, y: 150, size: 22, braille: false, face: 'front' },
-        { id: 2, label: 'Nome', val: 'CLODOALDO EXEMPLO', x: 38, y: 220, size: 16, braille: false, face: 'front' },
-        { id: 3, label: 'CVV', val: '123', x: 350, y: 105, size: 18, braille: false, face: 'back' }
+        { id: 1, label: 'PAN', val: '5555 4444', x: 38, y: 150, size: 22, braille: false, face: 'front', useNumberSign: true },
+        { id: 2, label: 'CVV', val: '123', x: 350, y: 105, size: 18, braille: false, face: 'back', useNumberSign: true }
     ];
 
-    const brailleMap = {
-        '0': '⠼⠚', '1': '⠼⠁', '2': '⠼⠝', '3': '⠼⠉', '4': '⠼⠙', '5': '⠼⠑', '6': '⠼⠋', '7': '⠼⠛', '8': '⠼⠓', '9': '⠼⠊',
-        'a': '⠁', 'b': '⠃', 'c': '⠉', 'd': '⠙', 'e': '⠑', 'f': '⠋', 'g': '⠛', 'h': '⠓', 'i': '⠊', 'j': '⠚',
-        'k': '⠅', 'l': '⠇', 'm': '⠍', 'n': '⠝', 'o': '⠕', 'p': '⠏', 'q': '⠟', 'r': '⠗', 's': '⠎', 't': '⠞',
-        'u': '⠥', 'v': '⠧', 'w': '⠺', 'x': '⠭', 'y': '⠽', 'z': '⠵', ' ': ' ', '/': '⠸'
+    const brailleLetters = {
+        '0':'⠚','1':'⠁','2':'⠃','3':'⠉','4':'⠙','5':'⠑','6':'⠋','7':'⠛','8':'⠓','9':'⠊',
+        'a':'⠁','b':'⠃','c':'⠉','d':'⠙','e':'⠑','f':'⠋','g':'⠛','h':'⠓','i':'⠊','j':'⠚',
+        'k':'⠅','l':'⠇','m':'⠍','n':'⠝','o':'⠕','p':'⠏','q':'⠟','r':'⠗','s':'⠎','t':'⠞',
+        'u':'⠥','v':'⠧','w':'⠺','x':'⠭','y':'⠽','z':'⠵',' ':' ','/':'⠸'
     };
 
-    function toBraille(text) {
-        return text.toLowerCase().split('').map(char => brailleMap[char] || char).join('');
+    function toBraille(text, useSign) {
+        return text.toLowerCase().split('').map(char => {
+            const isNum = /[0-9]/.test(char);
+            const symbol = brailleLetters[char] || char;
+            return (isNum && useSign) ? '⠼' + symbol : symbol;
+        }).join('');
     }
 
     function addField() {
-        fields.push({
-            id: Date.now(),
-            label: 'Novo Campo',
-            val: 'TEXTO',
-            x: 50,
-            y: 50,
-            size: 14,
-            braille: false,
-            face: 'front'
-        });
+        fields.push({ id: Date.now(), label: 'Novo Campo', val: 'TEXTO', x: 50, y: 50, size: 14, braille: false, face: 'front', useNumberSign: true });
         render();
     }
 
@@ -159,24 +120,21 @@
                     <input type="text" class="field-label" value="${f.label}" oninput="updateField(${f.id}, 'label', this.value)">
                     <button class="btn-remove" onclick="removeField(${f.id})">Remover</button>
                 </div>
-                
                 <input type="text" value="${f.val}" oninput="updateField(${f.id}, 'val', this.value)">
-                
                 <div class="grid-inputs">
                     <div><label>X</label><input type="number" value="${f.x}" oninput="updateField(${f.id}, 'x', this.value)"></div>
                     <div><label>Y</label><input type="number" value="${f.y}" oninput="updateField(${f.id}, 'y', this.value)"></div>
-                    <div><label>Tamanho</label><input type="number" value="${f.size}" oninput="updateField(${f.id}, 'size', this.value)"></div>
+                    <div><label>Size</label><input type="number" value="${f.size}" oninput="updateField(${f.id}, 'size', this.value)"></div>
                 </div>
-
-                <div style="display:flex; justify-content: space-between; align-items: center; margin-top:15px">
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-top:12px">
                     <div class="face-toggle" onclick="updateField(${f.id}, 'face', '${f.face === 'front' ? 'back' : 'front'}'); render();">
                         <span class="${f.face === 'front' ? 'active' : ''}">Frente</span>
                         <span class="${f.face === 'back' ? 'active' : ''}">Verso</span>
                     </div>
-                    <label style="display:flex; align-items:center; gap:5px; cursor:pointer; color:#374151">
-                        <input type="checkbox" ${f.braille ? 'checked' : ''} onchange="updateField(${f.id}, 'braille', this.checked)" style="width:auto; margin:0"> 
-                        Braille
-                    </label>
+                    <div style="text-align:right">
+                        <label class="opt-braille"><input type="checkbox" ${f.braille ? 'checked' : ''} onchange="updateField(${f.id}, 'braille', this.checked); render();"> Braille</label>
+                        ${f.braille ? `<label class="opt-braille"><input type="checkbox" ${f.useNumberSign ? 'checked' : ''} onchange="updateField(${f.id}, 'useNumberSign', this.checked); render();"> Prefixo (#)</label>` : ''}
+                    </div>
                 </div>
             </div>
         `).join('');
@@ -188,28 +146,18 @@
         const back = document.getElementById('cardBack');
         const bgColor = document.getElementById('bgColor').value;
         const textColor = document.getElementById('textColor').value;
-        
-        front.style.backgroundColor = bgColor;
-        back.style.backgroundColor = bgColor;
-        front.style.color = textColor;
-        back.style.color = textColor;
-
-        // Limpa campos dinâmicos
+        front.style.backgroundColor = back.style.backgroundColor = bgColor;
+        front.style.color = back.style.color = textColor;
         document.querySelectorAll('.dynamic-field').forEach(d => d.remove());
 
         fields.forEach(f => {
             const el = document.createElement('div');
             el.className = `dynamic-field ${f.braille ? 'braille-mode' : ''}`;
-            el.style.left = f.x + 'px';
-            el.style.top = f.y + 'px';
-            el.style.fontSize = f.size + 'px';
-            el.innerText = f.braille ? toBraille(f.val) : f.val;
-            
-            if (f.face === 'front') front.appendChild(el);
-            else back.appendChild(el);
+            el.style.left = f.x + 'px'; el.style.top = f.y + 'px'; el.style.fontSize = f.size + 'px';
+            el.innerText = f.braille ? toBraille(f.val, f.useNumberSign) : f.val;
+            (f.face === 'front' ? front : back).appendChild(el);
         });
     }
-
     render();
 </script>
 </body>
