@@ -1747,14 +1747,15 @@ function paginateSections() {
     const bodyRect = bodyEl.getBoundingClientRect();
     const padTop   = parseFloat(getComputedStyle(bodyEl).paddingTop) || 0;
 
-    // Measure where first section actually starts (in content coordinates)
     const firstSecTop = sections[0].getBoundingClientRect().top - bodyRect.top - padTop;
     let pageEnd = PAGE_H - firstSecTop;
 
-    sections.forEach(sec => {
-      // Re-measure each time — DOM may have changed from previously inserted spacers
+    console.log(`[PAG] template=${document.getElementById('template-select').value} PAGE_H=${PAGE_H.toFixed(1)} firstSecTop=${firstSecTop.toFixed(1)} pageEnd=${pageEnd.toFixed(1)} padTop=${padTop} bodyRect.top=${bodyRect.top.toFixed(1)}`);
+
+    sections.forEach((sec, i) => {
       const secTop = sec.getBoundingClientRect().top - bodyRect.top - padTop;
       const secH   = sec.offsetHeight;
+      console.log(`[PAG] sec[${i}] cls=${sec.className.slice(0,25)} secTop=${secTop.toFixed(1)} secH=${secH} bottom=${(secTop+secH).toFixed(1)} pageEnd=${pageEnd.toFixed(1)} overflow=${secTop+secH>pageEnd}`);
 
       if (secTop + secH > pageEnd) {
         const spacerH = pageEnd - secTop;
@@ -1763,9 +1764,12 @@ function paginateSections() {
           sp.dataset.pageBreak = '1';
           sp.style.cssText = `display:block;height:${spacerH}px;`;
           sec.parentNode.insertBefore(sp, sec);
-          pageEnd = sec.getBoundingClientRect().top - bodyRect.top - padTop + PAGE_H;
+          const newTop = sec.getBoundingClientRect().top - bodyRect.top - padTop;
+          pageEnd = newTop + PAGE_H;
+          console.log(`[PAG] → SPACER ${spacerH.toFixed(1)}px newSecTop=${newTop.toFixed(1)} new pageEnd=${pageEnd.toFixed(1)}`);
         } else {
           pageEnd = secTop + PAGE_H;
+          console.log(`[PAG] → NO SPACER (spacerH≤0), pageEnd=${pageEnd.toFixed(1)}`);
         }
       }
     });
