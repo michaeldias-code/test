@@ -1687,64 +1687,96 @@ function render() {
 function paginateSections() {
   document.querySelectorAll('[data-page-break]').forEach(el => el.remove());
 
-  const A4_H_PX = 297 * 3.7795275591;
-  const cvEl    = document.getElementById('cv-render');
+  const A4_H_PX  = 297 * 3.7795275591;
+  const cvEl     = document.getElementById('cv-render');
   const marginPx = parseFloat(
     cvEl.style.getPropertyValue('--cv-margin') ||
     getComputedStyle(document.documentElement).getPropertyValue('--cv-margin') || '45'
   ) || 45;
-  const USABLE = A4_H_PX - marginPx * 2;
+  // Usable height of a full blank page (both margins consumed)
+  const PAGE_H = A4_H_PX - marginPx * 2;
 
   document.querySelectorAll('.cv-page-sheet').forEach(sheet => {
-    // Skip multi-column layouts
-    if (sheet.querySelector('.cv-cols, .cv-body-cols')) return;
 
-    // For duotone, paginate inside cv-dt-body; otherwise paginate sheet directly
-    const dtBody   = sheet.querySelector('.cv-dt-body');
-    const bodyEl   = dtBody || sheet;
+    /* ── SIDEBAR: paginate col-main only ── */
+    if (sheet.querySelector('.cv-cols')) {
+      const colMain = sheet.querySelector('.col-main');
+      if (!colMain) return;
+      const sections = Array.from(colMain.querySelectorAll(
+        ':scope > .cv-section, :scope > .cv-objective-section, :scope > .cv-section-wrap, :scope > .inline-twocol'
+      ));
+      if (!sections.length) return;
 
-    // Collect direct-child pageable units
+      const colRect  = colMain.getBoundingClientRect();
+      const padTop   = parseFloat(getComputedStyle(colMain).paddingTop) || 0;
+      let pageEnd = PAGE_H; // sidebar col has no header, full page available
+
+      sections.forEach(sec => {
+        const secTop = sec.getBoundingClientRect().top - colRect.top - padTop;
+        const secH   = sec.offsetHeight;
+
+        if (secTop + secH > pageEnd) {
+          const spacerH = pageEnd - secTop;
+          if (spacerH > 0) {
+            const sp = document.createElement('div');
+            sp.dataset.pageBreak = '1';
+            sp.style.cssText = `display:block;height:${Math.max(0, spacerH)}px;`;
+            sec.parentNode.insertBefore(sp, sec);
+            pageEnd = secTop + spacerH + PAGE_H;
+          } else {
+            pageEnd = secTop + PAGE_H;
+          }
+        }
+      });
+      return;
+    }
+
+    /* ── TWOCOL: skip ── */
+    if (sheet.querySelector('.cv-body-cols')) return;
+
+    /* ── STANDARD + DUOTONE ── */
+    const dtBody = sheet.querySelector('.cv-dt-body');
+    const bodyEl = dtBody || sheet;
+
     const sections = Array.from(bodyEl.querySelectorAll(
       ':scope > .cv-section, :scope > .cv-objective-section, :scope > .cv-section-wrap, :scope > .inline-twocol'
     ));
     if (!sections.length) return;
 
-    // offsetTop of each section relative to bodyEl
-    function offsetRelTo(el, ancestor) {
-      let top = 0;
-      while (el && el !== ancestor) {
-        top += el.offsetTop;
-        el   = el.offsetParent;
-      }
-      return top;
-    }
-
-    // Content start: for duotone = header + stripe height; for normal = header-wrapper height
+    // How much of page 1 is already consumed before the sections start
     const headerWrapper = sheet.querySelector('.header-wrapper');
-    const contentStartInSheet = dtBody
+    const headerH = dtBody
       ? (sheet.querySelector('.cv-dt-header')?.offsetHeight || 0) +
         (sheet.querySelector('.cv-dt-stripe')?.offsetHeight || 0)
       : (headerWrapper?.offsetHeight || 0);
 
-    // paddingTop of bodyEl itself
-    const bodyPadTop = parseFloat(getComputedStyle(bodyEl).paddingTop) || 0;
+    // border-top of the sheet itself eats into usable space
+    const borderTop = parseFloat(getComputedStyle(sheet).borderTopWidth) || 0;
+
+    const bodyRect = bodyEl.getBoundingClientRect();
+    const padTop   = parseFloat(getComputedStyle(bodyEl).paddingTop) || 0;
 
     const toInsert = [];
-    // First page: space already consumed by header. Subsequent pages: full USABLE.
-    let pageUsed = contentStartInSheet + bodyPadTop;
+    const page1Used = headerH + borderTop;
+    // nextPageStart: the absolute content-position where the next page begins
+    // For page 1: it ends at PAGE_H - page1Used (content space available)
+    // After a break: it resets to full PAGE_H
+    let pageEnd = PAGE_H - page1Used; // how much content fits on page 1
 
     sections.forEach(sec => {
-      const secTop    = offsetRelTo(sec, bodyEl) - bodyPadTop;
-      const secHeight = sec.offsetHeight;
+      const secTop = sec.getBoundingClientRect().top - bodyRect.top - padTop;
+      const secH   = sec.offsetHeight;
 
-      // How far into the current page is this section's top?
-      const posInCurrentPage = secTop - (pageUsed - bodyPadTop);
-
-      if (posInCurrentPage >= 0 && posInCurrentPage + secHeight > USABLE) {
-        // Overflows current page — push to next
-        const spacerH = USABLE - posInCurrentPage + marginPx;
-        toInsert.push({ sec, spacerH });
-        pageUsed = secTop + spacerH + bodyPadTop;
+      if (secTop + secH > pageEnd) {
+        // Section overflows current page - insert spacer before it
+        const spacerH = pageEnd - secTop;
+        if (spacerH > 0) {
+          toInsert.push({ sec, spacerH });
+          pageEnd = secTop + spacerH + PAGE_H;
+        } else {
+          // Section starts exactly at or past page boundary, just set next pageEnd
+          pageEnd = secTop + PAGE_H;
+        }
       }
     });
 
