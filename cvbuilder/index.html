@@ -1709,7 +1709,8 @@ function paginateSections() {
 
       const colRect  = colMain.getBoundingClientRect();
       const padTop   = parseFloat(getComputedStyle(colMain).paddingTop) || 0;
-      let pageEnd = PAGE_H; // sidebar col has no header, full page available
+      const firstTop = sections[0].getBoundingClientRect().top - colRect.top - padTop;
+      let pageEnd = PAGE_H - firstTop;
 
       sections.forEach(sec => {
         const secTop = sec.getBoundingClientRect().top - colRect.top - padTop;
@@ -1720,9 +1721,9 @@ function paginateSections() {
           if (spacerH > 0) {
             const sp = document.createElement('div');
             sp.dataset.pageBreak = '1';
-            sp.style.cssText = `display:block;height:${Math.max(0, spacerH)}px;`;
+            sp.style.cssText = `display:block;height:${spacerH}px;`;
             sec.parentNode.insertBefore(sp, sec);
-            pageEnd = secTop + spacerH + PAGE_H;
+            pageEnd = sec.getBoundingClientRect().top - colRect.top - padTop + PAGE_H;
           } else {
             pageEnd = secTop + PAGE_H;
           }
@@ -1746,34 +1747,27 @@ function paginateSections() {
     const bodyRect = bodyEl.getBoundingClientRect();
     const padTop   = parseFloat(getComputedStyle(bodyEl).paddingTop) || 0;
 
-    const toInsert = [];
-
     // Measure where first section actually starts (in content coordinates)
-    // This implicitly accounts for header, border, padding — no double-counting
     const firstSecTop = sections[0].getBoundingClientRect().top - bodyRect.top - padTop;
-    // Remaining space on page 1 = full page minus whatever the header consumed
     let pageEnd = PAGE_H - firstSecTop;
 
     sections.forEach(sec => {
+      // Re-measure each time — DOM may have changed from previously inserted spacers
       const secTop = sec.getBoundingClientRect().top - bodyRect.top - padTop;
       const secH   = sec.offsetHeight;
 
       if (secTop + secH > pageEnd) {
         const spacerH = pageEnd - secTop;
         if (spacerH > 0) {
-          toInsert.push({ sec, spacerH });
-          pageEnd = secTop + spacerH + PAGE_H;
+          const sp = document.createElement('div');
+          sp.dataset.pageBreak = '1';
+          sp.style.cssText = `display:block;height:${spacerH}px;`;
+          sec.parentNode.insertBefore(sp, sec);
+          pageEnd = sec.getBoundingClientRect().top - bodyRect.top - padTop + PAGE_H;
         } else {
           pageEnd = secTop + PAGE_H;
         }
       }
-    });
-
-    toInsert.forEach(({ sec, spacerH }) => {
-      const sp = document.createElement('div');
-      sp.dataset.pageBreak = '1';
-      sp.style.cssText = `display:block;height:${Math.max(0, spacerH)}px;`;
-      sec.parentNode.insertBefore(sp, sec);
     });
   });
 }
