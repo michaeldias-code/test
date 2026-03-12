@@ -467,7 +467,7 @@ body.ats-visible .ats-node.missing {
 
 /* ── HEADER STYLE PANEL ── */
 #header-style-panel {
-  position: absolute; z-index: 200; background: white;
+  position: fixed; z-index: 200; background: white;
   border: 1px solid #e2e8f0; border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
   padding: 14px 14px 10px; width: 260px; font-family: sans-serif; display: none;
@@ -485,6 +485,29 @@ body.ats-visible .ats-node.missing {
 .hsp-toggle { width: 30px; height: 26px; border: 1px solid #cbd5e1; border-radius: 5px; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
 .hsp-toggle.on { background: #0f172a; color: white; border-color: #0f172a; }
 .hsp-close { position: absolute; top: 8px; right: 10px; background: none; border: none; font-size: 1rem; cursor: pointer; color: #94a3b8; line-height: 1; }
+
+#section-style-panel {
+  position: fixed; z-index: 200; background: white;
+  border: 1px solid #e2e8f0; border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  padding: 14px 14px 10px; width: 240px; font-family: sans-serif; display: none;
+}
+#section-style-panel.visible { display: block; }
+#section-style-panel h4 { margin: 0 0 10px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #64748b; }
+
+.section-title-wrap { position: relative; display: inline-block; }
+.ssp-pencil-btn {
+  opacity: 0; position: absolute; top: 0; right: -26px;
+  background: #1e293b; color: white; border: none;
+  width: 20px; height: 20px; border-radius: 4px;
+  font-size: 10px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: opacity 0.15s; z-index: 10;
+  transform: rotate(45deg);
+}
+.cv-section:hover .ssp-pencil-btn,
+.cv-section-wrap:hover .ssp-pencil-btn { opacity: 1; }
+.ssp-pencil-btn:hover { background: var(--primary-color); }
 </style>
 </head>
 <body>
@@ -701,6 +724,39 @@ body.ats-visible .ats-node.missing {
 
   <button class="btn-ats" id="btn-ats-toggle" onclick="toggleATSMode()" style="display:none">🔍 Visualizar Camada ATS</button>
   <button class="btn-main" onclick="exportPDF()">📥 BAIXAR PDF</button>
+</div>
+
+<div id="section-style-panel">
+  <button class="hsp-close" onclick="closeSectionPanel()">✕</button>
+  <h4>✒ Estilo dos Títulos de Seção</h4>
+  <div class="hsp-row">
+    <label>Fonte</label>
+    <select id="ssp-font" onchange="sspApply()">
+      <option value="">— padrão do template —</option>
+      <option value="'Outfit', sans-serif">Outfit</option>
+      <option value="'Sora', sans-serif">Sora</option>
+      <option value="'IBM Plex Sans', sans-serif">IBM Plex Sans</option>
+      <option value="'Playfair Display', serif">Playfair Display</option>
+      <option value="'DM Sans', sans-serif">DM Sans</option>
+      <option value="'Nunito', sans-serif">Nunito</option>
+      <option value="'Barlow Condensed', sans-serif">Barlow Condensed</option>
+      <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+    </select>
+  </div>
+  <div class="hsp-row">
+    <label>Tamanho</label>
+    <input type="number" id="ssp-size" min="5" max="24" step="0.5" onchange="sspApply()">
+    <span style="font-size:0.7rem;color:#94a3b8">pt</span>
+  </div>
+  <div class="hsp-row">
+    <label>Estilo</label>
+    <div class="hsp-toggles">
+      <button class="hsp-toggle" id="ssp-bold" onclick="sspToggle('bold')" title="Negrito"><b>B</b></button>
+      <button class="hsp-toggle" id="ssp-italic" onclick="sspToggle('italic')" title="Itálico"><i>I</i></button>
+      <button class="hsp-toggle" id="ssp-underline" onclick="sspToggle('underline')" title="Sublinhado"><u>U</u></button>
+      <button class="hsp-toggle" id="ssp-uppercase" onclick="sspToggle('uppercase')" title="Maiúsculas" style="font-size:0.65rem">AA</button>
+    </div>
+  </div>
 </div>
 
 <div id="header-style-panel">
@@ -1084,8 +1140,8 @@ function buildEditFields(section, index, lang) {
         el_pt: input('exp-company', exp.company),
         el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor (campo único)</div>` },
       { key:'period', label:'Período',
-        el_pt: input('exp-period', exp.period),
-        el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor (campo único)</div>` },
+        el_pt: input('exp-period_pt', exp.period_pt || exp.period),
+        el_en: input('exp-period_en', exp.period_en || exp.period) },
       { key:'desc', label:'Descrição (uma por linha)',
         el_pt: textarea('exp-desc_pt', (exp.description_pt||[]).join('\n'), 5),
         el_en: textarea('exp-desc_en', (exp.description_en||[]).join('\n'), 5) },
@@ -1100,8 +1156,8 @@ function buildEditFields(section, index, lang) {
         el_pt: input('ed-institution', ed.institution),
         el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor</div>` },
       { key:'period', label:'Período',
-        el_pt: input('ed-period', ed.period),
-        el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor</div>` },
+        el_pt: input('ed-period_pt', ed.period_pt || ed.period),
+        el_en: input('ed-period_en', ed.period_en || ed.period) },
     );
   } else if (section === 'skills') {
     const sk = d.skills || {};
@@ -1149,8 +1205,8 @@ function buildEditFields(section, index, lang) {
         el_pt: input('vol-org', vol.organization),
         el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor</div>` },
       { key:'period', label:'Período',
-        el_pt: input('vol-period', vol.period),
-        el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor</div>` },
+        el_pt: input('vol-period_pt', vol.period_pt || vol.period),
+        el_en: input('vol-period_en', vol.period_en || vol.period) },
       { key:'desc', label:'Descrição',
         el_pt: textarea('vol-desc_pt', vol.description_pt, 3),
         el_en: textarea('vol-desc_en', vol.description_en, 3) },
@@ -1197,7 +1253,9 @@ function saveEditModal() {
     exp.position_pt    = gv('exp-position_pt');
     exp.position_en    = gv('exp-position_en');
     exp.company        = gv('exp-company');
-    exp.period         = gv('exp-period');
+    exp.period_pt      = gv('exp-period_pt');
+    exp.period_en      = gv('exp-period_en');
+    exp.period         = exp.period_pt; // backward compat
     exp.description_pt = gv('exp-desc_pt').split('\n').filter(Boolean);
     exp.description_en = gv('exp-desc_en').split('\n').filter(Boolean);
   } else if (section === 'education') {
@@ -1205,7 +1263,9 @@ function saveEditModal() {
     ed.degree_pt    = gv('ed-degree_pt');
     ed.degree_en    = gv('ed-degree_en');
     ed.institution  = gv('ed-institution');
-    ed.period       = gv('ed-period');
+    ed.period_pt    = gv('ed-period_pt');
+    ed.period_en    = gv('ed-period_en');
+    ed.period       = ed.period_pt;
   } else if (section === 'skills') {
     cvData.skills.technical = gv('sk-technical').split('\n').filter(Boolean);
     cvData.skills.languages = gv('sk-languages').split('\n').filter(Boolean);
@@ -1222,7 +1282,9 @@ function saveEditModal() {
     const v = cvData.volunteer[index];
     v.role_pt       = gv('vol-role_pt');  v.role_en       = gv('vol-role_en');
     v.organization  = gv('vol-org');
-    v.period        = gv('vol-period');
+    v.period_pt     = gv('vol-period_pt');
+    v.period_en     = gv('vol-period_en');
+    v.period        = v.period_pt;
     v.description_pt= gv('vol-desc_pt'); v.description_en= gv('vol-desc_en');
   } else if (section === 'salary') {
     if (!cvData.salary_expectation) cvData.salary_expectation = {};
@@ -1339,7 +1401,7 @@ function summaryHTML(d, lang, sc) {
   const text = lang==='pt' ? d.personal.summary_pt : d.personal.summary_en;
   if (!text) return '';
   return wrapEditable(`<div class="cv-section">
-    <div class="${sc}">${lang==='pt'?'Resumo':'Summary'}</div>
+    ${ST(lang==='pt'?'Resumo':'Summary')}
     <p class="ats-summary" style="text-align:justify;font-size:var(--cv-font-size);line-height:var(--cv-line-height)">${text}</p>
   </div>`, 'summary');
 }
@@ -1347,13 +1409,14 @@ function summaryHTML(d, lang, sc) {
 function experienceHTML(d, lang, sc) {
   if (!d.experience||!d.experience.length) return '';
   const items = d.experience.map((exp, i) => {
-    const pos  = lang==='pt' ? exp.position_pt    : exp.position_en;
-    const desc = lang==='pt' ? exp.description_pt : exp.description_en;
+    const pos    = lang==='pt' ? exp.position_pt    : exp.position_en;
+    const desc   = lang==='pt' ? exp.description_pt : exp.description_en;
+    const period = lang==='pt' ? (exp.period_pt || exp.period) : (exp.period_en || exp.period);
     return `<div style="margin-bottom:11px;position:relative">
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('experience',${i})" title="Editar">✏</button>
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <span class="exp-position" style="flex:1;overflow-wrap:break-word;word-break:break-word">${pos||''}</span>
-        <span class="exp-period" style="flex-shrink:0">${exp.period||''}</span>
+        <span class="exp-period" style="flex-shrink:0">${period||''}</span>
       </div>
       <div class="exp-company">${exp.company||''}</div>
       <ul class="exp-desc" style="font-size:var(--cv-font-size);margin-top:4px;line-height:var(--cv-line-height)">
@@ -1361,7 +1424,7 @@ function experienceHTML(d, lang, sc) {
       </ul>
     </div>`;
   }).join('');
-  return wrapSplit(`<div class="cv-section-wrap"><div class="cv-section"><div class="${sc}">${lang==='pt'?'Experiência Profissional':'Experience'}</div>${items}</div></div>`,'experience');
+  return wrapSplit(`<div class="cv-section-wrap"><div class="cv-section">${ST(lang==='pt'?'Experiência Profissional':'Experience')}${items}</div></div>`,'experience');
 }
 
 function educationHTML(d, lang, sc) {
@@ -1371,12 +1434,12 @@ function educationHTML(d, lang, sc) {
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('education',${i})" title="Editar">✏</button>
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <span class="exp-position" style="flex:1;overflow-wrap:break-word;word-break:break-word">${lang==='pt'?ed.degree_pt:ed.degree_en}</span>
-        <span class="exp-period" style="flex-shrink:0">${ed.period||''}</span>
+        <span class="exp-period" style="flex-shrink:0">${lang==='pt'?(ed.period_pt||ed.period):(ed.period_en||ed.period)||''}</span>
       </div>
       <div class="exp-company">${ed.institution||''}</div>
     </div>`;
   }).join('');
-  return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Formação':'Education'}</div>${items}</div>`,'education');
+  return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Formação':'Education')}${items}</div>`,'education');
 }
 
 function skillsHTML(d, lang, sc, tagStyle) {
@@ -1390,12 +1453,12 @@ function skillsHTML(d, lang, sc, tagStyle) {
     const grp = (title,arr) => !arr||!arr.length?'': `<div style="margin-bottom:7px">
       <div style="font-size:7pt;font-weight:700;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:3px">${title}</div>
       <div>${arr.map(s=>`<span style="${tagStyle}">${s}</span>`).join('')}</div></div>`;
-    html = `<div class="cv-section" style="position:relative">${editBtn}<div class="${sc}">${lang==='pt'?'Habilidades':'Skills'}</div>${grp(tl,d.skills.technical)}${grp(ll,d.skills.languages)}${grp(sl,d.skills.soft)}</div>`;
+    html = `<div class="cv-section" style="position:relative">${editBtn}${ST(lang==='pt'?'Habilidades':'Skills')}${grp(tl,d.skills.technical)}${grp(ll,d.skills.languages)}${grp(sl,d.skills.soft)}</div>`;
   } else {
     const row = (title,arr,first) => !arr||!arr.length?'': `<tr style="vertical-align:top;border-bottom:1px solid #f1f5f9">
       <td class="ats-skill-cat" style="font-size:7pt;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.8px;padding:${first?'0':'5px'} 12px 5px 0;white-space:nowrap;width:1%">${title}</td>
       <td class="ats-skill-val" style="padding:${first?'0':'5px'} 0 5px;font-size:var(--cv-font-size);color:#334155;line-height:var(--cv-line-height);overflow-wrap:break-word">${arr.join(' · ')}</td></tr>`;
-    html = `<div class="cv-section" style="position:relative">${editBtn}<div class="${sc}">${lang==='pt'?'Habilidades':'Skills'}</div>
+    html = `<div class="cv-section" style="position:relative">${editBtn}${ST(lang==='pt'?'Habilidades':'Skills')}
       <table style="width:100%;border-collapse:collapse;margin:0">
         ${row(tl,d.skills.technical,true)}${row(ll,d.skills.languages,false)}${row(sl,d.skills.soft,false)}
       </table></div>`;
@@ -1412,7 +1475,7 @@ function certsHTML(d, lang, sc) {
       <span class="ats-cert-issuer" style="color:#64748b;font-size:8pt"> · ${c.issuer||''} ${c.year?'('+c.year+')':''}</span>
     </div>`
   ).join('');
-  return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Certificações':'Certifications'}</div>${items}</div>`,'certifications');
+  return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Certificações':'Certifications')}${items}</div>`,'certifications');
 }
 
 function projectsHTML(d, lang, sc) {
@@ -1424,7 +1487,7 @@ function projectsHTML(d, lang, sc) {
       <div class="ats-proj-desc" style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?p.description_pt:p.description_en}</div>
     </div>`
   ).join('');
-  return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Projetos':'Projects'}</div>${items}</div>`,'projects');
+  return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Projetos':'Projects')}${items}</div>`,'projects');
 }
 
 function volunteerHTML(d, lang, sc) {
@@ -1437,7 +1500,7 @@ function volunteerHTML(d, lang, sc) {
       <div class="ats-vol-desc" style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?v.description_pt:v.description_en}</div>
     </div>`
   ).join('');
-  return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Voluntariado':'Volunteer'}</div>${items}</div>`,'volunteer');
+  return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Voluntariado':'Volunteer')}${items}</div>`,'volunteer');
 }
 
 function salaryHTML(d, lang, sc) {
@@ -1446,7 +1509,7 @@ function salaryHTML(d, lang, sc) {
   if (!value) return '';
   const label = lang==='pt' ? 'Pretensão Salarial' : 'Salary Expectation';
   return wrapEditable(`<div class="cv-section">
-    <div class="${sc}">${label}</div>
+    ${ST(label)}
     <p class="ats-salary" style="font-size:var(--cv-font-size);line-height:var(--cv-line-height);font-weight:600;color:#334155">${value}</p>
   </div>`, 'salary');
 }
@@ -1462,6 +1525,21 @@ const DUOTONE_MAP = {
 };
 
 /* ── RENDER ── */
+function makeST(cls, label) {
+  let style = '';
+  if (sectionTitleStyle) {
+    const s = sectionTitleStyle;
+    if (s.font)      style += `font-family:${s.font};`;
+    if (s.size)      style += `font-size:${s.size}pt;`;
+    if (s.bold !== undefined) style += `font-weight:${s.bold?'700':'400'};`;
+    if (s.italic)    style += `font-style:italic;`;
+    if (s.underline) style += `text-decoration:underline;`;
+    if (s.uppercase !== undefined) style += `text-transform:${s.uppercase?'uppercase':'none'};`;
+  }
+  const styleAttr = style ? ` style="${style}"` : '';
+  return `<div class="${cls} section-title-wrap"${styleAttr}>${label}<button class="ssp-pencil-btn edit-btn" onclick="openSectionPanel(event)" title="Estilo dos títulos">✒</button></div>`;
+}
+
 function render() {
   if (!cvData) return;
   const lang      = document.getElementById('lang-toggle').checked ? 'en' : 'pt';
@@ -1492,6 +1570,11 @@ function render() {
   container.className = `template-${template}`;
 
   const sc = 'section-title';
+
+  // Build section title HTML with optional style overrides + pencil button
+  function ST(label) {
+    return makeST(sc, label);
+  }
   const tag = 'background:rgba(255,255,255,0.18);color:white;border-radius:4px;padding:2px 7px;font-size:8pt;display:inline-block;margin:2px 2px 2px 0;';
 
   // Map key → renderer
@@ -1546,7 +1629,7 @@ function render() {
           ${photoHTML(true)}
           <div class="cv-name" style="font-size:13pt">${d.personal.fullname}</div>
           ${showDesiredInHeader && desired ? `<div class="desired-position">${desired}</div>` : ''}
-          <div class="${sc}">Contato</div>
+          ${ST('Contato')}
           <div class="contact-info">📍 ${d.personal.location||''}<br>📞 ${d.personal.phone||''}<br>✉️ ${d.personal.email||''}${d.personal.linkedin?`<br>🔗 ${d.personal.linkedin}`:''}${d.personal.website?`<br>🌐 ${d.personal.website}`:''}</div>
           ${renderList(orderedSideKeys, tag)}
         </div>
@@ -1630,17 +1713,18 @@ function paginateSections() {
       return top;
     }
 
-    // Content start: for duotone = header + stripe height; for normal = paddingTop of sheet
+    // Content start: for duotone = header + stripe height; for normal = header-wrapper height
+    const headerWrapper = sheet.querySelector('.header-wrapper');
     const contentStartInSheet = dtBody
       ? (sheet.querySelector('.cv-dt-header')?.offsetHeight || 0) +
         (sheet.querySelector('.cv-dt-stripe')?.offsetHeight || 0)
-      : 0;
+      : (headerWrapper?.offsetHeight || 0);
 
     // paddingTop of bodyEl itself
     const bodyPadTop = parseFloat(getComputedStyle(bodyEl).paddingTop) || 0;
 
     const toInsert = [];
-    let pageCursor = 0; // tracks how many px of content we've placed on current page
+    let pageCursor = contentStartInSheet; // start after header
 
     sections.forEach(sec => {
       const secTop    = offsetRelTo(sec, bodyEl) - bodyPadTop; // top relative to content area
@@ -1748,6 +1832,78 @@ function hspApply() {
 document.addEventListener('click', (e) => {
   const panel = document.getElementById('header-style-panel');
   if (panel?.classList.contains('visible') && !panel.contains(e.target)) closeHeaderPanel();
+});
+
+/* ── SECTION TITLE STYLE ── */
+const SECTION_TITLE_DEFAULTS = {
+  'modern':      { size:'8.5', bold:true,  italic:false, uppercase:true  },
+  'executive':   { size:'8.5', bold:true,  italic:false, uppercase:true  },
+  'minimal':     { size:'8',   bold:true,  italic:false, uppercase:true  },
+  'creative':    { size:'9',   bold:true,  italic:false, uppercase:true  },
+  'sidebar-left':{ size:'8',   bold:true,  italic:false, uppercase:true  },
+  'duotone':     { size:'9',   bold:true,  italic:false, uppercase:true  },
+  'formal':      { size:'10.5',bold:true,  italic:false, uppercase:false },
+};
+
+let sectionTitleStyle = null; // null = use template default
+
+function makeSectionTitleStyle(tpl) {
+  return Object.assign({ font:'', size:'', bold:false, italic:false, underline:false, uppercase:false },
+    SECTION_TITLE_DEFAULTS[tpl] || {});
+}
+
+function resetSectionTitleStyle() {
+  sectionTitleStyle = null;
+  closeSectionPanel();
+}
+
+function openSectionPanel(e) {
+  e.stopPropagation();
+  const panel = document.getElementById('section-style-panel');
+  const btn   = e.currentTarget;
+  const previewRect = document.querySelector('.preview-area').getBoundingClientRect();
+  const btnRect = btn.getBoundingClientRect();
+  panel.style.top  = (btnRect.bottom - previewRect.top + 8) + 'px';
+  panel.style.left = Math.min(btnRect.left - previewRect.left, previewRect.width - 260) + 'px';
+  panel.classList.add('visible');
+  sspLoad();
+}
+
+function closeSectionPanel() {
+  document.getElementById('section-style-panel').classList.remove('visible');
+}
+
+function sspLoad() {
+  const tpl = document.getElementById('template-select').value;
+  const s   = sectionTitleStyle || makeSectionTitleStyle(tpl);
+  document.getElementById('ssp-font').value = s.font || '';
+  document.getElementById('ssp-size').value = s.size || '';
+  document.getElementById('ssp-bold').classList.toggle('on', !!s.bold);
+  document.getElementById('ssp-italic').classList.toggle('on', !!s.italic);
+  document.getElementById('ssp-underline').classList.toggle('on', !!s.underline);
+  document.getElementById('ssp-uppercase').classList.toggle('on', !!s.uppercase);
+}
+
+function sspToggle(prop) {
+  const tpl = document.getElementById('template-select').value;
+  if (!sectionTitleStyle) sectionTitleStyle = makeSectionTitleStyle(tpl);
+  sectionTitleStyle[prop] = !sectionTitleStyle[prop];
+  document.getElementById('ssp-' + prop).classList.toggle('on', sectionTitleStyle[prop]);
+  render();
+}
+
+function sspApply() {
+  const tpl = document.getElementById('template-select').value;
+  if (!sectionTitleStyle) sectionTitleStyle = makeSectionTitleStyle(tpl);
+  sectionTitleStyle.font = document.getElementById('ssp-font').value;
+  sectionTitleStyle.size = document.getElementById('ssp-size').value;
+  render();
+}
+
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('section-style-panel');
+  if (panel?.classList.contains('visible') && !panel.contains(e.target) &&
+      !e.target.classList.contains('ssp-pencil-btn')) closeSectionPanel();
 });
 
 /* ── ATS MODE ── */
@@ -1945,7 +2101,7 @@ function syncPaletteToTemplate() {
 }
 
 /* ── LISTENERS ── */
-document.getElementById('template-select').onchange = () => { resetHeaderStyle(); syncPaletteToTemplate(); render(); };
+document.getElementById('template-select').onchange = () => { resetHeaderStyle(); resetSectionTitleStyle(); syncPaletteToTemplate(); render(); };
 ['color-palette','font-select','include-cover','cover-first','lang-toggle','photo-align','photo-border']
   .forEach(id => document.getElementById(id).onchange = render);
 document.querySelectorAll('.split-toggle').forEach(cb => cb.onchange = render);
