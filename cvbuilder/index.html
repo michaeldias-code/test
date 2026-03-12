@@ -347,7 +347,7 @@ body.ats-visible .ats-node.missing {
 .template-minimal { --cv-font-body: 'IBM Plex Sans', sans-serif; --cv-font-display: 'IBM Plex Sans', sans-serif; }
 .template-minimal .cv-page-sheet { font-family: var(--cv-font-body); }
 .template-minimal .cv-name { font-size: 28pt; font-weight: 700; letter-spacing: -1px; color: #0f172a; line-height: 1.05; }
-.template-minimal .desired-position { font-size: 10pt; font-weight: 400; font-style: italic; color: var(--primary-color); margin-top: 5px; }
+.template-minimal .desired-position { font-size: 12pt; font-weight: 400; font-style: italic; color: var(--primary-color); margin-top: 5px; }
 .template-minimal .section-title { font-size: 8pt; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: #64748b; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-bottom: 10px; }
 .template-minimal .contact-info { font-size: 9pt; font-weight: 400; color: #64748b; }
 .template-minimal .exp-position { font-size: 10.5pt; font-weight: 600; color: #0f172a; }
@@ -358,7 +358,7 @@ body.ats-visible .ats-node.missing {
 .template-creative { --cv-font-body: 'DM Sans', sans-serif; --cv-font-display: 'Barlow Condensed', sans-serif; }
 .template-creative .cv-page-sheet { font-family: var(--cv-font-body); border-top: 6px solid var(--primary-color); }
 .template-creative .cv-name { font-family: var(--cv-font-display); font-size: 30pt; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #0f172a; line-height: 1; }
-.template-creative .desired-position { font-family: 'Roboto Mono', monospace; font-size: 8pt; font-weight: 500; color: var(--primary-color); margin-top: 6px; }
+.template-creative .desired-position { font-family: 'Roboto Mono', monospace; font-size: 10pt; font-weight: 500; color: var(--primary-color); margin-top: 6px; }
 .template-creative .section-title { font-family: var(--cv-font-display); font-size: 9pt; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: white; background: var(--primary-color); padding: 3px 10px; display: inline-block; margin-bottom: 10px; }
 .template-creative .contact-info { font-family: 'Roboto Mono', monospace; font-size: 8.5pt; color: #475569; }
 .template-creative .exp-position { font-family: var(--cv-font-display); font-size: 12pt; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #0f172a; }
@@ -439,7 +439,7 @@ body.ats-visible .ats-node.missing {
 .template-formal .cv-page-sheet { font-family: var(--cv-font-body); border-top: 5px solid var(--primary-color); }
 .template-formal .header-wrapper { display: flex; align-items: center; gap: 24px; padding-bottom: calc(var(--cv-margin) * 0.5); border-bottom: 1px solid #e2e8f0; margin-bottom: calc(var(--cv-margin) * 0.5); }
 .template-formal .cv-name { font-family: var(--cv-font-display); font-size: 24pt; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; line-height: 1.1; }
-.template-formal .desired-position { font-size: 9pt; font-weight: 500; color: var(--primary-color); margin-top: 5px; letter-spacing: 0.3px; text-transform: none; }
+.template-formal .desired-position { font-size: 11pt; font-weight: 500; color: var(--primary-color); margin-top: 5px; letter-spacing: 0.3px; text-transform: none; }
 .template-formal .contact-info { font-size: 8.5pt; font-weight: 400; color: #475569; margin-top: 3px; }
 .template-formal .photo-circle { border-color: var(--primary-color); border-radius: 4px !important; }
 .template-formal .section-title { font-family: var(--cv-font-display); font-size: 10.5pt; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--primary-color); border-bottom: 1px solid var(--primary-color); padding-bottom: 3px; margin-bottom: 10px; }
@@ -515,6 +515,14 @@ body.ats-visible .ats-node.missing {
       <select id="photo-align">
         <option value="row">Esquerda</option>
         <option value="row-reverse">Direita</option>
+      </select>
+      <label>Borda da foto:</label>
+      <select id="photo-border" onchange="render()">
+        <option value="12px">Arredondada</option>
+        <option value="50%">Circular</option>
+        <option value="4px">Levemente arredondada</option>
+        <option value="0px">Quadrada</option>
+        <option value="24px">Muito arredondada</option>
       </select>
     </div>
   </div>
@@ -1216,8 +1224,9 @@ function downloadModelJSON() {
 /* ── HTML BUILDERS ── */
 function photoHTML(side) {
   if (!userPhoto) return '';
-  if (side) return `<div class="photo-circle-side"><img src="${userPhoto}"></div>`;
-  return `<div class="photo-container"><div class="photo-circle"><img src="${userPhoto}"></div></div>`;
+  const br = document.getElementById('photo-border')?.value || '12px';
+  if (side) return `<div class="photo-circle-side" style="border-radius:${br}"><img src="${userPhoto}"></div>`;
+  return `<div class="photo-container"><div class="photo-circle" style="border-radius:${br}!important"><img src="${userPhoto}"></div></div>`;
 }
 
 function getObjStyle() {
@@ -1780,7 +1789,7 @@ function syncPaletteToTemplate() {
 
 /* ── LISTENERS ── */
 document.getElementById('template-select').onchange = () => { syncPaletteToTemplate(); render(); };
-['color-palette','font-select','include-cover','cover-first','lang-toggle','photo-align']
+['color-palette','font-select','include-cover','cover-first','lang-toggle','photo-align','photo-border']
   .forEach(id => document.getElementById(id).onchange = render);
 document.querySelectorAll('.split-toggle').forEach(cb => cb.onchange = render);
 
