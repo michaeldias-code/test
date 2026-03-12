@@ -1540,6 +1540,8 @@ function makeST(cls, label) {
   return `<div class="${cls} section-title-wrap"${styleAttr}>${label}<button class="ssp-pencil-btn edit-btn" onclick="openSectionPanel(event)" title="Estilo dos títulos">✒</button></div>`;
 }
 
+function ST(label) { return makeST('section-title', label); }
+
 function render() {
   if (!cvData) return;
   const lang      = document.getElementById('lang-toggle').checked ? 'en' : 'pt';
@@ -1570,11 +1572,6 @@ function render() {
   container.className = `template-${template}`;
 
   const sc = 'section-title';
-
-  // Build section title HTML with optional style overrides + pencil button
-  function ST(label) {
-    return makeST(sc, label);
-  }
   const tag = 'background:rgba(255,255,255,0.18);color:white;border-radius:4px;padding:2px 7px;font-size:8pt;display:inline-block;margin:2px 2px 2px 0;';
 
   // Map key → renderer
