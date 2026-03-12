@@ -2,242 +2,161 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Cartão ID-1</title>
+    <title>Simulador de Cartão Profissional e Braille</title>
     <style>
         :root {
-            --card-width: 400px;
-            --card-height: 252px; /* Proporção padrão 1.586 */
-            --bg-color: #f0f2f5;
-            --sidebar-width: 350px;
+            --card-w: 430px;
+            --card-h: 270px;
+            --primary: #2563eb;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            background-color: var(--bg-color);
+        body { font-family: 'Inter', sans-serif; display: flex; margin: 0; background: #e5e7eb; height: 100vh; }
+
+        /* Sidebar */
+        .sidebar { width: 380px; background: white; padding: 20px; overflow-y: auto; border-right: 1px solid #d1d5db; }
+        .control-block { background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
+        .control-block h3 { margin: 0 0 10px 0; font-size: 0.9rem; color: #374151; display: flex; justify-content: space-between; }
+        
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        label { font-size: 0.75rem; color: #6b7280; font-weight: bold; }
+        input { width: 100%; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; margin-top: 4px; box-sizing: border-box; }
+
+        /* Preview */
+        .preview { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        .card-wrapper { perspective: 1000px; width: var(--card-w); height: var(--card-h); }
+        .card { 
+            width: 100%; height: 100%; position: relative; transition: transform 0.6s; 
+            transform-style: preserve-3d; cursor: pointer; 
         }
-
-        /* Sidebar de Configurações */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: white;
-            padding: 20px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-            z-index: 10;
-            overflow-y: auto;
-        }
-
-        .sidebar h2 { color: #333; font-size: 1.2rem; margin-bottom: 20px; }
-
-        .input-group { margin-bottom: 15px; }
-
-        .input-group label {
-            display: block;
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .input-group input, .input-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
-        }
-
-        /* Área do Preview */
-        .preview-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            perspective: 1000px;
-        }
-
-        /* O Cartão */
-        .card {
-            width: var(--card-width);
-            height: var(--card-height);
-            position: relative;
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-            cursor: pointer;
-        }
-
         .card.flipped { transform: rotateY(180deg); }
 
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 15px;
-            background: #fff;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            border: 1px solid #d1d1d1;
-            display: flex;
-            flex-direction: column;
-            padding: 25px;
-            box-sizing: border-box;
-            color: #333;
+        .face { 
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden; 
+            border-radius: 14px; background: #fff; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+            overflow: hidden; border: 1px solid #ccc;
         }
 
-        /* Frente do Cartão */
-        .card-front { z-index: 2; }
-
-        .chip {
-            width: 50px;
-            height: 40px;
-            background: linear-gradient(135deg, #f0d078 0%, #cf9e2b 100%);
-            border-radius: 8px;
-            margin-bottom: 20px;
-            position: relative;
+        /* Elementos Fixos (ISO) */
+        .iso-chip {
+            position: absolute; width: 52px; height: 40px;
+            background: linear-gradient(135deg, #e5c06d 0%, #b88a1a 100%);
+            border-radius: 6px;
+            left: 35px; top: 75px; /* Posição padrão ISO */
+            z-index: 5;
+        }
+        .iso-chip::after {
+            content: ""; position: absolute; inset: 5px; border: 1px solid rgba(0,0,0,0.1); border-radius: 3px;
         }
 
-        .card-number {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 1.6rem;
-            letter-spacing: 2px;
-            margin-top: 20px;
-            min-height: 30px;
+        .back { transform: rotateY(180deg); }
+        .mag-stripe { width: 100%; height: 48px; background: #1a1a1a; margin-top: 30px; }
+
+        /* Elementos Dinâmicos */
+        .dynamic-field {
+            position: absolute; font-family: 'Courier New', monospace;
+            white-space: nowrap; transition: all 0.2s;
         }
+        .braille-mode { font-family: sans-serif !important; letter-spacing: 2px; font-size: 1.2rem !important; }
 
-        .card-info {
-            margin-top: auto;
-            display: flex;
-            justify-content: space-between;
-            text-transform: uppercase;
-        }
-
-        .label-small { font-size: 0.6rem; color: #888; display: block; }
-        .data-text { font-size: 0.9rem; font-weight: bold; }
-
-        /* Verso do Cartão */
-        .card-back {
-            transform: rotateY(180deg);
-            padding: 0;
-            background: #fdfdfd;
-        }
-
-        .magnetic-stripe {
-            width: 100%;
-            height: 45px;
-            background: #333;
-            margin-top: 30px;
-        }
-
-        .signature-area {
-            width: 80%;
-            height: 35px;
-            background: #eee;
-            margin: 20px auto 0;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 10px;
-        }
-
-        .cvv-display { font-style: italic; font-weight: bold; }
-
-        .controls-hint {
-            margin-top: 30px;
-            color: #888;
-            font-size: 0.9rem;
-        }
+        .btn-flip { margin-top: 20px; padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <aside class="sidebar">
-        <h2>Personalização</h2>
+        <h2>Configurações</h2>
         
-        <div class="input-group">
-            <label>Cor do Cartão</label>
-            <input type="color" id="cardColor" value="#ffffff" oninput="updateCard()">
+        <div class="control-block">
+            <label>Cor de Fundo</label>
+            <input type="color" id="bgColor" value="#ffffff" oninput="sync()">
         </div>
 
-        <div class="input-group">
-            <label>Número do Cartão (PAN)</label>
-            <input type="text" id="panInput" placeholder="0000 0000 0000 0000" maxlength="19" oninput="updateCard()">
-        </div>
-
-        <div class="input-group">
-            <label>Nome do Titular</label>
-            <input type="text" id="nameInput" placeholder="NOME DO TITULAR" oninput="updateCard()">
-        </div>
-
-        <div class="input-group">
-            <label>Validade (MM/AA)</label>
-            <input type="text" id="expiryInput" placeholder="12/30" maxlength="5" oninput="updateCard()">
-        </div>
-
-        <div class="input-group">
-            <label>CVV (Verso)</label>
-            <input type="text" id="cvvInput" placeholder="123" maxlength="3" oninput="updateCard()">
-        </div>
-
-        <button onclick="toggleFlip()" style="width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer;">
-            Girar Cartão
-        </button>
+        <div id="fieldControls"></div>
     </aside>
 
-    <main class="preview-container">
-        <div class="card" id="cardElement" onclick="toggleFlip()">
-            <div class="card-face card-front" id="frontFace">
-                <div class="chip"></div>
-                <div class="card-number" id="previewPan">0000 0000 0000 0000</div>
-                <div class="card-info">
-                    <div>
-                        <span class="label-small">NOME DO TITULAR</span>
-                        <span class="data-text" id="previewName">NOME DO TITULAR</span>
+    <main class="preview">
+        <div class="card-wrapper">
+            <div class="card" id="card" onclick="this.classList.toggle('flipped')">
+                <div class="face front" id="cardFront">
+                    <div class="iso-chip"></div>
                     </div>
-                    <div>
-                        <span class="label-small">VALIDADE</span>
-                        <span class="data-text" id="previewExpiry">00/00</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-face card-back" id="backFace">
-                <div class="magnetic-stripe"></div>
-                <div class="signature-area">
-                    <span class="cvv-display" id="previewCvv">123</span>
+                <div class="face back" id="cardBack">
+                    <div class="mag-stripe"></div>
                 </div>
             </div>
         </div>
-        <p class="controls-hint">Clique no cartão para girar</p>
+        <button class="btn-flip" onclick="document.getElementById('card').classList.toggle('flipped')">Girar Cartão</button>
     </main>
 
-    <script>
-        function updateCard() {
-            // Atualiza textos
-            document.getElementById('previewPan').innerText = document.getElementById('panInput').value || '0000 0000 0000 0000';
-            document.getElementById('previewName').innerText = document.getElementById('nameInput').value || 'NOME DO TITULAR';
-            document.getElementById('previewExpiry').innerText = document.getElementById('expiryInput').value || '00/00';
-            document.getElementById('previewCvv').innerText = document.getElementById('cvvInput').value || '123';
+<script>
+    const fields = [
+        { id: 'pan', label: 'Número (PAN)', val: '4444 5555 6666 7777', x: 35, y: 140, size: 22, show: true, braille: false },
+        { id: 'name', label: 'Nome', val: 'JOSÉ DA SILVA', x: 35, y: 210, size: 16, show: true, braille: false },
+        { id: 'expiry', label: 'Validade', val: '12/30', x: 300, y: 210, size: 14, show: true, braille: false }
+    ];
 
-            // Atualiza cor
-            const color = document.getElementById('cardColor').value;
-            document.getElementById('frontFace').style.backgroundColor = color;
-            document.getElementById('backFace').style.backgroundColor = color;
+    const brailleMap = {
+        '0': '⠼⠚', '1': '⠼⠁', '2': '⠼⠝', '3': '⠼⠉', '4': '⠼⠙', '5': '⠼⠑', '6': '⠼⠋', '7': '⠼⠛', '8': '⠼⠓', '9': '⠼⠊',
+        'a': '⠁', 'b': '⠃', 'c': '⠉', 'd': '⠙', 'e': '⠑', 'f': '⠋', 'g': '⠛', 'h': '⠓', 'i': '⠊', 'j': '⠚',
+        'k': '⠅', 'l': '⠇', 'm': '⠍', 'n': '⠝', 'o': '⠕', 'p': '⠏', 'q': '⠟', 'r': '⠗', 's': '⠎', 't': '⠞',
+        'u': '⠥', 'v': '⠧', 'w': '⠺', 'x': '⠭', 'y': '⠽', 'z': '⠵', ' ': ' ', '/': '⠸'
+    };
 
-            // Lógica simples para contraste de cor
-            const r = parseInt(color.substr(1,2), 16);
-            const g = parseInt(color.substr(3,2), 16);
-            const b = parseInt(color.substr(5,2), 16);
-            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-            document.getElementById('cardElement').style.color = brightness > 125 ? '#333' : '#fff';
-        }
+    function toBraille(text) {
+        return text.toLowerCase().split('').map(char => brailleMap[char] || char).join('');
+    }
 
-        function toggleFlip() {
-            document.getElementById('cardElement').classList.toggle('flipped');
-        }
-    </script>
+    function renderControls() {
+        const container = document.getElementById('fieldControls');
+        container.innerHTML = fields.map((f, i) => `
+            <div class="control-block">
+                <h3>${f.label} <input type="checkbox" ${f.show ? 'checked' : ''} onchange="updateField(${i}, 'show', this.checked)"></h3>
+                <input type="text" value="${f.val}" oninput="updateField(${i}, 'val', this.value)" placeholder="Texto">
+                <div class="grid-inputs">
+                    <div><label>X (px)</label><input type="number" value="${f.x}" oninput="updateField(${i}, 'x', this.value)"></div>
+                    <div><label>Y (px)</label><input type="number" value="${f.y}" oninput="updateField(${i}, 'y', this.value)"></div>
+                </div>
+                <div style="margin-top:10px">
+                    <label><input type="checkbox" ${f.braille ? 'checked' : ''} onchange="updateField(${i}, 'braille', this.checked)"> Modo Braille</label>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function updateField(index, prop, value) {
+        fields[index][prop] = value;
+        sync();
+    }
+
+    function sync() {
+        const front = document.getElementById('cardFront');
+        const back = document.getElementById('cardBack');
+        const color = document.getElementById('bgColor').value;
+        
+        front.style.backgroundColor = color;
+        back.style.backgroundColor = color;
+
+        // Remove campos antigos (mantendo o chip)
+        const dynamics = front.querySelectorAll('.dynamic-field');
+        dynamics.forEach(d => d.remove());
+
+        // Adiciona campos atualizados
+        fields.forEach(f => {
+            if (!f.show) return;
+            const el = document.createElement('div');
+            el.className = `dynamic-field ${f.braille ? 'braille-mode' : ''}`;
+            el.style.left = f.x + 'px';
+            el.style.top = f.y + 'px';
+            el.style.fontSize = f.size + 'px';
+            el.innerText = f.braille ? toBraille(f.val) : f.val;
+            front.appendChild(el);
+        });
+    }
+
+    renderControls();
+    sync();
+</script>
 </body>
 </html>
 
