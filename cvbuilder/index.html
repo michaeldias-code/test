@@ -1275,7 +1275,7 @@ function experienceHTML(d, lang, sc) {
         <span class="exp-period" style="flex-shrink:0">${exp.period||''}</span>
       </div>
       <div class="exp-company">${exp.company||''}</div>
-      <ul style="font-size:var(--cv-font-size);margin-top:4px;line-height:var(--cv-line-height)">
+      <ul class="exp-desc" style="font-size:var(--cv-font-size);margin-top:4px;line-height:var(--cv-line-height)">
         ${(desc||[]).map(item=>`<li style="overflow-wrap:break-word">${item}</li>`).join('')}
       </ul>
     </div>`;
@@ -1450,7 +1450,7 @@ function render() {
         <button class="edit-btn" style="top:12px;right:12px;opacity:0.6" onclick="openEditModal('coverletter')" title="Editar Cover Letter">✏</button>
         <div class="${sc}" style="margin-bottom:28px">${clTitle}</div>
         <p style="margin-bottom:16px;font-size:var(--cv-font-size)">${clGreeting}</p>
-        <div style="line-height:1.8;text-align:justify;font-size:var(--cv-font-size);white-space:pre-line">${cl}</div>
+        <div class="ats-cl-body" style="line-height:1.8;text-align:justify;font-size:var(--cv-font-size);white-space:pre-line">${cl}</div>
         <p style="margin-top:48px;font-size:var(--cv-font-size)">${clSign}<br><strong>${d.personal.fullname}</strong></p>
       </div>`;
   };
@@ -1605,7 +1605,7 @@ const ATS_SELECTORS = [
   // Volunteer
   '.ats-vol-role', '.ats-vol-org', '.ats-vol-desc',
   // Cover letter
-  '.cover-sheet p',
+  '.cover-sheet p', '.ats-cl-body',
 ];
 
 function toggleATSMode() {
