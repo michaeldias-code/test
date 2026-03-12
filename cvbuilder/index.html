@@ -1567,7 +1567,6 @@ function paginateSections() {
 /* ── PDF EXPORT ── */
 async function exportPDF() {
   document.querySelectorAll('.page-divider').forEach(el=>el.style.display='none');
-  // Hide edit buttons so they don't appear in PDF
   document.querySelectorAll('.edit-btn').forEach(el=>el.style.display='none');
   const sheets = Array.from(document.querySelectorAll('.cv-page-sheet'));
   const {jsPDF} = window.jspdf;
@@ -1575,18 +1574,51 @@ async function exportPDF() {
   const PW=210, PH=297;
   let first=true;
 
+  // ── ATS: collect all visible text nodes in a sheet with positions ──
+  const ATS_SELECTORS = [
+    '.cv-name', '.desired-position', '.contact-info',
+    '.section-title', '.cv-objective-section',
+    '.exp-position', '.exp-company', '.exp-period',
+    '.exp-desc li', '.exp-desc p',
+    '.edu-degree', '.edu-inst', '.edu-period',
+    '.cert-title', '.cert-issuer',
+    '.proj-title', '.proj-desc',
+    '.skill-group', '.skill-row td',
+    'span.skill-tag', '.salary-value',
+    '.summary-text', '.obj-value',
+    '.cover-sheet p', '.cover-sheet div'
+  ];
+
+  function collectTextNodes(sheet, sheetRect, pageOffsetMM, pxPerMM) {
+    const nodes = [];
+    sheet.querySelectorAll(ATS_SELECTORS.join(',')).forEach(el => {
+      const text = el.innerText?.trim();
+      if (!text) return;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) return;
+      const x = (r.left - sheetRect.left) / pxPerMM;
+      const y = pageOffsetMM + (r.top - sheetRect.top) / pxPerMM;
+      const fsPx = parseFloat(getComputedStyle(el).fontSize) || 10;
+      const fsMM = fsPx * 0.352778;
+      nodes.push({ text, x, y: y + fsMM, fs: Math.max(fsMM, 2) });
+    });
+    return nodes;
+  }
+
   for (const sheet of sheets) {
     const sheetRect = sheet.getBoundingClientRect();
     const scale = 2;
     const canvas = await html2canvas(sheet,{scale,useCORS:true,logging:false});
-    const pxPerMM = canvas.width / PW;
-    const pageHpx = Math.round(PH * pxPerMM);
+    const pxPerMM = canvas.width / scale / PW;  // unscaled px per mm
 
     const breakYs = [0];
     sheet.querySelectorAll('[data-page-break]').forEach(spacer => {
       const relY = spacer.getBoundingClientRect().top - sheetRect.top;
       if (relY > 1) breakYs.push(Math.round(relY * scale));
     });
+
+    // Collect ATS text nodes once per sheet
+    const allNodes = collectTextNodes(sheet, sheetRect, 0, pxPerMM);
 
     for (let i = 0; i < breakYs.length; i++) {
       const startPx = breakYs[i];
@@ -1595,7 +1627,7 @@ async function exportPDF() {
 
       const pc  = document.createElement('canvas');
       pc.width  = canvas.width;
-      pc.height = pageHpx;
+      pc.height = Math.round(PH * canvas.width / PW);
       const ctx = pc.getContext('2d');
       ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, pc.width, pc.height);
@@ -1604,6 +1636,20 @@ async function exportPDF() {
       if (!first) doc.addPage();
       first = false;
       doc.addImage(pc.toDataURL('image/jpeg',0.95),'JPEG',0,0,PW,PH);
+
+      // ── ATS text layer — invisible, exact position ──
+      const pageStartMM = (breakYs[i] / scale) / pxPerMM;
+      const pageEndMM   = (endPx / scale) / pxPerMM;
+      doc.saveGraphicsState();
+      doc.setTextColor(255, 255, 255);  // white = invisible over white bg
+      doc.setGState(new doc.GState({opacity: 0}));
+      allNodes.forEach(({text, x, y, fs}) => {
+        const yOnPage = y - pageStartMM;
+        if (yOnPage < 0 || yOnPage > pageEndMM - pageStartMM) return;
+        doc.setFontSize(fs / 0.352778);  // mm back to pt
+        try { doc.text(text, Math.max(x, 0), yOnPage, {baseline:'bottom'}); } catch(e){}
+      });
+      doc.restoreGraphicsState();
     }
   }
 
