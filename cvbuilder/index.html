@@ -86,6 +86,8 @@ body.ats-visible .ats-node.missing {
 /* ── INLINE EDIT BUTTON ── */
 .cv-section-wrap { position: relative; }
 .cv-section-wrap:hover .edit-btn { opacity: 1; }
+.cv-section { position: relative; }
+.cv-section:hover > .edit-btn { opacity: 1; }
 /* Quando cv-section está dentro de cv-section-wrap, o gap vai no wrapper */
 .cv-section-wrap > .cv-section { margin-bottom: 0; }
 .cv-section-wrap:has(> .cv-section) { margin-bottom: var(--cv-section-gap); }
@@ -356,7 +358,7 @@ body.ats-visible .ats-node.missing {
 
 /* CRIATIVO — Barlow Condensed + Roboto Mono. Tech, bold, inconfundível */
 .template-creative { --cv-font-body: 'DM Sans', sans-serif; --cv-font-display: 'Barlow Condensed', sans-serif; }
-.template-creative .cv-page-sheet { font-family: var(--cv-font-body); border-top: 6px solid var(--primary-color); }
+.template-creative .cv-page-sheet:not(.cover-sheet) { font-family: var(--cv-font-body); border-top: 6px solid var(--primary-color); }
 .template-creative .cv-name { font-family: var(--cv-font-display); font-size: 30pt; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #0f172a; line-height: 1; }
 .template-creative .desired-position { font-family: 'Roboto Mono', monospace; font-size: 10pt; font-weight: 500; color: var(--primary-color); margin-top: 6px; }
 .template-creative .section-title { font-family: var(--cv-font-display); font-size: 9pt; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: white; background: var(--primary-color); padding: 3px 10px; display: inline-block; margin-bottom: 10px; }
@@ -375,7 +377,7 @@ body.ats-visible .ats-node.missing {
 .template-sidebar-left .col-side .cv-name { font-size: 13pt; font-weight: 800; color: white; line-height: 1.2; letter-spacing: -0.2px; }
 .template-sidebar-left .col-side .desired-position { font-size: 7pt; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.6); margin-bottom: 14px; margin-top: 4px; }
 .template-sidebar-left .col-side .section-title { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.6); border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; margin: 16px 0 8px; }
-.template-sidebar-left .col-side .contact-info { font-size: 8.5pt; line-height: 1.8; color: rgba(255,255,255,0.85); font-weight: 400; }
+.template-sidebar-left .col-side .contact-info { font-size: 8.5pt; line-height: 1.8; color: rgba(255,255,255,0.85); font-weight: 400; overflow-wrap: break-word; word-break: break-all; }
 .template-sidebar-left .col-main { padding: 30px 26px; font-family: var(--cv-font-body); }
 .template-sidebar-left .col-main .section-title { font-size: 8.5pt; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--primary-color); border-bottom: 1.5px solid var(--primary-color); padding-bottom: 4px; margin-bottom: 10px; }
 .photo-circle-side { width: 100%; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); margin-bottom: 14px; }
@@ -1080,10 +1082,10 @@ function buildEditFields(section, index, lang) {
         el_en: input('exp-position_en', exp.position_en) },
       { key:'company', label:'Empresa',
         el_pt: input('exp-company', exp.company),
-        el_en: input('exp-company-en', exp.company) },
+        el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor (campo único)</div>` },
       { key:'period', label:'Período',
         el_pt: input('exp-period', exp.period),
-        el_en: input('exp-period-en', exp.period) },
+        el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor (campo único)</div>` },
       { key:'desc', label:'Descrição (uma por linha)',
         el_pt: textarea('exp-desc_pt', (exp.description_pt||[]).join('\n'), 5),
         el_en: textarea('exp-desc_en', (exp.description_en||[]).join('\n'), 5) },
@@ -1096,10 +1098,10 @@ function buildEditFields(section, index, lang) {
         el_en: input('ed-degree_en', ed.degree_en) },
       { key:'institution', label:'Instituição',
         el_pt: input('ed-institution', ed.institution),
-        el_en: input('ed-institution-en', ed.institution) },
+        el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor</div>` },
       { key:'period', label:'Período',
         el_pt: input('ed-period', ed.period),
-        el_en: input('ed-period-en', ed.period) },
+        el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor</div>` },
     );
   } else if (section === 'skills') {
     const sk = d.skills || {};
@@ -1122,10 +1124,10 @@ function buildEditFields(section, index, lang) {
         el_en: input('cert-title_en', cert.title_en) },
       { key:'issuer', label:'Emissor',
         el_pt: input('cert-issuer', cert.issuer),
-        el_en: input('cert-issuer-en', cert.issuer) },
+        el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor</div>` },
       { key:'year', label:'Ano',
         el_pt: input('cert-year', cert.year),
-        el_en: input('cert-year-en', cert.year) },
+        el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor</div>` },
     );
   } else if (section === 'projects' && index !== undefined) {
     const proj = d.projects[index];
@@ -1145,10 +1147,10 @@ function buildEditFields(section, index, lang) {
         el_en: input('vol-role_en', vol.role_en) },
       { key:'org', label:'Organização',
         el_pt: input('vol-org', vol.organization),
-        el_en: input('vol-org-en', vol.organization) },
+        el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor</div>` },
       { key:'period', label:'Período',
         el_pt: input('vol-period', vol.period),
-        el_en: input('vol-period-en', vol.period) },
+        el_en: `<div style="font-size:0.75rem;color:#94a3b8;padding:4px 0">← mesmo valor</div>` },
       { key:'desc', label:'Descrição',
         el_pt: textarea('vol-desc_pt', vol.description_pt, 3),
         el_en: textarea('vol-desc_en', vol.description_en, 3) },
@@ -1954,3 +1956,4 @@ initDragDrop();
 </script>
 </body>
 </html>
+
