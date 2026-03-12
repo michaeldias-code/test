@@ -1259,7 +1259,7 @@ function summaryHTML(d, lang, sc) {
   if (!text) return '';
   return wrapEditable(`<div class="cv-section">
     <div class="${sc}">${lang==='pt'?'Resumo':'Summary'}</div>
-    <p style="text-align:justify;font-size:var(--cv-font-size);line-height:var(--cv-line-height)">${text}</p>
+    <p class="ats-summary" style="text-align:justify;font-size:var(--cv-font-size);line-height:var(--cv-line-height)">${text}</p>
   </div>`, 'summary');
 }
 
@@ -1312,8 +1312,8 @@ function skillsHTML(d, lang, sc, tagStyle) {
     html = `<div class="cv-section" style="position:relative">${editBtn}<div class="${sc}">${lang==='pt'?'Habilidades':'Skills'}</div>${grp(tl,d.skills.technical)}${grp(ll,d.skills.languages)}${grp(sl,d.skills.soft)}</div>`;
   } else {
     const row = (title,arr,first) => !arr||!arr.length?'': `<tr style="vertical-align:top;border-bottom:1px solid #f1f5f9">
-      <td style="font-size:7pt;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.8px;padding:${first?'0':'5px'} 12px 5px 0;white-space:nowrap;width:1%">${title}</td>
-      <td style="padding:${first?'0':'5px'} 0 5px;font-size:var(--cv-font-size);color:#334155;line-height:var(--cv-line-height);overflow-wrap:break-word">${arr.join(' · ')}</td></tr>`;
+      <td class="ats-skill-cat" style="font-size:7pt;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.8px;padding:${first?'0':'5px'} 12px 5px 0;white-space:nowrap;width:1%">${title}</td>
+      <td class="ats-skill-val" style="padding:${first?'0':'5px'} 0 5px;font-size:var(--cv-font-size);color:#334155;line-height:var(--cv-line-height);overflow-wrap:break-word">${arr.join(' · ')}</td></tr>`;
     html = `<div class="cv-section" style="position:relative">${editBtn}<div class="${sc}">${lang==='pt'?'Habilidades':'Skills'}</div>
       <table style="width:100%;border-collapse:collapse;margin:0">
         ${row(tl,d.skills.technical,true)}${row(ll,d.skills.languages,false)}${row(sl,d.skills.soft,false)}
@@ -1327,8 +1327,8 @@ function certsHTML(d, lang, sc) {
   const items = d.certifications.map((c,i)=>
     `<div style="margin-bottom:5px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('certifications',${i})" title="Editar">✏</button>
-      <strong>${lang==='pt'?c.title_pt:c.title_en}</strong>
-      <span style="color:#64748b;font-size:8pt"> · ${c.issuer||''} ${c.year?'('+c.year+')':''}</span>
+      <strong class="ats-cert-title">${lang==='pt'?c.title_pt:c.title_en}</strong>
+      <span class="ats-cert-issuer" style="color:#64748b;font-size:8pt"> · ${c.issuer||''} ${c.year?'('+c.year+')':''}</span>
     </div>`
   ).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Certificações':'Certifications'}</div>${items}</div>`,'certifications');
@@ -1339,8 +1339,8 @@ function projectsHTML(d, lang, sc) {
   const items = d.projects.map((p,i)=>
     `<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('projects',${i})" title="Editar">✏</button>
-      <strong>${lang==='pt'?p.title_pt:p.title_en}</strong>
-      <div style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?p.description_pt:p.description_en}</div>
+      <strong class="ats-proj-title">${lang==='pt'?p.title_pt:p.title_en}</strong>
+      <div class="ats-proj-desc" style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?p.description_pt:p.description_en}</div>
     </div>`
   ).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Projetos':'Projects'}</div>${items}</div>`,'projects');
@@ -1351,9 +1351,9 @@ function volunteerHTML(d, lang, sc) {
   const items = d.volunteer.map((v,i)=>
     `<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('volunteer',${i})" title="Editar">✏</button>
-      <strong>${lang==='pt'?v.role_pt:v.role_en}</strong>
-      <span style="font-weight:normal;color:#64748b"> · ${v.organization||''} ${v.period?'('+v.period+')':''}</span>
-      <div style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?v.description_pt:v.description_en}</div>
+      <strong class="ats-vol-role">${lang==='pt'?v.role_pt:v.role_en}</strong>
+      <span class="ats-vol-org" style="font-weight:normal;color:#64748b"> · ${v.organization||''} ${v.period?'('+v.period+')':''}</span>
+      <div class="ats-vol-desc" style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?v.description_pt:v.description_en}</div>
     </div>`
   ).join('');
   return wrapSplit(`<div class="cv-section"><div class="${sc}">${lang==='pt'?'Voluntariado':'Volunteer'}</div>${items}</div>`,'volunteer');
@@ -1366,7 +1366,7 @@ function salaryHTML(d, lang, sc) {
   const label = lang==='pt' ? 'Pretensão Salarial' : 'Salary Expectation';
   return wrapEditable(`<div class="cv-section">
     <div class="${sc}">${label}</div>
-    <p style="font-size:var(--cv-font-size);line-height:var(--cv-line-height);font-weight:600;color:#334155">${value}</p>
+    <p class="ats-salary" style="font-size:var(--cv-font-size);line-height:var(--cv-line-height);font-weight:600;color:#334155">${value}</p>
   </div>`, 'salary');
 }
 
@@ -1586,17 +1586,26 @@ function paginateSections() {
 /* ── PDF EXPORT ── */
 /* ── ATS MODE ── */
 const ATS_SELECTORS = [
+  // Header
   '.cv-name', '.desired-position', '.contact-info',
-  '.section-title', '.cv-objective-section',
-  '.exp-position', '.exp-company', '.exp-period',
-  '.exp-desc li', '.exp-desc p',
+  // Section titles
+  '.section-title',
+  // Objective / Summary / Salary
+  '.obj-value', '.ats-summary', '.ats-salary',
+  // Experience
+  '.exp-position', '.exp-company', '.exp-period', '.exp-desc li',
+  // Education
   '.edu-degree', '.edu-inst', '.edu-period',
-  '.cert-title', '.cert-issuer',
-  '.proj-title', '.proj-desc',
-  '.skill-group', '.skill-row td',
-  'span.skill-tag', '.salary-value',
-  '.summary-text', '.obj-value',
-  '.cover-sheet p', '.cover-sheet div'
+  // Skills
+  '.ats-skill-cat', '.ats-skill-val',
+  // Certifications
+  '.ats-cert-title', '.ats-cert-issuer',
+  // Projects
+  '.ats-proj-title', '.ats-proj-desc',
+  // Volunteer
+  '.ats-vol-role', '.ats-vol-org', '.ats-vol-desc',
+  // Cover letter
+  '.cover-sheet p',
 ];
 
 function toggleATSMode() {
