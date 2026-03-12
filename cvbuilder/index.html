@@ -45,6 +45,24 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
 .twocol-toggle label { margin: 0; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
 
 .btn-main { width: 100%; background: #000; color: white; border: none; padding: 16px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 8px; font-size: 0.9rem; }
+.btn-ats { width: 100%; background: #fff; color: #0f172a; border: 2px solid #cbd5e1; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 8px; font-size: 0.78rem; transition: all 0.2s; }
+.btn-ats:hover { border-color: #6366f1; color: #6366f1; }
+.btn-ats.active { background: #eef2ff; border-color: #6366f1; color: #4338ca; }
+
+/* ATS visible mode — highlight text layer on the CV */
+body.ats-visible .cv-page-sheet { position: relative; }
+body.ats-visible .ats-node {
+  position: absolute;
+  background: rgba(99,102,241,0.12);
+  border: 1px solid rgba(99,102,241,0.5);
+  border-radius: 2px;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+body.ats-visible .ats-node.missing {
+  background: rgba(239,68,68,0.12);
+  border-color: rgba(239,68,68,0.5);
+}
 .btn-sec  { width: 100%; background: #475569; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 0.82rem; }
 .btn-reset { width: 100%; padding: 7px; border: 1px solid #cbd5e1; background: white; border-radius: 6px; cursor: pointer; font-size: 0.8rem; color: #475569; font-weight: 600; margin-top: 8px; }
 
@@ -650,6 +668,7 @@ input[type=range] { flex: 2; accent-color: var(--primary-color); cursor: pointer
     </div>
   </div>
 
+  <button class="btn-ats" id="btn-ats-toggle" onclick="toggleATSMode()">🔍 Visualizar Camada ATS</button>
   <button class="btn-main" onclick="exportPDF()">📥 BAIXAR PDF</button>
 </div>
 
@@ -1565,7 +1584,58 @@ function paginateSections() {
 }
 
 /* ── PDF EXPORT ── */
+/* ── ATS MODE ── */
+const ATS_SELECTORS = [
+  '.cv-name', '.desired-position', '.contact-info',
+  '.section-title', '.cv-objective-section',
+  '.exp-position', '.exp-company', '.exp-period',
+  '.exp-desc li', '.exp-desc p',
+  '.edu-degree', '.edu-inst', '.edu-period',
+  '.cert-title', '.cert-issuer',
+  '.proj-title', '.proj-desc',
+  '.skill-group', '.skill-row td',
+  'span.skill-tag', '.salary-value',
+  '.summary-text', '.obj-value',
+  '.cover-sheet p', '.cover-sheet div'
+];
+
+function toggleATSMode() {
+  const btn = document.getElementById('btn-ats-toggle');
+  const isOn = document.body.classList.toggle('ats-visible');
+  btn.classList.toggle('active', isOn);
+  btn.textContent = isOn ? '✕ Ocultar Camada ATS' : '🔍 Visualizar Camada ATS';
+
+  // Remove old overlays
+  document.querySelectorAll('.ats-node').forEach(el => el.remove());
+  if (!isOn) return;
+
+  document.querySelectorAll('.cv-page-sheet').forEach(sheet => {
+    // Sheet must be relative-positioned (CSS handles this)
+    const sheetRect = sheet.getBoundingClientRect();
+
+    sheet.querySelectorAll(ATS_SELECTORS.join(',')).forEach(el => {
+      const text = el.innerText?.trim();
+      if (!text) return;
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) return;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'ats-node';
+      overlay.title = `"${text.substring(0,60)}${text.length>60?'…':''}"`;
+      overlay.style.left   = (r.left - sheetRect.left) + 'px';
+      overlay.style.top    = (r.top  - sheetRect.top)  + 'px';
+      overlay.style.width  = r.width  + 'px';
+      overlay.style.height = r.height + 'px';
+      sheet.appendChild(overlay);
+    });
+  });
+}
+
 async function exportPDF() {
+  // Disable ATS visual mode during export if active
+  const atsWasOn = document.body.classList.contains('ats-visible');
+  if (atsWasOn) toggleATSMode();
+
   document.querySelectorAll('.page-divider').forEach(el=>el.style.display='none');
   document.querySelectorAll('.edit-btn').forEach(el=>el.style.display='none');
   const sheets = Array.from(document.querySelectorAll('.cv-page-sheet'));
@@ -1575,20 +1645,6 @@ async function exportPDF() {
   let first=true;
 
   // ── ATS: collect all visible text nodes in a sheet with positions ──
-  const ATS_SELECTORS = [
-    '.cv-name', '.desired-position', '.contact-info',
-    '.section-title', '.cv-objective-section',
-    '.exp-position', '.exp-company', '.exp-period',
-    '.exp-desc li', '.exp-desc p',
-    '.edu-degree', '.edu-inst', '.edu-period',
-    '.cert-title', '.cert-issuer',
-    '.proj-title', '.proj-desc',
-    '.skill-group', '.skill-row td',
-    'span.skill-tag', '.salary-value',
-    '.summary-text', '.obj-value',
-    '.cover-sheet p', '.cover-sheet div'
-  ];
-
   function collectTextNodes(sheet, sheetRect, pageOffsetMM, pxPerMM) {
     const nodes = [];
     sheet.querySelectorAll(ATS_SELECTORS.join(',')).forEach(el => {
@@ -1678,6 +1734,7 @@ async function exportPDF() {
   doc.save(filename);
   document.querySelectorAll('.page-divider').forEach(el=>el.style.display='');
   document.querySelectorAll('.edit-btn').forEach(el=>el.style.display='');
+  if (atsWasOn) toggleATSMode();
 }
 
 /* ── DUOTONE PALETTE SWITCHING ── */
