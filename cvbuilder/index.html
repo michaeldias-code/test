@@ -728,11 +728,16 @@ body.ats-visible .ats-node.missing {
 
 <div id="section-style-panel">
   <button class="hsp-close" onclick="closeSectionPanel()">✕</button>
-  <h4>✒ Estilo dos Títulos de Seção</h4>
+  <h4>✒ Estilo dos Itens</h4>
+  <div class="hsp-tabs">
+    <button class="hsp-tab active" id="ssp-tab-position" onclick="sspSetBlock('position',this)">Cargo/Grau</button>
+    <button class="hsp-tab" id="ssp-tab-company" onclick="sspSetBlock('company',this)">Empresa</button>
+    <button class="hsp-tab" id="ssp-tab-period" onclick="sspSetBlock('period',this)">Período</button>
+  </div>
   <div class="hsp-row">
     <label>Fonte</label>
     <select id="ssp-font" onchange="sspApply()">
-      <option value="">— padrão do template —</option>
+      <option value="">— padrão —</option>
       <option value="'Outfit', sans-serif">Outfit</option>
       <option value="'Sora', sans-serif">Sora</option>
       <option value="'IBM Plex Sans', sans-serif">IBM Plex Sans</option>
@@ -1415,10 +1420,10 @@ function experienceHTML(d, lang, sc) {
     return `<div style="margin-bottom:11px;position:relative">
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('experience',${i})" title="Editar">✏</button>
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-        <span class="exp-position" style="flex:1;overflow-wrap:break-word;word-break:break-word">${pos||''}</span>
-        <span class="exp-period" style="flex-shrink:0">${period||''}</span>
+        <span class="exp-position" style="flex:1;overflow-wrap:break-word;word-break:break-word;${itemInlineStyle('position')}">${pos||''}</span>
+        <span class="exp-period" style="flex-shrink:0;${itemInlineStyle('period')}">${period||''}</span>
       </div>
-      <div class="exp-company">${exp.company||''}</div>
+      <div class="exp-company" style="${itemInlineStyle('company')}">${exp.company||''}</div>
       <ul class="exp-desc" style="font-size:var(--cv-font-size);margin-top:4px;line-height:var(--cv-line-height)">
         ${(desc||[]).map(item=>`<li style="overflow-wrap:break-word">${item}</li>`).join('')}
       </ul>
@@ -1433,10 +1438,10 @@ function educationHTML(d, lang, sc) {
     return `<div style="margin-bottom:8px;position:relative">
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('education',${i})" title="Editar">✏</button>
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-        <span class="exp-position" style="flex:1;overflow-wrap:break-word;word-break:break-word">${lang==='pt'?ed.degree_pt:ed.degree_en}</span>
-        <span class="exp-period" style="flex-shrink:0">${lang==='pt'?(ed.period_pt||ed.period):(ed.period_en||ed.period)||''}</span>
+        <span class="exp-position" style="flex:1;overflow-wrap:break-word;word-break:break-word;${itemInlineStyle('position')}">${lang==='pt'?ed.degree_pt:ed.degree_en}</span>
+        <span class="exp-period" style="flex-shrink:0;${itemInlineStyle('period')}">${lang==='pt'?(ed.period_pt||ed.period):(ed.period_en||ed.period)||''}</span>
       </div>
-      <div class="exp-company">${ed.institution||''}</div>
+      <div class="exp-company" style="${itemInlineStyle('company')}">${ed.institution||''}</div>
     </div>`;
   }).join('');
   return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Formação':'Education')}${items}</div>`,'education');
@@ -1471,8 +1476,8 @@ function certsHTML(d, lang, sc) {
   const items = d.certifications.map((c,i)=>
     `<div style="margin-bottom:5px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('certifications',${i})" title="Editar">✏</button>
-      <strong class="ats-cert-title">${lang==='pt'?c.title_pt:c.title_en}</strong>
-      <span class="ats-cert-issuer" style="color:#64748b;font-size:8pt"> · ${c.issuer||''} ${c.year?'('+c.year+')':''}</span>
+      <strong class="ats-cert-title" style="${itemInlineStyle('position')}">${lang==='pt'?c.title_pt:c.title_en}</strong>
+      <span class="ats-cert-issuer" style="color:#64748b;${itemInlineStyle('company')}"> · ${c.issuer||''} ${c.year?'('+c.year+')':''}</span>
     </div>`
   ).join('');
   return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Certificações':'Certifications')}${items}</div>`,'certifications');
@@ -1483,7 +1488,7 @@ function projectsHTML(d, lang, sc) {
   const items = d.projects.map((p,i)=>
     `<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('projects',${i})" title="Editar">✏</button>
-      <strong class="ats-proj-title">${lang==='pt'?p.title_pt:p.title_en}</strong>
+      <strong class="ats-proj-title" style="${itemInlineStyle('position')}">${lang==='pt'?p.title_pt:p.title_en}</strong>
       <div class="ats-proj-desc" style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?p.description_pt:p.description_en}</div>
     </div>`
   ).join('');
@@ -1492,11 +1497,12 @@ function projectsHTML(d, lang, sc) {
 
 function volunteerHTML(d, lang, sc) {
   if (!d.volunteer||!d.volunteer.length) return '';
+  const period = lang==='pt' ? (v) => (v.period_pt||v.period) : (v) => (v.period_en||v.period);
   const items = d.volunteer.map((v,i)=>
     `<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('volunteer',${i})" title="Editar">✏</button>
-      <strong class="ats-vol-role">${lang==='pt'?v.role_pt:v.role_en}</strong>
-      <span class="ats-vol-org" style="font-weight:normal;color:#64748b"> · ${v.organization||''} ${v.period?'('+v.period+')':''}</span>
+      <strong class="ats-vol-role" style="${itemInlineStyle('position')}">${lang==='pt'?v.role_pt:v.role_en}</strong>
+      <span class="ats-vol-org" style="font-weight:normal;color:#64748b;${itemInlineStyle('company')}"> · ${v.organization||''} ${period(v)?'('+period(v)+')':''}</span>
       <div class="ats-vol-desc" style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?v.description_pt:v.description_en}</div>
     </div>`
   ).join('');
@@ -1526,21 +1532,24 @@ const DUOTONE_MAP = {
 
 /* ── RENDER ── */
 function makeST(cls, label) {
-  let style = '';
-  if (sectionTitleStyle) {
-    const s = sectionTitleStyle;
-    if (s.font)      style += `font-family:${s.font};`;
-    if (s.size)      style += `font-size:${s.size}pt;`;
-    if (s.bold !== undefined) style += `font-weight:${s.bold?'700':'400'};`;
-    if (s.italic)    style += `font-style:italic;`;
-    if (s.underline) style += `text-decoration:underline;`;
-    if (s.uppercase !== undefined) style += `text-transform:${s.uppercase?'uppercase':'none'};`;
-  }
-  const styleAttr = style ? ` style="${style}"` : '';
-  return `<div class="${cls} section-title-wrap"${styleAttr}>${label}<button class="ssp-pencil-btn edit-btn" onclick="openSectionPanel(event)" title="Estilo dos títulos">✒</button></div>`;
+  return `<div class="${cls} section-title-wrap">${label}<button class="ssp-pencil-btn edit-btn" onclick="openSectionPanel(event)" title="Estilo dos itens">✒</button></div>`;
 }
 
 function ST(label) { return makeST('section-title', label); }
+
+function itemInlineStyle(block) {
+  const tpl = document.getElementById('template-select')?.value || 'modern';
+  const s   = (itemStyle || makeItemStyle(tpl))[block];
+  if (!s) return '';
+  let style = '';
+  if (s.font)      style += `font-family:${s.font};`;
+  if (s.size)      style += `font-size:${s.size}pt;`;
+  if (s.bold)      style += `font-weight:700;`;
+  if (s.italic)    style += `font-style:italic;`;
+  if (s.underline) style += `text-decoration:underline;`;
+  if (s.uppercase) style += `text-transform:uppercase;`;
+  return style;
+}
 
 function render() {
   if (!cvData) return;
@@ -1721,18 +1730,21 @@ function paginateSections() {
     const bodyPadTop = parseFloat(getComputedStyle(bodyEl).paddingTop) || 0;
 
     const toInsert = [];
-    let pageCursor = contentStartInSheet; // start after header
+    // First page: space already consumed by header. Subsequent pages: full USABLE.
+    let pageUsed = contentStartInSheet + bodyPadTop;
 
     sections.forEach(sec => {
-      const secTop    = offsetRelTo(sec, bodyEl) - bodyPadTop; // top relative to content area
+      const secTop    = offsetRelTo(sec, bodyEl) - bodyPadTop;
       const secHeight = sec.offsetHeight;
-      const posInPage = secTop - pageCursor;
 
-      if (posInPage > 0 && posInPage + secHeight > USABLE) {
-        // This section overflows — push it to next page
-        const spacerH = USABLE - posInPage + marginPx;
+      // How far into the current page is this section's top?
+      const posInCurrentPage = secTop - (pageUsed - bodyPadTop);
+
+      if (posInCurrentPage >= 0 && posInCurrentPage + secHeight > USABLE) {
+        // Overflows current page — push to next
+        const spacerH = USABLE - posInCurrentPage + marginPx;
         toInsert.push({ sec, spacerH });
-        pageCursor = secTop + spacerH;
+        pageUsed = secTop + spacerH + bodyPadTop;
       }
     });
 
@@ -1832,25 +1844,32 @@ document.addEventListener('click', (e) => {
 });
 
 /* ── SECTION TITLE STYLE ── */
-const SECTION_TITLE_DEFAULTS = {
-  'modern':      { size:'8.5', bold:true,  italic:false, uppercase:true  },
-  'executive':   { size:'8.5', bold:true,  italic:false, uppercase:true  },
-  'minimal':     { size:'8',   bold:true,  italic:false, uppercase:true  },
-  'creative':    { size:'9',   bold:true,  italic:false, uppercase:true  },
-  'sidebar-left':{ size:'8',   bold:true,  italic:false, uppercase:true  },
-  'duotone':     { size:'9',   bold:true,  italic:false, uppercase:true  },
-  'formal':      { size:'10.5',bold:true,  italic:false, uppercase:false },
+/* ── ITEM STYLE PANEL (Cargo / Empresa / Período) ── */
+// Defaults per template per block
+const ITEM_STYLE_DEFAULTS = {
+  'modern':      { position:{size:'10',bold:true},  company:{size:'8.5',bold:true},  period:{size:'8'} },
+  'executive':   { position:{size:'10',bold:true},  company:{size:'8.5',bold:true,uppercase:true}, period:{size:'8'} },
+  'minimal':     { position:{size:'10.5',bold:true}, company:{size:'8.5',bold:true,uppercase:true}, period:{size:'8'} },
+  'creative':    { position:{size:'12',bold:true,uppercase:true}, company:{size:'7.5'}, period:{size:'7.5'} },
+  'sidebar-left':{ position:{size:'10',bold:true},  company:{size:'8',bold:true},    period:{size:'7.5'} },
+  'duotone':     { position:{size:'10',bold:true},  company:{size:'8',bold:true,uppercase:true}, period:{size:'7.5'} },
+  'formal':      { position:{size:'10',bold:true},  company:{size:'8.5',bold:true},  period:{size:'7.5',italic:true} },
 };
 
-let sectionTitleStyle = null; // null = use template default
+let itemStyle = null; // null = use template default
+let sspCurrentBlock = 'position';
 
-function makeSectionTitleStyle(tpl) {
-  return Object.assign({ font:'', size:'', bold:false, italic:false, underline:false, uppercase:false },
-    SECTION_TITLE_DEFAULTS[tpl] || {});
+function makeItemStyle(tpl) {
+  const defs = ITEM_STYLE_DEFAULTS[tpl] || {};
+  const make = (block) => Object.assign(
+    { font:'', size:'', bold:false, italic:false, underline:false, uppercase:false },
+    defs[block] || {}
+  );
+  return { position: make('position'), company: make('company'), period: make('period') };
 }
 
-function resetSectionTitleStyle() {
-  sectionTitleStyle = null;
+function resetItemStyle() {
+  itemStyle = null;
   closeSectionPanel();
 }
 
@@ -1858,21 +1877,27 @@ function openSectionPanel(e) {
   e.stopPropagation();
   const panel = document.getElementById('section-style-panel');
   const btn   = e.currentTarget;
-  const previewRect = document.querySelector('.preview-area').getBoundingClientRect();
   const btnRect = btn.getBoundingClientRect();
-  panel.style.top  = (btnRect.bottom - previewRect.top + 8) + 'px';
-  panel.style.left = Math.min(btnRect.left - previewRect.left, previewRect.width - 260) + 'px';
+  panel.style.top  = (btnRect.bottom + 8) + 'px';
+  panel.style.left = Math.min(btnRect.left, window.innerWidth - 270) + 'px';
   panel.classList.add('visible');
-  sspLoad();
+  sspSetBlock('position', document.getElementById('ssp-tab-position'));
 }
 
 function closeSectionPanel() {
   document.getElementById('section-style-panel').classList.remove('visible');
 }
 
+function sspSetBlock(block, tabEl) {
+  sspCurrentBlock = block;
+  document.querySelectorAll('#section-style-panel .hsp-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  sspLoad();
+}
+
 function sspLoad() {
   const tpl = document.getElementById('template-select').value;
-  const s   = sectionTitleStyle || makeSectionTitleStyle(tpl);
+  const s   = (itemStyle || makeItemStyle(tpl))[sspCurrentBlock];
   document.getElementById('ssp-font').value = s.font || '';
   document.getElementById('ssp-size').value = s.size || '';
   document.getElementById('ssp-bold').classList.toggle('on', !!s.bold);
@@ -1883,17 +1908,17 @@ function sspLoad() {
 
 function sspToggle(prop) {
   const tpl = document.getElementById('template-select').value;
-  if (!sectionTitleStyle) sectionTitleStyle = makeSectionTitleStyle(tpl);
-  sectionTitleStyle[prop] = !sectionTitleStyle[prop];
-  document.getElementById('ssp-' + prop).classList.toggle('on', sectionTitleStyle[prop]);
+  if (!itemStyle) itemStyle = makeItemStyle(tpl);
+  itemStyle[sspCurrentBlock][prop] = !itemStyle[sspCurrentBlock][prop];
+  document.getElementById('ssp-' + prop).classList.toggle('on', itemStyle[sspCurrentBlock][prop]);
   render();
 }
 
 function sspApply() {
   const tpl = document.getElementById('template-select').value;
-  if (!sectionTitleStyle) sectionTitleStyle = makeSectionTitleStyle(tpl);
-  sectionTitleStyle.font = document.getElementById('ssp-font').value;
-  sectionTitleStyle.size = document.getElementById('ssp-size').value;
+  if (!itemStyle) itemStyle = makeItemStyle(tpl);
+  itemStyle[sspCurrentBlock].font = document.getElementById('ssp-font').value;
+  itemStyle[sspCurrentBlock].size = document.getElementById('ssp-size').value;
   render();
 }
 
@@ -2098,7 +2123,7 @@ function syncPaletteToTemplate() {
 }
 
 /* ── LISTENERS ── */
-document.getElementById('template-select').onchange = () => { resetHeaderStyle(); resetSectionTitleStyle(); syncPaletteToTemplate(); render(); };
+document.getElementById('template-select').onchange = () => { resetHeaderStyle(); resetItemStyle(); syncPaletteToTemplate(); render(); };
 ['color-palette','font-select','include-cover','cover-first','lang-toggle','photo-align','photo-border']
   .forEach(id => document.getElementById(id).onchange = render);
 document.querySelectorAll('.split-toggle').forEach(cb => cb.onchange = render);
