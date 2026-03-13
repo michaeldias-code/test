@@ -1710,7 +1710,7 @@ function paginateSections() {
           // Fill to end of page 1; page 2 starts naturally after spacer.bottom
           const spacerH = marginPx;
           toInsert.push({ sec, spacerH });
-          pageCursor += marginPx;
+          pageCursor += posInPage + spacerH;
         }
       });
       toInsert.forEach(({ sec, spacerH }) => insertSpacer(sec, spacerH));
@@ -1749,7 +1749,7 @@ function paginateSections() {
       if (posInPage + height > USABLE && posInPage > 0) {
         const spacerH = marginPx;
         toInsert.push({ sec, spacerH });
-        pageCursor += marginPx;
+        pageCursor += posInPage + spacerH;
       }
     });
     toInsert.forEach(({ sec, spacerH }) => insertSpacer(sec, spacerH));
