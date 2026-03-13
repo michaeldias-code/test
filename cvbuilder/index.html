@@ -711,9 +711,9 @@ body.ats-visible .ats-node.missing {
   <h4>✒ Estilo dos Itens</h4>
   <div class="hsp-tabs">
     <button class="hsp-tab active" id="ssp-tab-title" onclick="sspSetBlock('title',this)">Título</button>
-    <button class="hsp-tab" id="ssp-tab-position" onclick="sspSetBlock('position',this)">Cargo/Grau</button>
-    <button class="hsp-tab" id="ssp-tab-company" onclick="sspSetBlock('company',this)">Empresa</button>
-    <button class="hsp-tab" id="ssp-tab-period" onclick="sspSetBlock('period',this)">Período</button>
+    <button class="hsp-tab" id="ssp-tab-position" onclick="sspSetBlock('position',this)">Subtítulo</button>
+    <button class="hsp-tab" id="ssp-tab-company" onclick="sspSetBlock('company',this)">Detalhe</button>
+    <button class="hsp-tab" id="ssp-tab-period" onclick="sspSetBlock('period',this)">Data</button>
   </div>
   <div class="hsp-row">
     <label>Fonte</label>
@@ -1513,7 +1513,9 @@ const DUOTONE_MAP = {
 
 /* ── RENDER ── */
 function makeST(cls, label) {
-  return `<div class="${cls} section-title-wrap" style="${itemInlineStyle('title')}">${label}<button class="ssp-pencil-btn edit-btn" onclick="openSectionPanel(event)" title="Estilo dos itens">✒</button></div>`;
+  // Only apply title inline style when user has explicitly customized (itemStyle !== null)
+  const titleStyle = itemStyle ? itemInlineStyle('title') : '';
+  return `<div class="${cls} section-title-wrap" style="${titleStyle}">${label}<button class="ssp-pencil-btn edit-btn" onclick="openSectionPanel(event)" title="Estilo dos itens">✒</button></div>`;
 }
 
 function ST(label) { return makeST('section-title', label); }
@@ -2246,3 +2248,4 @@ if (hadState) {
 </script>
 </body>
 </html>
+
