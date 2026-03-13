@@ -713,6 +713,7 @@ body.ats-visible .ats-node.missing {
     <button class="hsp-tab active" id="ssp-tab-position" onclick="sspSetBlock('position',this)">Cargo/Grau</button>
     <button class="hsp-tab" id="ssp-tab-company" onclick="sspSetBlock('company',this)">Empresa</button>
     <button class="hsp-tab" id="ssp-tab-period" onclick="sspSetBlock('period',this)">Período</button>
+    <button class="hsp-tab" id="ssp-tab-title" onclick="sspSetBlock('title',this)">Título</button>
   </div>
   <div class="hsp-row">
     <label>Fonte</label>
@@ -1512,7 +1513,7 @@ const DUOTONE_MAP = {
 
 /* ── RENDER ── */
 function makeST(cls, label) {
-  return `<div class="${cls} section-title-wrap">${label}<button class="ssp-pencil-btn edit-btn" onclick="openSectionPanel(event)" title="Estilo dos itens">✒</button></div>`;
+  return `<div class="${cls} section-title-wrap" style="${itemInlineStyle('title')}">${label}<button class="ssp-pencil-btn edit-btn" onclick="openSectionPanel(event)" title="Estilo dos itens">✒</button></div>`;
 }
 
 function ST(label) { return makeST('section-title', label); }
@@ -1707,7 +1708,7 @@ function paginateSections() {
         const posInPage = top - pageCursor;
         if (posInPage + height > USABLE && posInPage > 0) {
           // Fill to end of page 1; page 2 starts naturally after spacer.bottom
-          const spacerH = USABLE - posInPage;
+          const spacerH = USABLE - posInPage + marginPx * 2;
           toInsert.push({ sec, spacerH });
           pageCursor += posInPage + spacerH;
         }
@@ -1746,7 +1747,7 @@ function paginateSections() {
     measured.forEach(({ sec, top, height }) => {
       const posInPage = top - pageCursor;
       if (posInPage + height > USABLE && posInPage > 0) {
-        const spacerH = USABLE - posInPage;
+        const spacerH = USABLE - posInPage + marginPx * 2;
         toInsert.push({ sec, spacerH });
         pageCursor += posInPage + spacerH;
       }
@@ -1845,13 +1846,13 @@ document.addEventListener('click', (e) => {
 /* ── ITEM STYLE PANEL (Cargo / Empresa / Período) ── */
 // Defaults per template per block
 const ITEM_STYLE_DEFAULTS = {
-  'modern':      { position:{size:'10',bold:true},  company:{size:'8.5',bold:true},  period:{size:'8'} },
-  'executive':   { position:{size:'10',bold:true},  company:{size:'8.5',bold:true,uppercase:true}, period:{size:'8'} },
-  'minimal':     { position:{size:'10.5',bold:true}, company:{size:'8.5',bold:true,uppercase:true}, period:{size:'8'} },
-  'creative':    { position:{size:'12',bold:true,uppercase:true}, company:{size:'7.5'}, period:{size:'7.5'} },
-  'sidebar-left':{ position:{size:'10',bold:true},  company:{size:'8',bold:true},    period:{size:'7.5'} },
-  'duotone':     { position:{size:'10',bold:true},  company:{size:'8',bold:true,uppercase:true}, period:{size:'7.5'} },
-  'formal':      { position:{size:'10',bold:true},  company:{size:'8.5',bold:true},  period:{size:'7.5',italic:true} },
+  'modern':      { position:{size:'10',bold:true},  company:{size:'8.5',bold:true},  period:{size:'8'}, title:{size:'8.5',bold:true,uppercase:true} },
+  'executive':   { position:{size:'10',bold:true},  company:{size:'8.5',bold:true,uppercase:true}, period:{size:'8'}, title:{size:'8.5',bold:true,uppercase:true} },
+  'minimal':     { position:{size:'10.5',bold:true}, company:{size:'8.5',bold:true,uppercase:true}, period:{size:'8'}, title:{size:'8',bold:true,uppercase:true} },
+  'creative':    { position:{size:'12',bold:true,uppercase:true}, company:{size:'7.5'}, period:{size:'7.5'}, title:{size:'9',bold:true,uppercase:true} },
+  'sidebar-left':{ position:{size:'10',bold:true},  company:{size:'8',bold:true},    period:{size:'7.5'}, title:{size:'8',bold:true,uppercase:true} },
+  'duotone':     { position:{size:'10',bold:true},  company:{size:'8',bold:true,uppercase:true}, period:{size:'7.5'}, title:{size:'9',bold:true,uppercase:true} },
+  'formal':      { position:{size:'10',bold:true},  company:{size:'8.5',bold:true},  period:{size:'7.5',italic:true}, title:{size:'10.5',bold:true} },
 };
 
 let itemStyle = null; // null = use template default
@@ -1863,7 +1864,7 @@ function makeItemStyle(tpl) {
     { font:'', size:'', bold:false, italic:false, underline:false, uppercase:false },
     defs[block] || {}
   );
-  return { position: make('position'), company: make('company'), period: make('period') };
+  return { position: make('position'), company: make('company'), period: make('period'), title: make('title') };
 }
 
 function resetItemStyle() {
