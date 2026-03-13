@@ -1457,8 +1457,8 @@ function certsHTML(d, lang) {
   const items = d.certifications.map((c,i)=>
     `<div style="margin-bottom:5px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('certifications',${i})" title="Editar">✏</button>
-      <strong class="ats-cert-title" style="${itemInlineStyle('position')}">${lang==='pt'?c.title_pt:c.title_en}</strong>
-      <span class="ats-cert-issuer" style="color:#64748b;${itemInlineStyle('company')}"> · ${c.issuer||''} ${c.year?'('+c.year+')':''}</span>
+      <span class="exp-position ats-cert-title" style="${itemInlineStyle('position')}">${lang==='pt'?c.title_pt:c.title_en}</span>
+      <span class="exp-company ats-cert-issuer" style="${itemInlineStyle('company')}"> · ${c.issuer||''} ${c.year?'('+c.year+')':''}</span>
     </div>`
   ).join('');
   return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Certificações':'Certifications')}${items}</div>`,'certifications');
@@ -1469,7 +1469,7 @@ function projectsHTML(d, lang) {
   const items = d.projects.map((p,i)=>
     `<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('projects',${i})" title="Editar">✏</button>
-      <strong class="ats-proj-title" style="${itemInlineStyle('position')}">${lang==='pt'?p.title_pt:p.title_en}</strong>
+      <span class="exp-position ats-proj-title" style="${itemInlineStyle('position')}">${lang==='pt'?p.title_pt:p.title_en}</span>
       <div class="ats-proj-desc" style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?p.description_pt:p.description_en}</div>
     </div>`
   ).join('');
@@ -1482,8 +1482,8 @@ function volunteerHTML(d, lang) {
   const items = d.volunteer.map((v,i)=>
     `<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
       <button class="edit-btn" style="top:0;right:-28px" onclick="openEditModal('volunteer',${i})" title="Editar">✏</button>
-      <strong class="ats-vol-role" style="${itemInlineStyle('position')}">${lang==='pt'?v.role_pt:v.role_en}</strong>
-      <span class="ats-vol-org" style="font-weight:normal;color:#64748b;${itemInlineStyle('company')}"> · ${v.organization||''} ${period(v)?'('+period(v)+')':''}</span>
+      <span class="exp-position ats-vol-role" style="${itemInlineStyle('position')}">${lang==='pt'?v.role_pt:v.role_en}</span>
+      <span class="exp-company ats-vol-org" style="${itemInlineStyle('company')}"> · ${v.organization||''} ${period(v)?'('+period(v)+')':''}</span>
       <div class="ats-vol-desc" style="color:#475569;line-height:var(--cv-line-height)">${lang==='pt'?v.description_pt:v.description_en}</div>
     </div>`
   ).join('');
