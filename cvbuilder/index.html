@@ -710,10 +710,10 @@ body.ats-visible .ats-node.missing {
   <button class="hsp-close" onclick="closeSectionPanel()">✕</button>
   <h4>✒ Estilo dos Itens</h4>
   <div class="hsp-tabs">
-    <button class="hsp-tab active" id="ssp-tab-position" onclick="sspSetBlock('position',this)">Cargo/Grau</button>
+    <button class="hsp-tab active" id="ssp-tab-title" onclick="sspSetBlock('title',this)">Título</button>
+    <button class="hsp-tab" id="ssp-tab-position" onclick="sspSetBlock('position',this)">Cargo/Grau</button>
     <button class="hsp-tab" id="ssp-tab-company" onclick="sspSetBlock('company',this)">Empresa</button>
     <button class="hsp-tab" id="ssp-tab-period" onclick="sspSetBlock('period',this)">Período</button>
-    <button class="hsp-tab" id="ssp-tab-title" onclick="sspSetBlock('title',this)">Título</button>
   </div>
   <div class="hsp-row">
     <label>Fonte</label>
@@ -1708,9 +1708,9 @@ function paginateSections() {
         const posInPage = top - pageCursor;
         if (posInPage + height > USABLE && posInPage > 0) {
           // Fill to end of page 1; page 2 starts naturally after spacer.bottom
-          const spacerH = USABLE - posInPage + marginPx * 2;
+          const spacerH = marginPx;
           toInsert.push({ sec, spacerH });
-          pageCursor += posInPage + spacerH;
+          pageCursor += USABLE - posInPage + marginPx;
         }
       });
       toInsert.forEach(({ sec, spacerH }) => insertSpacer(sec, spacerH));
@@ -1747,9 +1747,9 @@ function paginateSections() {
     measured.forEach(({ sec, top, height }) => {
       const posInPage = top - pageCursor;
       if (posInPage + height > USABLE && posInPage > 0) {
-        const spacerH = USABLE - posInPage + marginPx * 2;
+        const spacerH = marginPx;
         toInsert.push({ sec, spacerH });
-        pageCursor += posInPage + spacerH;
+        pageCursor += USABLE - posInPage + marginPx;
       }
     });
     toInsert.forEach(({ sec, spacerH }) => insertSpacer(sec, spacerH));
@@ -1880,7 +1880,7 @@ function openSectionPanel(e) {
   panel.style.top  = (btnRect.bottom + 8) + 'px';
   panel.style.left = Math.min(btnRect.left, window.innerWidth - 270) + 'px';
   panel.classList.add('visible');
-  sspSetBlock('position', document.getElementById('ssp-tab-position'));
+  sspSetBlock('title', document.getElementById('ssp-tab-title'));
 }
 
 function closeSectionPanel() {
@@ -2021,9 +2021,9 @@ async function exportPDF() {
 
     const breakYs = [0];
     sheet.querySelectorAll('[data-page-break]').forEach(spacer => {
-      // Cut at spacer bottom — spacer fills remainder of page 1, page 2 starts fresh
-      const bottomY = spacer.getBoundingClientRect().bottom - sheetRect.top;
-      if (bottomY > 1) breakYs.push(Math.round(bottomY * scale));
+      // Cut at spacer top — spacer appears at top of page 2 as top margin
+      const topY = spacer.getBoundingClientRect().top - sheetRect.top;
+      if (topY > 1) breakYs.push(Math.round(topY * scale));
     });
 
     // Collect ATS text nodes once per sheet
