@@ -1538,6 +1538,7 @@ function render() {
   const align     = document.getElementById('photo-align').value;
   const container = document.getElementById('cv-render');
   const d = cvData;
+  const colorVal  = document.getElementById('color-palette').value;
   const isDuotone = colorVal.startsWith('duotone-');
   const dtPreview = document.getElementById('duotone-preview');
   if (isDuotone && DUOTONE_MAP[colorVal]) {
