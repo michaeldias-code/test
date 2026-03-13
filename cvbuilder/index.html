@@ -23,9 +23,6 @@ body { font-family: 'Inter', sans-serif; background: #323639; margin: 0; display
 .sidebar { width: 360px; background: #fff; border-right: 1px solid #e2e8f0; padding: 20px; overflow-y: auto; height: 100%; box-sizing: border-box; }
 .preview-area { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; position: relative; }
 
-.control-group { margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px; }
-.control-group h3 { font-size: 0.7rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 10px; }
-label { display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin: 8px 0 4px; }
 select, input[type=file] { width: 100%; padding: 7px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 0.82rem; }
 
 .slider-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
@@ -85,15 +82,13 @@ body.ats-visible .ats-node.missing {
 
 /* ── INLINE EDIT BUTTON ── */
 .cv-section-wrap { position: relative; }
-.cv-section-wrap:hover .edit-btn { opacity: 1; }
+.cv-section-wrap:hover .edit-btn,
+.cv-section:hover > .edit-btn,
+[style*="position:relative"]:hover > .edit-btn { opacity: 1 !important; }
+/* Section structure */
 .cv-section { position: relative; }
-.cv-section:hover > .edit-btn { opacity: 1; }
-/* Quando cv-section está dentro de cv-section-wrap, o gap vai no wrapper */
 .cv-section-wrap > .cv-section { margin-bottom: 0; }
 .cv-section-wrap:has(> .cv-section) { margin-bottom: var(--cv-section-gap); }
-/* Botões inline dentro de itens */
-[style*="position:relative"]:hover > .edit-btn { opacity: 1 !important; }
-.cv-section[style*="position:relative"]:hover > .edit-btn { opacity: 1 !important; }
 .edit-btn {
   opacity: 0; position: absolute; top: 0; right: -28px;
   background: #1e293b; color: white; border: none;
@@ -139,18 +134,9 @@ body.ats-visible .ats-node.missing {
   font-family: inherit; resize: vertical; color: #0f172a;
 }
 .edit-field input:focus, .edit-field textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(37,99,235,0.1); }
-.edit-field-mono { margin-bottom: 12px; }
-.edit-field-mono label { font-size: 0.75rem; font-weight: 700; color: #475569; display: block; margin-bottom: 4px; }
-.edit-field-mono input, .edit-field-mono textarea {
-  width: 100%; box-sizing: border-box; border: 1px solid #cbd5e1;
-  border-radius: 6px; padding: 7px 9px; font-size: 0.78rem;
-  font-family: inherit; resize: vertical; color: #0f172a;
-}
-.edit-save-btn { width: 100%; background: #0f172a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; margin-top: 14px; }
-.edit-save-btn:hover { background: #1e293b; }
-.edit-section-divider { border: none; border-top: 1px solid #f1f5f9; margin: 14px 0; }
 
 /* ── VALIDATION MODAL ── */
+.edit-save-btn { width: 100%; background: #0f172a; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; margin-top: 14px; }
 #validation-overlay {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.55); z-index: 1000;
@@ -465,15 +451,17 @@ body.ats-visible .ats-node.missing {
 
 .html2pdf__page-break { display: block; height: 0; page-break-before: always; }
 
-/* ── HEADER STYLE PANEL ── */
-#header-style-panel {
+/* ── STYLE PANELS (header & section item) ── */
+.style-panel {
   position: fixed; z-index: 200; background: white;
   border: 1px solid #e2e8f0; border-radius: 10px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  padding: 14px 14px 10px; width: 260px; font-family: sans-serif; display: none;
+  padding: 14px 14px 10px; font-family: sans-serif; display: none;
 }
-#header-style-panel.visible { display: block; }
-#header-style-panel h4 { margin: 0 0 10px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #64748b; }
+.style-panel.visible { display: block; }
+#header-style-panel  { width: 260px; }
+#section-style-panel { width: 240px; }
+.style-panel h4 { margin: 0 0 10px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #64748b; }
 .hsp-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
 .hsp-tab { flex: 1; padding: 5px 4px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 0.7rem; font-weight: 700; cursor: pointer; background: white; color: #475569; text-align: center; }
 .hsp-tab.active { background: #0f172a; color: white; border-color: #0f172a; }
@@ -485,15 +473,6 @@ body.ats-visible .ats-node.missing {
 .hsp-toggle { width: 30px; height: 26px; border: 1px solid #cbd5e1; border-radius: 5px; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
 .hsp-toggle.on { background: #0f172a; color: white; border-color: #0f172a; }
 .hsp-close { position: absolute; top: 8px; right: 10px; background: none; border: none; font-size: 1rem; cursor: pointer; color: #94a3b8; line-height: 1; }
-
-#section-style-panel {
-  position: fixed; z-index: 200; background: white;
-  border: 1px solid #e2e8f0; border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  padding: 14px 14px 10px; width: 240px; font-family: sans-serif; display: none;
-}
-#section-style-panel.visible { display: block; }
-#section-style-panel h4 { margin: 0 0 10px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #64748b; }
 
 .section-title-wrap { position: relative; display: inline-block; }
 .ssp-pencil-btn {
@@ -724,9 +703,10 @@ body.ats-visible .ats-node.missing {
 
   <button class="btn-ats" id="btn-ats-toggle" onclick="toggleATSMode()" style="display:none">🔍 Visualizar Camada ATS</button>
   <button class="btn-main" onclick="exportPDF()">📥 BAIXAR PDF</button>
+  <button class="btn-reset" onclick="if(confirm('Limpar sessão e reiniciar?')) clearState()" title="Apaga dados salvos e recarrega">🗑 Limpar sessão</button>
 </div>
 
-<div id="section-style-panel">
+<div id="section-style-panel" class="style-panel">
   <button class="hsp-close" onclick="closeSectionPanel()">✕</button>
   <h4>✒ Estilo dos Itens</h4>
   <div class="hsp-tabs">
@@ -764,7 +744,7 @@ body.ats-visible .ats-node.missing {
   </div>
 </div>
 
-<div id="header-style-panel">
+<div id="header-style-panel" class="style-panel">
   <button class="hsp-close" onclick="closeHeaderPanel()">✕</button>
   <h4>✒ Estilo do Header</h4>
   <div class="hsp-tabs">
@@ -925,7 +905,7 @@ sliderCfg.forEach(s => {
   document.getElementById(s.id).addEventListener('input', function() {
     document.getElementById(s.val).textContent = s.fmt(this.value);
     document.getElementById('cv-render').style.setProperty(s.prop, this.value + s.unit);
-    requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); }));
+    requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); saveState(); }));
   });
 });
 function resetDensity() {
@@ -935,7 +915,7 @@ function resetDensity() {
     document.getElementById(s.val).textContent = s.fmt(def[s.id]);
     document.getElementById('cv-render').style.removeProperty(s.prop);
   });
-  requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); }));
+  requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); saveState(); }));
 }
 
 /* ── FIT INDICATOR ── */
@@ -1402,7 +1382,7 @@ function objectiveHTML(d, lang) {
   </div>`;
 }
 
-function summaryHTML(d, lang, sc) {
+function summaryHTML(d, lang) {
   const text = lang==='pt' ? d.personal.summary_pt : d.personal.summary_en;
   if (!text) return '';
   return wrapEditable(`<div class="cv-section">
@@ -1411,7 +1391,7 @@ function summaryHTML(d, lang, sc) {
   </div>`, 'summary');
 }
 
-function experienceHTML(d, lang, sc) {
+function experienceHTML(d, lang) {
   if (!d.experience||!d.experience.length) return '';
   const items = d.experience.map((exp, i) => {
     const pos    = lang==='pt' ? exp.position_pt    : exp.position_en;
@@ -1429,10 +1409,10 @@ function experienceHTML(d, lang, sc) {
       </ul>
     </div>`;
   }).join('');
-  return wrapSplit(`<div class="cv-section-wrap"><div class="cv-section">${ST(lang==='pt'?'Experiência Profissional':'Experience')}${items}</div></div>`,'experience');
+  return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Experiência Profissional':'Experience')}${items}</div>`,'experience');
 }
 
-function educationHTML(d, lang, sc) {
+function educationHTML(d, lang) {
   if (!d.education||!d.education.length) return '';
   const items = d.education.map((ed, i) => {
     return `<div style="margin-bottom:8px;position:relative">
@@ -1447,7 +1427,7 @@ function educationHTML(d, lang, sc) {
   return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Formação':'Education')}${items}</div>`,'education');
 }
 
-function skillsHTML(d, lang, sc, tagStyle) {
+function skillsHTML(d, lang, tagStyle) {
   if (!d.skills) return '';
   const tl = lang==='pt'?'Técnicas':'Technical';
   const ll = lang==='pt'?'Idiomas':'Languages';
@@ -1471,7 +1451,7 @@ function skillsHTML(d, lang, sc, tagStyle) {
   return wrapSplit(html,'skills');
 }
 
-function certsHTML(d, lang, sc) {
+function certsHTML(d, lang) {
   if (!d.certifications||!d.certifications.length) return '';
   const items = d.certifications.map((c,i)=>
     `<div style="margin-bottom:5px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
@@ -1483,7 +1463,7 @@ function certsHTML(d, lang, sc) {
   return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Certificações':'Certifications')}${items}</div>`,'certifications');
 }
 
-function projectsHTML(d, lang, sc) {
+function projectsHTML(d, lang) {
   if (!d.projects||!d.projects.length) return '';
   const items = d.projects.map((p,i)=>
     `<div style="margin-bottom:7px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
@@ -1495,7 +1475,7 @@ function projectsHTML(d, lang, sc) {
   return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Projetos':'Projects')}${items}</div>`,'projects');
 }
 
-function volunteerHTML(d, lang, sc) {
+function volunteerHTML(d, lang) {
   if (!d.volunteer||!d.volunteer.length) return '';
   const period = lang==='pt' ? (v) => (v.period_pt||v.period) : (v) => (v.period_en||v.period);
   const items = d.volunteer.map((v,i)=>
@@ -1509,7 +1489,7 @@ function volunteerHTML(d, lang, sc) {
   return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Voluntariado':'Volunteer')}${items}</div>`,'volunteer');
 }
 
-function salaryHTML(d, lang, sc) {
+function salaryHTML(d, lang) {
   if (!d.salary_expectation) return '';
   const value = lang==='pt' ? d.salary_expectation.pt : d.salary_expectation.en;
   if (!value) return '';
@@ -1558,9 +1538,6 @@ function render() {
   const align     = document.getElementById('photo-align').value;
   const container = document.getElementById('cv-render');
   const d = cvData;
-
-  // Apply colors
-  const colorVal = document.getElementById('color-palette').value;
   const isDuotone = colorVal.startsWith('duotone-');
   const dtPreview = document.getElementById('duotone-preview');
   if (isDuotone && DUOTONE_MAP[colorVal]) {
@@ -1580,20 +1557,20 @@ function render() {
   document.getElementById('cv-render').style.setProperty('--cv-font-body', selectedFont);
   container.className = `template-${template}`;
 
-  const sc = 'section-title';
-  const tag = 'background:rgba(255,255,255,0.18);color:white;border-radius:4px;padding:2px 7px;font-size:8pt;display:inline-block;margin:2px 2px 2px 0;';
+  // Inline tag style for sidebar skills/volunteer (white pill badges on dark bg)
+  const SIDEBAR_TAG = 'background:rgba(255,255,255,0.18);color:white;border-radius:4px;padding:2px 7px;font-size:8pt;display:inline-block;margin:2px 2px 2px 0;';
 
   // Map key → renderer
   const renderers = {
     objective:      () => objectiveHTML(d, lang),
-    summary:        () => summaryHTML(d, lang, sc),
-    experience:     () => experienceHTML(d, lang, sc),
-    education:      () => educationHTML(d, lang, sc),
-    skills:         (ts) => skillsHTML(d, lang, sc, ts),
-    certifications: () => certsHTML(d, lang, sc),
-    projects:       () => projectsHTML(d, lang, sc),
-    volunteer:      () => volunteerHTML(d, lang, sc),
-    salary:         () => salaryHTML(d, lang, sc),
+    summary:        () => summaryHTML(d, lang),
+    experience:     () => experienceHTML(d, lang),
+    education:      () => educationHTML(d, lang),
+    skills:         (ts) => skillsHTML(d, lang, ts),
+    certifications: () => certsHTML(d, lang),
+    projects:       () => projectsHTML(d, lang),
+    volunteer:      () => volunteerHTML(d, lang),
+    salary:         () => salaryHTML(d, lang),
   };
 
   // Ordered keys from drag list, filtered by visibility
@@ -1618,7 +1595,7 @@ function render() {
     return `<hr class="page-divider" data-label="${clTitle}">
       <div class="cv-page-sheet cover-sheet${breakAfter?' break-after':''}" style="padding:var(--cv-margin);position:relative">
         <button class="edit-btn" style="top:12px;right:12px;opacity:0.6" onclick="openEditModal('coverletter')" title="Editar Cover Letter">✏</button>
-        <div class="${sc}" style="margin-bottom:28px">${clTitle}</div>
+        <div class="section-title" style="margin-bottom:28px">${clTitle}</div>
         <p style="margin-bottom:16px;font-size:var(--cv-font-size)">${clGreeting}</p>
         <div class="ats-cl-body" style="line-height:1.8;text-align:justify;font-size:var(--cv-font-size);white-space:pre-line">${cl}</div>
         <p style="margin-top:48px;font-size:var(--cv-font-size)">${clSign}<br><strong>${d.personal.fullname}</strong></p>
@@ -1637,7 +1614,7 @@ function render() {
           ${showDesiredInHeader && desired ? `<div class="desired-position">${desired}</div>` : ''}
           ${ST('Contato')}
           <div class="contact-info">📍 ${d.personal.location||''}<br>📞 ${d.personal.phone||''}<br>✉️ ${d.personal.email||''}${d.personal.linkedin?`<br>🔗 ${d.personal.linkedin}`:''}${d.personal.website?`<br>🌐 ${d.personal.website}`:''}</div>
-          ${renderList(orderedSideKeys, tag)}
+          ${renderList(orderedSideKeys, SIDEBAR_TAG)}
         </div>
         <div class="col-main">${renderList(mainKeys)}</div>
       </div></div>`;
@@ -1680,7 +1657,7 @@ function render() {
   }
 
   container.innerHTML = html;
-  requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); }));
+  requestAnimationFrame(() => requestAnimationFrame(() => { paginateSections(); updateFit(); saveState(); }));
 }
 
 /* ── PAGINAÇÃO POR SEÇÃO INTEIRA ── */
@@ -1700,18 +1677,6 @@ function paginateSections() {
     const sp = document.createElement('div');
     sp.dataset.pageBreak = '1';
     sp.style.cssText = `display:block;height:${h}px;`;
-    beforeEl.parentNode.insertBefore(sp, beforeEl);
-  }
-
-  function insertPageBreak(beforeEl, posInPage, usable, margin) {
-    // Page 1 fills up with (usable - posInPage) blank px, then page 2 starts with margin px
-    const fillH  = usable - posInPage;   // white space to end of page 1
-    const totalH = fillH + margin;        // total spacer height
-    if (totalH <= 0) return;
-    const sp = document.createElement('div');
-    sp.dataset.pageBreak = '1';
-    sp.dataset.page1end  = fillH;         // px from spacer top where page 1 ends
-    sp.style.cssText = `display:block;height:${totalH}px;`;
     beforeEl.parentNode.insertBefore(sp, beforeEl);
   }
 
@@ -1740,9 +1705,10 @@ function paginateSections() {
       measured.forEach(({ sec, top, height }) => {
         const posInPage = top - pageCursor;
         if (posInPage + height > USABLE && posInPage > 0) {
-          const spacerH = USABLE - posInPage + marginPx;
+          // Fill to end of page 1; page 2 starts naturally after spacer.bottom
+          const spacerH = USABLE - posInPage;
           toInsert.push({ sec, spacerH });
-          pageCursor += spacerH;
+          pageCursor += posInPage + spacerH;
         }
       });
       toInsert.forEach(({ sec, spacerH }) => insertSpacer(sec, spacerH));
@@ -1779,9 +1745,9 @@ function paginateSections() {
     measured.forEach(({ sec, top, height }) => {
       const posInPage = top - pageCursor;
       if (posInPage + height > USABLE && posInPage > 0) {
-        const spacerH = USABLE - posInPage + marginPx;
+        const spacerH = USABLE - posInPage;
         toInsert.push({ sec, spacerH });
-        pageCursor += spacerH;
+        pageCursor += posInPage + spacerH;
       }
     });
     toInsert.forEach(({ sec, spacerH }) => insertSpacer(sec, spacerH));
@@ -2053,8 +2019,8 @@ async function exportPDF() {
 
     const breakYs = [0];
     sheet.querySelectorAll('[data-page-break]').forEach(spacer => {
-      const r = spacer.getBoundingClientRect();
-      const bottomY = r.bottom - sheetRect.top;
+      // Cut at spacer bottom — spacer fills remainder of page 1, page 2 starts fresh
+      const bottomY = spacer.getBoundingClientRect().bottom - sheetRect.top;
       if (bottomY > 1) breakYs.push(Math.round(bottomY * scale));
     });
 
@@ -2154,7 +2120,111 @@ function syncPaletteToTemplate() {
   }
 }
 
-/* ── LISTENERS ── */
+/* ── STATE PERSISTENCE ── */
+const STATE_KEY = 'cvdesigner_v1';
+
+function saveState() {
+  if (!cvData) return;
+  try {
+    const state = {
+      cvData,
+      userPhoto,
+      template:    document.getElementById('template-select').value,
+      color:       document.getElementById('color-palette').value,
+      font:        document.getElementById('font-select').value,
+      photoAlign:  document.getElementById('photo-align').value,
+      photoBorder: document.getElementById('photo-border')?.value,
+      lang:        document.getElementById('lang-toggle').checked,
+      coverOn:     document.getElementById('include-cover').checked,
+      coverFirst:  document.getElementById('cover-first').checked,
+      margin:      document.getElementById('ctrl-margin').value,
+      fontSize:    document.getElementById('ctrl-font').value,
+      gap:         document.getElementById('ctrl-gap').value,
+      lineHeight:  document.getElementById('ctrl-lh').value,
+      sectionOrder: getSectionOrder(),
+      sectionChecks: [...document.querySelectorAll('.sec-check-inline')].reduce((acc, cb) => {
+        acc[cb.id.replace('chk-','')] = cb.checked; return acc;
+      }, {}),
+      objStyle: document.querySelector('input[name="obj-style"]:checked')?.value,
+      headerStyle,
+      itemStyle,
+      splitToggles: [...document.querySelectorAll('.split-toggle')].reduce((acc, cb) => {
+        acc[cb.dataset.sec] = cb.checked; return acc;
+      }, {}),
+    };
+    localStorage.setItem(STATE_KEY, JSON.stringify(state));
+  } catch(e) { /* quota exceeded or private mode */ }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STATE_KEY);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+
+    // Restore data
+    cvData    = s.cvData    || null;
+    userPhoto = s.userPhoto || null;
+    if (userPhoto) document.getElementById('btn-remove-photo').style.display = '';
+
+    // Restore controls
+    if (s.template)    document.getElementById('template-select').value = s.template;
+    if (s.color)       document.getElementById('color-palette').value   = s.color;
+    if (s.font)        document.getElementById('font-select').value     = s.font;
+    if (s.photoAlign)  document.getElementById('photo-align').value     = s.photoAlign;
+    if (s.photoBorder) { const pb = document.getElementById('photo-border'); if (pb) pb.value = s.photoBorder; }
+    if (s.lang       !== undefined) document.getElementById('lang-toggle').checked     = s.lang;
+    if (s.coverOn    !== undefined) document.getElementById('include-cover').checked   = s.coverOn;
+    if (s.coverFirst !== undefined) document.getElementById('cover-first').checked     = s.coverFirst;
+
+    // Restore sliders
+    const sliderMap = { margin:'ctrl-margin', fontSize:'ctrl-font', gap:'ctrl-gap', lineHeight:'ctrl-lh' };
+    sliderCfg.forEach(sc => {
+      const key = Object.keys(sliderMap).find(k => sliderMap[k] === sc.id);
+      if (key && s[key] !== undefined) {
+        document.getElementById(sc.id).value = s[key];
+        document.getElementById(sc.val).textContent = sc.fmt(s[key]);
+        document.getElementById('cv-render').style.setProperty(sc.prop, s[key] + sc.unit);
+      }
+    });
+
+    // Restore section order + checks
+    if (s.sectionOrder) {
+      const list = document.getElementById('section-order-list');
+      s.sectionOrder.forEach(key => {
+        const li = list.querySelector(`li[data-key="${key}"]`);
+        if (li) list.appendChild(li);
+      });
+    }
+    if (s.sectionChecks) {
+      Object.entries(s.sectionChecks).forEach(([key, val]) => {
+        const cb = document.getElementById('chk-' + key);
+        if (cb) cb.checked = val;
+      });
+    }
+    if (s.objStyle) {
+      const r = document.querySelector(`input[name="obj-style"][value="${s.objStyle}"]`);
+      if (r) r.checked = true;
+    }
+    if (s.splitToggles) {
+      Object.entries(s.splitToggles).forEach(([sec, val]) => {
+        const cb = document.querySelector(`.split-toggle[data-sec="${sec}"]`);
+        if (cb) cb.checked = val;
+      });
+    }
+
+    // Restore styles
+    if (s.headerStyle) headerStyle = s.headerStyle;
+    if (s.itemStyle)   itemStyle   = s.itemStyle;
+
+    return !!cvData;
+  } catch(e) { return false; }
+}
+
+function clearState() {
+  localStorage.removeItem(STATE_KEY);
+  location.reload();
+}
 document.getElementById('template-select').onchange = () => { resetHeaderStyle(); resetItemStyle(); syncPaletteToTemplate(); render(); };
 ['color-palette','font-select','include-cover','cover-first','lang-toggle','photo-align','photo-border']
   .forEach(id => document.getElementById(id).onchange = render);
@@ -2163,7 +2233,14 @@ document.querySelectorAll('.split-toggle').forEach(cb => cb.onchange = render);
 /* ── INIT ── */
 syncPaletteToTemplate();
 initDragDrop();
+const hadState = loadState();
+if (hadState) {
+  syncPaletteToTemplate();
+  document.getElementById('objective-style-row').style.display =
+    document.getElementById('chk-objective')?.checked ? 'block' : 'none';
+  updateEyes();
+  render();
+}
 </script>
 </body>
 </html>
-
