@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -49,6 +48,9 @@ body { font-family: 'Inter', sans-serif; background: #323639; margin: 0; display
   background: white; white-space: nowrap; transition: all 0.15s;
 }
 .btn-file-upload:hover { border-color: #6366f1; color: #6366f1; }
+.sections-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; }
+.sec-toggle-label { font-size: 0.75rem; font-weight: 600; color: #475569; display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 3px 0; }
+.sec-toggle-label input { margin: 0; cursor: pointer; }
 .btn-gerar {
   width: 100%; padding: 14px; border: none; border-radius: 10px;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
@@ -615,6 +617,22 @@ body.ats-visible .ats-node.missing {
     <div class="dados-section">
       <p class="dados-label">Vaga <span style="font-weight:400;color:#94a3b8">(opcional)</span></p>
       <textarea id="ai-job-text" rows="3" placeholder="Cole a descrição da vaga para tailoring automático do conteúdo e cover letter..."></textarea>
+    </div>
+
+    <div class="dados-section">
+      <p class="dados-label">Seções desejadas</p>
+      <p style="font-size:0.72rem;color:#94a3b8;margin:0 0 8px">A IA só gerará conteúdo para as seções marcadas.</p>
+      <div class="sections-grid">
+        <label class="sec-toggle-label"><input type="checkbox" class="sec-want" data-key="summary" checked> 📝 Resumo</label>
+        <label class="sec-toggle-label"><input type="checkbox" class="sec-want" data-key="experience" checked> 💼 Experiência</label>
+        <label class="sec-toggle-label"><input type="checkbox" class="sec-want" data-key="education" checked> 🎓 Formação</label>
+        <label class="sec-toggle-label"><input type="checkbox" class="sec-want" data-key="skills" checked> 🛠 Habilidades</label>
+        <label class="sec-toggle-label"><input type="checkbox" class="sec-want" data-key="certifications"> 📜 Certificações</label>
+        <label class="sec-toggle-label"><input type="checkbox" class="sec-want" data-key="projects"> 🚀 Projetos</label>
+        <label class="sec-toggle-label"><input type="checkbox" class="sec-want" data-key="volunteer"> 🤝 Voluntariado</label>
+        <label class="sec-toggle-label"><input type="checkbox" class="sec-want" data-key="coverletter" checked> 📄 Cover Letter</label>
+        <label class="sec-toggle-label"><input type="checkbox" class="sec-want" data-key="salary"> 💰 Pretensão Salarial</label>
+      </div>
     </div>
 
     <button class="btn-gerar" id="btn-gerar" onclick="startGeminiImport()">
@@ -1457,77 +1475,52 @@ async function loadSample(type) {
 const GEMINI_KEY_STORAGE = 'cvdesigner_gemini_key';
 function getGeminiKey() { return localStorage.getItem(GEMINI_KEY_STORAGE) || ''; }
 function setGeminiKey(k) { localStorage.setItem(GEMINI_KEY_STORAGE, k.trim()); }
-const GEMINI_MODEL_URL = k => `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${k}`;
+const GEMINI_MODEL_URL = k => `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${k}`;
 
 // JSON schema description for the prompt
 
-const EXTRACT_PROMPT = (resumeText, jobText) => `Você é um especialista em RH. Extraia os dados do currículo e retorne SOMENTE um objeto JSON, sem markdown, sem bloco de código, sem explicação — apenas o JSON puro começando com { e terminando com }.
+const EXTRACT_PROMPT = (resumeText, jobText, wantedSections = []) => {
+  const want = (key) => wantedSections.length === 0 || wantedSections.includes(key);
+  const wantCover = want('coverletter');
+  const wantSalary = want('salary');
+  return `Você é um especialista em RH. Extraia os dados do currículo e retorne SOMENTE um objeto JSON válido, sem markdown, sem bloco de código — apenas JSON puro começando com { e terminando com }.
 
-Use exatamente esta estrutura (omita arrays vazios, mas mantenha as chaves obrigatórias de personal):
+Seções que DEVEM ser geradas (apenas estas, com conteúdo real extraído do currículo):
+${wantedSections.filter(s => !['coverletter','salary'].includes(s)).join(', ') || 'personal, experience, education, skills'}
 
+Regras obrigatórias:
+- personal: SEMPRE incluir com todos os campos
+- summary_pt/en: 3-4 linhas profissionais, primeira pessoa${want('summary') ? ' — OBRIGATÓRIO gerar' : ' — deixar vazio'}
+- experience: ${want('experience') ? 'extrair TODAS as experiências do currículo com bullets de realizações' : 'array vazio []'}
+- education: ${want('education') ? 'extrair TODA a formação' : 'array vazio []'}
+- skills: ${want('skills') ? 'extrair todas as habilidades técnicas, idiomas e soft skills' : '{ "technical": [], "languages": [], "soft": [] }'}
+- certifications: ${want('certifications') ? 'extrair se houver no currículo' : 'array vazio []'}
+- projects: ${want('projects') ? 'extrair se houver no currículo' : 'array vazio []'}
+- volunteer: ${want('volunteer') ? 'extrair se houver no currículo' : 'array vazio []'}
+- salary_expectation: ${wantSalary ? 'extrair se mencionado, senão usar { "pt": "A negociar", "en": "Negotiable" }' : '{ "pt": "A negociar", "en": "Negotiable" }'}
+- coverletter: ${wantCover ? ('{pt: carta em português' + (jobText ? ' tailored para a vaga, ' : ', ') + 'en: carta em inglês' + (jobText ? ' tailored para a vaga' : '') + '}') : '{ "pt": "", "en": "" }'}
+- Todos os campos _pt em português, _en em inglês
+- period_pt: ex "2021 – Atual", period_en: ex "2021 – Present"
+
+Estrutura JSON exata a retornar:
 {
-  "personal": {
-    "fullname": "Nome Completo",
-    "jobtitle_pt": "Cargo Atual em PT",
-    "jobtitle_en": "Current Role in EN",
-    "desired_position_pt": "Cargo Pretendido PT",
-    "desired_position_en": "Desired Position EN",
-    "email": "email@exemplo.com",
-    "phone": "+5511999999999",
-    "linkedin": "linkedin.com/in/perfil",
-    "website": "",
-    "location": "Cidade, Estado, País",
-    "summary_pt": "Resumo profissional em 3-4 linhas, primeira pessoa.",
-    "summary_en": "Professional summary in 3-4 lines, first person."
-  },
-  "experience": [
-    {
-      "company": "Nome da Empresa",
-      "position_pt": "Cargo em Português",
-      "position_en": "Role in English",
-      "period_pt": "2020 – Atual",
-      "period_en": "2020 – Present",
-      "description_pt": ["Realizou X aumentando Y em Z%", "Liderou equipe de N pessoas"],
-      "description_en": ["Achieved X increasing Y by Z%", "Led team of N people"]
-    }
-  ],
-  "education": [
-    {
-      "degree_pt": "Bacharelado em Ciência da Computação",
-      "degree_en": "Bachelor's in Computer Science",
-      "institution": "Nome da Universidade",
-      "period_pt": "2015 – 2019",
-      "period_en": "2015 – 2019"
-    }
-  ],
-  "skills": {
-    "technical": ["JavaScript", "Python", "AWS"],
-    "languages": ["Português: Nativo", "Inglês: Avançado"],
-    "soft": ["Liderança", "Comunicação"]
-  },
-  "certifications": [
-    { "title_pt": "Nome da Certificação", "title_en": "Certification Name", "issuer": "Emissor", "year": "2023" }
-  ],
-  "projects": [
-    { "title_pt": "Nome do Projeto", "title_en": "Project Name", "description_pt": "Descrição.", "description_en": "Description." }
-  ],
-  "volunteer": [
-    {
-      "role_pt": "Função", "role_en": "Role",
-      "organization": "Organização",
-      "period_pt": "2022", "period_en": "2022",
-      "description_pt": "Descrição.", "description_en": "Description."
-    }
-  ],
-  "salary_expectation": { "pt": "", "en": "" },
-  "coverletter": { "pt": "${jobText ? 'Gere uma cover letter em português tailored para a vaga descrita abaixo.' : ''}", "en": "${jobText ? 'Generate a cover letter in English tailored for the job described below.' : ''}" }
+  "personal": { "fullname": "", "jobtitle_pt": "", "jobtitle_en": "", "desired_position_pt": "", "desired_position_en": "", "email": "", "phone": "", "linkedin": "", "website": "", "location": "", "summary_pt": "", "summary_en": "" },
+  "experience": [{ "company": "", "position_pt": "", "position_en": "", "period_pt": "", "period_en": "", "description_pt": [], "description_en": [] }],
+  "education": [{ "degree_pt": "", "degree_en": "", "institution": "", "period_pt": "", "period_en": "" }],
+  "skills": { "technical": [], "languages": [], "soft": [] },
+  "certifications": [{ "title_pt": "", "title_en": "", "issuer": "", "year": "" }],
+  "projects": [{ "title_pt": "", "title_en": "", "description_pt": "", "description_en": "" }],
+  "volunteer": [{ "role_pt": "", "role_en": "", "organization": "", "period_pt": "", "period_en": "", "description_pt": "", "description_en": "" }],
+  "salary_expectation": { "pt": "A negociar", "en": "Negotiable" },
+  "coverletter": { "pt": "", "en": "" }
 }
 
-CURRÍCULO A EXTRAIR:
-${resumeText}
-${jobText ? `\nVAGA (use para tailoring da cover letter e do summary):\n${jobText}` : ''}
+CURRÍCULO:
+\${resumeText}
+\${jobText ? '\nVAGA (use para tailoring da cover letter e do resumo profissional):\n' + jobText : ''}
 
 Retorne APENAS o JSON. Nenhum texto antes ou depois.`;
+};
 
 const REFINE_SYSTEM = `Você é um assistente especializado em currículos. O usuário está revisando os dados extraídos do currículo dele.
 Quando o usuário pedir ajustes, modifique o JSON atual e retorne o JSON COMPLETO atualizado no final da sua resposta, dentro de <json>...</json>.
@@ -1602,6 +1595,9 @@ async function startGeminiImport() {
   const textInput = document.getElementById('ai-resume-text').value.trim();
   const jobText   = document.getElementById('ai-job-text').value.trim();
 
+  // Collect wanted sections
+  const wantedSections = [...document.querySelectorAll('.sec-want:checked')].map(cb => cb.dataset.key);
+
   if (!textInput && !fileInput.files.length) {
     alert('Cole o texto do currículo ou selecione um arquivo.');
     return;
@@ -1632,12 +1628,12 @@ async function startGeminiImport() {
         role: 'user',
         parts: [
           { inlineData: { mimeType: 'application/pdf', data: pdfBase64 } },
-          { text: EXTRACT_PROMPT('(ver PDF anexo)', jobText) }
+          { text: EXTRACT_PROMPT('(ver PDF anexo)', jobText, wantedSections) }
         ]
       }];
       responseText = await callGemini(contents);
     } else {
-      const contents = [{ role: 'user', parts: [{ text: EXTRACT_PROMPT(resumeText, jobText) }] }];
+      const contents = [{ role: 'user', parts: [{ text: EXTRACT_PROMPT(resumeText, jobText, wantedSections) }] }];
       responseText = await callGemini(contents);
     }
 
@@ -2624,18 +2620,17 @@ const SECTION_DATA_MAP = {
 };
 
 function syncSectionAvailability() {
-  const hasData = SECTION_DATA_MAP;
   let anyDisabled = false;
-  Object.entries(hasData).forEach(([key, check]) => {
-    const cb  = document.getElementById('chk-' + key);
-    const li  = cb?.closest('li');
+  Object.entries(SECTION_DATA_MAP).forEach(([key, check]) => {
+    const cb = document.getElementById('chk-' + key);
+    const li = cb?.closest('li');
     if (!cb || !li) return;
     const available = check(cvData);
     cb.disabled = !available;
     li.style.opacity = available ? '1' : '0.4';
     li.title = available ? '' : 'Sem dados para esta seção';
     if (!available) { cb.checked = false; anyDisabled = true; }
-    else if (!cb.disabled && cvData) cb.checked = true; // re-enable when data arrives
+    // never force cb.checked = true — respect user choice
   });
   document.getElementById('sections-no-data-hint').style.display = anyDisabled ? '' : 'none';
   updateEyes();
@@ -2772,3 +2767,4 @@ if (hadState) {
 </script>
 </body>
 </html>
+
