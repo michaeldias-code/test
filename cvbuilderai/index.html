@@ -2095,8 +2095,10 @@ function objectiveHTML(d, lang) {
 }
 
 function summaryHTML(d, lang) {
-  const text = lang==='pt' ? d.personal.summary_pt : d.personal.summary_en;
-  if (!text) return '';
+  const raw = lang==='pt' ? d.personal.summary_pt : d.personal.summary_en;
+  if (!raw) return '';
+  // Collapse newlines to spaces — summary is a single paragraph
+  const text = raw.replace(/\s*\n\s*/g, ' ').trim();
   return wrapEditable(`<div class="cv-section">
     ${ST(lang==='pt'?'Resumo':'Summary')}
     <p class="ats-summary" style="text-align:justify;font-size:var(--cv-font-size);line-height:var(--cv-line-height)">${text}</p>
