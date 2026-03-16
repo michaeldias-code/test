@@ -194,21 +194,53 @@ body.ats-visible .ats-node.missing {
 }
 #gemini-modal-overlay.open { display: flex; }
 #gemini-modal {
-  background: white; border-radius: 14px; width: 680px; max-width: 96vw;
+  background: white; border-radius: 14px; width: 720px; max-width: 96vw;
   max-height: 90vh; display: flex; flex-direction: column;
   box-shadow: 0 24px 60px rgba(0,0,0,0.35);
 }
 #gemini-modal-header {
   display: flex; align-items: flex-start; justify-content: space-between;
-  padding: 18px 20px 12px; border-bottom: 1px solid #e2e8f0;
+  padding: 18px 20px 12px; border-bottom: 1px solid #e2e8f0; flex-shrink:0;
 }
 #gemini-modal-header h2 { font-size: 0.95rem; font-weight: 800; color: #0f172a; margin: 0 0 3px; }
 #gemini-modal-sub { font-size: 0.75rem; color: #64748b; margin: 0; }
 #gemini-modal-close { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #64748b; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+/* Tabs */
+#gemini-modal-tabs { display: flex; border-bottom: 2px solid #e2e8f0; flex-shrink: 0; }
+.gm-tab { flex: 1; padding: 10px; border: none; background: none; font-size: 0.8rem; font-weight: 700; color: #94a3b8; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+.gm-tab.active { color: #6366f1; border-bottom-color: #6366f1; background: white; }
+/* Panels */
+.gm-panel { flex: 1; overflow-y: auto; min-height: 0; display: flex; flex-direction: column; }
+#gm-panel-dados { padding: 14px 20px; gap: 6px; }
+/* Accordion inside review form */
+.gm-accordion { border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 6px; overflow: hidden; }
+.gm-acc-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #f8fafc; cursor: pointer; user-select: none; font-size: 0.78rem; font-weight: 700; color: #334155; }
+.gm-acc-header:hover { background: #f1f5f9; }
+.gm-acc-header .gm-acc-arrow { font-size: 0.6rem; color: #94a3b8; transition: transform 0.2s; }
+.gm-acc-header.open .gm-acc-arrow { transform: rotate(180deg); }
+.gm-acc-body { display: none; padding: 12px 14px; border-top: 1px solid #e2e8f0; }
+.gm-acc-body.open { display: block; }
+/* Form fields inside accordion */
+.gm-field { margin-bottom: 8px; }
+.gm-field label { display: block; font-size: 0.68rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.gm-field input, .gm-field textarea {
+  width: 100%; box-sizing: border-box; border: 1px solid #e2e8f0; border-radius: 6px;
+  padding: 6px 9px; font-size: 0.8rem; font-family: inherit; color: #0f172a;
+  background: #fafafa; resize: vertical;
+}
+.gm-field input:focus, .gm-field textarea:focus { outline: none; border-color: #6366f1; background: white; }
+.gm-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.gm-entry { border: 1px solid #f1f5f9; border-radius: 6px; padding: 10px; margin-bottom: 8px; background: white; }
+.gm-entry-title { font-size: 0.72rem; font-weight: 800; color: #475569; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.gm-del-btn { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 0.75rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+.gm-del-btn:hover { background: #fee2e2; }
+.gm-add-btn { width: 100%; padding: 7px; border: 1px dashed #cbd5e1; background: white; border-radius: 6px; color: #64748b; font-size: 0.78rem; font-weight: 600; cursor: pointer; margin-top: 4px; }
+.gm-add-btn:hover { border-color: #6366f1; color: #6366f1; }
+/* Chat panel */
 #gemini-chat-area {
   flex: 1; overflow-y: auto; padding: 16px 20px;
   display: flex; flex-direction: column; gap: 12px;
-  min-height: 200px; max-height: 420px;
+  min-height: 200px;
 }
 .gchat-msg { display: flex; gap: 10px; align-items: flex-start; }
 .gchat-msg.user { flex-direction: row-reverse; }
@@ -219,14 +251,12 @@ body.ats-visible .ats-node.missing {
 .gchat-msg.ai   .gchat-bubble { background: #f1f5f9; border-radius: 2px 10px 10px 10px; }
 .gchat-msg.user .gchat-bubble { background: #0f172a; color: white; border-radius: 10px 2px 10px 10px; }
 .gchat-bubble.typing { color: #94a3b8; font-style: italic; }
-.gchat-summary { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; font-size: 0.75rem; line-height: 1.6; color: #334155; }
-.gchat-summary strong { color: #0f172a; display: block; margin-bottom: 2px; }
-#gemini-input-row { display: flex; gap: 8px; padding: 10px 20px; border-top: 1px solid #f1f5f9; }
+#gemini-input-row { display: flex; gap: 8px; padding: 10px 20px; border-top: 1px solid #f1f5f9; flex-shrink: 0; }
 #gemini-user-input { flex: 1; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; font-family: inherit; resize: none; }
 #gemini-user-input:focus { outline: none; border-color: #6366f1; }
 #gemini-send-btn { background: #6366f1; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 700; font-size: 0.8rem; cursor: pointer; align-self: flex-end; }
 #gemini-send-btn:disabled { opacity: 0.5; cursor: wait; }
-#gemini-modal-footer { display: flex; gap: 8px; padding: 12px 20px; border-top: 1px solid #e2e8f0; }
+#gemini-modal-footer { display: flex; gap: 8px; padding: 12px 20px; border-top: 1px solid #e2e8f0; flex-shrink: 0; }
 .btn-gemini-cancel  { flex: 1; padding: 10px; border: 1px solid #cbd5e1; background: white; border-radius: 8px; cursor: pointer; font-size: 0.82rem; font-weight: 600; color: #475569; }
 .btn-gemini-confirm { flex: 2; padding: 10px; background: #0f172a; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; }
 .btn-gemini-confirm:hover { background: #1e293b; }
@@ -965,16 +995,30 @@ body.ats-visible .ats-node.missing {
   <div id="gemini-modal">
     <div id="gemini-modal-header">
       <div>
-        <h2>✨ Revisão com IA</h2>
-        <p id="gemini-modal-sub">Revise e ajuste os dados antes de gerar o currículo</p>
+        <h2>✨ Revisão dos dados</h2>
+        <p id="gemini-modal-sub">Confira, edite e ajuste antes de gerar o currículo</p>
       </div>
       <button id="gemini-modal-close" onclick="closeGeminiModal()">✕</button>
     </div>
-    <div id="gemini-chat-area"></div>
-    <div id="gemini-input-row">
-      <textarea id="gemini-user-input" rows="2" placeholder="Ex: Traduza os cargos para inglês também, corrija o período da última empresa..."></textarea>
-      <button id="gemini-send-btn" onclick="sendGeminiMessage()">Enviar</button>
+    <div id="gemini-modal-tabs">
+      <button class="gm-tab active" id="gm-tab-dados" onclick="gmSwitchTab('dados')">📋 Dados extraídos</button>
+      <button class="gm-tab" id="gm-tab-chat" onclick="gmSwitchTab('chat')">💬 Chat com IA</button>
     </div>
+
+    <!-- DADOS TAB: accordion form -->
+    <div id="gm-panel-dados" class="gm-panel">
+      <div id="gm-form-area"></div>
+    </div>
+
+    <!-- CHAT TAB -->
+    <div id="gm-panel-chat" class="gm-panel" style="display:none">
+      <div id="gemini-chat-area"></div>
+      <div id="gemini-input-row">
+        <textarea id="gemini-user-input" rows="2" placeholder="Ex: Melhore os bullets de experiência, adicione mais skills técnicas, adapte para a vaga..."></textarea>
+        <button id="gemini-send-btn" onclick="sendGeminiMessage()">Enviar</button>
+      </div>
+    </div>
+
     <div id="gemini-modal-footer">
       <button class="btn-gemini-cancel" onclick="closeGeminiModal()">Cancelar</button>
       <button class="btn-gemini-confirm" onclick="confirmGeminiData()">✓ Confirmar e gerar currículo</button>
@@ -1482,46 +1526,54 @@ const GEMINI_MODEL_URL = k => `https://generativelanguage.googleapis.com/v1beta/
 
 const EXTRACT_PROMPT = (resumeText, jobText, wantedSections = []) => {
   const want = (key) => wantedSections.length === 0 || wantedSections.includes(key);
-  const wantCover = want('coverletter');
+  const wantCover  = want('coverletter');
   const wantSalary = want('salary');
-  return `Você é um especialista em RH. Extraia os dados do currículo e retorne SOMENTE um objeto JSON válido, sem markdown, sem bloco de código — apenas JSON puro começando com { e terminando com }.
+  return `Você é um redator especialista em currículos e recolocação profissional. Sua missão é DUAS coisas ao mesmo tempo:
 
-Seções que DEVEM ser geradas (apenas estas, com conteúdo real extraído do currículo):
-${wantedSections.filter(s => !['coverletter','salary'].includes(s)).join(', ') || 'personal, experience, education, skills'}
+1. EXTRAIR os dados reais fornecidos pelo candidato (nome, empresas, cargos, datas, contatos)
+2. ENRIQUECER e PROFISSIONALIZAR o conteúdo — se o candidato escreveu pouco ou de forma simples, você expande com linguagem profissional, verbos de impacto e realizações plausíveis para o cargo/setor. Nunca invente fatos (empresas, datas, diplomas), mas pode e deve inferir e detalhar atividades típicas do cargo mencionado.
 
-Regras obrigatórias:
-- personal: SEMPRE incluir com todos os campos
-- summary_pt/en: 3-4 linhas profissionais, primeira pessoa${want('summary') ? ' — OBRIGATÓRIO gerar' : ' — deixar vazio'}
-- experience: ${want('experience') ? 'extrair TODAS as experiências do currículo com bullets de realizações' : 'array vazio []'}
-- education: ${want('education') ? 'extrair TODA a formação' : 'array vazio []'}
-- skills: ${want('skills') ? 'extrair todas as habilidades técnicas, idiomas e soft skills' : '{ "technical": [], "languages": [], "soft": [] }'}
-- certifications: ${want('certifications') ? 'extrair se houver no currículo' : 'array vazio []'}
-- projects: ${want('projects') ? 'extrair se houver no currículo' : 'array vazio []'}
-- volunteer: ${want('volunteer') ? 'extrair se houver no currículo' : 'array vazio []'}
-- salary_expectation: ${wantSalary ? 'extrair se mencionado no currículo, senão SEMPRE usar { "pt": "A negociar", "en": "Negotiable" }' : '{ "pt": "A negociar", "en": "Negotiable" }'}
-- coverletter: ${wantCover ? `OBRIGATÓRIO gerar carta completa de 3 parágrafos. pt: carta em português${jobText ? ' tailored para a vaga descrita' : ' genérica baseada no perfil'}. en: carta em inglês${jobText ? ' tailored para a vaga descrita' : ' genérica baseada no perfil'}. NÃO deixar vazio.` : '{ "pt": "", "en": "" }'}
-- Todos os campos _pt em português, _en em inglês
-- period_pt: ex "2021 – Atual", period_en: ex "2021 – Present"
+${jobText ? `MODO VAGA ATIVA: há uma vaga descrita abaixo. Adapte TODO o currículo para maximizar aderência a ela — destaque competências relevantes, ajuste o summary e os bullets de experiência para ecoar os requisitos da vaga (de forma autêntica, sem mentir). A cover letter deve ser diretamente direcionada a esta vaga.` : 'Gere um currículo genérico e forte, focado no perfil identificado.'}
 
-Estrutura JSON exata a retornar:
+REGRAS DE ENRIQUECIMENTO:
+- summary_pt/en: 4-5 linhas impactantes, primeira pessoa, destacando anos de experiência, principais competências e valor entregue. NÃO seja genérico — personalize para o perfil real.
+- experience bullets: 3-5 bullets por cargo com verbos de ação (Liderou, Implementou, Reduziu, Aumentou...). Se o candidato não detalhou, infira responsabilidades típicas do cargo e setor. Quantifique quando possível com estimativas razoáveis (ex: "equipe de ~5 pessoas", "redução de ~20% no tempo").
+- skills: extraia do texto E infira habilidades técnicas e soft skills típicas do cargo/setor. Organize em técnicas, idiomas e comportamentais.
+- desired_position: infira o cargo ideal baseado no histórico, ou use o mais recente evoluído um nível.
+
+SEÇÕES A GERAR: ${wantedSections.filter(s => !['coverletter','salary'].includes(s)).join(', ') || 'personal, summary, experience, education, skills'}
+- experience: ${want('experience') ? 'OBRIGATÓRIO — extrair e enriquecer TODAS as experiências' : '[]'}
+- education: ${want('education') ? 'extrair e completar se necessário' : '[]'}
+- skills: ${want('skills') ? 'extrair + inferir habilidades do perfil' : '{"technical":[],"languages":[],"soft":[]}'}
+- certifications: ${want('certifications') ? 'incluir se mencionado' : '[]'}
+- projects: ${want('projects') ? 'incluir se mencionado' : '[]'}
+- volunteer: ${want('volunteer') ? 'incluir se mencionado' : '[]'}
+- salary_expectation: ${wantSalary ? '{"pt":"A negociar","en":"Negotiable"} — ou extrair se mencionado' : '{"pt":"A negociar","en":"Negotiable"}'}
+- coverletter: ${wantCover
+    ? `OBRIGATÓRIO — gerar carta profissional completa de 3 parágrafos (abertura com entusiasmo + corpo com 2-3 realizações concretas do candidato + fechamento com CTA). pt em português, en em inglês. ${jobText ? 'Carta DIRETAMENTE direcionada à vaga descrita.' : 'Carta genérica baseada no perfil.'} NÃO deixar vazio.`
+    : '{"pt":"","en":""}'}
+
+FORMATO DE SAÍDA — retorne APENAS este JSON sem markdown, sem texto antes ou depois:
 {
-  "personal": { "fullname": "", "jobtitle_pt": "", "jobtitle_en": "", "desired_position_pt": "", "desired_position_en": "", "email": "", "phone": "", "linkedin": "", "website": "", "location": "", "summary_pt": "", "summary_en": "" },
-  "experience": [{ "company": "", "position_pt": "", "position_en": "", "period_pt": "", "period_en": "", "description_pt": [], "description_en": [] }],
-  "education": [{ "degree_pt": "", "degree_en": "", "institution": "", "period_pt": "", "period_en": "" }],
-  "skills": { "technical": [], "languages": [], "soft": [] },
-  "certifications": [{ "title_pt": "", "title_en": "", "issuer": "", "year": "" }],
-  "projects": [{ "title_pt": "", "title_en": "", "description_pt": "", "description_en": "" }],
-  "volunteer": [{ "role_pt": "", "role_en": "", "organization": "", "period_pt": "", "period_en": "", "description_pt": "", "description_en": "" }],
-  "salary_expectation": { "pt": "A negociar", "en": "Negotiable" },
-  "coverletter": { "pt": "", "en": "" }
+  "personal": {"fullname":"","jobtitle_pt":"","jobtitle_en":"","desired_position_pt":"","desired_position_en":"","email":"","phone":"","linkedin":"","website":"","location":"","summary_pt":"","summary_en":""},
+  "experience": [{"company":"","position_pt":"","position_en":"","period_pt":"","period_en":"","description_pt":[],"description_en":[]}],
+  "education": [{"degree_pt":"","degree_en":"","institution":"","period_pt":"","period_en":""}],
+  "skills": {"technical":[],"languages":[],"soft":[]},
+  "certifications": [{"title_pt":"","title_en":"","issuer":"","year":""}],
+  "projects": [{"title_pt":"","title_en":"","description_pt":"","description_en":""}],
+  "volunteer": [{"role_pt":"","role_en":"","organization":"","period_pt":"","period_en":"","description_pt":"","description_en":""}],
+  "salary_expectation": {"pt":"A negociar","en":"Negotiable"},
+  "coverletter": {"pt":"","en":""}
 }
 
-CURRÍCULO:
+DADOS DO CANDIDATO:
 ${resumeText}
-${jobText ? '\nVAGA (use para tailoring da cover letter e do resumo profissional):\n' + jobText : ''}
+${jobText ? '\nDESCRIÇÃO DA VAGA:\n' + jobText : ''}
 
 Retorne APENAS o JSON. Nenhum texto antes ou depois.`;
 };
+
+
 
 const REFINE_SYSTEM = `Você é um assistente especializado em currículos. O usuário está revisando os dados extraídos do currículo dele.
 Quando o usuário pedir ajustes, modifique o JSON atual e retorne o JSON COMPLETO atualizado no final da sua resposta, dentro de <json>...</json>.
@@ -1658,6 +1710,179 @@ async function startGeminiImport() {
   }
 }
 
+function gmSwitchTab(tab) {
+  document.getElementById('gm-panel-dados').style.display = tab === 'dados' ? '' : 'none';
+  document.getElementById('gm-panel-chat').style.display  = tab === 'chat'  ? '' : 'none';
+  document.getElementById('gm-tab-dados').classList.toggle('active', tab === 'dados');
+  document.getElementById('gm-tab-chat').classList.toggle('active',  tab === 'chat');
+}
+
+function gmAccToggle(header) {
+  const body = header.nextElementSibling;
+  const open = body.classList.toggle('open');
+  header.classList.toggle('open', open);
+}
+
+function buildReviewForm(d) {
+  const p = d.personal || {};
+  const f = (id, label, val, rows) => {
+    const el = rows
+      ? `<textarea id="grf-${id}" rows="${rows}">${escHTML(val||'')}</textarea>`
+      : `<input id="grf-${id}" value="${escAttr(val||'')}">`;
+    return `<div class="gm-field"><label>${label}</label>${el}</div>`;
+  };
+  const row2 = (...fields) => `<div class="gm-field-row">${fields.join('')}</div>`;
+
+  // Personal section
+  let html = `<div class="gm-accordion">
+    <div class="gm-acc-header open" onclick="gmAccToggle(this)">👤 Dados Pessoais <span class="gm-acc-arrow">▼</span></div>
+    <div class="gm-acc-body open">
+      ${f('fullname','Nome completo', p.fullname)}
+      ${row2(f('jobtitle_pt','Cargo PT', p.jobtitle_pt), f('jobtitle_en','Cargo EN', p.jobtitle_en))}
+      ${row2(f('desired_pt','Cargo pretendido PT', p.desired_position_pt), f('desired_en','Cargo pretendido EN', p.desired_position_en))}
+      ${row2(f('email','Email', p.email), f('phone','Telefone', p.phone))}
+      ${row2(f('location','Localização', p.location), f('linkedin','LinkedIn', p.linkedin))}
+      ${f('website','Website', p.website)}
+      ${f('summary_pt','Resumo PT', p.summary_pt, 3)}
+      ${f('summary_en','Resumo EN', p.summary_en, 3)}
+    </div>
+  </div>`;
+
+  // Experience
+  const exps = d.experience || [];
+  let expHtml = exps.map((e, i) => `
+    <div class="gm-entry" id="grf-exp-${i}">
+      <div class="gm-entry-title">💼 Experiência ${i+1} <button class="gm-del-btn" onclick="gmDelEntry('experience',${i})">✕</button></div>
+      ${f(`exp${i}_company`,'Empresa', e.company)}
+      ${row2(f(`exp${i}_pos_pt`,'Cargo PT', e.position_pt), f(`exp${i}_pos_en`,'Cargo EN', e.position_en))}
+      ${row2(f(`exp${i}_period_pt`,'Período PT', e.period_pt), f(`exp${i}_period_en`,'Período EN', e.period_en))}
+      <div class="gm-field"><label>Descrição PT (uma por linha)</label><textarea id="grf-exp${i}_desc_pt" rows="3">${escHTML((e.description_pt||[]).join('\n'))}</textarea></div>
+      <div class="gm-field"><label>Descrição EN (uma por linha)</label><textarea id="grf-exp${i}_desc_en" rows="3">${escHTML((e.description_en||[]).join('\n'))}</textarea></div>
+    </div>`).join('');
+  html += `<div class="gm-accordion">
+    <div class="gm-acc-header" onclick="gmAccToggle(this)">💼 Experiência (${exps.length}) <span class="gm-acc-arrow">▼</span></div>
+    <div class="gm-acc-body">${expHtml}<button class="gm-add-btn" onclick="gmAddEntry('experience')">+ Adicionar experiência</button></div>
+  </div>`;
+
+  // Education
+  const eds = d.education || [];
+  let edHtml = eds.map((e, i) => `
+    <div class="gm-entry" id="grf-ed-${i}">
+      <div class="gm-entry-title">🎓 Formação ${i+1} <button class="gm-del-btn" onclick="gmDelEntry('education',${i})">✕</button></div>
+      ${row2(f(`ed${i}_deg_pt`,'Curso PT', e.degree_pt), f(`ed${i}_deg_en`,'Curso EN', e.degree_en))}
+      ${f(`ed${i}_inst`,'Instituição', e.institution)}
+      ${row2(f(`ed${i}_period_pt`,'Período PT', e.period_pt), f(`ed${i}_period_en`,'Período EN', e.period_en))}
+    </div>`).join('');
+  html += `<div class="gm-accordion">
+    <div class="gm-acc-header" onclick="gmAccToggle(this)">🎓 Formação (${eds.length}) <span class="gm-acc-arrow">▼</span></div>
+    <div class="gm-acc-body">${edHtml}<button class="gm-add-btn" onclick="gmAddEntry('education')">+ Adicionar formação</button></div>
+  </div>`;
+
+  // Skills
+  const sk = d.skills || {};
+  html += `<div class="gm-accordion">
+    <div class="gm-acc-header" onclick="gmAccToggle(this)">🛠 Habilidades <span class="gm-acc-arrow">▼</span></div>
+    <div class="gm-acc-body">
+      <div class="gm-field"><label>Técnicas (uma por linha)</label><textarea id="grf-sk_tech" rows="3">${escHTML((sk.technical||[]).join('\n'))}</textarea></div>
+      <div class="gm-field"><label>Idiomas (uma por linha)</label><textarea id="grf-sk_lang" rows="2">${escHTML((sk.languages||[]).join('\n'))}</textarea></div>
+      <div class="gm-field"><label>Comportamentais (uma por linha)</label><textarea id="grf-sk_soft" rows="2">${escHTML((sk.soft||[]).join('\n'))}</textarea></div>
+    </div>
+  </div>`;
+
+  // Certifications
+  const certs = d.certifications || [];
+  if (certs.length) {
+    let certHtml = certs.map((c, i) => `
+      <div class="gm-entry">
+        <div class="gm-entry-title">📜 Certificação ${i+1} <button class="gm-del-btn" onclick="gmDelEntry('certifications',${i})">✕</button></div>
+        ${row2(f(`cert${i}_pt`,'Título PT', c.title_pt), f(`cert${i}_en`,'Título EN', c.title_en))}
+        ${row2(f(`cert${i}_issuer`,'Emissor', c.issuer), f(`cert${i}_year`,'Ano', c.year))}
+      </div>`).join('');
+    html += `<div class="gm-accordion">
+      <div class="gm-acc-header" onclick="gmAccToggle(this)">📜 Certificações (${certs.length}) <span class="gm-acc-arrow">▼</span></div>
+      <div class="gm-acc-body">${certHtml}</div>
+    </div>`;
+  }
+
+  // Cover Letter
+  const cl = d.coverletter || {};
+  if (cl.pt || cl.en) {
+    html += `<div class="gm-accordion">
+      <div class="gm-acc-header" onclick="gmAccToggle(this)">📄 Cover Letter <span class="gm-acc-arrow">▼</span></div>
+      <div class="gm-acc-body">
+        <div class="gm-field"><label>Português</label><textarea id="grf-cl_pt" rows="6">${escHTML(cl.pt||'')}</textarea></div>
+        <div class="gm-field"><label>English</label><textarea id="grf-cl_en" rows="6">${escHTML(cl.en||'')}</textarea></div>
+      </div>
+    </div>`;
+  }
+
+  document.getElementById('gm-form-area').innerHTML = html;
+}
+
+function gmReadForm(d) {
+  // Read all form fields back into the data object
+  const gv = (id) => { const el = document.getElementById('grf-' + id); return el ? el.value : null; };
+  const p = d.personal || {};
+  d.personal = {
+    ...p,
+    fullname:            gv('fullname')   ?? p.fullname,
+    jobtitle_pt:         gv('jobtitle_pt') ?? p.jobtitle_pt,
+    jobtitle_en:         gv('jobtitle_en') ?? p.jobtitle_en,
+    desired_position_pt: gv('desired_pt') ?? p.desired_position_pt,
+    desired_position_en: gv('desired_en') ?? p.desired_position_en,
+    email:    gv('email')    ?? p.email,
+    phone:    gv('phone')    ?? p.phone,
+    location: gv('location') ?? p.location,
+    linkedin: gv('linkedin') ?? p.linkedin,
+    website:  gv('website')  ?? p.website,
+    summary_pt: gv('summary_pt') ?? p.summary_pt,
+    summary_en: gv('summary_en') ?? p.summary_en,
+  };
+  (d.experience||[]).forEach((e, i) => {
+    e.company      = gv(`exp${i}_company`)  ?? e.company;
+    e.position_pt  = gv(`exp${i}_pos_pt`)   ?? e.position_pt;
+    e.position_en  = gv(`exp${i}_pos_en`)   ?? e.position_en;
+    e.period_pt    = gv(`exp${i}_period_pt`) ?? e.period_pt;
+    e.period_en    = gv(`exp${i}_period_en`) ?? e.period_en;
+    const dp = gv(`exp${i}_desc_pt`); if (dp !== null) e.description_pt = dp.split('\n').filter(Boolean);
+    const de = gv(`exp${i}_desc_en`); if (de !== null) e.description_en = de.split('\n').filter(Boolean);
+  });
+  (d.education||[]).forEach((e, i) => {
+    e.degree_pt  = gv(`ed${i}_deg_pt`)    ?? e.degree_pt;
+    e.degree_en  = gv(`ed${i}_deg_en`)    ?? e.degree_en;
+    e.institution= gv(`ed${i}_inst`)      ?? e.institution;
+    e.period_pt  = gv(`ed${i}_period_pt`) ?? e.period_pt;
+    e.period_en  = gv(`ed${i}_period_en`) ?? e.period_en;
+  });
+  const tech = gv('sk_tech'); if (tech !== null) d.skills.technical = tech.split('\n').filter(Boolean);
+  const lang = gv('sk_lang'); if (lang !== null) d.skills.languages = lang.split('\n').filter(Boolean);
+  const soft = gv('sk_soft'); if (soft !== null) d.skills.soft      = soft.split('\n').filter(Boolean);
+  (d.certifications||[]).forEach((c, i) => {
+    c.title_pt = gv(`cert${i}_pt`)    ?? c.title_pt;
+    c.title_en = gv(`cert${i}_en`)    ?? c.title_en;
+    c.issuer   = gv(`cert${i}_issuer`) ?? c.issuer;
+    c.year     = gv(`cert${i}_year`)   ?? c.year;
+  });
+  const clpt = gv('cl_pt'); if (clpt !== null) { d.coverletter = d.coverletter||{}; d.coverletter.pt = clpt; }
+  const clen = gv('cl_en'); if (clen !== null) { d.coverletter = d.coverletter||{}; d.coverletter.en = clen; }
+  return d;
+}
+
+function gmDelEntry(section, idx) {
+  if (!geminiCurrentData[section]) return;
+  geminiCurrentData[section].splice(idx, 1);
+  buildReviewForm(geminiCurrentData);
+}
+
+function gmAddEntry(section) {
+  if (!geminiCurrentData[section]) geminiCurrentData[section] = [];
+  const blank = section === 'experience'
+    ? { company:'', position_pt:'', position_en:'', period_pt:'', period_en:'', description_pt:[], description_en:[] }
+    : { degree_pt:'', degree_en:'', institution:'', period_pt:'', period_en:'' };
+  geminiCurrentData[section].push(blank);
+  buildReviewForm(geminiCurrentData);
+}
+
 function openGeminiModal(data, resumeText, jobText) {
   geminiCurrentData = data;
   geminiChatHistory = [];
@@ -1666,30 +1891,15 @@ function openGeminiModal(data, resumeText, jobText) {
   document.getElementById('gemini-chat-area').innerHTML = '';
   document.getElementById('gemini-user-input').value = '';
 
-  // Initial AI message with summary
-  const summary = buildDataSummary(data);
-  appendGeminiMessage('ai', `Extraí os dados do seu currículo. Confira o resumo abaixo e me diga se quer ajustar algo antes de gerar o CV.\n\n${summary}`);
+  // Build accordion form and show Dados tab first
+  buildReviewForm(data);
+  gmSwitchTab('dados');
 
   // Seed chat history for context
   geminiChatHistory = [
     { role: 'user', parts: [{ text: `Dados extraídos do currículo. JSON atual:\n${JSON.stringify(data, null, 2)}` }] },
-    { role: 'model', parts: [{ text: `Entendido. Aqui está o resumo dos dados extraídos:\n${summary}\n\nComo posso ajudar?` }] }
+    { role: 'model', parts: [{ text: 'Dados carregados. Como posso ajudar a melhorar o currículo?' }] }
   ];
-}
-
-function buildDataSummary(d) {
-  const p = d.personal || {};
-  const lines = [
-    `**Nome:** ${p.fullname || '—'}`,
-    `**Cargo:** ${p.jobtitle_pt || '—'}`,
-    `**Localização:** ${p.location || '—'}`,
-    `**Experiências:** ${(d.experience||[]).length} empresa(s) — ${(d.experience||[]).map(e=>e.company).join(', ')||'—'}`,
-    `**Formação:** ${(d.education||[]).map(e=>e.institution).join(', ')||'—'}`,
-    `**Skills técnicas:** ${(d.skills?.technical||[]).slice(0,5).join(', ')||'—'}`,
-    `**Certificações:** ${(d.certifications||[]).length}`,
-    `**Cover Letter:** ${d.coverletter?.pt ? '✓ gerada' : '✗ não gerada'}`,
-  ];
-  return lines.join('\n');
 }
 
 function appendGeminiMessage(role, text) {
@@ -1752,11 +1962,12 @@ async function sendGeminiMessage() {
       try {
         const updated = JSON.parse(jsonMatch[1].trim());
         geminiCurrentData = updated;
-        // Update preview in real-time
+        // Update preview and rebuild form
         cvData = updated;
         document.getElementById('cv-welcome').style.display = 'none';
         document.getElementById('cv-render').style.display = '';
         render();
+        buildReviewForm(updated);
         const cleanResponse = response.replace(/<json>[\s\S]*?<\/json>/, '').trim();
         typingBubble.innerHTML = (cleanResponse || '✓ Dados atualizados — preview atualizado.')
           .replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -1785,6 +1996,8 @@ async function sendGeminiMessage() {
 
 function confirmGeminiData() {
   if (!geminiCurrentData) return;
+  // Read any manual edits from the form
+  geminiCurrentData = gmReadForm(geminiCurrentData);
   closeGeminiModal();
   tryLoadJSON(geminiCurrentData);
   switchTab('design');
