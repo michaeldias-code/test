@@ -584,6 +584,7 @@ body.ats-visible .ats-node.missing {
 .cv-section-wrap:hover .ssp-pencil-btn { opacity: 1; }
 .ssp-pencil-btn:hover { background: var(--primary-color); }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body>
 
@@ -609,7 +610,7 @@ body.ats-visible .ats-node.missing {
       <textarea id="ai-resume-text" rows="5" placeholder="Cole aqui seu currículo em texto livre — sem formato específico. Pode ser copiado do Word, LinkedIn, PDF, ou escrito do zero com as informações que tiver..."></textarea>
       <div class="file-upload-row">
         <label class="btn-file-upload" for="ai-resume-file">📎 Ou anexar arquivo</label>
-        <input type="file" id="ai-resume-file" accept=".txt,.pdf" style="display:none">
+        <input type="file" id="ai-resume-file" accept=".txt,.pdf,.doc,.docx" style="display:none">
         <span id="ai-file-name" style="font-size:0.72rem;color:#64748b;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
       </div>
     </div>
@@ -1516,8 +1517,8 @@ Estrutura JSON exata a retornar:
 }
 
 CURRÍCULO:
-\${resumeText}
-\${jobText ? '\nVAGA (use para tailoring da cover letter e do resumo profissional):\n' + jobText : ''}
+${resumeText}
+${jobText ? '\nVAGA (use para tailoring da cover letter e do resumo profissional):\n' + jobText : ''}
 
 Retorne APENAS o JSON. Nenhum texto antes ou depois.`;
 };
@@ -1793,15 +1794,31 @@ document.getElementById('gemini-user-input').addEventListener('keydown', e => {
 });
 
 // File input handler for resume
-document.getElementById('ai-resume-file').onchange = e => {
+document.getElementById('ai-resume-file').onchange = async e => {
   const file = e.target.files[0];
   if (!file) return;
-  if (file.type !== 'application/pdf') {
+  const name = file.name.toLowerCase();
+  const statusEl = document.getElementById('ai-file-name');
+  statusEl.textContent = file.name;
+  if (name.endsWith('.docx') || name.endsWith('.doc')) {
+    statusEl.textContent = file.name + ' (convertendo...)';
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      document.getElementById('ai-resume-text').value = result.value;
+      statusEl.textContent = file.name + ' ✓';
+    } catch(err) {
+      statusEl.textContent = 'Erro ao ler Word: ' + err.message;
+    }
+  } else if (file.type !== 'application/pdf') {
     const r = new FileReader();
-    r.onload = ev => { document.getElementById('ai-resume-text').value = ev.target.result; };
+    r.onload = ev => {
+      document.getElementById('ai-resume-text').value = ev.target.result;
+      statusEl.textContent = file.name + ' ✓';
+    };
     r.readAsText(file);
   }
-  // PDF is handled directly in startGeminiImport
+  // PDF handled directly in startGeminiImport
 };
 
 /* ── HTML BUILDERS ── */
