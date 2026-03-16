@@ -1497,8 +1497,8 @@ Regras obrigatórias:
 - certifications: ${want('certifications') ? 'extrair se houver no currículo' : 'array vazio []'}
 - projects: ${want('projects') ? 'extrair se houver no currículo' : 'array vazio []'}
 - volunteer: ${want('volunteer') ? 'extrair se houver no currículo' : 'array vazio []'}
-- salary_expectation: ${wantSalary ? 'extrair se mencionado, senão usar { "pt": "A negociar", "en": "Negotiable" }' : '{ "pt": "A negociar", "en": "Negotiable" }'}
-- coverletter: ${wantCover ? ('{pt: carta em português' + (jobText ? ' tailored para a vaga, ' : ', ') + 'en: carta em inglês' + (jobText ? ' tailored para a vaga' : '') + '}') : '{ "pt": "", "en": "" }'}
+- salary_expectation: ${wantSalary ? 'extrair se mencionado no currículo, senão SEMPRE usar { "pt": "A negociar", "en": "Negotiable" }' : '{ "pt": "A negociar", "en": "Negotiable" }'}
+- coverletter: ${wantCover ? `OBRIGATÓRIO gerar carta completa de 3 parágrafos. pt: carta em português${jobText ? ' tailored para a vaga descrita' : ' genérica baseada no perfil'}. en: carta em inglês${jobText ? ' tailored para a vaga descrita' : ' genérica baseada no perfil'}. NÃO deixar vazio.` : '{ "pt": "", "en": "" }'}
 - Todos os campos _pt em português, _en em inglês
 - period_pt: ex "2021 – Atual", period_en: ex "2021 – Present"
 
@@ -1745,8 +1745,13 @@ async function sendGeminiMessage() {
       try {
         const updated = JSON.parse(jsonMatch[1].trim());
         geminiCurrentData = updated;
+        // Update preview in real-time
+        cvData = updated;
+        document.getElementById('cv-welcome').style.display = 'none';
+        document.getElementById('cv-render').style.display = '';
+        render();
         const cleanResponse = response.replace(/<json>[\s\S]*?<\/json>/, '').trim();
-        typingBubble.innerHTML = (cleanResponse || '✓ Dados atualizados.')
+        typingBubble.innerHTML = (cleanResponse || '✓ Dados atualizados — preview atualizado.')
           .replace(/&/g,'&amp;').replace(/</g,'&lt;')
           .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
           .replace(/\n/g, '<br>');
@@ -2678,12 +2683,12 @@ function loadState() {
     if (!raw) return false;
     const s = JSON.parse(raw);
 
-    // Restore data
+    // Restore CV data (so returning users see their last CV)
     cvData    = s.cvData    || null;
     userPhoto = s.userPhoto || null;
     if (userPhoto) document.getElementById('btn-remove-photo').style.display = '';
 
-    // Restore controls
+    // Restore controls — design settings only
     if (s.template)    document.getElementById('template-select').value = s.template;
     if (s.color)       document.getElementById('color-palette').value   = s.color;
     if (s.font)        document.getElementById('font-select').value     = s.font;
@@ -2767,3 +2772,4 @@ if (hadState) {
 </script>
 </body>
 </html>
+
