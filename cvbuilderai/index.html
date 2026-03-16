@@ -1456,7 +1456,7 @@ async function loadSample(type) {
 const GEMINI_KEY_STORAGE = 'cvdesigner_gemini_key';
 function getGeminiKey() { return localStorage.getItem(GEMINI_KEY_STORAGE) || ''; }
 function setGeminiKey(k) { localStorage.setItem(GEMINI_KEY_STORAGE, k.trim()); }
-const GEMINI_MODEL_URL = k => `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`;
+const GEMINI_MODEL_URL = k => `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${k}`;
 
 // JSON schema description for the prompt
 
