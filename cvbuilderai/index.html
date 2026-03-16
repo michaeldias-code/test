@@ -1459,43 +1459,74 @@ function setGeminiKey(k) { localStorage.setItem(GEMINI_KEY_STORAGE, k.trim()); }
 const GEMINI_MODEL_URL = k => `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`;
 
 // JSON schema description for the prompt
-const CV_JSON_SCHEMA = `{
-  "personal": { "fullname", "jobtitle_pt", "jobtitle_en", "desired_position_pt", "desired_position_en",
-    "email", "phone", "linkedin", "website", "location", "summary_pt", "summary_en" },
-  "experience": [{ "company", "position_pt", "position_en", "period_pt", "period_en",
-    "description_pt": ["string"], "description_en": ["string"] }],
-  "education": [{ "degree_pt", "degree_en", "institution", "period_pt", "period_en" }],
-  "skills": { "technical": ["string"], "languages": ["string"], "soft": ["string"] },
-  "projects": [{ "title_pt", "title_en", "description_pt", "description_en" }],
-  "volunteer": [{ "role_pt", "role_en", "organization", "period_pt", "period_en", "description_pt", "description_en" }],
-  "certifications": [{ "title_pt", "title_en", "issuer", "year" }],
-  "salary_expectation": { "pt", "en" },
-  "coverletter": { "pt", "en" }
-}`;
 
-const EXTRACT_PROMPT = (resumeText, jobText) => `
-Você é um especialista em RH e currículos. Extraia os dados do currículo abaixo e retorne APENAS um JSON válido, sem markdown, sem explicações.
+const EXTRACT_PROMPT = (resumeText, jobText) => `Você é um especialista em RH. Extraia os dados do currículo e retorne SOMENTE um objeto JSON, sem markdown, sem bloco de código, sem explicação — apenas o JSON puro começando com { e terminando com }.
 
-Schema obrigatório:
-${CV_JSON_SCHEMA}
+Use exatamente esta estrutura (omita arrays vazios, mas mantenha as chaves obrigatórias de personal):
 
-Regras:
-- Todos os campos _pt em português, _en em inglês (traduza se necessário)
-- summary_pt/en: 3-4 linhas profissionais, primeira pessoa
-- description_pt/en: bullets de realizações, use verbos de ação
-- Se não houver vaga descrita, deixe coverletter vazio ("")
-- Se houver vaga, gere cover letter tailored para ela
-- Omita seções sem dados (arrays vazios ok, mas não invente)
-- period_pt: ex "2021 – Atual", period_en: ex "2021 – Present"
-- salary_expectation: deixe vazio a menos que mencionado
+{
+  "personal": {
+    "fullname": "Nome Completo",
+    "jobtitle_pt": "Cargo Atual em PT",
+    "jobtitle_en": "Current Role in EN",
+    "desired_position_pt": "Cargo Pretendido PT",
+    "desired_position_en": "Desired Position EN",
+    "email": "email@exemplo.com",
+    "phone": "+5511999999999",
+    "linkedin": "linkedin.com/in/perfil",
+    "website": "",
+    "location": "Cidade, Estado, País",
+    "summary_pt": "Resumo profissional em 3-4 linhas, primeira pessoa.",
+    "summary_en": "Professional summary in 3-4 lines, first person."
+  },
+  "experience": [
+    {
+      "company": "Nome da Empresa",
+      "position_pt": "Cargo em Português",
+      "position_en": "Role in English",
+      "period_pt": "2020 – Atual",
+      "period_en": "2020 – Present",
+      "description_pt": ["Realizou X aumentando Y em Z%", "Liderou equipe de N pessoas"],
+      "description_en": ["Achieved X increasing Y by Z%", "Led team of N people"]
+    }
+  ],
+  "education": [
+    {
+      "degree_pt": "Bacharelado em Ciência da Computação",
+      "degree_en": "Bachelor's in Computer Science",
+      "institution": "Nome da Universidade",
+      "period_pt": "2015 – 2019",
+      "period_en": "2015 – 2019"
+    }
+  ],
+  "skills": {
+    "technical": ["JavaScript", "Python", "AWS"],
+    "languages": ["Português: Nativo", "Inglês: Avançado"],
+    "soft": ["Liderança", "Comunicação"]
+  },
+  "certifications": [
+    { "title_pt": "Nome da Certificação", "title_en": "Certification Name", "issuer": "Emissor", "year": "2023" }
+  ],
+  "projects": [
+    { "title_pt": "Nome do Projeto", "title_en": "Project Name", "description_pt": "Descrição.", "description_en": "Description." }
+  ],
+  "volunteer": [
+    {
+      "role_pt": "Função", "role_en": "Role",
+      "organization": "Organização",
+      "period_pt": "2022", "period_en": "2022",
+      "description_pt": "Descrição.", "description_en": "Description."
+    }
+  ],
+  "salary_expectation": { "pt": "", "en": "" },
+  "coverletter": { "pt": "${jobText ? 'Gere uma cover letter em português tailored para a vaga descrita abaixo.' : ''}", "en": "${jobText ? 'Generate a cover letter in English tailored for the job described below.' : ''}" }
+}
 
-CURRÍCULO:
+CURRÍCULO A EXTRAIR:
 ${resumeText}
+${jobText ? `\nVAGA (use para tailoring da cover letter e do summary):\n${jobText}` : ''}
 
-${jobText ? `VAGA (para tailoring):
-${jobText}` : ''}
-
-Retorne APENAS o JSON, sem nenhum texto antes ou depois.`;
+Retorne APENAS o JSON. Nenhum texto antes ou depois.`;
 
 const REFINE_SYSTEM = `Você é um assistente especializado em currículos. O usuário está revisando os dados extraídos do currículo dele.
 Quando o usuário pedir ajustes, modifique o JSON atual e retorne o JSON COMPLETO atualizado no final da sua resposta, dentro de <json>...</json>.
@@ -1519,7 +1550,7 @@ function initApiKeyStatus() {
   else status.textContent = '⚠ Key não configurada — necessária para gerar';
 }
 
-
+function setAIStatus(msg, visible = true) {
   const el = document.getElementById('ai-status');
   el.style.display = visible ? 'block' : 'none';
   el.textContent = msg;
