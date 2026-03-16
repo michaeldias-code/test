@@ -51,6 +51,14 @@ body { font-family: 'Inter', sans-serif; background: #323639; margin: 0; display
 .sections-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; }
 .sec-toggle-label { font-size: 0.75rem; font-weight: 600; color: #475569; display: flex; align-items: center; gap: 5px; cursor: pointer; padding: 3px 0; }
 .sec-toggle-label input { margin: 0; cursor: pointer; }
+.enrich-toggle-wrap { margin-bottom: 12px; }
+.enrich-toggle-label { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fafafa; transition: all 0.15s; }
+.enrich-toggle-label:has(input:checked) { border-color: #a5b4fc; background: #eef2ff; }
+.enrich-toggle-label input { margin-top: 2px; flex-shrink: 0; accent-color: #6366f1; width: 15px; height: 15px; cursor: pointer; }
+.enrich-toggle-content { display: flex; flex-direction: column; gap: 2px; }
+.enrich-title { font-size: 0.78rem; font-weight: 700; color: #334155; }
+.enrich-toggle-label:has(input:checked) .enrich-title { color: #4338ca; }
+.enrich-desc { font-size: 0.7rem; color: #94a3b8; line-height: 1.4; }
 .btn-gerar {
   width: 100%; padding: 14px; border: none; border-radius: 10px;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
@@ -626,16 +634,6 @@ body.ats-visible .ats-node.missing {
 
   <!-- ══ ABA DADOS ══ -->
   <div id="panel-dados" class="tab-panel">
-
-    <div class="dados-section">
-      <p class="dados-label">API Key Gemini</p>
-      <div style="display:flex;gap:6px;align-items:center">
-        <input type="password" id="api-key-input" placeholder="Cole sua key do Google AI Studio..." style="flex:1;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:0.78rem;font-family:inherit;box-sizing:border-box">
-        <button onclick="saveApiKey()" style="padding:7px 10px;border:1px solid #6366f1;border-radius:8px;background:white;color:#6366f1;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap">Salvar</button>
-      </div>
-      <span id="api-key-status" style="font-size:0.7rem;color:#64748b;margin-top:4px;display:block"></span>
-    </div>
-
     <div class="dados-section">
       <textarea id="ai-resume-text" rows="5" placeholder="Cole aqui seu currículo em texto livre — sem formato específico. Pode ser copiado do Word, LinkedIn, PDF, ou escrito do zero com as informações que tiver..."></textarea>
       <div class="file-upload-row">
@@ -664,6 +662,16 @@ body.ats-visible .ats-node.missing {
         <label class="sec-toggle-label"><input type="checkbox" class="sec-want" data-key="coverletter" checked> 📄 Cover Letter</label>
         <label class="sec-toggle-label"><input type="checkbox" class="sec-want" data-key="salary"> 💰 Pretensão Salarial</label>
       </div>
+    </div>
+
+    <div class="enrich-toggle-wrap">
+      <label class="enrich-toggle-label">
+        <input type="checkbox" id="opt-enrich" checked>
+        <span class="enrich-toggle-content">
+          <span class="enrich-title">✨ Enriquecer currículo com IA</span>
+          <span class="enrich-desc">A IA expande bullets, melhora o resumo e infere habilidades do cargo. Desmarque para extrair fielmente o que foi fornecido.</span>
+        </span>
+      </label>
     </div>
 
     <button class="btn-gerar" id="btn-gerar" onclick="startGeminiImport()">
@@ -1517,21 +1525,20 @@ async function loadSample(type) {
 /* ══ GEMINI INTEGRATION ══ */
 
 // ⚠️ Substitua pela sua API key do Google AI Studio (https://aistudio.google.com/app/apikey)
-const GEMINI_KEY_STORAGE = 'cvdesigner_gemini_key';
-function getGeminiKey() { return localStorage.getItem(GEMINI_KEY_STORAGE) || ''; }
-function setGeminiKey(k) { localStorage.setItem(GEMINI_KEY_STORAGE, k.trim()); }
+const GEMINI_API_KEY = 'COLOQUE_SUA_KEY_AQUI'; // Proteja com restrição de domínio no Google Cloud Console
+function getGeminiKey() { return GEMINI_API_KEY; }
+function setGeminiKey(k) { /* hardcoded */ }
 const GEMINI_MODEL_URL = k => `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${k}`;
 
 // JSON schema description for the prompt
 
-const EXTRACT_PROMPT = (resumeText, jobText, wantedSections = []) => {
+const EXTRACT_PROMPT = (resumeText, jobText, wantedSections = [], enrich = true) => {
   const want = (key) => wantedSections.length === 0 || wantedSections.includes(key);
   const wantCover  = want('coverletter');
   const wantSalary = want('salary');
-  return `Você é um redator especialista em currículos e recolocação profissional. Sua missão é DUAS coisas ao mesmo tempo:
-
-1. EXTRAIR os dados reais fornecidos pelo candidato (nome, empresas, cargos, datas, contatos)
-2. ENRIQUECER e PROFISSIONALIZAR o conteúdo — se o candidato escreveu pouco ou de forma simples, você expande com linguagem profissional, verbos de impacto e realizações plausíveis para o cargo/setor. Nunca invente fatos (empresas, datas, diplomas), mas pode e deve inferir e detalhar atividades típicas do cargo mencionado.
+  return `Você é um especialista em currículos. Modo de operação: ${enrich
+    ? 'EXTRAIR + ENRIQUECER — extraia os dados reais e expanda com linguagem profissional, verbos de impacto e realizações plausíveis. Nunca invente fatos, mas infira atividades típicas do cargo e quantifique com estimativas razoáveis.'
+    : 'EXTRAÇÃO FIEL — extraia APENAS o que foi fornecido, sem adicionar ou inferir conteúdo. Melhore apenas gramática e formatação. Seja estritamente fiel aos dados originais.'}
 
 ${jobText ? `MODO VAGA ATIVA: há uma vaga descrita abaixo. Adapte TODO o currículo para maximizar aderência a ela — destaque competências relevantes, ajuste o summary e os bullets de experiência para ecoar os requisitos da vaga (de forma autêntica, sem mentir). A cover letter deve ser diretamente direcionada a esta vaga.` : 'Gere um currículo genérico e forte, focado no perfil identificado.'}
 
@@ -1583,19 +1590,7 @@ Seja conciso e profissional. Responda em português.`;
 let geminiChatHistory = [];  // { role: 'user'|'model', parts: [{text}] }
 let geminiCurrentData = null; // parsed JSON being reviewed
 
-function saveApiKey() {
-  const val = document.getElementById('api-key-input').value.trim();
-  if (!val) { alert('Cole uma API key válida.'); return; }
-  setGeminiKey(val);
-  document.getElementById('api-key-input').value = '';
-  document.getElementById('api-key-status').textContent = '✓ Key salva localmente';
-}
-
-function initApiKeyStatus() {
-  const status = document.getElementById('api-key-status');
-  if (getGeminiKey()) status.textContent = '✓ Key configurada';
-  else status.textContent = '⚠ Key não configurada — necessária para gerar';
-}
+// API key hardcoded — configure restrição de domínio no Google Cloud Console
 
 function setAIStatus(msg, visible = true) {
   const el = document.getElementById('ai-status');
@@ -1636,13 +1631,7 @@ async function readFileAsText(file) {
 }
 
 async function startGeminiImport() {
-  const key = getGeminiKey();
-  if (!key) {
-    const entered = prompt('Cole sua API key do Google AI Studio:\n(será salva localmente no seu browser, nunca no código)');
-    if (!entered?.trim()) return;
-    setGeminiKey(entered);
-    document.getElementById('api-key-status').textContent = '🔑 Key configurada';
-  }
+  // API key hardcoded
 
   const fileInput = document.getElementById('ai-resume-file');
   const textInput = document.getElementById('ai-resume-text').value.trim();
@@ -1650,6 +1639,7 @@ async function startGeminiImport() {
 
   // Collect wanted sections
   const wantedSections = [...document.querySelectorAll('.sec-want:checked')].map(cb => cb.dataset.key);
+  const enrich = document.getElementById('opt-enrich').checked;
 
   if (!textInput && !fileInput.files.length) {
     alert('Cole o texto do currículo ou selecione um arquivo.');
@@ -1687,12 +1677,12 @@ async function startGeminiImport() {
         role: 'user',
         parts: [
           { inlineData: { mimeType: 'application/pdf', data: pdfBase64 } },
-          { text: EXTRACT_PROMPT('(ver PDF anexo)', jobText, wantedSections) }
+          { text: EXTRACT_PROMPT('(ver PDF anexo)', jobText, wantedSections, enrich) }
         ]
       }];
       responseText = await callGemini(contents);
     } else {
-      const contents = [{ role: 'user', parts: [{ text: EXTRACT_PROMPT(resumeText, jobText, wantedSections) }] }];
+      const contents = [{ role: 'user', parts: [{ text: EXTRACT_PROMPT(resumeText, jobText, wantedSections, enrich) }] }];
       responseText = await callGemini(contents);
     }
 
@@ -2998,7 +2988,6 @@ document.querySelectorAll('.split-toggle').forEach(cb => cb.onchange = render);
 /* ── INIT ── */
 syncPaletteToTemplate();
 initDragDrop();
-initApiKeyStatus();
 const hadState = loadState();
 if (hadState) {
   syncPaletteToTemplate();
