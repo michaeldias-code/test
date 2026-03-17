@@ -1524,11 +1524,9 @@ async function loadSample(type) {
 
 /* ══ GEMINI INTEGRATION ══ */
 
-// ⚠️ Substitua pela sua API key do Google AI Studio (https://aistudio.google.com/app/apikey)
-const GEMINI_API_KEY = 'AIzaSyAv4vSeHT8rLjBd_Ong7oXiChQNcGnqEus'; // Proteja com restrição de domínio no Google Cloud Console
-function getGeminiKey() { return GEMINI_API_KEY; }
-function setGeminiKey(k) { /* hardcoded */ }
-const GEMINI_MODEL_URL = k => `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${k}`;
+
+// API via proxy Vercel — key fica segura no servidor
+const GEMINI_MODEL_URL = () => `/api/gemini`;
 
 // JSON schema description for the prompt
 
@@ -1599,11 +1597,9 @@ function setAIStatus(msg, visible = true) {
 }
 
 async function callGemini(contents, systemInstruction = null) {
-  const key = getGeminiKey();
-  if (!key) throw new Error('API key não configurada.');
   const body = { contents };
   if (systemInstruction) body.systemInstruction = { parts: [{ text: systemInstruction }] };
-  const res = await fetch(GEMINI_MODEL_URL(key), {
+  const res = await fetch(GEMINI_MODEL_URL(), {  // sem parâmetro
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
@@ -1615,6 +1611,7 @@ async function callGemini(contents, systemInstruction = null) {
   const data = await res.json();
   return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 }
+
 
 async function readFileAsText(file) {
   return new Promise((resolve, reject) => {
@@ -2999,4 +2996,3 @@ if (hadState) {
 </script>
 </body>
 </html>
-
