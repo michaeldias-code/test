@@ -920,7 +920,6 @@ body.ats-visible .ats-node.missing {
         <p style="font-size:0.73rem;color:#94a3b8;margin:0 0 8px">Divide a seção para economizar espaço vertical.</p>
         <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="experience"> Experiência</label></div>
         <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="education"> Formação</label></div>
-        <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="skills"> Habilidades</label></div>
         <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="certifications"> Certificações</label></div>
         <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="projects"> Projetos</label></div>
         <div class="twocol-toggle"><label><input type="checkbox" class="split-toggle" data-sec="volunteer"> Voluntariado</label></div>
@@ -2289,16 +2288,19 @@ function skillsHTML(d, lang, tagStyle) {
 
 function certsHTML(d, lang) {
   if (!d.certifications||!d.certifications.length) return '';
-  const items = d.certifications.map((c,i)=>
-    `<div style="margin-bottom:5px;font-size:var(--cv-font-size);overflow-wrap:break-word;position:relative">
+  const items = d.certifications.map((c,i) => {
+    return `<div style="margin-bottom:8px;position:relative">
       <div class="pen-group">
         <button class="pen-edit" onclick="openEditModal('certifications',${i})" title="Edição manual">✏</button>
         <button class="pen-magic" onclick="openMagicModal('certifications',${i})" title="Editar com IA">✨</button>
       </div>
-      <span class="exp-position ats-cert-title" style="${itemInlineStyle('position')}">${lang==='pt'?c.title_pt:c.title_en}</span>
-      <span class="exp-company ats-cert-issuer" style="${itemInlineStyle('company')}"> · ${c.issuer||''} ${c.year?'('+c.year+')':''}</span>
-    </div>`
-  ).join('');
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <span class="exp-position ats-cert-title" style="flex:1;overflow-wrap:break-word;word-break:break-word;${itemInlineStyle('position')}">${lang==='pt'?c.title_pt:c.title_en}</span>
+        <span class="exp-period" style="flex-shrink:0;${itemInlineStyle('period')}">${c.year||''}</span>
+      </div>
+      <div class="exp-company ats-cert-issuer" style="${itemInlineStyle('company')}">${c.issuer||''}</div>
+    </div>`;
+  }).join('');
   return wrapSplit(`<div class="cv-section">${ST(lang==='pt'?'Certificações':'Certifications')}${items}</div>`,'certifications');
 }
 
