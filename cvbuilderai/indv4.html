@@ -1248,9 +1248,20 @@ function wrapSplit(html, k) {
   return html.replace(
     /(<div class="cv-section[^>]*>)([\s\S]*)(<\/div>)$/,
     (_, open, inner, close) => {
-      const m = inner.match(/([\s\S]*<div class="section-title[^>]*>[\s\S]*?<\/div>)([\s\S]*)/);
-      if (!m) return open+inner+close;
-      return `${open}${m[1]}<div class="inline-twocol">${m[2]}</div>${close}`;
+      // Find where the first child div (section-title-wrap) closes
+      let depth = 0, splitPos = -1;
+      for (let i = 0; i < inner.length; i++) {
+        if (inner.slice(i, i+4) === '<div') depth++;
+        else if (inner.slice(i, i+6) === '</div') {
+          depth--;
+          if (depth === 0) { splitPos = i + 6; break; }
+        }
+      }
+      if (splitPos === -1) return open + inner + close;
+      const title   = inner.slice(0, splitPos);
+      const content = inner.slice(splitPos);
+      if (!content.trim()) return open + inner + close;
+      return `${open}${title}<div class="inline-twocol">${content}</div>${close}`;
     }
   );
 }
