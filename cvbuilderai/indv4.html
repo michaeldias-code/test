@@ -1248,16 +1248,18 @@ function wrapSplit(html, k) {
   return html.replace(
     /(<div class="cv-section[^>]*>)([\s\S]*)(<\/div>)$/,
     (_, open, inner, close) => {
-      // Find where the first child div (section-title-wrap) closes
-      let depth = 0, splitPos = -1;
-      for (let i = 0; i < inner.length; i++) {
-        if (inner.slice(i, i+4) === '<div') depth++;
-        else if (inner.slice(i, i+6) === '</div') {
-          depth--;
-          if (depth === 0) { splitPos = i + 6; break; }
-        }
+      // Count <div opens and </div> closes separately to find where section-title-wrap ends
+      const opens = [], closes = [];
+      let i = 0;
+      while (i < inner.length) {
+        if (inner.slice(i,i+4) === '<div') { opens.push(i); i += 4; }
+        else if (inner.slice(i,i+6) === '</div>') { closes.push(i); i += 6; }
+        else { i++; }
       }
-      if (splitPos === -1) return open + inner + close;
+      // section-title-wrap contains exactly 1 nested div (section-title)
+      // so it closes at closes[1] (index of 2nd </div>)
+      if (closes.length < 2) return open + inner + close;
+      const splitPos = closes[1] + 6;
       const title   = inner.slice(0, splitPos);
       const content = inner.slice(splitPos);
       if (!content.trim()) return open + inner + close;
