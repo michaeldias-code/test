@@ -1,0 +1,132 @@
+{
+  "personal": {
+    "fullname": "Lucas Mendes Ferreira",
+    "jobtitle_pt": "Desenvolvedor Front-end Júnior",
+    "jobtitle_en": "Junior Front-end Developer",
+    "desired_position_pt": "Desenvolvedor Front-end",
+    "desired_position_en": "Front-end Developer",
+    "email": "lucas.mendes@email.com",
+    "phone": "+55 11 98765-4321",
+    "linkedin": "linkedin.com/in/lucasmendesferreira",
+    "website": "",
+    "location": "São Paulo, SP, Brasil",
+    "summary_pt": "Desenvolvedor front-end júnior com 1 ano de experiência em projetos web, apaixonado por criar interfaces intuitivas e acessíveis. Formado em Análise e Desenvolvimento de Sistemas, com vivência prática em React e metodologias ágeis durante estágio. Busco oportunidade para crescer em equipe colaborativa e contribuir com soluções criativas.",
+    "summary_en": "Junior front-end developer with 1 year of experience in web projects, passionate about building intuitive and accessible interfaces. Degree in Systems Analysis, with hands-on experience in React and agile methodologies during internship. Looking to grow within a collaborative team and contribute creative solutions."
+  },
+  "experience": [
+    {
+      "company": "Agência Digital Criativa",
+      "position_pt": "Desenvolvedor Front-end (Estágio)",
+      "position_en": "Front-end Developer (Intern)",
+      "period": "Fev 2024 – Atual",
+      "description_pt": [
+        "Desenvolvimento de landing pages responsivas com HTML, CSS e JavaScript",
+        "Implementação de componentes em React para sistema de gestão interno",
+        "Correção de bugs e melhorias de performance identificadas em code review",
+        "Participação em sprints semanais com metodologia Scrum"
+      ],
+      "description_en": [
+        "Built responsive landing pages using HTML, CSS, and JavaScript",
+        "Implemented React components for an internal management system",
+        "Fixed bugs and performance issues identified during code reviews",
+        "Participated in weekly sprints following Scrum methodology"
+      ]
+    },
+    {
+      "company": "Freelancer",
+      "position_pt": "Desenvolvedor Web Autônomo",
+      "position_en": "Freelance Web Developer",
+      "period": "Jun 2023 – Jan 2024",
+      "description_pt": [
+        "Criação de sites institucionais para pequenas empresas locais",
+        "Integração com formulários e ferramentas como WhatsApp Business e Google Analytics"
+      ],
+      "description_en": [
+        "Created institutional websites for local small businesses",
+        "Integrated contact forms and tools like WhatsApp Business and Google Analytics"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree_pt": "Tecnólogo em Análise e Desenvolvimento de Sistemas",
+      "degree_en": "Associate Degree in Systems Analysis and Development",
+      "institution": "FATEC São Paulo",
+      "period": "2022 – 2024"
+    },
+    {
+      "degree_pt": "Curso Técnico em Informática",
+      "degree_en": "Technical Certificate in Computer Science",
+      "institution": "ETEC Cidade Tiradentes",
+      "period": "2019 – 2021"
+    }
+  ],
+  "skills": {
+    "technical": [
+      "HTML5", "CSS3", "JavaScript (ES6+)", "React", "Git & GitHub",
+      "Figma (básico)", "Node.js (básico)", "SQL"
+    ],
+    "languages": [
+      "Português: Nativo",
+      "Inglês: Intermediário (B1)"
+    ],
+    "soft": [
+      "Trabalho em equipe",
+      "Comunicação clara",
+      "Proatividade",
+      "Aprendizado rápido"
+    ]
+  },
+  "projects": [
+    {
+      "title_pt": "App de Lista de Tarefas — React + LocalStorage",
+      "title_en": "To-Do List App — React + LocalStorage",
+      "description_pt": "Aplicativo de gerenciamento de tarefas desenvolvido como projeto pessoal, com funcionalidades de criação, edição, filtragem e persistência de dados. Disponível no GitHub.",
+      "description_en": "Task management app built as a personal project with create, edit, filter, and data persistence features. Available on GitHub."
+    },
+    {
+      "title_pt": "Site Institucional — Barbearia do Bairro",
+      "title_en": "Institutional Website — Local Barbershop",
+      "description_pt": "Site responsivo desenvolvido para cliente real, com galeria de fotos, seção de serviços e integração com agendamento via WhatsApp.",
+      "description_en": "Responsive website developed for a real client, with photo gallery, services section, and WhatsApp scheduling integration."
+    }
+  ],
+  "volunteer": [
+    {
+      "role_pt": "Monitor de Informática",
+      "role_en": "Computer Lab Monitor",
+      "organization": "Instituto Crescer",
+      "period": "2022",
+      "description_pt": "Ensino de informática básica para jovens em situação de vulnerabilidade social, abordando uso do pacote Office e navegação segura na internet.",
+      "description_en": "Taught basic computer skills to at-risk youth, covering Office suite usage and safe internet browsing."
+    }
+  ],
+  "certifications": [
+    {
+      "title_pt": "Desenvolvimento Web Completo",
+      "title_en": "Full Web Development Bootcamp",
+      "issuer": "Udemy",
+      "year": "2023"
+    },
+    {
+      "title_pt": "React: Do Zero ao Avançado",
+      "title_en": "React: Zero to Advanced",
+      "issuer": "Origamid",
+      "year": "2024"
+    },
+    {
+      "title_pt": "Fundamentos de UX Design",
+      "title_en": "UX Design Fundamentals",
+      "issuer": "Google (Coursera)",
+      "year": "2024"
+    }
+  ],
+  "salary_expectation": {
+    "pt": "R$ 3.500 – R$ 4.500 / mês (CLT ou PJ)",
+    "en": "BRL 3,500 – 4,500 / month"
+  },
+  "coverletter": {
+    "pt": "\nMeu nome é Lucas Mendes e estou me candidatando à vaga de Desenvolvedor Front-end Júnior. Sou formado em Análise e Desenvolvimento de Sistemas pela FATEC São Paulo e tenho acompanhado com entusiasmo o trabalho da sua empresa.\n\nDurante meu estágio na Agência Digital Criativa, tive a oportunidade de trabalhar com React em um ambiente ágil real, o que acelerou muito minha evolução técnica. Além disso, projetos pessoais e freelances me ensinaram a pensar em soluções do início ao fim, com foco na experiência do usuário.\n\nEstou em um momento em que busco consolidar minha carreira em uma equipe que valorize aprendizado contínuo e colaboração. Tenho certeza de que posso contribuir desde o primeiro dia e crescer junto com o time.\n\nAgradeço pela oportunidade e fico à disposição para uma conversa.",
+    "en": "\nMy name is Lucas Mendes and I am applying for the Junior Front-end Developer position. I hold an Associate Degree in Systems Analysis from FATEC São Paulo and have been following your company's work with great interest.\n\nDuring my internship at Agência Digital Criativa, I had the chance to work with React in a real agile environment, which greatly accelerated my technical growth. Personal projects and freelance work also taught me to think end-to-end, always keeping the user experience in focus.\n\nI am at a point in my career where I want to grow within a team that values continuous learning and collaboration. I am confident I can contribute from day one and develop alongside the team.\n\nThank you for the opportunity — I look forward to speaking with you."
+  }
+}
